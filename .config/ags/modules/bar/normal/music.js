@@ -175,7 +175,7 @@ export default () => {
         className: "txt-smallie txt-arabic bar-music-txt",
         wrap: true, // Enable text wrapping
         ellipsize: Pango.EllipsizeMode.END, // Truncate with ellipsis
-        maxWidthChars: 30, // Maximum width in characters (adjust as needed)
+        maxWidthChars: 20, // Maximum width in characters (adjust as needed)
         truncate: "end",
         setup: (self) => {
             const update = () => {

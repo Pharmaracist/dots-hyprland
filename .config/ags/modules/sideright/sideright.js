@@ -10,12 +10,25 @@ import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 import { ExpandingIconTabContainer } from "../.commonwidgets/tabcontainer.js";
 import { getDistroIcon } from "../.miscutils/system.js";
 import { checkKeybind } from "../.widgetutils/keybind.js";
-import { ModuleCalendar } from "./calendar.js";
+// import { ModuleCalendar } from "./calendar.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
-import * as quicktogglesJs from "./quicktoggles.js";
+import {
+    ModuleReloadIcon,
+    ModuleSettingsIcon,
+    ModulePowerIcon,
+    ToggleIconWifi,
+    ToggleIconBluetooth,
+    ModuleNightLight,
+    ModuleInvertColors,
+    ModuleIdleInhibitor,
+    ModuleCloudflareWarp,
+    ModuleLMS,
+} from "./quicktoggles.js";
+import { ModuleGithub } from "./quicktoggles.js";
+
 const { execAsync, exec } = Utils;
 const { Box, EventBox, Label } = Widget;
 
@@ -125,9 +138,9 @@ const timeRow = Box({
             },
         }),
         Widget.Box({ hexpand: true }),
-        quicktogglesJs.ModuleReloadIcon({ hpack: "end" }),
-        quicktogglesJs.ModuleSettingsIcon({ hpack: "end" }),
-        quicktogglesJs.ModulePowerIcon({ hpack: "end" }),
+        ModuleReloadIcon({ hpack: "end" }),
+        ModuleSettingsIcon({ hpack: "end" }),
+        ModulePowerIcon({ hpack: "end" }),
     ],
 });
 
@@ -135,14 +148,16 @@ const togglesBox = Widget.Box({
     hpack: "center",
     className: "sidebar-togglesbox spacing-h-5",
     children: [
-        quicktogglesJs.ToggleIconWifi(),
-        quicktogglesJs.ToggleIconBluetooth(),
+        ToggleIconWifi(),
+        ToggleIconBluetooth(),
         // await ModuleRawInput(),
         // await HyprToggleIcon('touchpad_mouse', 'No touchpad while typing', 'input:touchpad:disable_while_typing', {}),
-        await quicktogglesJs.ModuleNightLight(),
-        await quicktogglesJs.ModuleInvertColors(),
-        quicktogglesJs.ModuleIdleInhibitor(),
-        await quicktogglesJs.ModuleCloudflareWarp(),
+        await ModuleNightLight(),
+        await ModuleInvertColors(),
+        ModuleIdleInhibitor(),
+        await ModuleCloudflareWarp(),
+        await ModuleGithub(),
+        ModuleLMS(),
     ],
 });
 
