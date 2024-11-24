@@ -29,6 +29,6 @@
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "Syntax"
+    "dark": "Tailwind Syntax"
   }
 }
