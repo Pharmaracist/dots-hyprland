@@ -434,6 +434,21 @@ $bar_ws_width_focus_active: 2.045rem;
     //margin-left: 5px;
 }
 .app-icon {
-    margin-top: -0.35rem;
+    margin-top: 0.2rem;
     margin-left: -0.4rem;
+    margin-right: -0.3rem;
+}
+.mid-wintitle {
+    margin: 0.27rem 0rem 0.27rem -0.8rem;
+    font-size: 18px;
+}
+.margin-left-2 {
+    margin-left: 2rem;
+}
+.time-status {
+    color: $secondary;
+    font-family: Open Sans;
+    font-weight: 700;
+    font-size: 19px;
+    margin-right: 0.9rem;
 }

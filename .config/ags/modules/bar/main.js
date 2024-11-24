@@ -1,15 +1,16 @@
 const { Gtk } = imports.gi;
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
-
+import midLabel from "./normal/spaceleft.js";
 import WindowTitle from "./normal/spaceleft.js";
 import Indicators from "./normal/spaceright.js";
 import Music from "./normal/music.js";
+import BarBattery from "./normal/system.js";
 import BatteryModule from "./normal/system.js";
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
 import { RoundedCorner } from "../.commonwidgets/cairo_roundedcorner.js";
 import { currentShellMode } from "../../variables.js";
-
+import system from "./normal/system.js";
 const NormalOptionalWorkspaces = async () => {
     try {
         return (await import("./normal/workspaces_hyprland.js")).default();
@@ -93,9 +94,37 @@ export const Bar = async (monitor = 0) => {
             });
         },
     });
-    const nothingContent = Widget.Box({
-        className: "bar-bg-nothing",
+
+    const nothingContent = Widget.CenterBox({
+        className: "bar-bg",
+        setup: (self) => {
+            const styleContext = self.get_style_context();
+            const minHeight = styleContext.get_property(
+                "min-height",
+                Gtk.StateFlags.NORMAL,
+            );
+        },
+        // centerWidget: BarClock(),
+        startWidget: Widget.Box({
+            className: "spacing-h-4",
+            children: [
+                Widget.Box({
+                    className: "margin-left-2",
+                    homogeneous: false,
+                    children: [
+                        await NormalOptionalWorkspaces(),
+                        await midLabel(),
+                    ],
+                }),
+            ],
+        }),
+        endWidget: Widget.Box({
+            className: "margin-left-2",
+            homogeneous: false,
+            children: [await Indicators()],
+        }),
     });
+
     return Widget.Window({
         monitor,
         name: `bar${monitor}`,
