@@ -7,7 +7,7 @@ const { Box, EventBox, Scrollable, Label } = Widget;
 let cachedContent = null;
 let wallpaperPaths = [];
 let visiblePaths = [];
-let isLoading = true;
+let isLoading = true;                     
 
 // Read bar position from config
 const getBarPosition = () => {
@@ -67,10 +67,10 @@ const loadMoreWallpapers = (scroll) => {
     if (isLoading || visiblePaths.length >= wallpaperPaths.length) return;
     isLoading = true;
 
-    const loadChunk = 50;
+    const loadChunk = 20;
     const newPaths = wallpaperPaths.slice(
         visiblePaths.length,
-        visiblePaths.length + loadChunk,
+        visiblePaths.length + loadChunk
     );
     visiblePaths = [...visiblePaths, ...newPaths];
 
@@ -93,17 +93,15 @@ const createContent = async () => {
         if (wallpaperPaths.length === 0) {
             return Box({
                 className: "wallpaper-placeholder",
-                children: [
-                    Label({
-                        label: "No wallpapers found in ~/Pictures/Wallpapers.",
-                        className: "fallback-label",
-                    }),
-                ],
+                children: [Label({
+                    label: "No wallpapers found in ~/Pictures/Wallpapers.",
+                    className: "fallback-label",
+                })],
             });
         }
 
         // Load initial batch of wallpapers
-        visiblePaths = wallpaperPaths.slice(0, 50);
+        visiblePaths = wallpaperPaths.slice(0, 20);
 
         const scroll = Scrollable({
             hexpand: true,
@@ -138,12 +136,10 @@ const createContent = async () => {
         console.error("Error loading wallpapers:", error);
         return Box({
             className: "wallpaper-placeholder",
-            children: [
-                Label({
-                    label: "Error loading wallpapers.",
-                    className: "fallback-label",
-                }),
-            ],
+            children: [Label({
+                label: "Error loading wallpapers.",
+                className: "fallback-label",
+            })],
         });
     }
 };
