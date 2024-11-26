@@ -262,14 +262,14 @@ export default () => {
                                 "bar-ram-txt",
                                 "bar-ram-icon",
                             ),
-                            BarResource(
-                                getString("Swap Usage"),
-                                "swap_horiz",
-                                `LANG=C free | awk '/^Swap/ {if ($2 > 0) printf("%.2f\\n", ($3/$2) * 100); else print "0";}'`,
-                                "bar-swap-circprog",
-                                "bar-swap-txt",
-                                "bar-swap-icon",
-                            ),
+                            // BarResource(
+                            //     getString("Swap Usage"),
+                            //     "swap_horiz",
+                            //     `LANG=C free | awk '/^Swap/ {if ($2 > 0) printf("%.2f\\n", ($3/$2) * 100); else print "0";}'`,
+                            //     "bar-swap-circprog",
+                            //     "bar-swap-txt",
+                            //     "bar-swap-icon",
+                            // ),
                             BarResource(
                                 getString("GPU Usage"),
                                 "developer_board",

@@ -107,17 +107,17 @@
         "pages": {
             "order": ["apis", "tools"],
             "apis": {
-                "order": ["gpt", "translater"]
+                "order": ["gemini", "gpt", "translater"]
             }
         },
         "translater": {
             "__custom": ["languages"],
             "from": "auto",
-            "to": "en",
+            "to": "ar",
             "languages": {
                 "auto": "Auto",
                 "en": "English",
-                "ru": "Russian"
+                "ar": "Arabic"
             }
         }
     },

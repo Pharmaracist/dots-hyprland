@@ -3,7 +3,7 @@
 
 include "/home/archlinux/.gtkrc-2.0.mine"
 gtk-theme-name="adw-gtk3-dark"
-gtk-icon-theme-name="WhiteSur"
+gtk-icon-theme-name="Nordzy-purple"
 gtk-font-name="Rubik Medium 11"
 gtk-cursor-theme-name="Bibata-Modern-Classic"
 gtk-cursor-theme-size=24

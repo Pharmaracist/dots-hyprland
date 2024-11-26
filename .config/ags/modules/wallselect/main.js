@@ -55,33 +55,27 @@ const debouncedScroll = (scroll, delay = 150) => {
         timeoutId = setTimeout(() => {
             const adj = scroll.get_hadjustment();
             const scrollValue = adj.get_value();
-            // Trigger load more if needed (e.g., near the end of the current list)
-            if (scrollValue + adj.get_page_size() >= adj.get_upper()) {
-                loadMoreWallpapers();
+            if (scrollValue + adj.get_page_size() >= adj.get_upper() * 0.8) {
+                loadMoreWallpapers(scroll);
             }
         }, delay);
     };
 };
 
 // Lazy load more wallpapers
-const loadMoreWallpapers = () => {
-    if (isLoading || visiblePaths.length === wallpaperPaths.length) return;
+const loadMoreWallpapers = (scroll) => {
+    if (isLoading || visiblePaths.length >= wallpaperPaths.length) return;
     isLoading = true;
 
-    const loadChunk = 500; // Load 20 wallpapers at a time
+    const loadChunk = 50;
     const newPaths = wallpaperPaths.slice(
         visiblePaths.length,
         visiblePaths.length + loadChunk,
     );
     visiblePaths = [...visiblePaths, ...newPaths];
 
-    cachedContent = EventBox({
-        child: Box({
-            className: "wallpaper-list",
-            children: visiblePaths.map(WallpaperButton),
-        }),
-    });
-
+    // Update the scroll content
+    scroll.child.children = visiblePaths.map(WallpaperButton);
     isLoading = false;
 };
 
@@ -108,9 +102,8 @@ const createContent = async () => {
             });
         }
 
-        // Initially load a small batch of wallpapers
-        visiblePaths = wallpaperPaths.slice(0, 90);
-        loadMoreWallpapers();
+        // Load initial batch of wallpapers
+        visiblePaths = wallpaperPaths.slice(0, 50);
 
         const scroll = Scrollable({
             hexpand: true,
@@ -123,12 +116,20 @@ const createContent = async () => {
             }),
         });
 
-        // Debounced scroll
+        // Add debounced scroll handler
         const handleScroll = debouncedScroll(scroll);
 
         cachedContent = EventBox({
-            onScrollUp: handleScroll,
-            onScrollDown: handleScroll,
+            onScrollUp: () => {
+                const adj = scroll.get_hadjustment();
+                adj.set_value(adj.get_value() - 100);
+                handleScroll();
+            },
+            onScrollDown: () => {
+                const adj = scroll.get_hadjustment();
+                adj.set_value(adj.get_value() + 100);
+                handleScroll();
+            },
             child: scroll,
         });
 
