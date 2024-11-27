@@ -28,7 +28,7 @@
   "buffer_font_size": 20,
   "theme": {
     "mode": "system",
-    "light": "One Light",
+    "light": "wal",
     "dark": "macOS Classic Dark2"
   }
 }
