@@ -1,0 +1,14 @@
+.git
+.gitignore
+install.sh
+checkdeps.sh
+manual-install-helper.sh
+README.md
+LICENSE
+update-dots.sh
+update-dots.dev.sh
+uninstall.sh
+scriptdata
+arch-packages
+CONTRIBUTING.md
+Extras

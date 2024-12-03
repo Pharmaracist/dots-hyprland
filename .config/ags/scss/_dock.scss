@@ -1,8 +1,9 @@
 .dock-bg {
-    @include large-rounding;
-    @include elevation2;
+    /* @include rounding_medium; */
+    @include elevation3;
     background-color: $layer0;
     padding: 0.682rem;
+    border-radius: 1rem;
 }
 
 .dock-app-btn-animate {

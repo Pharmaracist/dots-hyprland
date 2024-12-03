@@ -11,14 +11,13 @@ if status is-interactive
     set fish_greeting
 
 end
-
 starship init fish | source
 if test -f ~/.cache/ags/user/generated/terminal/sequences.txt
     cat ~/.cache/ags/user/generated/terminal/sequences.txt
 end
-
+pokemon-colorscripts --no-title -r
 alias pamcan=pacman
-
+alias cache="sh ~/.config/ags/scripts/generate_thumbnails.sh ~/Pictures/Wallpapers ~/Pictures/Wallpapers/thumbnails"
 # function fish_prompt
 #   set_color cyan; echo (pwd)
 #   set_color green; echo '> '

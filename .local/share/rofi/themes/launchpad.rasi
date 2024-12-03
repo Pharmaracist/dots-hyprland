@@ -1,0 +1,92 @@
+/* MACOS LAUNCHPAD LIKE THEME FOR ROFI */
+/* Author: Newman Sanchez (https://github.com/newmanls) */
+
+* {
+    font: "Rubik 11";
+
+    bg0:  #24242480;
+    bg1:  #363636;
+    bg2:  #f5f5f520;
+    bg3:  #f5f5f540;
+    bg4:  #0860f2E6;
+
+    fg0:  #c7c7c7;
+    fg1:  #f5f5f580;
+
+    background-color: transparent;
+    text-color:       @fg0;
+    padding:          0px;
+    margin:           0px;
+}
+
+window {
+  fullscreen: true;
+  padding: 1em;
+  background-color: transparent;
+}
+
+mainbox {
+  padding:  8px;
+}
+
+inputbar {
+  background-color: @bg2;
+
+  margin:   25px calc( 50% - 120px );
+  padding:  6px 20px;
+  spacing:  10px;
+
+  border:         1px;
+  border-radius:  9px;
+  border-color:   @bg3;
+
+  children: [icon-search,entry];
+}
+
+prompt {
+  enabled:  false;
+}
+
+icon-search {
+  expand:   false;
+  filename: "search";
+  vertical-align: 0.5;
+}
+
+entry {
+  placeholder:        "Search";
+  placeholder-color:  @bg2;
+}
+
+listview {
+  margin:   0px calc( 50% - 560px );
+  spacing:  40px;
+  columns:  6;
+  fixed-columns: true;
+}
+
+element, element-text, element-icon {
+  cursor: pointer;
+}
+
+element {
+  padding:      1px;
+  spacing:      2px;
+
+  orientation:    vertical;
+  border-radius:  16px;
+}
+
+element selected {
+  background-color: @bg4;
+}
+
+element-icon {
+  size: 5em;
+  horizontal-align: 0.5;
+}
+
+element-text {
+  size:2em;
+  horizontal-align: 0.5;
+}

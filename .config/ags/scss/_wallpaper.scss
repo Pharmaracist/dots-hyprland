@@ -20,20 +20,3 @@
 .wallpaper-window {
     @extend .sidebar-right;
 }
-
-.wallpaper-placeholder {
-    padding: 2rem;
-
-    .txt-large {
-        font-size: 1.2em;
-    }
-
-    .txt-subtext {
-        opacity: 0.8;
-    }
-
-    .button-accent {
-        padding: 1rem 2rem;
-        border-radius: 9999px;
-    }
-}

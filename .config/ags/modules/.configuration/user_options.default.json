@@ -10,9 +10,9 @@
     "proxyUrl": ""
   },
   "animations": {
-    "choreographyDelay": 25,
-    "durationSmall": 110,
-    "durationLarge": 180
+    "choreographyDelay": 15,
+    "durationSmall": 120,
+    "durationLarge": 250
   },
   "appearance": {
     "autoDarkMode": {
@@ -31,8 +31,8 @@
     "imageViewer": "loupe",
     "network": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi",
     "settings": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center",
-    "taskManager": "foot -e btop",
-    "terminal": "foot"
+    "taskManager": "zen-browser --new-window https://chatgpt.com",
+    "terminal": "kitty"
   },
   "battery": {
     "low": 20,
@@ -76,9 +76,9 @@
     "layout": "qwerty_full"
   },
   "overview": {
-    "scale": 0.18,
+    "scale": 0.16,
     "numOfRows": 2,
-    "numOfCols": 5,
+    "numOfCols": 4,
     "wsNumScale": 0.09,
     "wsNumMarginScale": 0.07
   },
@@ -94,9 +94,18 @@
           "key_get_url": "https://openrouter.ai/keys",
           "key_file": "openrouter_key.txt",
           "model": "meta-llama/llama-3-8b-instruct:free"
+        },
+        "openai": {
+          "name": "ChatGPT",
+          "logo_name": "openai-symbolic",
+          "description": "ChatGPT",
+          "base_url": "https://openrouter.ai/api/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "openai.txt",
+          "model": "meta-llama/llama-3-8b-instruct:free"
         }
       },
-      "initMessages": []
+      "initMessages": ["hello im abdullah"]
     },
     "image": {
       "columns": 2,
@@ -107,17 +116,17 @@
     "pages": {
       "order": ["apis", "tools", "github"],
       "apis": {
-        "order": ["gpt", "translater"]
+        "order": ["gemini", "gpt", "translater"]
       }
     },
     "translater": {
       "__custom": ["languages"],
       "from": "auto",
-      "to": "en",
+      "to": "ar",
       "languages": {
         "auto": "Auto",
         "en": "English",
-        "ru": "Russian"
+        "ar": "Arabic"
       }
     }
   },
@@ -139,22 +148,22 @@
     "excludedSites": ["quora.com"]
   },
   "time": {
-    "format": "%H:%M",
+    "format": "%I:%M",
     "interval": 5000,
-    "dateFormatLong": "%A, %d/%m",
+    "dateFormatLong": "%A %d/%m",
     "dateInterval": 5000,
     "dateFormat": "%d/%m"
   },
   "weather": {
-    "city": "Barabinsk",
+    "city": "Cairo",
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 10
+    "shown": 8
   },
   "dock": {
-    "enabled": false,
-    "hiddenThickness": 5,
+    "enabled": true,
+    "hiddenThickness": 20,
     "pinnedApps": ["firefox", "org.gnome.Nautilus"],
     "layer": "top",
     "monitorExclusivity": true,
@@ -227,7 +236,7 @@
     }
   },
   "bar": {
-    "modes": ["normal"],
+    "modes": ["nothing"],
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }

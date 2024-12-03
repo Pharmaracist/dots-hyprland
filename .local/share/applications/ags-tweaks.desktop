@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=ags-tweaks
+Exec=sh /home/archlinux/.local/bin/ags-tweaks %U
+Icon=com.logseq.Logseq
+Type=Application
+Categories=Utility;
+Comment= Ags Tweak Application for Sh1zucus !

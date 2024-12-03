@@ -4,9 +4,9 @@ $activecolor: $surfaceContainerHighest;
 $rounding_verysmall: 0.477rem;
 $rounding_small: 0.818rem;
 $rounding_mediumsmall: 0.955rem;
-$rounding_medium: 1.159rem;
-$rounding_mediumlarge: 1.364rem;
-$rounding_large: 1.705rem;
+$rounding_medium: 1.15rem;
+$rounding_mediumlarge: 1.3rem;
+$rounding_large: 1.305rem;
 
 // Common rules
 @mixin small-rounding {
@@ -29,9 +29,9 @@ $rounding_large: 1.705rem;
     -gtk-outline-radius: 9999px;
 }
 
-// @mixin symbolic-icon {
-//    -gtk-icon-theme: 'Adwaita';
-// }
+@mixin symbolic-icon {
+    -gtk-icon-theme: "Adwaita";
+}
 
 @mixin titlefont {
     // Geometric sans-serif
@@ -42,13 +42,13 @@ $rounding_large: 1.705rem;
     // Other clean sans-serif
     font-family: "Rubik", "Geist", "AR One Sans", "Reddit Sans", "Inter",
         "Roboto", "Ubuntu", "Noto Sans", sans-serif;
-    // font-weight: 500;
+    //font-weight: 500;
 }
 
 @mixin icon-material {
     // Material Design Icons
-    font-family: "Material Symbols Rounded", "MaterialSymbolsRounded", "Material Symbols Outlined",
-        "Material Symbols Sharp";
+    font-family: "Material Symbols Outlined", "MaterialSymbolsRounded",
+        "Material Symbols Rounded", "Material Symbols Sharp";
 }
 
 @mixin icon-nerd {
@@ -59,8 +59,9 @@ $rounding_large: 1.705rem;
 
 @mixin techfont {
     // Monospace for sys info n stuff. Doesn't have to be a nerd font, but it's cool.
-    font-family: "JetBrains Mono NF", "JetBrains Mono Nerd Font",
-        "JetBrains Mono NL", "SpaceMono NF", "SpaceMono Nerd Font", monospace;
+    font-family: "Iosevka Nerd Font", "JetBrains Mono NF",
+        "JetBrains Mono Nerd Font", "JetBrains Mono NL", "SpaceMono NF",
+        "SpaceMono Nerd Font", monospace;
 }
 
 @mixin readingfont {
@@ -99,7 +100,7 @@ $elevation_margin: 0.476rem;
 }
 
 @mixin menu_decel {
-    transition: 300ms cubic-bezier(0.1, 1, 0, 1);
+    transition: 400ms cubic-bezier(1, 0, 0, 1);
 }
 
 @mixin menu_decel_fast {

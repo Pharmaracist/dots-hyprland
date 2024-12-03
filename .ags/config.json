@@ -1,0 +1,23 @@
+{
+  "dock": {
+    "enabled": false,
+    "pinnedApps": [
+      "spotify",
+      "telegram-desktop",
+      "nautilus",
+      "zed",
+      "GitHub-Web",
+      "Github-desktop",
+      "Gemini-Web",
+      "ChatGPT-Web",
+      "obsidian"
+    ]
+  },
+  "apps": {
+    "terminal": "foot",
+    "imageViewer": "loupe",
+    "bluetooth": "blueberry",
+    "taskManager": "foot btop",
+    "settings": "sh ~/.local/bin/ags-tweaks"
+  }
+}

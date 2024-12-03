@@ -2,9 +2,8 @@
 set -e  # Exit on errors
 set -u  # Treat unset variables as errors
 
-# Paths configuration
-THUMBNAIL_DIR="$HOME/Pictures/Wallpapers/thumbnails"
-WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+WALLPAPER_DIR="$1"
+THUMBNAIL_DIR="$2"
 
 # Ensure the thumbnail directory exists
 mkdir -p "$THUMBNAIL_DIR"
