@@ -183,6 +183,43 @@ case $SKIP_PLASMAINTG in
     ;;
 esac
 
+# Theme integration packages
+install_theme_integrations() {
+    if $ask; then
+        echo -e "\e[33m[$0]: Would you like to install theme integration for Discord? [y/N]\e[0m"
+        read -p "====> " discord
+        case $discord in
+            [yY]) v yay -S --needed pywal-discord-git ;;
+            *) echo "Skipping Discord theme integration" ;;
+        esac
+
+        echo -e "\e[33m[$0]: Would you like to install theme integration for Telegram? [y/N]\e[0m"
+        read -p "====> " telegram
+        case $telegram in
+            [yY]) v yay -S --needed wal-telegram-git ;;
+            *) echo "Skipping Telegram theme integration" ;;
+        esac
+
+        echo -e "\e[33m[$0]: Would you like to install theme integration for Firefox? [y/N]\e[0m"
+        read -p "====> " firefox
+        case $firefox in
+            [yY]) v yay -S --needed pywalfox ;;
+            *) echo "Skipping Firefox theme integration" ;;
+        esac
+
+        echo -e "\e[33m[$0]: Would you like to install theme integration for Spotify? [y/N]\e[0m"
+        read -p "====> " spotify
+        case $spotify in
+            [yY]) v yay -S --needed spicetify-cli python-pywal-spicetify-git ;;
+            *) echo "Skipping Spotify theme integration" ;;
+        esac
+    else
+        v yay -S --needed --noconfirm pywal-discord-git wal-telegram-git pywalfox spicetify-cli python-pywal-spicetify-git
+    fi
+}
+
+v install_theme_integrations
+
 v sudo usermod -aG video,i2c,input "$(whoami)"
 v bash -c "echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf"
 v systemctl --user enable ydotool --now

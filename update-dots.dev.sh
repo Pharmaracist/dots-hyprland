@@ -16,6 +16,31 @@ RESET="\033[0m"
 config_folders=(".config")
 excludes=(".config/hypr/custom" ".config/ags/user_options.js" ".config/hypr/hyprland.conf")
 
+# Parse command line arguments
+RESET_AGS_CONFIG=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --reset-ags-config|-r)
+            RESET_AGS_CONFIG=true
+            shift
+            ;;
+        --help|-h)
+            echo -e "\n${CYAN}Usage: $0 [OPTIONS]${RESET}"
+            echo -e "\n${CYAN}Description:${RESET}"
+            echo -e "  Updates your dotfiles while preserving your personal configurations."
+            echo -e "  Automatically reloads Hyprland and AGS after the update."
+            echo -e "\n${CYAN}Options:${RESET}"
+            echo -e "  ${YELLOW}--reset-ags-config, -r${RESET}  Reset AGS settings to default"
+            echo -e "  ${YELLOW}--help, -h${RESET}              Show this help message\n"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${RESET}"
+            exit 1
+            ;;
+    esac
+done
+
 get_destination() {
     local file="$1"
     if [ "$(echo $file | cut -d/ -f1)" = ".config" ]; then
@@ -73,8 +98,14 @@ fi
 
 echo -e "${CYAN}Copying new files...${RESET}"
 
-mkdir -p "$HOME/.ags"
-cp -f "$base/.config/ags/modules/.configuration/user_options.default.json" "$HOME/.ags/config.json"
+# Only reset AGS config if flag is provided
+if [ "$RESET_AGS_CONFIG" = true ]; then
+    echo -e "${YELLOW}Resetting AGS config...${RESET}"
+    mkdir -p "$HOME/.ags"
+    cp -f "$base/.config/ags/modules/.configuration/user_options.default.json" "$HOME/.ags/config.json"
+else
+    echo -e "${BLUE}Skipping AGS config reset${RESET}"
+fi
 
 mkdir -p "$XDG_BIN_HOME"
 if [ -d "$base/.local/bin" ]; then

@@ -28,6 +28,7 @@ import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
 import GLib from 'gi://GLib';
+import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
 
 const centerWidgets = [
     {
@@ -40,11 +41,11 @@ const centerWidgets = [
         materialIcon: 'volume_up',
         contentWidget: ModuleAudioControls,
     },
-    {
+    ...(Battery.available ? [{
         name: 'Power Profiles',
         materialIcon: 'speed',
         contentWidget: ModulePowerProfiles,
-    },
+    }] : []),
     {
         name: getString('Bluetooth'),
         materialIcon: 'bluetooth',

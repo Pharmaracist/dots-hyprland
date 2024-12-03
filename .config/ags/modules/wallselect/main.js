@@ -7,7 +7,7 @@ const { Box, EventBox, Scrollable, Label } = Widget;
 let cachedContent = null;
 let wallpaperPaths = [];
 let visiblePaths = [];
-let isLoading = true;
+let isLoading = false;
 
 // Constants
 const THUMBNAIL_DIR = GLib.build_filenamev([
@@ -56,7 +56,7 @@ const WallpaperButton = (path) =>
 const getWallpaperPaths = async () => {
     try {
         const files = await Utils.execAsync(
-            `find ${GLib.shell_quote(THUMBNAIL_DIR)} -type f \\( -iname "*.jpg" -o -iname "*.png" \\)`,
+            `find ${GLib.shell_quote(THUMBNAIL_DIR)} -type f \\( -iname "*.jpg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.jpeg" \\)`,
         );
         return files.split("\n").filter((file) => file);
     } catch (error) {
