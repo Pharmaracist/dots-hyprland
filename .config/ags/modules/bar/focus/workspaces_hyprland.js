@@ -13,7 +13,7 @@ const dummyWs = Box({ className: 'bar-ws-focus' }); // Not shown. Only for getti
 const dummyActiveWs = Box({ className: 'bar-ws-focus bar-ws-focus-active' }); // Not shown. Only for getting size props
 const dummyOccupiedWs = Box({ className: 'bar-ws-focus bar-ws-focus-occupied' }); // Not shown. Only for getting size props
 
-const WS_TAKEN_WIDTH_MULTIPLIER = 1.4;
+const WS_TAKEN_WIDTH_MULTIPLIER = 1.34;
 const floor = Math.floor;
 const ceil = Math.ceil;
 

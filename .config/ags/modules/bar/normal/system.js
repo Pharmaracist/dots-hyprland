@@ -191,10 +191,11 @@ const BarGroup = ({ child }) => Widget.Box({
 const BatteryModule = () => Box({
     className: 'spacing-h-4',
     children: [
-        BarGroup({ child: Utilities() }),
+        BarGroup({   child:BarClock() }),
+        BarGroup({child: Utilities()}),
         Stack({
-            transition: 'slide_up_down',
             transitionDuration: userOptions.asyncGet().animations.durationLarge,
+            transition: 'slide_up_down',
             children: {
                 'laptop': BarGroup({ child: BarBattery() }),
                 'hidden': Widget.Box({}),

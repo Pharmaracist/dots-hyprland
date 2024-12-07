@@ -113,11 +113,11 @@
     "translater": {
       "__custom": ["languages"],
       "from": "auto",
-      "to": "en",
+      "to": "ar",
       "languages": {
         "auto": "Auto",
         "en": "English",
-        "ru": "Russian"
+        "ar": "Arabic"
       }
     }
   },
@@ -139,23 +139,23 @@
     "excludedSites": ["quora.com"]
   },
   "time": {
-    "format": "%H:%M",
+    "format": "%I:%M",
     "interval": 5000,
     "dateFormatLong": "%A, %d/%m",
     "dateInterval": 5000,
     "dateFormat": "%d/%m"
   },
   "weather": {
-    "city": "Barabinsk",
+    "city": "Cairo",
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 10
+    "shown": 5
   },
   "dock": {
-    "enabled": false,
+    "enabled": true,
     "hiddenThickness": 5,
-    "pinnedApps": ["firefox", "org.gnome.Nautilus"],
+    "pinnedApps": ["zen-browser","spotube","github-desktop","Code","zeditor","firefox","nwg-look","Obisidian","steam","heroic-games-launcher", "org.gnome.Nautilus"],
     "layer": "top",
     "monitorExclusivity": true,
     "searchPinnedAppIcons": false,

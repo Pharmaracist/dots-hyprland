@@ -1,7 +1,7 @@
 // 1rem = 11pt = 14.6666666667px
 $bar_ws_width: 1.774rem;
-$bar_ws_width_focus: 0.614rem;
-$bar_ws_width_focus_active: 2.045rem;
+$bar_ws_width_focus: 1rem;
+$bar_ws_width_focus_active: 6.045rem;
 
 @mixin bar-group-rounding {
     @include small-rounding;
@@ -10,7 +10,9 @@ $bar_ws_width_focus_active: 2.045rem;
 .bar-height {
     min-height: 2.727rem;
 }
-
+.prim-txt{
+    color:$secondary;
+}
 .bar-bg {
     background-color: $layer0;
     min-height: 2.727rem;
