@@ -149,30 +149,6 @@ export const ModuleCloudflareWarp = async (props = {}) => {
     return button;
 }
 
-export const ModuleInvertColors = async (props = {}) => {
-    try {
-        const Hyprland = (await import('resource:///com/github/Aylur/ags/service/hyprland.js')).default;
-        const shaderPath = `${GLib.get_user_config_dir()}/hypr/shaders/invert.frag`;
-        
-        return Widget.Button({
-            className: 'txt-small sidebar-iconbutton',
-            tooltipText: getString('Color inversion'),
-            onClicked: async (button) => {
-                const output = await Hyprland.messageAsync('j/getoption decoration:screen_shader');
-                const currentShader = JSON.parse(output)["str"].trim();
-                const newShader = (currentShader != "[[EMPTY]]" && currentShader != "") ? '[[EMPTY]]' : shaderPath;
-                
-                await Hyprland.messageAsync(`j/keyword decoration:screen_shader ${newShader}`).catch(print);
-                button.toggleClassName('sidebar-button-active', newShader !== '[[EMPTY]]');
-            },
-            child: MaterialIcon('invert_colors', 'norm'),
-            setup: setupCursorHover,
-            ...props,
-        });
-    } catch {
-        return null;
-    }
-}
 
 export const ModuleRawInput = async (props = {}) => {
     try {
