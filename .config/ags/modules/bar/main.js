@@ -118,7 +118,15 @@ export const Bar = async (monitor = 0) => {
                 SideModule([Utilities()])
             ]
         }),
-        centerWidget:SideModule([MusicStuff()]),
+        centerWidget: Widget.Box({
+            // css:"margin-right:1.8rem;",
+            children: [
+                Widget.Box({
+                    // css:"margin-right:-2.4rem;",
+                    children: [await MusicStuff()],
+                }),
+            ]
+        }),
         endWidget:  Widget.Box({
             css:"margin-right:1.8rem;",
             children: [
@@ -170,8 +178,8 @@ export const Bar = async (monitor = 0) => {
             transitionDuration: userOptions.asyncGet().animations.durationLarge,
             children: {
                 'normal': normalBarContent,
-                'focus': focusedBarContent,
                 'nothing': metroBarContent,
+                'focus': metroBarContent,
             },
             setup: (self) => self.hook(currentShellMode, (self) => {
                 self.shown = currentShellMode.value[monitor];

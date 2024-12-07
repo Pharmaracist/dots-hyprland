@@ -25,7 +25,7 @@ import { getDistroIcon } from '../.miscutils/system.js';
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
-import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
+// import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
 import GLib from 'gi://GLib';
 import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
 
@@ -149,81 +149,6 @@ export const sidebarOptionsStack = ExpandingIconTabContainer({
     }
 });
 
-const WeatherWidget = () => {
-    const options = userOptions.asyncGet();
-    const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
-    const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + '/wttr.in.txt';
-    
-    const updateWeather = async () => {
-        try {
-            await Utils.execAsync(['mkdir', '-p', WEATHER_CACHE_FOLDER]);
-            const city = options.weather.city || 'London';
-            const url = `wttr.in/${city}?format=Weather:%20%c,%20Condition:%20%C,%20Temperature:%20%t,%20Wind:%20%w`;
-            await Utils.execAsync(['curl', '-s', url, '-o', WEATHER_CACHE_PATH]);
-        } catch (error) {
-            console.error('Failed to update weather:', error);
-        }
-    };
-
-    updateWeather();
-    Utils.interval(900000, updateWeather);
-    
-    return Box({
-        hexpand: true,
-        hpack: 'center',
-        className: 'spacing-h-10',
-        children: [
-            MaterialIcon('location_on', 'small'),
-            Label({
-                className: 'txt-smallie',
-                label: options.weather.city || 'Unknown',
-            }),
-            MaterialIcon('device_thermostat', 'small'),
-            Label({
-                className: 'txt-smallie',
-                setup: (self) => self.poll(900000, async (label) => {
-                    try {
-                        const temp = await Utils.execAsync(['grep', '-o', 'Temperature: [^,]*', WEATHER_CACHE_PATH]);
-                        label.label = temp?.trim().split(': ')[1] || 'N/A';
-                    } catch (error) {
-                        label.label = 'N/A';
-                    }
-                }),
-            }),
-            Label({
-                className: 'txt-norm icon-material',
-                setup: (self) => self.poll(900000, async (label) => {
-                    try {
-                        const code = await Utils.execAsync(['grep', '-o', 'Weather: [^,]*', WEATHER_CACHE_PATH]);
-                        const weatherCode = code?.trim().split(' ')[1];
-                        if (!weatherCode || !WWO_CODE[weatherCode]) {
-                            label.label = 'cloud_off';
-                            return;
-                        }
-                        const condition = WWO_CODE[weatherCode];
-                        const isNight = GLib.DateTime.new_now_local().get_hour() >= 20 || GLib.DateTime.new_now_local().get_hour() <= 6;
-                        label.label = isNight ? NIGHT_WEATHER_SYMBOL[condition] || 'cloud_off' : WEATHER_SYMBOL[condition] || 'cloud_off';
-                    } catch (error) {
-                        label.label = 'cloud_off';
-                    }
-                }),
-            }),
-            MaterialIcon('air', 'small'),
-            Label({
-                className: 'txt-smallie',
-                setup: (self) => self.poll(900000, async (label) => {
-                    try {
-                        const wind = await Utils.execAsync(['grep', '-o', 'Wind: [^,]*', WEATHER_CACHE_PATH]);
-                        const windMatch = wind?.trim().match(/\d+\s*km\/h/);
-                        label.label = windMatch ? windMatch[0] : 'N/A';
-                    } catch (error) {
-                        label.label = 'N/A';
-                    }
-                }),
-            }),
-        ]
-    });
-};
 
 export default () => Box({
     vexpand: true,
@@ -255,7 +180,6 @@ export default () => Box({
                     ],
                 }),
                 ModuleCalendar(),
-                WeatherWidget(),
             ]
         }),
     ],
