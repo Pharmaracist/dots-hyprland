@@ -31,20 +31,9 @@
     .txt-subtext {
         opacity: 0.8;
     }
-}
 
-.generate-thumbnails {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px;
-    background-color: $secondaryContainer;
-    color: $onSecondaryContainer;
-    margin-right: 0.5rem;
-    
-    &:hover {
-        background-color: mix($secondaryContainer, $onSecondaryContainer, 90%);
-    }
-    
-    &:active {
-        background-color: mix($secondaryContainer, $onSecondaryContainer, 80%);
+    .button-accent {
+        padding: 1rem 2rem;
+        border-radius: 9999px;
     }
 }

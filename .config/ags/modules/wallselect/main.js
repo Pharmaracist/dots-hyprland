@@ -66,29 +66,13 @@ const getWallpaperPaths = async () => {
 };
 
 // Debounced Scroll Event
-const debouncedScroll = (scroll, delay = 50) => {
+const debouncedScroll = (scroll, delay = 150) => {
     let timeoutId;
-    let lastScrollTime = 0;
-    
-    return (event) => {
-        // Предотвращаем слишком частую прокрутку
-        const now = Date.now();
-        if (now - lastScrollTime < 50) return;
-        lastScrollTime = now;
-
+    return () => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
             const adj = scroll.get_hadjustment();
             const scrollValue = adj.get_value();
-            
-            // Плавная прокрутка с учетом направления
-            if (event.direction === 'up') {
-                adj.set_value(Math.max(0, scrollValue - adj.get_step_increment()));
-            } else {
-                const maxScroll = adj.get_upper() - adj.get_page_size();
-                adj.set_value(Math.min(maxScroll, scrollValue + adj.get_step_increment()));
-            }
-
             if (scrollValue + adj.get_page_size() >= adj.get_upper()) {
                 loadMoreWallpapers();
             }
@@ -136,6 +120,27 @@ const createPlaceholder = () => Box({
                 }),
             ],
         }),
+        Box({
+            hpack: 'center',
+            children: [
+                Widget.Button({
+                    className: 'button-accent button-large',
+                    label: 'Generate Thumbnails',
+                    onClicked: () => {
+                        Utils.execAsync([
+                            'bash',
+                            `${GLib.get_home_dir()}/.config/ags/scripts/generate_thumbnails.sh`
+                        ]).then(() => {
+                            // Clear cache to reload wallpapers
+                            cachedContent = null;
+                            // Reload window content
+                            App.closeWindow('wallselect');
+                            App.openWindow('wallselect');
+                        }).catch(console.error);
+                    },
+                }),
+            ],
+        }),
     ],
 });
 
@@ -166,9 +171,8 @@ const createContent = async () => {
 
         const handleScroll = debouncedScroll(scroll);
         cachedContent = EventBox({
-            onScrollUp: (event) => handleScroll({ direction: 'up', event }),
-            onScrollDown: (event) => handleScroll({ direction: 'down', event }),
-            onPrimaryClick: () => App.closeWindow("wallselect"),
+            onScrollUp: handleScroll,
+            onScrollDown: handleScroll,
             child: scroll,
         });
 
@@ -189,33 +193,6 @@ const createContent = async () => {
     }
 };
 
-// Кнопка генерации превью
-const GenerateButton = () => Widget.Button({
-    className: 'button-accent generate-thumbnails',
-    child: Box({
-        children: [
-            Widget.Icon({
-                icon: 'view-refresh-symbolic',
-                size: 16,
-            }),
-            Widget.Label({
-                label: ' Generate Thumbnails',
-            }),
-        ],
-    }),
-    tooltipText: 'Regenerate all wallpaper thumbnails',
-    onClicked: () => {
-        Utils.execAsync([
-            'bash',
-            `${GLib.get_home_dir()}/.config/ags/scripts/generate_thumbnails.sh`
-        ]).then(() => {
-            cachedContent = null;
-            App.closeWindow('wallselect');
-            App.openWindow('wallselect');
-        }).catch(console.error);
-    },
-});
-
 // Main Window
 export default () =>
     Widget.Window({
@@ -235,13 +212,6 @@ export default () =>
                     vertical: true,
                     className: "sidebar-right spacing-v-15",
                     children: [
-                        Box({
-                            className: "wallselect-header",
-                            children: [
-                                Box({ hexpand: true }), // Пустое пространство для выравнивания
-                                GenerateButton(),
-                            ],
-                        }),
                         Box({
                             vertical: true,
                             className: "sidebar-module",
