@@ -36,8 +36,8 @@
 .bg-distro-txt {
     @include titlefont;
     @include bg-textshadow;
-    font-size: 1.432rem;
-    color: $onLayer0;
+    font-size: 2.532rem;
+    color: rgba($outline, 0.8);
 }
 
 .bg-distro-name {

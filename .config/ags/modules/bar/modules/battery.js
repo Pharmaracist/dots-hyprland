@@ -71,7 +71,7 @@ const BarBattery = () => {
   };
 
   return Box({
-    className: "spacing-h-10 bar-batt-txt",
+    className: "spacing-h-10 bar-batt-txt txt-norm",
     children: [
       EventBox({
         onScrollUp: () => handleScroll(1), // Increase brightness
@@ -136,8 +136,8 @@ const BatteryModule = () =>
 
 export default () =>
   Widget.EventBox({
-    onScrollUp: () => handleScroll(1),
-    onScrollDown: () => handleScroll(-1),
+    onScrollUp: () => handleScroll(-1),
+    onScrollDown: () => handleScroll(1),
     child: Widget.Box({
       children: [BatteryModule()],
     }),

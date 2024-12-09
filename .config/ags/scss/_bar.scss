@@ -15,10 +15,13 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-notch {
-    background-color: $black;
+    background-color: $layer0;
     padding: 0.8rem 3rem;
     border-radius: 0px 0px 1.6rem 1.6rem;
     margin: 0rem;
+    border: 1.5px solid $outline;
+    border-top: none;
+    /* border-color: #ffffff; */
 }
 .bar-height {
     min-height: 2.727rem;
@@ -141,7 +144,7 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-ws-focus-active {
     min-width: $bar_ws_width_focus_active;
-    background-color: $onLayer0;
+    background-color: $onSurfaceVariant;
 }
 
 .bar-ws-focus-occupied {
@@ -171,8 +174,8 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-batt {
     @include full-rounding;
     @include element_decel;
-    min-height: 1.77rem;
-    min-width: 1.77rem;
+    min-height: 1.87rem;
+    min-width: 1.99rem;
     border-radius: 10rem;
     color: $battOnLayer2;
 }
@@ -183,8 +186,8 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-batt-circprog {
     @include fluent_decel_long;
-    min-width: 0.136rem; // line width
-    min-height: 1.636rem;
+    min-width: 0.34rem; // line width
+    min-height: 1.97rem;
     padding: 0rem;
     background-color: $battLayer2;
     color: $battOnLayer2;
@@ -412,7 +415,9 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-util-btn:active {
     background-color: $layer2Active;
 }
-
+.bar-button {
+    color: $utilsOnLayer2;
+}
 .bar-spaceright {
     color: $barspacerightOnLayer0;
 }

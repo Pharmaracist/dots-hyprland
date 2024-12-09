@@ -26,55 +26,6 @@ const { GLib } = imports.gi;
 //   return false;
 // }
 
-// export const MicIndicator = () =>
-//   Widget.Button({
-//     onClicked: () => {
-//       if (Audio.microphone)
-//         Audio.microphone.isMuted = !Audio.microphone.isMuted;
-//     },
-//     child: Widget.Box({
-//       children: [
-//         Widget.Stack({
-//           transition: "slide_up_down",
-//           transitionDuration: userOptions.asyncGet().animations.durationSmall,
-//           children: {
-//             true: MaterialIcon("mic_off", "norm"),
-//             false: MaterialIcon("mic", "norm"),
-//           },
-//           setup: (self) =>
-//             self.hook(Audio, (stack) => {
-//               if (!Audio.microphone) return;
-//               stack.shown = String(Audio.microphone.isMuted);
-//             }),
-//         }),
-//       ],
-//     }),
-//   });
-
-// export const SpeakerIndicator = () =>
-//   Widget.Button({
-//     onClicked: () => {
-//       if (Audio.speaker) Audio.speaker.isMuted = !Audio.speaker.isMuted;
-//     },
-//     child: Widget.Box({
-//       children: [
-//         Widget.Stack({
-//           transition: "slide_up_down",
-//           transitionDuration: userOptions.asyncGet().animations.durationSmall,
-//           children: {
-//             true: MaterialIcon("volume_off", "norm"),
-//             false: MaterialIcon("volume_up", "norm"),
-//           },
-//           setup: (self) =>
-//             self.hook(Audio, (stack) => {
-//               if (!Audio.speaker) return;
-//               stack.shown = String(Audio.speaker.isMuted);
-//             }),
-//         }),
-//       ],
-//     }),
-//   });
-
 export const NotificationIndicator = (notifCenterName = "sideright") => {
   const widget = Widget.Revealer({
     transition: "slide_left",

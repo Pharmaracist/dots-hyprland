@@ -13,10 +13,21 @@ import WindowTitle from "./modules/spaceleft.js";
 import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
 import Utilities from "./modules/utils.js";
+import { BarButton } from "./modules/simple_button.js";
+import { BarToggles } from "./modules/bar_toggles.js";
 // import spaceleft from "./modules/spaceleft.js";
 // import SystemResources from "./modules/resources.js"
 const { GLib } = imports.gi;
-
+const BarGroup = ({ child }) =>
+  Widget.Box({
+    className: "bar-group-margin bar-sides",
+    children: [
+      Widget.Box({
+        className: "bar-group bar-group-standalone bar-group-pad-system",
+        children: [child],
+      }),
+    ],
+  });
 // Define time formats
 const timeFormat = "%I:%M";
 const dateFormat = "%A, %d %B %Y";
@@ -118,8 +129,8 @@ export const Bar = async (monitor = 0) => {
   const finalNormalBarContent = await attachCorners(normalBarContent);
 
   const floatingBarContent = await Widget.CenterBox({
-    className: "bar-floating",
-    css: " min-height:45px;",
+    className: "bar-floating ",
+    css: " min-height:50px;",
     setup: (self) => {
       const styleContext = self.get_style_context();
       const minHeight = styleContext.get_property(
@@ -140,11 +151,8 @@ export const Bar = async (monitor = 0) => {
         }),
         Widget.Box({
           css: "margin-left:0.4rem;",
-          className: "spacing-h-15",
-          children: [
-            Utilities(),
-            // PowerDrawWidget()
-          ],
+          className: "spacing-h-10",
+          children: [Utilities(), BarToggles()],
         }),
       ],
     }),

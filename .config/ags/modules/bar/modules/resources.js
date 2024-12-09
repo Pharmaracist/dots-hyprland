@@ -39,7 +39,7 @@ const BarResource = (
   const detailRevealer = Revealer({
     transitionDuration: 500, // Adjust this value for the speed of the slide
     transition: "slide_right", // Slide to the right on reveal
-    revealChild: false,
+    revealChild: true,
     child: resourceLabel, // The resource label is the child of the revealer
   });
 
@@ -108,14 +108,6 @@ const SystemResources = () =>
         Box({
           className: "spacing-h-10 margin-left-10",
           children: [
-            BarResource(
-              "Swap Usage",
-              "swap_horiz",
-              `LANG=C free | awk '/^Swap/ {if ($2 > 0) printf("%.2f\\n", ($3/$2) * 100); else print "0";}'`,
-              "bar-swap-circprog",
-              "bar-swap-txt",
-              "bar-swap-icon",
-            ),
             BarResource(
               "CPU Usage",
               "settings_motion_mode",

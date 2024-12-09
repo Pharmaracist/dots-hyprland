@@ -1,20 +1,26 @@
-$rootTransparency: 0.22; // Transparency = 1 - opacity
-$transparency: 0.75;
+$rootTransparency: 0.52; // Transparency = 1 - opacity
+$transparency: 0.9;
 
 // Transparent versions
 @if $transparent == True {
-  $background: transparentize($background, $rootTransparency);
-  $surface: transparentize($surface, $transparency);
-  $surfaceDim: transparentize($surfaceDim, $transparency);
-  $surfaceBright: transparentize($surfaceBright, $transparency);
-  $surfaceContainerLowest: transparentize($surfaceContainerLowest, $transparency);
-  $surfaceContainerLow: transparentize($surfaceContainerLow, $transparency);
-  $surfaceContainer: transparentize($surfaceContainer, $transparency);
-  $surfaceContainerHigh: transparentize($surfaceContainerHigh, $transparency);
-  $surfaceContainerHighest: transparentize($surfaceContainerHighest, $transparency);
-  $surfaceVariant: transparentize($surfaceVariant, $transparency);
-  $inverseSurface: transparentize($inverseSurface, $transparency);
-  $surfaceTint: transparentize($surfaceTint, $transparency);
+    $background: transparentize($background, $rootTransparency);
+    $surface: transparentize($surface, $transparency);
+    $surfaceDim: transparentize($surfaceDim, $transparency);
+    $surfaceBright: transparentize($surfaceBright, $transparency);
+    $surfaceContainerLowest: transparentize(
+        $surfaceContainerLowest,
+        $transparency
+    );
+    $surfaceContainerLow: transparentize($surfaceContainerLow, $transparency);
+    $surfaceContainer: transparentize($surfaceContainer, $transparency);
+    $surfaceContainerHigh: transparentize($surfaceContainerHigh, $transparency);
+    $surfaceContainerHighest: transparentize(
+        $surfaceContainerHighest,
+        $transparency
+    );
+    $surfaceVariant: transparentize($surfaceVariant, $transparency);
+    $inverseSurface: transparentize($inverseSurface, $transparency);
+    $surfaceTint: transparentize($surfaceTint, $transparency);
 }
 
 // Others
@@ -22,7 +28,6 @@ $subtext: $outline;
 $actiontext: mix($onBackground, $background, 85%);
 $black: black;
 $white: white;
-
 /// Color mappings for more chaotic, dynamic colors like the average rice ///
 // General
 $layer0: $background;
@@ -96,4 +101,3 @@ $sessionColors: (
 );
 $brightnessOnLayer0: $onLayer0;
 $volumeOnLayer0: $onLayer0;
-
