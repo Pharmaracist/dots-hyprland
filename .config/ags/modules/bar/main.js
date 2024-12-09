@@ -95,6 +95,7 @@ export const Bar = async (monitor = 0) => {
   });
   const metroBarContent = Widget.CenterBox({
     className: "bar-bg",
+    css: "min-height:45px;",
     setup: (self) => {
       const styleContext = self.get_style_context();
       const minHeight = styleContext.get_property(
@@ -104,11 +105,11 @@ export const Bar = async (monitor = 0) => {
     },
     startWidget: Widget.Box({
       css: "margin-left:1.8rem;",
-      className: "spacing-h-10",
+      className: "spacing-h-15",
       children: [
         await BatteryModule(),
         Widget.Box({
-          // css:"margin-left:0.3rem;",
+          css: "padding-left:0.7rem;",
           // className: 'spacing-h-15',
           homogeneous: true,
           children: [await FocusOptionalWorkspaces()],

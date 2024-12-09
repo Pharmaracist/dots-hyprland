@@ -58,7 +58,7 @@ const BarBattery = () => {
           Battery,
           (label) => {
             const chargingText = Battery.charging ? "" : " ";
-            label.label = `${Battery.percent}% ${chargingText}`; // Show percentage and charging status
+            label.label = `${Battery.percent}% ${chargingText} `;
           },
         ],
       ],
