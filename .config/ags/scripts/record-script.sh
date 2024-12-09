@@ -15,11 +15,11 @@ mkdir -p "$videos_dir"
 cd "$videos_dir" || exit
 
 if pidof wf-recorder > /dev/null; then
-    notify-send "Запись остановлена" -a 'record-script.sh' &
+    notify-send "Recording stopped" -a 'record-script.sh' &
     killall -SIGINT wf-recorder &
 else
     output_file="./rec_$(getdate).mp4"
-    notify-send "Начало записи" "$output_file" -a 'record-script.sh'
+    notify-send "Recording started" "$output_file" -a 'record-script.sh'
     if [[ "$1" == "--fullscreen" ]]; then
         wf-recorder -c h264_vaapi -d /dev/dri/renderD128 \
             -o "$(getactivemonitor)" \
