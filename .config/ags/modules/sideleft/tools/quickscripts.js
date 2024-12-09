@@ -12,6 +12,12 @@ import { distroID, isArchDistro, isDebianDistro, hasFlatpak } from '../../.miscu
 
 const scripts = [
     {
+        icon: 'youtube',
+        name: getString('YouTube Downloader'),
+        command: `gjs ${Utils.HOME}/.local/bin/yt-downloader.js`,
+        enabled: true,
+    },
+    {
         icon: 'screen-resolution-symbolic',
         name: getString('Change screen resolution'),
         command: `bash ${App.configDir}/modules/sideleft/tools/changeres.sh`,
@@ -89,7 +95,7 @@ export default () => SidebarModule({
                         child: scriptStateIcon,
                         onClicked: () => {
                             closeEverything();
-                            execAsync([`bash`, `-c`, `${userOptions.asyncGet().apps.terminal} fish -C "${script.command}"`]).catch(print)
+                            execAsync([`bash`, `-c`, `${script.command}`]).catch(print)
                                 .then(() => {
                                     scriptStateIcon.label = 'done';
                                 })

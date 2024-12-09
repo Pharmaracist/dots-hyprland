@@ -365,7 +365,7 @@ const PlayState = ({ player }) => {
 const MusicControlsWidget = (player) => Box({
     className: 'osd-music spacing-h-20 test',
     children: [
-        CoverArt({ player: player, vpack: 'center' }),
+        // CoverArt({ player: player, vpack: 'center' }),
         Box({
             vertical: true,
             className: 'spacing-v-5 osd-music-info',
