@@ -146,6 +146,12 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $timeOnLayer1;
 }
 
+.power-draw-text {
+    @include titlefont;
+    font-size: 1.2rem;
+    color: $timeOnLayer1;
+}
+
 .bar-date {
     color: $dateOnLayer1;
 }
