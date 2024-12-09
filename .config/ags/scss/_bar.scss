@@ -15,12 +15,12 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-notch {
-    background-color: $layer0;
+    background-color: $black;
     padding: 0.8rem 3rem;
     border-radius: 0px 0px 1.6rem 1.6rem;
     margin: 0rem;
-    border: 1.5px solid $outline;
-    border-top: none;
+    /* border: 1.5px solid $outline;
+    border-top: none; */
     /* border-color: #ffffff; */
 }
 .bar-height {
@@ -171,11 +171,28 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $dateOnLayer1;
 }
 
+.bar-bat {
+    @include full-rounding;
+    @include element_decel;
+    min-height: 1.99rem;
+    min-width: 1.99rem;
+    border-radius: 10rem;
+    color: $battOnLayer2;
+}
+.bar-bat-circprog {
+    @include fluent_decel_long;
+    min-width: 0.34rem; // line width
+    min-height: 1.97rem;
+    padding: 0rem;
+    background-color: $battLayer2;
+    color: $battOnLayer2;
+}
+
 .bar-batt {
     @include full-rounding;
     @include element_decel;
-    min-height: 1.87rem;
-    min-width: 1.99rem;
+    min-height: 1.77rem;
+    min-width: 1.77rem;
     border-radius: 10rem;
     color: $battOnLayer2;
 }
@@ -186,8 +203,8 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-batt-circprog {
     @include fluent_decel_long;
-    min-width: 0.34rem; // line width
-    min-height: 1.97rem;
+    min-width: 0.136rem; // line width
+    min-height: 1.636rem;
     padding: 0rem;
     background-color: $battLayer2;
     color: $battOnLayer2;

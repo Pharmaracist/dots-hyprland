@@ -28,15 +28,15 @@ const BarBatteryProgress = () => {
 
     circprog.css = batteryProgressCache.get(key);
     circprog.toggleClassName(
-      "bar-batt-circprog-low",
+      "bar-bat-circprog-low",
       percent <= options.battery.low,
     );
-    circprog.toggleClassName("bar-batt-circprog-full", Battery.charged);
-    circprog.toggleClassName("bar-batt-charging", Battery.charging); // Add charging state class
+    circprog.toggleClassName("bar-bat-circprog-full", Battery.charged);
+    circprog.toggleClassName("bar-bat-charging", Battery.charging); // Add charging state class
   };
 
   return AnimatedCircProg({
-    className: "bar-batt-circprog",
+    className: "bar-bat-circprog",
     vpack: "center",
     hpack: "center",
     extraSetup: (self) => self.hook(Battery, _updateProgress),
@@ -53,13 +53,12 @@ const BarBattery = () => {
     revealChild: false, // Initially hidden
     child: Label({
       className: "bar-batt-percent",
-      css: "margin-left: 8px;",
       connections: [
         [
           Battery,
           (label) => {
             const chargingText = Battery.charging ? "" : " ";
-            label.label = `${Battery.percent}% ${chargingText} `;
+            label.label = ` ${chargingText}  ${Battery.percent}%`;
           },
         ],
       ],
@@ -71,7 +70,7 @@ const BarBattery = () => {
   };
 
   return Box({
-    className: "spacing-h-10 bar-batt-txt txt-norm",
+    className: "spacing-h-10 prim-txt txt-norm ",
     children: [
       EventBox({
         onScrollUp: () => handleScroll(1), // Increase brightness
@@ -86,7 +85,7 @@ const BarBattery = () => {
             Overlay({
               child: Box({
                 vpack: "center",
-                className: "bar-batt",
+                className: "bar-bat",
                 homogeneous: true,
                 children: [MaterialIcon("", "large")],
                 setup: (self) =>
