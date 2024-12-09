@@ -11,7 +11,14 @@ $bar_ws_width_focus_active: 6.045rem;
     @include elevation2;
     @include anim-enter;
     @include large-rounding;
-    margin: 8px 20px;
+    margin: 6px 20px 4px;
+}
+
+.bar-notch {
+    background-color: $black;
+    padding: 0.8rem 3rem;
+    border-radius: 0px 0px 1.6rem 1.6rem;
+    margin: 0rem;
 }
 .bar-height {
     min-height: 2.727rem;

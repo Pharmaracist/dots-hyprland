@@ -47,8 +47,8 @@ $rounding_large: 1.705rem;
 
 @mixin icon-material {
     // Material Design Icons
-    font-family: "Material Symbols Rounded", "MaterialSymbolsRounded", "Material Symbols Outlined",
-        "Material Symbols Sharp";
+    font-family: "Material Symbols Rounded", "MaterialSymbolsRounded",
+        "Material Symbols Outlined", "Material Symbols Sharp";
 }
 
 @mixin icon-nerd {
@@ -78,7 +78,7 @@ $rounding_large: 1.705rem;
     color: $actiontext;
 }
 
-$elevation_margin: 0.476rem;
+$elevation_margin: 0.576rem;
 
 @mixin elevation2 {
     box-shadow: 0px 2px 3px transparentize($shadow, 0.55);

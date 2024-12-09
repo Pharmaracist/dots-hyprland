@@ -1,19 +1,20 @@
 const { Gtk } = imports.gi;
 import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import PowerDrawWidget from "./normal/powerdraw.js";
 import { Variable } from "resource:///com/github/Aylur/ags/variable.js";
 import { currentShellMode } from "../../variables.js";
 import { RoundedCorner } from "../.commonwidgets/cairo_roundedcorner.js";
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
-import BatteryModule from "./normal/battery.js";
-import Music from "./normal/mixed.js";
-import MusicStuff from "./normal/music.js";
-import WindowTitle from "./normal/spaceleft.js";
-import Indicators from "./normal/spaceright.js";
-import System from "./normal/system.js";
-import Utilities from "./normal/utils.js";
-// import SystemResources from "./normal/resources.js"
+import PowerDrawWidget from "./modules/powerdraw.js";
+import BatteryModule from "./modules/battery.js";
+import Music from "./modules/mixed.js";
+import MusicStuff from "./modules/music.js";
+import WindowTitle from "./modules/spaceleft.js";
+import Indicators from "./modules/spaceright.js";
+import System from "./modules/system.js";
+import Utilities from "./modules/utils.js";
+// import spaceleft from "./modules/spaceleft.js";
+// import SystemResources from "./modules/resources.js"
 const { GLib } = imports.gi;
 
 // Define time formats
@@ -42,10 +43,10 @@ const simpleClock = () =>
   });
 const NormalOptionalWorkspaces = async () => {
   try {
-    return (await import("./normal/workspaces_hyprland.js")).default();
+    return (await import("./modules/workspaces_hyprland.js")).default();
   } catch {
     try {
-      return (await import("./normal/workspaces_sway.js")).default();
+      return (await import("./modules/workspaces_sway.js")).default();
     } catch {
       return null;
     }
@@ -54,23 +55,42 @@ const NormalOptionalWorkspaces = async () => {
 
 const FocusOptionalWorkspaces = async () => {
   try {
-    return (await import("./focus/workspaces_hyprland.js")).default();
+    return (await import("./modules/workspaces_hyprland_focus.js")).default();
   } catch {
     try {
-      return (await import("./focus/workspaces_sway.js")).default();
+      return (await import("./modules/workspaces_sway_focus.js")).default();
     } catch {
       return null;
     }
   }
 };
-
 export const Bar = async (monitor = 0) => {
+  const LoneModule = (children) =>
+    Widget.Box({
+      children: children,
+    });
   const SideModule = (children) =>
     Widget.Box({
       className: "bar-sidemodule",
       children: children,
     });
-  const normalBarContent = Widget.CenterBox({
+
+  // Function to attach corners to the bar when needed
+  const attachCorners = async (barContent) => {
+    if (userOptions.asyncGet().bar.position === "top") {
+      // Ensure the corner widgets are resolved before adding them to the bar content
+      barContent.startWidget = Widget.Box({
+        children: [
+          await BarCornerTopleft(monitor), // Attach top-left corner
+          await BarCornerTopright(monitor), // Attach top-right corner
+        ],
+      });
+    }
+    return barContent;
+  };
+
+  // Resolve the async widgets before passing to the bar content
+  const normalBarContent = await Widget.CenterBox({
     className: "bar-bg",
     setup: (self) => {
       const styleContext = self.get_style_context();
@@ -78,7 +98,6 @@ export const Bar = async (monitor = 0) => {
         "min-height",
         Gtk.StateFlags.NORMAL,
       );
-      // execAsync(['bash', '-c', `hyprctl keyword monitor ,addreserved,${minHeight},0,0,0`]).catch(print);
     },
     startWidget: await WindowTitle(monitor),
     centerWidget: Widget.Box({
@@ -94,9 +113,13 @@ export const Bar = async (monitor = 0) => {
     }),
     endWidget: Indicators(monitor),
   });
-  const metroBarContent = Widget.CenterBox({
+
+  // Apply corners based on the bar mode
+  const finalNormalBarContent = await attachCorners(normalBarContent);
+
+  const floatingBarContent = await Widget.CenterBox({
     className: "bar-floating",
-    css: " min-height:50px;",
+    css: " min-height:45px;",
     setup: (self) => {
       const styleContext = self.get_style_context();
       const minHeight = styleContext.get_property(
@@ -105,33 +128,34 @@ export const Bar = async (monitor = 0) => {
       );
     },
     startWidget: Widget.Box({
-      css: "margin-left:1.8rem;",
+      css: "margin-left:1.6rem;",
       className: "spacing-h-15",
       children: [
         await BatteryModule(),
         Widget.Box({
           css: "padding-left:0.7rem;",
-          // className: 'spacing-h-15',
           homogeneous: true,
           css: "margin-left:1rem;",
           children: [await FocusOptionalWorkspaces()],
         }),
         Widget.Box({
-          // children: [PowerDrawWidget()],
+          css: "margin-left:0.4rem;",
+          className: "spacing-h-15",
+          children: [
+            Utilities(),
+            // PowerDrawWidget()
+          ],
         }),
       ],
     }),
     centerWidget: Widget.Box({
-      // css:"margin-right:1.8rem;",
       children: [
         Widget.Box({
-          // css:"margin-right:-2.4rem;",
           children: [await MusicStuff()],
         }),
       ],
     }),
     endWidget: Widget.Box({
-      // css: "margin-right:0.2rem;",
       className: "spacing-h-5",
       children: [
         Widget.Box({
@@ -146,34 +170,35 @@ export const Bar = async (monitor = 0) => {
       ],
     }),
   });
-  const focusedBarContent = Widget.CenterBox({
-    className: "bar-bg-focus",
-    startWidget: Widget.Box({}),
+
+  const notchedBarContent = await Widget.CenterBox({
+    css: "min-height:44px;",
+    startWidget: Widget.Box({
+      homogeneous: false,
+      children: [await WindowTitle()],
+    }),
     centerWidget: Widget.Box({
-      className: "spacing-h-4",
+      className: "spacing-h-15 bar-notch",
       children: [
-        SideModule([]),
         Widget.Box({
-          homogeneous: true,
           children: [await FocusOptionalWorkspaces()],
         }),
-        SideModule([]),
       ],
     }),
-    endWidget: Widget.Box({}),
-    setup: (self) => {
-      self.hook(Battery, (self) => {
-        if (!Battery.available) return;
-        self.toggleClassName(
-          "bar-bg-focus-batterylow",
-          Battery.percent <= userOptions.asyncGet().battery.low,
-        );
-      });
-    },
+    endWidget: Widget.Box({
+      children: [
+        Widget.Box({
+          css: "margin-right:-1.5rem;",
+          children: [Indicators()],
+        }),
+        Widget.Box({
+          css: "padding-right:2rem;",
+          children: [simpleClock()],
+        }),
+      ],
+    }),
   });
-  const nothingContent = Widget.Box({
-    className: "bar-bg-nothing",
-  });
+
   return Widget.Window({
     monitor,
     name: `bar${monitor}`,
@@ -185,9 +210,9 @@ export const Bar = async (monitor = 0) => {
       transition: "slide_up_down",
       transitionDuration: userOptions.asyncGet().animations.durationLarge,
       children: {
-        normal: normalBarContent,
-        nothing: metroBarContent,
-        focus: metroBarContent,
+        normal: finalNormalBarContent, // Use resolved bar content with corners
+        nothing: floatingBarContent,
+        focus: notchedBarContent,
       },
       setup: (self) =>
         self.hook(currentShellMode, (self) => {
