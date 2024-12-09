@@ -164,72 +164,71 @@ const Utilities = () => {
   return box;
 };
 const BarBattery = () => {
-    let isRevealed = false;
-  
-    // Create Revealer only once
-    const percentageRevealer = Revealer({
-      transitionDuration: options.animations.durationLarge,
-      transition: "slide_right",
-      revealChild: false, // Initially hidden
-      child: Label({
-        className: "bar-batt-percent",
-        css: "margin-left: 6px;",
-        connections: [
-          [
-            Battery,
-            (label) => {
-              const chargingText = Battery.charging ? "Charging" : "Discharging";
-              label.label = `${Battery.percent}% (${chargingText})`; // Show percentage and charging status
-            },
-          ],
-        ],
-      }),
-    });
-  
-    const handleScroll = (direction) => {
-      Indicator.popup(1);
-      Brightness[0].screen_value += direction * BRIGHTNESS_STEP; // Adjust brightness for monitor 0
-    };
-  
-    return Box({
-      className: "spacing-h-10 bar-batt-txt",
-      children: [
-        EventBox({
-          onScrollUp: () => handleScroll(1), // Increase brightness
-          onScrollDown: () => handleScroll(-1), // Decrease brightness
-          onPrimaryClick: () => {
-            isRevealed = !isRevealed;
-            percentageRevealer.revealChild = isRevealed;
+  let isRevealed = false;
+
+  // Create Revealer only once
+  const percentageRevealer = Revealer({
+    transitionDuration: options.animations.durationLarge,
+    transition: "slide_right",
+    revealChild: false, // Initially hidden
+    child: Label({
+      className: "bar-batt-percent",
+      css: "margin-left: 6px;",
+      connections: [
+        [
+          Battery,
+          (label) => {
+            const chargingText = Battery.charging ? "Charging" : "Discharging";
+            label.label = `${Battery.percent}% (${chargingText})`; // Show percentage and charging status
           },
-          child: Box({
-            className: "bar-batt-container",
-            children: [
-              MaterialIcon("", "norm"),
-              Overlay({
-                child: Box({
-                  vpack: "center",
-                  className: "bar-batt",
-                  homogeneous: true,
-                  children: [MaterialIcon("", "small")],
-                  setup: (self) =>
-                    self.hook(Battery, (box) => {
-                      box.toggleClassName(
-                        "bar-batt-low",
-                        Battery.percent <= userOptions.asyncGet().battery.low,
-                      );
-                      box.toggleClassName("bar-batt-full", Battery.charged);
-                    }),
-                }),
-                overlays: [BarBatteryProgress()],
-              }),
-            ],
-          }),
-        }),
-        percentageRevealer, // Revealer added only once
+        ],
       ],
-    });
+    }),
+  });
+
+  const handleScroll = (direction) => {
+    Indicator.popup(1);
+    Brightness[0].screen_value += direction * BRIGHTNESS_STEP; // Adjust brightness for monitor 0
   };
-  
+
+  return Box({
+    className: "spacing-h-10 bar-batt-txt",
+    children: [
+      EventBox({
+        onScrollUp: () => handleScroll(1), // Increase brightness
+        onScrollDown: () => handleScroll(-1), // Decrease brightness
+        onPrimaryClick: () => {
+          isRevealed = !isRevealed;
+          percentageRevealer.revealChild = isRevealed;
+        },
+        child: Box({
+          className: "bar-batt-container",
+          children: [
+            MaterialIcon("", "norm"),
+            Overlay({
+              child: Box({
+                vpack: "center",
+                className: "bar-batt",
+                homogeneous: true,
+                children: [MaterialIcon("", "small")],
+                setup: (self) =>
+                  self.hook(Battery, (box) => {
+                    box.toggleClassName(
+                      "bar-batt-low",
+                      Battery.percent <= userOptions.asyncGet().battery.low,
+                    );
+                    box.toggleClassName("bar-batt-full", Battery.charged);
+                  }),
+              }),
+              overlays: [BarBatteryProgress()],
+            }),
+          ],
+        }),
+      }),
+      percentageRevealer, // Revealer added only once
+    ],
+  });
+};
 
 const BarGroup = ({ child }) =>
   Widget.Box({
