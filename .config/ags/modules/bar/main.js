@@ -13,6 +13,7 @@ import WindowTitle from "./normal/spaceleft.js";
 import Indicators from "./normal/spaceright.js";
 import System from "./normal/system.js";
 import Utilities from "./normal/utils.js";
+// import SystemResources from "./normal/resources.js"
 const { GLib } = imports.gi;
 
 // Define time formats
@@ -109,14 +110,17 @@ export const Bar = async (monitor = 0) => {
       children: [
         await BatteryModule(),
         Widget.Box({
+<<<<<<< Updated upstream
           css: "padding-left:0.7rem;",
           // className: 'spacing-h-15',
           homogeneous: true,
+=======
+          css: "margin-left:1rem;",
+>>>>>>> Stashed changes
           children: [await FocusOptionalWorkspaces()],
         }),
         Widget.Box({
-          css: "margin-left:0.3rem; ",
-          children: [PowerDrawWidget()],
+          // children: [PowerDrawWidget()],
         }),
       ],
     }),
