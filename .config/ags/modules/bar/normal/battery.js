@@ -32,6 +32,7 @@ const BarBatteryProgress = () => {
       percent <= options.battery.low,
     );
     circprog.toggleClassName("bar-batt-circprog-full", Battery.charged);
+    circprog.toggleClassName("bar-batt-charging", Battery.charging); // Add charging state class
   };
 
   return AnimatedCircProg({
@@ -82,13 +83,12 @@ const BarBattery = () => {
         child: Box({
           className: "bar-batt-container",
           children: [
-            MaterialIcon("", "norm"),
             Overlay({
               child: Box({
                 vpack: "center",
                 className: "bar-batt",
                 homogeneous: true,
-                children: [MaterialIcon("", "small")],
+                children: [MaterialIcon("", "large")],
                 setup: (self) =>
                   self.hook(Battery, (box) => {
                     box.toggleClassName(
@@ -96,6 +96,7 @@ const BarBattery = () => {
                       Battery.percent <= userOptions.asyncGet().battery.low,
                     );
                     box.toggleClassName("bar-batt-full", Battery.charged);
+                    box.toggleClassName("bar-batt-charging", Battery.charging); // Add charging state class
                   }),
               }),
               overlays: [BarBatteryProgress()],

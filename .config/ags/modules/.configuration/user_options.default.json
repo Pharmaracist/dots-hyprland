@@ -150,12 +150,24 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 5
+    "shown": 8
   },
   "dock": {
     "enabled": true,
     "hiddenThickness": 5,
-    "pinnedApps": ["zen-browser","spotube","github-desktop","Code","zeditor","firefox","nwg-look","Obisidian","steam","heroic-games-launcher", "org.gnome.Nautilus"],
+    "pinnedApps": [
+      "zen-browser",
+      "spotube",
+      "github-desktop",
+      "Code",
+      "zeditor",
+      "firefox",
+      "nwg-look",
+      "Obisidian",
+      "steam",
+      "heroic-games-launcher",
+      "org.gnome.Nautilus"
+    ],
     "layer": "top",
     "monitorExclusivity": true,
     "searchPinnedAppIcons": false,
