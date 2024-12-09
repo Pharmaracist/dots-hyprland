@@ -6,12 +6,18 @@ $bar_ws_width_focus_active: 6.045rem;
 @mixin bar-group-rounding {
     @include small-rounding;
 }
-
+.bar-floating {
+    background-color: $layer0;
+    @include elevation2;
+    @include anim-enter;
+    @include large-rounding;
+    margin: 8px 20px;
+}
 .bar-height {
     min-height: 2.727rem;
 }
-.prim-txt{
-    color:$secondary;
+.prim-txt {
+    color: $secondary;
 }
 .bar-bg {
     background-color: $layer0;
@@ -98,7 +104,6 @@ $bar_ws_width_focus_active: 6.045rem;
     min-width: 18.341rem;
 }
 
-
 .bar-ws-container {
     transition: 700ms cubic-bezier(0.1, 1, 0, 1);
 }
@@ -182,7 +187,6 @@ $bar_ws_width_focus_active: 6.045rem;
     background-color: $error;
     color: $errorContainer;
 }
-
 
 .bar-batt-low {
     background-color: $error;
@@ -341,7 +345,7 @@ $bar_ws_width_focus_active: 6.045rem;
     padding: 0.341rem;
 }
 
-.bar-space-button>box:first-child {
+.bar-space-button > box:first-child {
     @include full-rounding;
     padding: 0rem 0.682rem;
 }
@@ -352,7 +356,7 @@ $bar_ws_width_focus_active: 6.045rem;
     }
 }
 
-.bar-space-area-rightmost>box {
+.bar-space-area-rightmost > box {
     padding-right: 1.364rem;
 }
 

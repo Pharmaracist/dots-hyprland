@@ -95,8 +95,8 @@ export const Bar = async (monitor = 0) => {
     endWidget: Indicators(monitor),
   });
   const metroBarContent = Widget.CenterBox({
-    className: "bar-bg",
-    css: "min-height:45px;",
+    className: "bar-floating",
+    css: " min-height:50px;",
     setup: (self) => {
       const styleContext = self.get_style_context();
       const minHeight = styleContext.get_property(
@@ -110,13 +110,10 @@ export const Bar = async (monitor = 0) => {
       children: [
         await BatteryModule(),
         Widget.Box({
-<<<<<<< Updated upstream
           css: "padding-left:0.7rem;",
           // className: 'spacing-h-15',
           homogeneous: true,
-=======
           css: "margin-left:1rem;",
->>>>>>> Stashed changes
           children: [await FocusOptionalWorkspaces()],
         }),
         Widget.Box({
@@ -134,15 +131,17 @@ export const Bar = async (monitor = 0) => {
       ],
     }),
     endWidget: Widget.Box({
-      css: "margin-right:1.8rem;",
+      // css: "margin-right:0.2rem;",
+      className: "spacing-h-5",
       children: [
         Widget.Box({
-          css: "margin-right:-2.4rem;",
-          children: [await Indicators()],
-        }),
-
-        Widget.Box({
-          children: [simpleClock()],
+          children: [
+            await Indicators(),
+            Widget.Box({
+              css: "margin:0rem 1rem 0rem -1.4rem;",
+              children: [simpleClock()],
+            }),
+          ],
         }),
       ],
     }),
@@ -178,7 +177,7 @@ export const Bar = async (monitor = 0) => {
   return Widget.Window({
     monitor,
     name: `bar${monitor}`,
-    anchor: [userOptions.asyncGet().bar.position, "left", "right"],
+    anchor: [userOptions.asyncGet().bar.position, "right", "left"],
     exclusivity: "exclusive",
     visible: true,
     child: Widget.Stack({

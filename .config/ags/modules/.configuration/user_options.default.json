@@ -23,7 +23,7 @@
     "keyboardUseFlag": false,
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
-    "barRoundCorners": 1,
+    "barRoundCorners": 0,
     "fakeScreenRounding": 1
   },
   "apps": {
