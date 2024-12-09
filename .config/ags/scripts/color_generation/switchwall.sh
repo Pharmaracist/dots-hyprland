@@ -3,6 +3,7 @@
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 CONFIG_DIR="$XDG_CONFIG_HOME/ags"
 LINK_DIR="$HOME/.cache/ags/user/generated"
+LINK_PATH="$LINK_DIR/image_link"
 
 # Function to set the wallpaper
 switch() {
@@ -53,6 +54,13 @@ execute_custom_script() {
     fi
 }
 
+# Function to remove old symbolic link if it exists
+remove_old_link() {
+    if [ -L "$LINK_PATH" ]; then
+        rm -f "$LINK_PATH" >/dev/null 2>&1
+    fi
+}
+
 # Main Script Logic
 if [ "$1" == "--noswitch" ]; then
     imgpath=$(swww query | awk -F 'image: ' '{print $2}')
@@ -61,11 +69,14 @@ elif [ -n "$1" ]; then
     switch "$1"
     generate_colors "$1"
 
+    # Remove old symbolic link if it exists
+    remove_old_link
+
     # Extract the file extension from the image path
     img_extension="${1##*.}"
 
     # Create symbolic link for the image with the correct extension
-    ln -sf "$1" "$LINK_DIR/image_link.$img_extension" >/dev/null 2>&1
+    ln -sf "$1" "$LINK_PATH.$img_extension" >/dev/null 2>&1
 
     # Execute the custom script after processing
     execute_custom_script
@@ -73,7 +84,7 @@ else
     # Prompt user to select an image
     cd "$(xdg-user-dir PICTURES)" || exit 1
     imgpath=$(yad --width 1200 --height 800 --file --add-preview --large-preview --title="Choose wallpaper")
-    [ -n "$imgpath" ] && switch "$imgpath" && generate_colors "$imgpath" && ln -sf "$imgpath" "$LINK_DIR/image_link.${imgpath##*.}" >/dev/null 2>&1
+    [ -n "$imgpath" ] && switch "$imgpath" && generate_colors "$imgpath" && remove_old_link && ln -sf "$imgpath" "$LINK_PATH.${imgpath##*.}" >/dev/null 2>&1
 
     # Execute the custom script after processing
     execute_custom_script
