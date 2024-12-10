@@ -11,17 +11,13 @@ $bar_ws_width_focus_active: 6.045rem;
     @include elevation2;
     @include anim-enter;
     @include large-rounding;
-    margin: 10px 17px 2px;
+    margin: 8px 10px 0px;
 }
 
 .bar-notch {
     background-color: $layer0;
-    padding: 0.1rem 3.9rem;
-    border-radius: 0px 0px 3rem 3rem;
-    margin: 0rem;
-    /* border: 1.5px solid $outline;
-    border-top: none; */
-    /* border-color: #ffffff; */
+    padding: 0.2rem 2rem;
+    border-radius: 0px 0px 2rem 2rem;
 }
 .bar-height {
     min-height: 2.727rem;
@@ -185,7 +181,7 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .bar-bat-circprog {
     @include fluent_decel_long;
-    min-width: 0.34rem; // line width
+    min-width: 0.2rem; // line width
     min-height: 1.97rem;
     padding: 0rem;
     background-color: $battLayer2;
@@ -371,7 +367,10 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-wintitle-txt {
     color: $windowtitleOnLayer0;
 }
-
+.wintitle {
+    @include techfont;
+    font-size: 17px;
+}
 .bar-space-button {
     padding: 0.341rem;
 }

@@ -13,8 +13,10 @@ import WindowTitle from "./modules/spaceleft.js";
 import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
 import Utilities from "./modules/utils.js";
+import ClassWindow from "./modules/window_title.js";
 import { BarButton } from "./modules/simple_button.js";
 import { BarToggles } from "./modules/bar_toggles.js";
+import spaceleft from "./modules/spaceleft.js";
 // import spaceleft from "./modules/spaceleft.js";
 // import SystemResources from "./modules/resources.js"
 const { GLib } = imports.gi;
@@ -86,20 +88,6 @@ export const Bar = async (monitor = 0) => {
       children: children,
     });
 
-  // Function to attach corners to the bar when needed
-  const attachCorners = async (barContent) => {
-    if (userOptions.asyncGet().bar.position === "top") {
-      // Ensure the corner widgets are resolved before adding them to the bar content
-      barContent.startWidget = Widget.Box({
-        children: [
-          await BarCornerTopleft(monitor), // Attach top-left corner
-          await BarCornerTopright(monitor), // Attach top-right corner
-        ],
-      });
-    }
-    return barContent;
-  };
-
   // Resolve the async widgets before passing to the bar content
   const normalBarContent = await Widget.CenterBox({
     className: "bar-bg",
@@ -110,6 +98,7 @@ export const Bar = async (monitor = 0) => {
         Gtk.StateFlags.NORMAL,
       );
     },
+
     startWidget: await WindowTitle(monitor),
     centerWidget: Widget.Box({
       className: "spacing-h-4",
@@ -122,10 +111,21 @@ export const Bar = async (monitor = 0) => {
         SideModule([System()]),
       ],
     }),
-    endWidget: Indicators(monitor),
+    endWidget: Indicators(),
   });
+  const attachCorners = (barContent) => {
+    if (userOptions.asyncGet().bar.position === "top") {
+      // Ensure the corner widgets are resolved before adding them to the bar content
+      barContent.startWidget = Widget.Box({
+        children: [
+          BarCornerTopleft(), // Attach top-left corner
+          BarCornerTopright(), // Attach top-right corner
+        ],
+      });
+    }
+    return barContent;
+  };
 
-  // Apply corners based on the bar mode
   const finalNormalBarContent = await attachCorners(normalBarContent);
 
   const floatingBarContent = await Widget.CenterBox({
@@ -142,19 +142,16 @@ export const Bar = async (monitor = 0) => {
       css: "margin-left:1.6rem;",
       className: "spacing-h-15",
       children: [
-        // BarButton(),
         await BatteryModule(),
         Widget.Box({
-          css: "padding-left:0.7rem;",
-          homogeneous: true,
-          css: "margin-left:1rem;",
+          css: "padding-left:0.7rem; margin-right:0.7rem;",
           children: [await FocusOptionalWorkspaces()],
         }),
+        await ClassWindow(),
       ],
     }),
     centerWidget: Widget.Box({
-      css: "margin-left:0.4rem;",
-      className: "spacing-h-10",
+      className: "spacing-h-15",
       children: [Utilities(), BarToggles()],
     }),
     endWidget: Widget.Box({
@@ -164,7 +161,7 @@ export const Bar = async (monitor = 0) => {
           children: [
             await Indicators(),
             Widget.Box({
-              css: "margin:0rem 1rem 0rem -1.4rem;",
+              css: "margin:0rem 1.4rem 0rem -1.4rem;",
               children: [simpleClock()],
             }),
           ],
@@ -248,3 +245,4 @@ export const BarCornerTopright = (monitor = 0) =>
     ),
     setup: enableClickthrough,
   });
+// Function to attach corners to the bar when needed

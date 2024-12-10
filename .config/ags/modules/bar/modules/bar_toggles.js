@@ -22,8 +22,8 @@ export const MicIndicator = () =>
           transition: "slide_up_down",
           transitionDuration: userOptions.asyncGet().animations.durationSmall,
           children: {
-            true: MaterialIcon("mic_off", "norm"),
-            false: MaterialIcon("mic", "norm"),
+            true: MaterialIcon("mic_off", "large"),
+            false: MaterialIcon("mic", "large"),
           },
           setup: (self) =>
             self.hook(Audio, (stack) => {
@@ -46,8 +46,8 @@ export const SpeakerIndicator = () =>
           transition: "slide_up_down",
           transitionDuration: userOptions.asyncGet().animations.durationSmall,
           children: {
-            true: MaterialIcon("volume_off", "norm"),
-            false: MaterialIcon("volume_up", "norm"),
+            true: MaterialIcon("volume_off", "large"),
+            false: MaterialIcon("volume_up", "large"),
           },
           setup: (self) =>
             self.hook(Audio, (stack) => {

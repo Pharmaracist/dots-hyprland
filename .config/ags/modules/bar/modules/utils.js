@@ -14,7 +14,7 @@ const UtilButton = ({ name, icon, onClicked }) => {
         vpack: "center",
         tooltipText: name,
         onClicked: onClicked,
-        className: "icon-material sec-txt txt-norm",
+        className: "icon-material sec-txt txt-large",
         label: `${icon}`,
       }),
     );
@@ -33,6 +33,16 @@ const Utilities = () => {
     onClicked: () => App.toggleWindow("wallselect"),
   });
 
+  const chatBot = UtilButton({
+    name: getString("ChatGPT"),
+    icon: "smart_toy",
+    onClicked: () => Utils.execAsync(`firefox --new-window chatgpt.com`),
+  });
+  const obsidian = UtilButton({
+    name: getString("Notion"),
+    icon: "deployed_code",
+    onClicked: () => Utils.execAsync(`firefox --new-window notion.com`),
+  });
   const ags_tweaks = UtilButton({
     name: getString("Settings"),
     icon: "water_drop",
@@ -47,8 +57,10 @@ const Utilities = () => {
     hpack: "center",
     className: "spacing-h-10",
     children: [
+      obsidian,
       change_wallpaper_btn,
       ags_tweaks,
+      chatBot,
       UtilButton({
         name: getString("Screen snip"),
         icon: "screenshot_region",
