@@ -90,27 +90,27 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     padding: 0rem $rounding_medium;
 }
 
-.sidebar-navrail-btn>box>label {
+.sidebar-navrail-btn > box > label {
     @include full-rounding;
     @include menu_decel;
 }
 
-.sidebar-navrail-btn:hover>box>label:first-child,
-.sidebar-navrail-btn:focus>box>label:first-child {
+.sidebar-navrail-btn:hover > box > label:first-child,
+.sidebar-navrail-btn:focus > box > label:first-child {
     background-color: $layer1Hover;
 }
 
-.sidebar-navrail-btn:active>box>label:first-child {
+.sidebar-navrail-btn:active > box > label:first-child {
     background-color: $layer1Active;
 }
 
-.sidebar-navrail-btn-active>box>label:first-child {
+.sidebar-navrail-btn-active > box > label:first-child {
     background-color: $secondaryContainer;
     color: $onSecondaryContainer;
 }
 
-.sidebar-navrail-btn-active:hover>box>label:first-child,
-.sidebar-navrail-btn-active:focus>box>label:first-child {
+.sidebar-navrail-btn-active:hover > box > label:first-child,
+.sidebar-navrail-btn-active:focus > box > label:first-child {
     background-color: mix($secondaryContainer, $layer1Hover, 90%);
     color: mix($onSecondaryContainer, $layer1Hover, 90%);
 }
@@ -289,7 +289,9 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
 }
 
 .sidebar-todo-crosser {
-    transition: margin 200ms cubic-bezier(0.1, 1, 0, 1), background-color 0ms;
+    transition:
+        margin 200ms cubic-bezier(0.1, 1, 0, 1),
+        background-color 0ms;
     min-width: 0rem;
 }
 
@@ -513,7 +515,7 @@ $colorpicker_rounding: 0.341rem;
 }
 
 .sidebar-chat-wrapper-extended {
-    min-height: 7.500rem;
+    min-height: 7.5rem;
 }
 
 .sidebar-chat-send {
@@ -576,7 +578,13 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-chat-message-skeletonline-offset0 {
     background-repeat: no-repeat;
-    background: linear-gradient(to right, $layer3 0%, $skeleton-accent 25%, $layer3 50%, $layer3 100%);
+    background: linear-gradient(
+        to right,
+        $layer3 0%,
+        $skeleton-accent 25%,
+        $layer3 50%,
+        $layer3 100%
+    );
     background-size: 500% 500%;
     animation: sidebar-chat-message-skeletonline-anim 2s linear;
     animation-iteration-count: infinite;
@@ -584,7 +592,13 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-chat-message-skeletonline-offset1 {
     background-repeat: no-repeat;
-    background: linear-gradient(to right, $layer3 0%, $layer3 50%, $skeleton-accent 75%, $layer3 100%);
+    background: linear-gradient(
+        to right,
+        $layer3 0%,
+        $layer3 50%,
+        $skeleton-accent 75%,
+        $layer3 100%
+    );
     background-size: 500% 500%;
     animation: sidebar-chat-message-skeletonline-anim 2s linear;
     animation-iteration-count: infinite;
@@ -593,7 +607,14 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-chat-message-skeletonline-offset2 {
     margin-right: 5.795rem;
     background-repeat: no-repeat;
-    background: linear-gradient(to right, $layer3 0%, $layer3 25%, $skeleton-accent 50%, $layer3 75%, $layer3 100%);
+    background: linear-gradient(
+        to right,
+        $layer3 0%,
+        $layer3 25%,
+        $skeleton-accent 50%,
+        $layer3 75%,
+        $layer3 100%
+    );
     background-size: 500% 500%;
     animation: sidebar-chat-message-skeletonline-anim 2s linear;
     animation-iteration-count: infinite;
@@ -929,7 +950,11 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 }
 
 .sidebar-centermodules-scrollgradient-bottom {
-    background: linear-gradient(to top, $layer1 0%, transparentize($layer1, 1) 1.023rem);
+    background: linear-gradient(
+        to top,
+        $layer1 0%,
+        transparentize($layer1, 1) 1.023rem
+    );
 }
 
 .sidebar-scrollable {

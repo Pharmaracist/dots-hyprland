@@ -16,15 +16,6 @@ const CUSTOM_MODULE_MIDDLECLICK_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/
 const CUSTOM_MODULE_SCROLLUP_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-scrollup.sh`;
 const CUSTOM_MODULE_SCROLLDOWN_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-scrolldown.sh`;
 
-function trimTrackTitle(title) {
-  if (!title) return getString("No title");
-  const cleanPatterns = [/【[^】]*】/, " [FREE DOWNLOAD]"];
-  return cleanPatterns.reduce(
-    (str, pattern) => str.replace(pattern, ""),
-    title,
-  );
-}
-
 const BarGroup = ({ child }) =>
   Box({
     className: "bar-group-margin bar-sides",
@@ -172,12 +163,12 @@ export default () => {
     hexpand: true,
     className: "txt-smallie bar-music-txt",
     truncate: "end",
-    maxWidthChars: 35,
+    maxWidthChars: 26,
     setup: (self) => {
       const update = () => {
         const mpris = Mpris.getPlayer("");
         if (mpris) {
-          self.label = `${trimTrackTitle(mpris.trackTitle)} • ${mpris.trackArtists.join(", ")}`;
+          self.label = `${mpris.trackTitle}`;
         } else {
           self.label = getString("No media");
         }
@@ -245,14 +236,6 @@ export default () => {
           Box({
             className: "spacing-h-10 margin-left-10",
             children: [
-              BarResource(
-                getString("Swap Usage"),
-                "swap_horiz",
-                `LANG=C free | awk '/^Swap/ {if ($2 > 0) printf("%.2f\\n", ($3/$2) * 100); else print "0";}'`,
-                "bar-swap-circprog",
-                "bar-swap-txt",
-                "bar-swap-icon",
-              ),
               BarResource(
                 getString("CPU Usage"),
                 "settings_motion_mode",

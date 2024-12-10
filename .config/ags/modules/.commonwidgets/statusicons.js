@@ -60,7 +60,6 @@ export const NotificationIndicator = (notifCenterName = "sideright") => {
   });
   return widget;
 };
-
 export const BluetoothIndicator = () =>
   Widget.Stack({
     transition: "slide_up_down",
@@ -251,8 +250,8 @@ export const StatusIcons = (props = {}, monitor = 0) =>
           children: [NotificationIndicator()],
         }),
         NetworkIndicator(),
-        BluetoothIndicator(),
         BluetoothDevices(),
+        BluetoothIndicator(),
       ],
     }),
   });

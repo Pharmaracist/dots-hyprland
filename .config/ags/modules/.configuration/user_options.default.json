@@ -107,7 +107,7 @@
     "pages": {
       "order": ["apis", "tools", "github"],
       "apis": {
-        "order": ["gemini","gpt", "translater"]
+        "order": ["gemini", "gpt", "translater"]
       }
     },
     "translater": {
@@ -140,9 +140,9 @@
   },
   "time": {
     "format": "%I:%M",
-    "interval": 5000,
+    "interval": 1000,
     "dateFormatLong": "%A, %d/%m",
-    "dateInterval": 5000,
+    "dateInterval": 500000,
     "dateFormat": "%d/%m"
   },
   "weather": {
@@ -150,7 +150,7 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 8
+    "shown": 5
   },
   "dock": {
     "enabled": true,
@@ -239,7 +239,7 @@
     }
   },
   "bar": {
-    "modes": ["nothing"],
+    "modes": ["mode2"],
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }

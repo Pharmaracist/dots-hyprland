@@ -21,7 +21,22 @@ const UtilButton = ({ name, icon, onClicked }) => {
   }
   return utilButtonCache.get(key);
 };
-
+const NerdButton = ({ name, icon, onClicked }) => {
+  const key = `${name}-${icon}`;
+  if (!utilButtonCache.has(key)) {
+    utilButtonCache.set(
+      key,
+      Button({
+        vpack: "center",
+        tooltipText: name,
+        onClicked: onClicked,
+        className: "icon-nerd sec-txt txt-title",
+        label: `${icon}`,
+      }),
+    );
+  }
+  return utilButtonCache.get(key);
+};
 const Utilities = () => {
   let unsubscriber = () => {};
   let wallpaperFolder = "";
@@ -38,10 +53,11 @@ const Utilities = () => {
     icon: "smart_toy",
     onClicked: () => Utils.execAsync(`firefox --new-window chatgpt.com`),
   });
-  const obsidian = UtilButton({
-    name: getString("Notion"),
-    icon: "deployed_code",
-    onClicked: () => Utils.execAsync(`firefox --new-window notion.com`),
+  const obsidian = NerdButton({
+    name: getString("GitHub"),
+    icon: "\uea84",
+    onClicked: () =>
+      Utils.execAsync(`firefox --new-window github.com/pharmaracist`),
   });
   const ags_tweaks = UtilButton({
     name: getString("Settings"),
@@ -99,5 +115,7 @@ const Utilities = () => {
   });
   return box;
 };
-
-export default Utilities;
+export default () =>
+  Widget.Box({
+    children: [Utilities()],
+  });

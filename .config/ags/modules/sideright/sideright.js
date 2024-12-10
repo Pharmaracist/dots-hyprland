@@ -118,8 +118,8 @@ const timeRow = Box({
       },
     }),
     Widget.Box({ hexpand: true }),
-    ModuleReloadIcon({ hpack: "end" }),
-    ModuleSettingsIcon({ hpack: "end" }),
+    // ModuleReloadIcon({ hpack: "end" }),
+    // ModuleSettingsIcon({ hpack: "end" }),
     ModulePowerIcon({ hpack: "end" }),
   ],
 });
@@ -169,7 +169,8 @@ export default () =>
           Box({
             vertical: true,
             className: "spacing-v-5",
-            children: [timeRow, togglesBox],
+            children: [timeRow],
+            //togglesBox
           }),
           Box({
             className: "sidebar-group",

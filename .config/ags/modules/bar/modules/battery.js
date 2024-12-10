@@ -13,7 +13,7 @@ const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
 
-const BRIGHTNESS_STEP = 0.05;
+const BRIGHTNESS_STEP = 0.01;
 
 const batteryProgressCache = new Map();
 const BarBatteryProgress = () => {

@@ -12,12 +12,14 @@ $bar_ws_width_focus_active: 6.045rem;
     @include anim-enter;
     @include large-rounding;
     margin: 8px 10px 0px;
+    border-radius: 1.37rem;
+    -gtk-outline-radius: 10rem;
 }
 
 .bar-notch {
     background-color: $layer0;
-    padding: 0.2rem 2rem;
-    border-radius: 0px 0px 2rem 2rem;
+    padding: 0.3rem 1.1rem;
+    border-radius: 0px 0px 1.5rem 1.5rem;
 }
 .bar-height {
     min-height: 2.727rem;
@@ -414,8 +416,8 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-statusicons-active {
-    background-color: $layer0Active;
-    color: $onLayer0Active;
+    /* background-color: $layer0Active;
+    color: $onLayer0Active; */
 }
 
 .bar-util-btn {
