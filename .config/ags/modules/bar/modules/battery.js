@@ -57,7 +57,7 @@ const BarBattery = () => {
         [
           Battery,
           (label) => {
-            const chargingText = Battery.charging ? "" : " ";
+            const chargingText = Battery.charging ? "\uf0e7" : " ";
             label.label = ` ${chargingText}  ${Battery.percent}%`;
           },
         ],
@@ -70,7 +70,7 @@ const BarBattery = () => {
   };
 
   return Box({
-    className: "spacing-h-10 prim-txt txt-norm ",
+    className: "spacing-h-10 sec-txt txt-norm ",
     children: [
       EventBox({
         onScrollUp: () => handleScroll(1), // Increase brightness

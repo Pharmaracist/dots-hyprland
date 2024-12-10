@@ -6,11 +6,12 @@ const { Box, Label, Button, Overlay, Revealer, Scrollable, Stack, EventBox } =
 const { exec, execAsync } = Utils;
 // Define the button component
 export const BarButton = ({
-  label = "power", // Material icon name
-  onPrimaryClick = () => Utils.execAsync(`obsidian`),
+  label = "\udb82\udcc7 ",
+  onPrimaryClick = () => Utils.App.toggleWindow("overview"),
 } = {}) =>
   Widget.EventBox({
-    className: "icon-material prim-txt txt-larger",
+    // css: "min-height:30px;min-width:30px;",
+    className: "txt-hugerass icon-nerd prim-txt",
     child: Widget.Label({
       label,
     }),

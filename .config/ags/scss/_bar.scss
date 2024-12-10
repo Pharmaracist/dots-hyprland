@@ -11,13 +11,13 @@ $bar_ws_width_focus_active: 6.045rem;
     @include elevation2;
     @include anim-enter;
     @include large-rounding;
-    margin: 6px 20px 4px;
+    margin: 10px 17px 2px;
 }
 
 .bar-notch {
-    background-color: $black;
-    padding: 0.8rem 3rem;
-    border-radius: 0px 0px 1.6rem 1.6rem;
+    background-color: $layer0;
+    padding: 0.1rem 3.9rem;
+    border-radius: 0px 0px 3rem 3rem;
     margin: 0rem;
     /* border: 1.5px solid $outline;
     border-top: none; */
@@ -26,8 +26,12 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-height {
     min-height: 2.727rem;
 }
-.prim-txt {
+.sec-txt {
     color: $secondary;
+}
+
+.prim-txt {
+    color: $primary;
 }
 .bar-bg {
     background-color: $layer0;

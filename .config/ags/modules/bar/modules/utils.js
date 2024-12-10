@@ -1,6 +1,7 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 const { Box, Button } = Widget;
+const { GLib } = imports.gi;
 
 const utilButtonCache = new Map();
 
@@ -13,7 +14,7 @@ const UtilButton = ({ name, icon, onClicked }) => {
         vpack: "center",
         tooltipText: name,
         onClicked: onClicked,
-        className: "icon-material prim-txt txt-norm",
+        className: "icon-material sec-txt txt-norm",
         label: `${icon}`,
       }),
     );
@@ -32,11 +33,22 @@ const Utilities = () => {
     onClicked: () => App.toggleWindow("wallselect"),
   });
 
+  const ags_tweaks = UtilButton({
+    name: getString("Settings"),
+    icon: "water_drop",
+    onClicked: () =>
+      Utils.execAsync([
+        "bash",
+        "-c",
+        `${GLib.get_home_dir()}/.local/bin/ags-tweaks`,
+      ]),
+  });
   const box = Box({
     hpack: "center",
     className: "spacing-h-10",
     children: [
       change_wallpaper_btn,
+      ags_tweaks,
       UtilButton({
         name: getString("Screen snip"),
         icon: "screenshot_region",
@@ -46,15 +58,7 @@ const Utilities = () => {
           ).catch(print);
         },
       }),
-      UtilButton({
-        name: getString("Record"),
-        icon: "radio_button_checked",
-        onClicked: () => {
-          Utils.execAsync(`${App.configDir}/scripts/record-script.sh`).catch(
-            print,
-          );
-        },
-      }),
+
       UtilButton({
         name: getString("Color picker"),
         icon: "colorize",

@@ -130,7 +130,7 @@ export const Bar = async (monitor = 0) => {
 
   const floatingBarContent = await Widget.CenterBox({
     className: "bar-floating ",
-    css: " min-height:50px;",
+    css: " min-height:2.9rem;",
     setup: (self) => {
       const styleContext = self.get_style_context();
       const minHeight = styleContext.get_property(
@@ -142,6 +142,7 @@ export const Bar = async (monitor = 0) => {
       css: "margin-left:1.6rem;",
       className: "spacing-h-15",
       children: [
+        // BarButton(),
         await BatteryModule(),
         Widget.Box({
           css: "padding-left:0.7rem;",
@@ -149,19 +150,12 @@ export const Bar = async (monitor = 0) => {
           css: "margin-left:1rem;",
           children: [await FocusOptionalWorkspaces()],
         }),
-        Widget.Box({
-          css: "margin-left:0.4rem;",
-          className: "spacing-h-10",
-          children: [Utilities(), BarToggles()],
-        }),
       ],
     }),
     centerWidget: Widget.Box({
-      children: [
-        Widget.Box({
-          children: [await MusicStuff()],
-        }),
-      ],
+      css: "margin-left:0.4rem;",
+      className: "spacing-h-10",
+      children: [Utilities(), BarToggles()],
     }),
     endWidget: Widget.Box({
       className: "spacing-h-5",
@@ -180,28 +174,21 @@ export const Bar = async (monitor = 0) => {
   });
 
   const notchedBarContent = await Widget.CenterBox({
-    css: "min-height:44px;",
-    startWidget: Widget.Box({
-      homogeneous: false,
-      children: [await WindowTitle()],
-    }),
+    css: "min-height:3rem;min-width:1200px;",
+    startWidget: await WindowTitle(),
     centerWidget: Widget.Box({
       className: "spacing-h-15 bar-notch",
       children: [
-        Widget.Box({
-          children: [await FocusOptionalWorkspaces()],
-        }),
+        await Music(),
+        await NormalOptionalWorkspaces(),
+        await System(),
       ],
     }),
     endWidget: Widget.Box({
       children: [
         Widget.Box({
-          css: "margin-right:-1.5rem;",
+          // css: "margin-right:-1.5rem;",
           children: [Indicators()],
-        }),
-        Widget.Box({
-          css: "padding-right:2rem;",
-          children: [simpleClock()],
         }),
       ],
     }),

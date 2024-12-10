@@ -66,7 +66,7 @@ export const BarToggles = (props = {}, monitor = 0) =>
       className: "bar-button",
       children: [
         Widget.Box({
-          className: "spacing-h-10 prim-txt ",
+          className: "spacing-h-10 sec-txt ",
           children: [
             // optionalKeyboardLayoutInstances[monitor],
             MicIndicator(),
