@@ -107,7 +107,7 @@
     "pages": {
       "order": ["apis", "tools", "github"],
       "apis": {
-        "order": ["gpt", "translater"]
+        "order": ["gemini","gpt", "translater"]
       }
     },
     "translater": {
@@ -150,7 +150,7 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 4
+    "shown": 8
   },
   "dock": {
     "enabled": true,
@@ -159,7 +159,7 @@
       "zen-browser",
       "spotube",
       "github-desktop",
-      "Code",
+      "visual-studio-code",
       "zeditor",
       "firefox",
       "nwg-look",
