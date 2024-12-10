@@ -111,16 +111,16 @@ export const Bar = async (monitor = 0) => {
         SideModule([System()]),
       ],
     }),
-    endWidget: Indicators(),
+    endWidget: Widget.Box({
+      css: "margin-right:1rem",
+      children: [Indicators()],
+    }),
   });
   const attachCorners = (barContent) => {
     if (userOptions.asyncGet().bar.position === "top") {
       // Ensure the corner widgets are resolved before adding them to the bar content
       barContent.startWidget = Widget.Box({
-        children: [
-          BarCornerTopleft(), // Attach top-left corner
-          BarCornerTopright(), // Attach top-right corner
-        ],
+        children: [BarCornerTopleft(), BarCornerTopright()],
       });
     }
     return barContent;
@@ -161,7 +161,7 @@ export const Bar = async (monitor = 0) => {
           children: [
             await Indicators(),
             Widget.Box({
-              css: "margin:0rem 1.4rem 0rem -1.4rem;",
+              css: "margin:0rem 1.4rem 0rem -1rem;",
               children: [simpleClock()],
             }),
           ],
@@ -171,7 +171,7 @@ export const Bar = async (monitor = 0) => {
   });
 
   const notchedBarContent = await Widget.CenterBox({
-    css: "min-height:3rem;min-width:1200px;",
+    css: "min-height:3rem",
     startWidget: await WindowTitle(),
     centerWidget: Widget.Box({
       className: "spacing-h-15 bar-notch",
@@ -184,7 +184,7 @@ export const Bar = async (monitor = 0) => {
     endWidget: Widget.Box({
       children: [
         Widget.Box({
-          // css: "margin-right:-1.5rem;",
+          css: "margin-right:1.2rem;",
           children: [Indicators()],
         }),
       ],
