@@ -24,7 +24,7 @@
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
-    "fakeScreenRounding": 1
+    "fakeScreenRounding": 0
   },
   "apps": {
     "bluetooth": "blueberry",
@@ -150,7 +150,8 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 5
+    "shown": 8,
+    "focus": 4
   },
   "dock": {
     "enabled": true,
