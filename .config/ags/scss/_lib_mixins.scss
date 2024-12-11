@@ -78,7 +78,9 @@ $rounding_large: 1.705rem;
 @mixin actiontext {
     color: $actiontext;
 }
-
+@mixin numbertext {
+    font-family: Bebas Neue;
+}
 $elevation_margin: 0.576rem;
 
 @mixin elevation2 {

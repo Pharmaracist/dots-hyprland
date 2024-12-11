@@ -6,6 +6,28 @@
 @mixin bg-textshadow {
     // text-shadow: mix($shadow, $secondaryContainer, 50%) 1px 0px 3px;
 }
+.quote-positioner {
+    margin: 20px; /* Adjust spacing from the edges */
+}
+
+.quote-widget {
+    margin: 5rem -115rem 0rem 0rem;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.quote-text {
+    @include titlefont;
+    @include bg-textshadow;
+    font-size: 2.795rem;
+    color: $onLayer0;
+}
+
+.quote-author {
+    font-size: 18px;
+    color: $onLayer0;
+    margin-top: 5px;
+}
 
 .bg-time-box {
     @include large-rounding;
@@ -14,14 +36,14 @@
 }
 
 .bg-time-clock {
-    @include titlefont;
+    @include numbertext;
     @include bg-textshadow;
-    font-size: 5.795rem;
-    color: $onLayer0;
+    font-size: 8.795rem;
+    color: $windowtitleOnLayer0;
 }
 
 .bg-time-date {
-    @include titlefont;
+    @include numbertext;
     @include bg-textshadow;
     font-size: 2.591rem;
     color: $onLayer0;

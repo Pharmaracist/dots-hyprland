@@ -17,7 +17,7 @@ import {
   BarCornerTopright,
 } from "./modules/bar/main.js";
 // import Cheatsheet from "./modules/cheatsheet/main.js";
-// import DesktopBackground from "./modules/desktopbackground/main.js";
+import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
 import Corner from "./modules/screencorners/main.js";
 // import Crosshair from './modules/crosshair/main.js';
@@ -47,7 +47,7 @@ handleStyles(true);
 startBatteryWarningService().catch(print);
 
 const Windows = () => [
-  // forMonitors(DesktopBackground),
+  DesktopBackground(),
   // forMonitors(Crosshair),
   Overview(),
   forMonitors(Indicator),
