@@ -64,4 +64,4 @@ export default () =>
     child: Widget.Box({
       children: [BarClock(), musicRevealer],
     }),
-  });// thats a clock module for ags bar i want to make a module that shows battery wattage
+  }); // thats a clock module for ags bar i want to make a module that shows battery wattage
