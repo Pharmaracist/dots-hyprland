@@ -14,7 +14,7 @@ const ClassWindow = async () => {
     ).default;
 
     const topLabel = Widget.Label({
-      className: "wintitle sec-txt txt-semibold",
+      className: "wintitle  txt-norm",
       setup: (self) =>
         self.hook(Hyprland.active.client, () => {
           self.label = Hyprland.active.client.class || DEFAULT_WORKSPACE_LABEL;

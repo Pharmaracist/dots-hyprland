@@ -37,7 +37,8 @@ const BarResource = (
 
   // Create a Revealer to handle the sliding effect of the resource label
   const detailRevealer = Revealer({
-    transitionDuration: 100, // Adjust this value for the speed of the slide
+    transitionDuration: 100,
+    css: "padding-left:5px", // Adjust this value for the speed of the slide
     transition: "slide_right", // Slide to the right on reveal
     revealChild: true,
     child: resourceLabel, // The resource label is the child of the revealer
@@ -49,7 +50,7 @@ const BarResource = (
     children: [
       Button({
         child: Box({
-          className: `spacing-h-4 ${textClassName}`,
+          className: `spacing-h-5 ${textClassName}`,
           children: [
             Box({
               homogeneous: true,
@@ -96,6 +97,7 @@ const BarResource = (
 const SystemResources = () =>
   BarGroup({
     child: Box({
+      className: "spacing-h-10 margin-rl-5",
       children: [
         BarResource(
           "RAM Usage",
@@ -105,19 +107,14 @@ const SystemResources = () =>
           "bar-ram-txt",
           "bar-ram-icon",
         ),
-        Box({
-          className: "spacing-h-10 margin-left-10",
-          children: [
-            BarResource(
-              "CPU Usage",
-              "settings_motion_mode",
-              `LANG=C top -bn1 | grep Cpu | sed 's/\\,/\\./g' | awk '{print $2}'`,
-              "bar-cpu-circprog",
-              "bar-cpu-txt",
-              "bar-cpu-icon",
-            ),
-          ],
-        }),
+        BarResource(
+          "CPU Usage",
+          "settings_motion_mode",
+          `LANG=C top -bn1 | grep Cpu | sed 's/\\,/\\./g' | awk '{print $2}'`,
+          "bar-cpu-circprog",
+          "bar-cpu-txt",
+          "bar-cpu-icon",
+        ),
       ],
     }),
   });

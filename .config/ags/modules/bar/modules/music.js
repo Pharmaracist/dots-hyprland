@@ -15,14 +15,14 @@ export default () =>
         Label({
           className: "bar-music-txt",
           truncate: "end",
-          maxWidthChars: 80,
+          maxWidthChars: 100,
           setup: (self) => {
             const update = () => {
               const mpris = Mpris.getPlayer(""); // Get active player
               if (mpris && mpris.trackTitle) {
                 self.label = `${mpris.trackTitle}`;
               } else {
-                self.label = "     "; // Fallback text
+                self.label = ""; // Fallback text
               }
             };
             self.hook(Mpris, update, "player-changed");

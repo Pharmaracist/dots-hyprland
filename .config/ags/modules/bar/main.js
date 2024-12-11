@@ -3,21 +3,19 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import { currentShellMode } from "../../variables.js";
 import { RoundedCorner } from "../.commonwidgets/cairo_roundedcorner.js";
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
-import { BarToggles } from "./modules/bar_toggles.js";
 import BatteryModule from "./modules/battery.js";
+import BarClock from "./modules/clock.js";
 import Music from "./modules/mixed.js";
 import MusicStuff from "./modules/music.js";
+import PowerDrawWidget from "./modules/powerdraw.js";
+import { BarButton } from "./modules/simple_button.js";
 import simpleClock from "./modules/simple_clock.js";
 import WindowTitle from "./modules/spaceleft.js";
 import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
 import Shortcuts from "./modules/utils.js";
 import ClassWindow from "./modules/window_title.js";
-import PowerDrawWidget from "./modules/powerdraw.js";
-import { BarButton } from "./modules/simple_button.js";
-import BarClock from "./modules/clock.js";
 // import spaceleft from "./modules/spaceleft.js";
-import SystemResources from "./modules/resources.js";
 
 const NormalOptionalWorkspaces = async () => {
   try {
@@ -91,7 +89,6 @@ export const Bar = async (monitor = 0) => {
           className: "margin-rl-15",
           children: [await FocusOptionalWorkspaces()],
         }),
-        await Shortcuts(),
       ],
     }),
     centerWidget: Widget.Box({
@@ -114,6 +111,32 @@ export const Bar = async (monitor = 0) => {
               ],
             }),
           ],
+        }),
+      ],
+    }),
+  });
+  const hangedBarContent = await Widget.CenterBox({
+    className: "bar-hang",
+    css: "min-height:3rem;",
+    startWidget: Widget.Box({
+      className: "start-widget",
+      children: [
+        await BatteryModule(),
+        Widget.Box({
+          className: "margin-rl-15",
+          children: [await FocusOptionalWorkspaces()],
+        }),
+        await ClassWindow(),
+      ],
+    }),
+    centerWidget: Widget.Box({
+      children: [BarClock()],
+    }),
+    endWidget: Widget.Box({
+      className: "end-widget",
+      children: [
+        Widget.Box({
+          children: [await Indicators()],
         }),
       ],
     }),
@@ -168,6 +191,9 @@ export const Bar = async (monitor = 0) => {
       ],
     }),
   });
+  const nothingContent = Widget.Box({
+    className: "bar-bg-nothing",
+  });
 
   return Widget.Window({
     monitor,
@@ -184,7 +210,8 @@ export const Bar = async (monitor = 0) => {
         mode2: floatingBarContent,
         mode3: notchedBarContent,
         mode4: minimalBarContent,
-        mode5: normalBarContent,
+        mode5: nothingContent,
+        mode6: hangedBarContent,
       },
       setup: (self) =>
         self.hook(currentShellMode, (self) => {
