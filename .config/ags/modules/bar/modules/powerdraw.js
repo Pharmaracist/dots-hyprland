@@ -51,7 +51,7 @@ const PowerDrawWidget = () => {
   // Initial fetch
   updatePowerDraw();
 
-  return Box({
+  return Widget.Box({
     className: "power-draw-widget bar-util", // Added class name to the Box widget
     children: [label],
   });

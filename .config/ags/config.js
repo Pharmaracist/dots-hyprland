@@ -9,7 +9,7 @@ import {
   firstRunWelcome,
   startBatteryWarningService,
 } from "./services/messages.js";
-import { startAutoDarkModeService } from "./services/darkmode.js";
+//import { startAutoDarkModeService } from "./services/darkmode.js";
 // Widgets
 import {
   Bar,
@@ -17,7 +17,7 @@ import {
   BarCornerTopright,
 } from "./modules/bar/main.js";
 // import Cheatsheet from "./modules/cheatsheet/main.js";
-import DesktopBackground from "./modules/desktopbackground/main.js";
+// import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
 import Corner from "./modules/screencorners/main.js";
 // import Crosshair from './modules/crosshair/main.js';
@@ -42,12 +42,12 @@ function forMonitorsAsync(widget) {
 
 // Start stuff
 handleStyles(true);
-startAutoDarkModeService().catch(print);
-firstRunWelcome().catch(print);
+// startAutoDarkModeService().catch(print);
+//ssfirstRunWelcome().catch(print);
 startBatteryWarningService().catch(print);
 
 const Windows = () => [
-  forMonitors(DesktopBackground),
+  // forMonitors(DesktopBackground),
   // forMonitors(Crosshair),
   Overview(),
   forMonitors(Indicator),
@@ -71,7 +71,7 @@ const Windows = () => [
   Wallselect(),
 ];
 
-const CLOSE_ANIM_TIME = 180; // Longer than actual anim time to make sure widgets animate fully
+const CLOSE_ANIM_TIME = 0; // Longer than actual anim time to make sure widgets animate fully
 const closeWindowDelays = {}; // For animations
 for (let i = 0; i < (Gdk.Display.get_default()?.get_n_monitors() || 1); i++) {
   closeWindowDelays[`osk${i}`] = CLOSE_ANIM_TIME;

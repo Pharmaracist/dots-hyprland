@@ -13,6 +13,7 @@ import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
 import Utilities from "./modules/utils.js";
 import ClassWindow from "./modules/window_title.js";
+import PowerDrawWidget from "./modules/powerdraw.js";
 // import { BarButton } from "./modules/simple_button.js";
 // import spaceleft from "./modules/spaceleft.js";
 // import SystemResources from "./modules/resources.js"
@@ -77,7 +78,7 @@ export const Bar = async (monitor = 0) => {
           className: "margin-rl-15",
           children: [await FocusOptionalWorkspaces()],
         }),
-        await ClassWindow(),
+        await PowerDrawWidget(),
       ],
     }),
     centerWidget: Widget.Box({
