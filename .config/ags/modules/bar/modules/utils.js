@@ -37,7 +37,7 @@ const NerdButton = ({ name, icon, onClicked }) => {
   }
   return utilButtonCache.get(key);
 };
-const Utilities = () => {
+const Shortcuts = () => {
   let unsubscriber = () => {};
   let wallpaperFolder = "";
   let status = true;
@@ -117,5 +117,5 @@ const Utilities = () => {
 };
 export default () =>
   Widget.Box({
-    children: [Utilities()],
+    children: [Shortcuts()],
   });

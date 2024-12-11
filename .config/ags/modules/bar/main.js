@@ -11,12 +11,14 @@ import simpleClock from "./modules/simple_clock.js";
 import WindowTitle from "./modules/spaceleft.js";
 import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
-import Utilities from "./modules/utils.js";
+import Shortcuts from "./modules/utils.js";
 import ClassWindow from "./modules/window_title.js";
 import PowerDrawWidget from "./modules/powerdraw.js";
-// import { BarButton } from "./modules/simple_button.js";
+import { BarButton } from "./modules/simple_button.js";
+import BarClock from "./modules/clock.js";
 // import spaceleft from "./modules/spaceleft.js";
-// import SystemResources from "./modules/resources.js"
+import SystemResources from "./modules/resources.js";
+
 const NormalOptionalWorkspaces = async () => {
   try {
     return (await import("./modules/workspaces_hyprland.js")).default();
@@ -39,6 +41,17 @@ const FocusOptionalWorkspaces = async () => {
     }
   }
 };
+
+const separator = () =>
+  Widget.Box({
+    vpack: "center",
+    className: "margin-rl-10 sec-txt txt-norm",
+    children: [
+      Widget.Label({
+        label: "|",
+      }),
+    ],
+  });
 export const Bar = async (monitor = 0) => {
   const SideModule = (children) =>
     Widget.Box({
@@ -63,7 +76,7 @@ export const Bar = async (monitor = 0) => {
       ],
     }),
     endWidget: Widget.Box({
-      css: "margin-right:1rem",
+      className: "end-widget",
       children: [Indicators()],
     }),
   });
@@ -78,7 +91,7 @@ export const Bar = async (monitor = 0) => {
           className: "margin-rl-15",
           children: [await FocusOptionalWorkspaces()],
         }),
-        await PowerDrawWidget(),
+        await Shortcuts(),
       ],
     }),
     centerWidget: Widget.Box({
@@ -92,8 +105,13 @@ export const Bar = async (monitor = 0) => {
           children: [
             await Indicators(),
             Widget.Box({
-              css: "margin-left:-15px",
-              children: [simpleClock()],
+              className: "spacing-h-5",
+              children: [
+                await PowerDrawWidget(),
+                separator(),
+                simpleClock(),
+                BarButton(),
+              ],
             }),
           ],
         }),
@@ -166,6 +184,7 @@ export const Bar = async (monitor = 0) => {
         mode2: floatingBarContent,
         mode3: notchedBarContent,
         mode4: minimalBarContent,
+        mode5: normalBarContent,
       },
       setup: (self) =>
         self.hook(currentShellMode, (self) => {

@@ -48,6 +48,8 @@ globalThis["cycleMode"] = () => {
     updateMonitorShellMode(currentShellMode, monitor, "mode3");
   } else if (currentShellMode.value[monitor] === "mode3") {
     updateMonitorShellMode(currentShellMode, monitor, "mode4");
+  } else if (currentShellMode.value[monitor] === "mode4") {
+    updateMonitorShellMode(currentShellMode, monitor, "mode5");
   } else {
     updateMonitorShellMode(currentShellMode, monitor, "mode1");
   }

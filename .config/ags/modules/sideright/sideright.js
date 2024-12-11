@@ -169,8 +169,7 @@ export default () =>
           Box({
             vertical: true,
             className: "spacing-v-5",
-            children: [timeRow],
-            //togglesBox
+            children: [timeRow, togglesBox],
           }),
           Box({
             className: "sidebar-group",

@@ -8,10 +8,10 @@ const { Box, Button, Overlay, Label, Revealer } = Widget;
 
 const BarGroup = ({ child }) =>
   Box({
-    className: "bar-group-margin bar-sides",
+    // className: "bar-group-margin bar-sides",
     children: [
       Box({
-        className: "bar-group bar-group-standalone bar-group-pad-system",
+        // className: "bar-group bar-group-standalone bar-group-pad-system",
         children: [child],
       }),
     ],
@@ -37,7 +37,7 @@ const BarResource = (
 
   // Create a Revealer to handle the sliding effect of the resource label
   const detailRevealer = Revealer({
-    transitionDuration: 500, // Adjust this value for the speed of the slide
+    transitionDuration: 100, // Adjust this value for the speed of the slide
     transition: "slide_right", // Slide to the right on reveal
     revealChild: true,
     child: resourceLabel, // The resource label is the child of the revealer
