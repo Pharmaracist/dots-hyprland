@@ -9,11 +9,10 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-floating {
     background-color: $layer0;
     @include elevation2;
-    @include anim-enter;
     @include large-rounding;
     margin: 8px 10px;
     border-radius: 1.37rem;
-    padding-top: 3px;
+    padding: 3px;
     -gtk-outline-radius: 10rem;
 }
 .bar-hang {
@@ -24,11 +23,11 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .bar-notch {
     background-color: $layer0;
-    padding: 0.3rem 1.1rem;
+    padding: 0.05rem 1.1rem 0.4rem;
     border-radius: 0px 0px 1.5rem 1.5rem;
 }
 .bar-height {
-    min-height: 2.727rem;
+    min-height: 3rem;
 }
 .sec-txt {
     color: $secondary;
@@ -113,11 +112,15 @@ $bar_ws_width_focus_active: 6.045rem;
     border-top-right-radius: 1.364rem;
     border-bottom-right-radius: 1.364rem;
 }
-
-.bar-sidemodule {
+.bar-largesidemodule {
     min-width: 26rem;
 }
-
+.bar-normsidemodule {
+    min-width: 12rem;
+}
+.bar-smallsidemodule {
+    min-width: 6rem;
+}
 .bar-ws-width {
     min-width: 18.341rem;
 }

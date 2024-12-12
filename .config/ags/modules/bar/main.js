@@ -5,6 +5,7 @@ import { RoundedCorner } from "../.commonwidgets/cairo_roundedcorner.js";
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
 import BatteryModule from "./modules/battery.js";
 import BarClock from "./modules/clock.js";
+import BarToggles from "./modules/bar_toggles.js";
 import Music from "./modules/mixed.js";
 import MusicStuff from "./modules/music.js";
 import PowerDrawWidget from "./modules/powerdraw.js";
@@ -15,7 +16,28 @@ import Indicators from "./modules/spaceright.js";
 import System from "./modules/system.js";
 import Shortcuts from "./modules/utils.js";
 import ClassWindow from "./modules/window_title.js";
+import SystemResources from "./modules/resources.js";
+
 // import spaceleft from "./modules/spaceleft.js";
+const attachCorners = async (barContent) => {
+  // Ensure the bar position is top, and then attach the corners within the Stack
+  if (userOptions.asyncGet().bar.position === "top") {
+    const topLeftCorner = await BarCornerTopleft();
+    const topRightCorner = await BarCornerTopright();
+
+    // Add corners within the layout structure by placing them in separate windows
+    barContent = Widget.Stack({
+      homogeneous: false,
+      children: [
+        barContent, // Add original content
+        topLeftCorner, 
+        topRightCorner,
+      ],
+    });
+  }
+
+  return barContent;
+};
 
 const NormalOptionalWorkspaces = async () => {
   try {
@@ -50,12 +72,28 @@ const separator = () =>
       }),
     ],
   });
+  
 export const Bar = async (monitor = 0) => {
-  const SideModule = (children) =>
+  const LargeSideModule = (children) =>
     Widget.Box({
-      className: "bar-sidemodule",
+      className: "bar-largesidemodule",
       children: children,
     });
+    const NormSideModule = (children) =>
+      Widget.Box({
+        className: "bar-normsidemodule margin-rl-5",
+        children: children,
+      });
+      const SmallSideModule = (children) =>
+        Widget.Box({
+          className: "bar-smallsidemodule",
+          children: children,
+        });
+        const MarginSideModule = (children) =>
+          Widget.Box({
+            className: "margin-rl-10",
+            children: children,
+          });
 
   const normalBarContent = await Widget.CenterBox({
     className: "bar-bg",
@@ -64,13 +102,11 @@ export const Bar = async (monitor = 0) => {
     },
     startWidget: await WindowTitle(),
     centerWidget: Widget.Box({
-      className: "spacing-h-4",
+      className: "spacing-h-5",
       children: [
-        SideModule([Music()]),
-        Widget.Box({
-          children: [await NormalOptionalWorkspaces()],
-        }),
-        SideModule([System()]),
+        NormSideModule([Music()]),
+        SmallSideModule([await NormalOptionalWorkspaces()]),
+        NormSideModule([System()]),
       ],
     }),
     endWidget: Widget.Box({
@@ -78,38 +114,30 @@ export const Bar = async (monitor = 0) => {
       children: [Indicators()],
     }),
   });
+  const finalNormalBarContent = await attachCorners(normalBarContent);
+
   const floatingBarContent = await Widget.CenterBox({
     className: "bar-floating ",
-    css: "min-height:2.9rem;",
+    css: "min-height:3rem;",
     startWidget: Widget.Box({
       className: "start-widget",
       children: [
         await BatteryModule(),
-        Widget.Box({
-          className: "margin-rl-15",
-          children: [await FocusOptionalWorkspaces()],
-        }),
+       MarginSideModule([await FocusOptionalWorkspaces()])
       ],
     }),
-    centerWidget: Widget.Box({
-      className: "spacing-h-10",
-      children: [MusicStuff()],
-    }),
+    centerWidget:SmallSideModule([MusicStuff()]),
     endWidget: Widget.Box({
       className: "end-widget",
       children: [
         Widget.Box({
           children: [
             await Indicators(),
-            Widget.Box({
-              className: "spacing-h-5",
-              children: [
-                await PowerDrawWidget(),
-                separator(),
-                simpleClock(),
-                BarButton(),
-              ],
-            }),
+            await PowerDrawWidget(),
+            separator(),
+            simpleClock(),
+            BarButton(),
+           
           ],
         }),
       ],
@@ -122,21 +150,21 @@ export const Bar = async (monitor = 0) => {
       className: "start-widget",
       children: [
         await BatteryModule(),
-        Widget.Box({
-          className: "margin-rl-15",
-          children: [await FocusOptionalWorkspaces()],
-        }),
-        await ClassWindow(),
-      ],
+        NormSideModule([await FocusOptionalWorkspaces()]),
+        await Shortcuts(),
+      ]
     }),
-    centerWidget: Widget.Box({
-      children: [BarClock()],
-    }),
+    centerWidget:BarClock(),
     endWidget: Widget.Box({
       className: "end-widget",
       children: [
         Widget.Box({
-          children: [await Indicators()],
+          children: [
+            await Indicators(),
+            separator(),
+            SystemResources(),
+           
+          ],
         }),
       ],
     }),
@@ -150,44 +178,34 @@ export const Bar = async (monitor = 0) => {
       className: "start-widget",
       children: [
         await BatteryModule(),
-        Widget.Box({
-          className: "margin-rl-15",
-          children: [await FocusOptionalWorkspaces()],
-        }),
+        MarginSideModule([await FocusOptionalWorkspaces()]),
+        SystemResources(),
       ],
     }),
-    centerWidget: await MusicStuff(),
+    centerWidget: BarClock(),
     endWidget: Widget.Box({
-      className: "end-widget",
-      children: [
-        await Indicators(),
-        Widget.Box({
-          css: "margin-left:-15px",
-          children: [simpleClock()],
-        }),
-      ],
+      className:"end-widget",
+      children:[
+      await Indicators()
+      ]
     }),
-  });
+    });
+  const finalMinimalBarContent = await attachCorners(minimalBarContent);
   const notchedBarContent = await Widget.CenterBox({
-    css: "min-height:3rem",
+    css: "min-height:3.5rem",
     startWidget: await WindowTitle(),
     centerWidget: Widget.Box({
-      className: "spacing-h-25 bar-notch",
+      className: "spacing-h-15 bar-notch",
       children: [
         await Music(),
-        Widget.Box({
-          className: "margin-rl-5",
-          children: [await NormalOptionalWorkspaces()],
-        }),
-        await System(),
+        NormSideModule([await NormalOptionalWorkspaces()]),
+        await System()
       ],
     }),
     endWidget: Widget.Box({
+      className:"end-widget",
       children: [
-        Widget.Box({
-          css: "margin-right:1.2rem;",
-          children: [await Indicators()],
-        }),
+       await Indicators()
       ],
     }),
   });
@@ -195,58 +213,55 @@ export const Bar = async (monitor = 0) => {
     className: "bar-bg-nothing",
   });
 
+
   return Widget.Window({
     monitor,
     name: `bar${monitor}`,
     anchor: [userOptions.asyncGet().bar.position, "right", "left"],
     exclusivity: "exclusive",
     visible: true,
+    layer:"top",
     child: Widget.Stack({
       homogeneous: false,
       transition: "slide_up_down",
       transitionDuration: userOptions.asyncGet().animations.durationSmall,
       children: {
-        mode1: normalBarContent,
-        mode2: floatingBarContent,
-        mode3: notchedBarContent,
-        mode4: minimalBarContent,
-        mode5: nothingContent,
-        mode6: hangedBarContent,
+        mode1: floatingBarContent,
+        mode2: notchedBarContent,
+        mode3: nothingContent,
+        mode4: hangedBarContent,
+        mode5: finalNormalBarContent, // Now has corners attached
+        mode6: finalMinimalBarContent,
+        
       },
-      setup: (self) =>
+      setup: (self) => {
         self.hook(currentShellMode, (self) => {
           self.shown = currentShellMode.value[monitor];
-        }),
+        });
+      },
     }),
   });
 };
+
 export const BarCornerTopleft = (monitor = 0) =>
   Widget.Window({
     monitor,
     name: `barcornertl${monitor}`,
-    layer: "top",
-    anchor: [userOptions.asyncGet().bar.position, "left"],
+    anchor: ["top", "left"],  // Anchor to top-left
     exclusivity: "normal",
     visible: true,
-    child: RoundedCorner(
-      userOptions.asyncGet().bar.position === "top" ? "topleft" : "bottomleft",
-      { className: "corner" },
-    ),
+    layer:"bottom",
+    child: RoundedCorner("topleft", { className: "corner" }),
     setup: enableClickthrough,
   });
+
 export const BarCornerTopright = (monitor = 0) =>
   Widget.Window({
     monitor,
     name: `barcornertr${monitor}`,
-    layer: "top",
-    anchor: [userOptions.asyncGet().bar.position, "right"],
+    anchor: ["top", "right"],  // Anchor to top-right
     exclusivity: "normal",
     visible: true,
-    child: RoundedCorner(
-      userOptions.asyncGet().bar.position === "top"
-        ? "topright"
-        : "bottomright",
-      { className: "corner" },
-    ),
+    child: RoundedCorner("topright", { className: "corner" }),
     setup: enableClickthrough,
   });

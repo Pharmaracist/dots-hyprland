@@ -103,63 +103,77 @@ const UtilButton = ({ name, icon, onClicked }) => {
 const Utilities = () => {
   let unsubscriber = () => {};
   let wallpaperFolder = "";
-  let status = true;
+  let showWallpaperButton = false;  // More descriptive variable name
 
-  const change_wallpaper_btn = UtilButton({
-    name: getString("Change wallpaper"),
-    icon: "image",
+  const changeWallpaperButton = Widget.Button({
+    vpack: "center",
+    tooltipText: getString("Change wallpaper"),
     onClicked: () => App.toggleWindow("wallselect"),
+    className: "bar-util-btn icon-material txt-norm",
+    label: "image",
   });
+
+ const screenSnipButton = Widget.Button({
+    vpack: "center",
+    tooltipText: getString("Screen snip"),
+    onClicked: () => {
+      Utils.execAsync(
+        `${App.configDir}/scripts/grimblast.sh copy area`,
+      ).catch(print);
+    },
+    className: "bar-util-btn icon-material txt-norm",
+    label: "screenshot_region",
+  });
+
+  const colorPickerButton = Widget.Button({
+    vpack: "center",
+    tooltipText: getString("Color picker"),
+    onClicked: () => {
+      Utils.execAsync(["hyprpicker", "-a"]).catch(print);
+    },
+    className: "bar-util-btn icon-material txt-norm",
+    label: "colorize",
+  });
+
+
+  const keyboardButton = Widget.Button({
+    vpack: "center",
+    tooltipText: getString("Toggle on-screen keyboard"),
+    onClicked: () => {
+      App.toggleWindow("osk"); // Use App.toggleWindow for consistency.  If you have a custom function, replace this.
+    },
+    className: "bar-util-btn icon-material txt-norm",
+    label: "keyboard",
+  });
+
 
   const box = Box({
     hpack: "center",
     className: "spacing-h-4",
     children: [
-      UtilButton({
-        name: getString("Screen snip"),
-        icon: "screenshot_region",
-        onClicked: () => {
-          Utils.execAsync(
-            `${App.configDir}/scripts/grimblast.sh copy area`,
-          ).catch(print);
-        },
-      }),
-      UtilButton({
-        name: getString("Color picker"),
-        icon: "colorize",
-        onClicked: () => {
-          Utils.execAsync(["hyprpicker", "-a"]).catch(print);
-        },
-      }),
-      UtilButton({
-        name: getString("Toggle on-screen keyboard"),
-        icon: "keyboard",
-        onClicked: () => {
-          toggleWindowOnAllMonitors("osk");
-        },
-      }),
-      change_wallpaper_btn,
+      screenSnipButton,
+      colorPickerButton,
+      keyboardButton,
     ],
   });
-  unsubscriber = userOptions.subscribe((userOptions) => {
-    wallpaperFolder = userOptions.bar.wallpaper_folder;
-    const current_status = typeof wallpaperFolder == "string";
-    if (status != current_status) {
-      if (current_status) {
-        box.add(change_wallpaper_btn);
-      } else {
-        box.remove(change_wallpaper_btn);
-      }
 
-      status = current_status;
+  unsubscriber = userOptions.subscribe((options) => {
+    wallpaperFolder = options.bar.wallpaper_folder;
+    const shouldShow = typeof wallpaperFolder === "string";
+
+    if (shouldShow !== showWallpaperButton) {
+      showWallpaperButton = shouldShow;
+      if (shouldShow) {
+        box.add(changeWallpaperButton);
+      } else {
+        box.remove(changeWallpaperButton);
+      }
     }
   });
-  box.on("destroy", () => {
-    unsubscriber();
-  });
+
+  box.on("destroy", unsubscriber);
   return box;
 };
-
 const BarBattery = () =>
   Box({
     className: "spacing-h-4 bar-batt-txt",
@@ -217,7 +231,7 @@ const BatteryModule = () =>
     className: "spacing-h-5",
     children: [
       BarGroup({ child: BarClock() }),
-      // BarGroup({ Utilities() }),
+      BarGroup({ child:Utilities() }),
       Stack({
         transitionDuration: userOptions.asyncGet().animations.durationLarge,
         transition: "slide_up_down",

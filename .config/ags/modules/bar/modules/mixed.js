@@ -163,7 +163,7 @@ export default () => {
     hexpand: true,
     className: "txt-smallie bar-music-txt",
     truncate: "end",
-    maxWidthChars: 26,
+    maxWidthChars: 40,
     setup: (self) => {
       const update = () => {
         const mpris = Mpris.getPlayer("");
@@ -179,8 +179,8 @@ export default () => {
   });
 
   const musicStuff = Box({
-    className: "spacing-h-10",
-    hexpand: true,
+    className: "spacing-h-10 padding-rl-5",
+      hexpand: true,
     children: [playingState, trackTitle],
   });
 

@@ -1,7 +1,7 @@
 import Audio from "resource:///com/github/Aylur/ags/service/audio.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
-// import { languages } from "./statusicons_languages.js";
+// import { languages } from "../../.commonwidgets/statusicons_languages.js";
 const { GLib } = imports.gi;
 
 export const MicIndicator = () =>
@@ -53,7 +53,7 @@ export const SpeakerIndicator = () =>
     }),
   });
 
-export const BarToggles = (props = {}, monitor = 0) =>
+ const BarToggles = (props = {}, monitor = 0) =>
   Widget.Box({
     ...props,
     child: Widget.Box({
@@ -62,7 +62,6 @@ export const BarToggles = (props = {}, monitor = 0) =>
         Widget.Box({
           className: "spacing-h-10 sec-txt ",
           children: [
-            // optionalKeyboardLayoutInstances[monitor],
             MicIndicator(),
             SpeakerIndicator(),
           ],
@@ -70,3 +69,4 @@ export const BarToggles = (props = {}, monitor = 0) =>
       ],
     }),
   });
+export default () => BarToggles();

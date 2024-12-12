@@ -532,6 +532,15 @@
 .element-accel {
     @include element_accel;
 }
+.padding-rl-5{
+    padding:0px 5px;
+}
+.padding-rl-10{
+    padding:0px 10px;
+}
+.padding-rl-15{
+    padding:0px 15px;
+}
 .margin-rl-2-5 {
     margin: 0px 2.5px;
 }

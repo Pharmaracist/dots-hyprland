@@ -24,7 +24,7 @@
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
-    "fakeScreenRounding": 0
+    "fakeScreenRounding": 1
   },
   "apps": {
     "bluetooth": "blueberry",
@@ -240,7 +240,7 @@
     }
   },
   "bar": {
-    "modes": ["mode2"],
+    "modes": ["mode5"],
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }
