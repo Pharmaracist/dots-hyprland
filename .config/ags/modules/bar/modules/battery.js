@@ -1,143 +1,178 @@
+// External dependencies
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
-import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
-import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
-const { Box, Label, Button, Overlay, Revealer, Scrollable, Stack, EventBox } =
-  Widget;
-const { exec, execAsync } = Utils;
+const { Box, Label, Overlay, Revealer, EventBox } = Widget;
+const { execAsync, exec } = Utils;
 const { GLib } = imports.gi;
 
-const options = userOptions.asyncGet();
-const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
-const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
-Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
+// Common widgets
+import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 
-const BRIGHTNESS_STEP = 0.01;
+// Configuration
+const { userOptions } = globalThis;
 
-const batteryProgressCache = new Map();
-const BarBatteryProgress = () => {
-  const _updateProgress = (circprog) => {
-    const percent = Battery.percent;
-    const key = `${percent}-${Battery.charged}`;
+// Constants
+const POWER_DRAW = {
+    CACHE_DURATION: 5000,
+    PATHS: {
+        CURRENT: "/sys/class/power_supply/BAT0/current_now",
+        VOLTAGE: "/sys/class/power_supply/BAT0/voltage_now"
+    },
+    CONVERSION: {
+        TO_AMPS: 1000000,
+        TO_VOLTS: 1000000
+    }
+};
 
-    if (!batteryProgressCache.has(key)) {
-      const css = `font-size: ${Math.abs(percent)}px;`;
-      batteryProgressCache.set(key, css);
+// Cache state
+const powerDrawCache = { 
+    value: "N/A", 
+    timestamp: 0 
+};
+
+// Utility functions
+const fetchPowerDraw = async () => {
+    const now = Date.now();
+    if (powerDrawCache.timestamp + POWER_DRAW.CACHE_DURATION > now) {
+        return powerDrawCache.value;
     }
 
-    circprog.css = batteryProgressCache.get(key);
-    circprog.toggleClassName(
-      "bar-bat-circprog-low",
-      percent <= options.battery.low,
-    );
-    circprog.toggleClassName("bar-bat-circprog-full", Battery.charged);
-    circprog.toggleClassName("bar-bat-charging", Battery.charging); // Add charging state class
-  };
+    try {
+        const current = parseInt(await Utils.execAsync(`cat ${POWER_DRAW.PATHS.CURRENT}`), 10);
+        const voltage = parseInt(await Utils.execAsync(`cat ${POWER_DRAW.PATHS.VOLTAGE}`), 10);
 
-  return AnimatedCircProg({
-    className: "bar-bat-circprog",
-    vpack: "center",
-    hpack: "center",
-    extraSetup: (self) => self.hook(Battery, _updateProgress),
-  });
+        const currentInAmps = current / POWER_DRAW.CONVERSION.TO_AMPS;
+        const voltageInVolts = voltage / POWER_DRAW.CONVERSION.TO_VOLTS;
+        const powerInWatts = (currentInAmps * voltageInVolts).toFixed(2);
+
+        powerDrawCache.value = `${powerInWatts} W`;
+        powerDrawCache.timestamp = now;
+        return powerDrawCache.value;
+    } catch (error) {
+        console.error('Error fetching power draw:', error);
+        return 'N/A';
+    }
+};
+
+const BarBatteryProgress = () => {
+    const _updateProgress = (circprog) => {
+        const percent = Battery.percent;
+        const css = `font-size: ${percent}px;`;
+        circprog.css = css;
+        circprog.toggleClassName("bar-bat-circprog-low", Battery.percent <= (userOptions.battery?.low || 20));
+        circprog.toggleClassName("bar-bat-circprog-full", Battery.charged);
+        circprog.toggleClassName("bar-bat-charging", Battery.charging);
+    };
+    return AnimatedCircProg({
+        className: "bar-batt-circprog",
+        vpack: "center",
+        hpack: "center",
+        extraSetup: (self) => self.hook(Battery, _updateProgress),
+    });
 };
 
 const BarBattery = () => {
-  let isRevealed = false;
+    let timeoutId = 0;
 
-  // Create Revealer only once
-  const percentageRevealer = Revealer({
-    transitionDuration: options.animations.durationLarge,
-    transition: "slide_right",
-    revealChild: false, // Initially hidden
-    child: Label({
-      className: "bar-batt-percent",
-      connections: [
-        [
-          Battery,
-          (label) => {
-            const chargingText = Battery.charging ? "\uf0e7" : " ";
-            label.label = ` ${chargingText}  ${Battery.percent}%`;
-          },
-        ],
-      ],
-    }),
-  });
+    const percentageLabel = Label({
+        className: "sec-txt txt-large",
+        setup: (self) => self.hook(Battery, (label) => {
+            label.label = `${Battery.percent.toFixed(0)}%  `;
+        }),
+    });
 
-  const handleScroll = (direction) => {
-    execAsync(`brightnessctl set ${direction > 0 ? "10%+" : "10%-"}`);
+    const timeToEmptyFullLabel = Label({ hpack: "start", className: "sec-txt txt-smallie" });
+    const powerDrawLabel = Label({ hpack: "start", className: "sec-txt txt-smallie" });
+    
+    const detailsBox = Box({
+        hpack: "start", 
+        vertical: true, 
+        children: [timeToEmptyFullLabel, powerDrawLabel],
+    });
+
+    const percentageBox = Box({
+        className: "margin-rl-10",
+        children: [
+            percentageLabel,
+            detailsBox,
+        ]
+    });
+
+    const detailsRevealer = Revealer({
+        transitionDuration: userOptions.animations?.durationLarge || 150,
+        transition: "slide_right",
+        revealChild: false,
+        child: percentageBox,
+    });
+
+    const batteryIcon = Overlay({
+        child: Box({
+            vpack: "center",
+            className: "bar-bat",
+            homogeneous: true,
+            children: [],
+            setup: (self) =>
+                self.hook(Battery, (box) => {
+                    box.toggleClassName("bar-bat-low", Battery.percent <= (userOptions.battery?.low || 20));
+                    box.toggleClassName("bar-bat-full", Battery.charged);
+                    box.toggleClassName("bar-bat-charging", Battery.charging);
+                }),
+        }),
+        overlays: [BarBatteryProgress()],
+    });
+
+    const updateBatteryDetails = async () => {
+        const powerDraw = await fetchPowerDraw();
+        powerDrawLabel.label = `Power: ${powerDraw}`;
+
+        try {
+          const result = await Utils.execAsync("upower -i /org/freedesktop/UPower/devices/battery_BAT0");
+          const lines = result.split('\n');
+          let timeToEmptyFull = "N/A";
+
+          for (const line of lines) {
+              if (line.includes("time to")) {
+                  timeToEmptyFull = line.split(":")[1].trim();
+                  break; // Found the time, no need to continue
+              }
+          }
+          timeToEmptyFullLabel.label =  timeToEmptyFull ;
+      } catch (error) {
+          console.error("Error getting battery info with upower:", error)
+          timeToEmptyFullLabel.label = "Error";
+      }
   };
 
-  return Box({
-    className: "spacing-h-10 sec-txt txt-norm ",
-    children: [
-      EventBox({
-        onScrollUp: () => handleScroll(1), // Increase brightness
-        onScrollDown: () => handleScroll(-1), // Decrease brightness
-        onPrimaryClick: () => {
-          isRevealed = !isRevealed;
-          percentageRevealer.revealChild = isRevealed;
-        },
+    const batteryBox = EventBox({
+        onPrimaryClick: () => detailsRevealer.revealChild = !detailsRevealer.revealChild,
         child: Box({
-          className: "bar-batt-container",
-          children: [
-            Overlay({
-              child: Box({
-                vpack: "center",
-                className: "bar-bat",
-                homogeneous: true,
-                children: [MaterialIcon("", "large")],
-                setup: (self) =>
-                  self.hook(Battery, (box) => {
-                    box.toggleClassName(
-                      "bar-batt-low",
-                      Battery.percent <= userOptions.asyncGet().battery.low,
-                    );
-                    box.toggleClassName("bar-batt-full", Battery.charged);
-                    box.toggleClassName("bar-batt-charging", Battery.charging); // Add charging state class
-                  }),
-              }),
-              overlays: [BarBatteryProgress()],
-            }),
-          ],
+            className: "sec-txt", 
+            children: [batteryIcon],
         }),
-      }),
-      percentageRevealer, // Revealer added only once
-    ],
-  });
+    });
+
+    // Initial update
+    updateBatteryDetails();
+
+    // Periodic updates for time/power draw (less frequent)
+    timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 5000, () => {
+        updateBatteryDetails();
+        return GLib.SOURCE_CONTINUE;
+    });
+
+    batteryBox.destroy = () => {
+        if (timeoutId) {
+            GLib.source_remove(timeoutId);
+            timeoutId = 0;
+        }
+        batteryBox.parent_instance.destroy();
+    };
+
+    return Box({
+        className: "bar-battery-module spacing-h-10",  
+        children: [batteryBox, detailsRevealer],
+    });
 };
 
-const BatteryModule = () =>
-  Box({
-    className: "spacing-h-4",
-    children: [
-      Stack({
-        transition: "slide_up_down",
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
-        children: {
-          laptop: BarBattery(),
-          hidden: Widget.Box({}),
-        },
-        setup: (stack) => {
-          stack.hook(globalThis.devMode, () => {
-            if (globalThis.devMode.value) {
-              stack.shown = "laptop";
-            } else {
-              if (!Battery.available) stack.shown = "hidden";
-              else stack.shown = "laptop";
-            }
-          });
-        },
-      }),
-    ],
-  });
-
-export default () =>
-  Widget.EventBox({
-    onScrollUp: () => handleScroll(-1),
-    onScrollDown: () => handleScroll(1),
-    child: Widget.Box({
-      children: [BatteryModule()],
-    }),
-  });
+export default BarBattery;

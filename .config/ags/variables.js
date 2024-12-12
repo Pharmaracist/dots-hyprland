@@ -6,6 +6,8 @@ import Variable from "resource:///com/github/Aylur/ags/variable.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 const { exec, execAsync } = Utils;
 import { init as i18n_init, getString } from "./i18n/i18n.js";
+import userOptions from "./modules/.configuration/user_options.js";
+
 //init i18n, Load language file
 i18n_init();
 Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons`);
@@ -17,20 +19,18 @@ globalThis["openMusicControls"] = showMusicControls;
 globalThis["openColorScheme"] = showColorScheme;
 globalThis["mpris"] = Mpris;
 globalThis["getString"] = getString;
+
 // load monitor shell modes from userOptions
 const initialMonitorShellModes = () => {
   const numberOfMonitors = Gdk.Display.get_default()?.get_n_monitors() || 1;
   const monitorBarConfigs = [];
   for (let i = 0; i < numberOfMonitors; i++) {
-    if (userOptions.asyncGet().bar.modes[i]) {
-      monitorBarConfigs.push(userOptions.asyncGet().bar.modes[i]);
-    } else {
-      monitorBarConfigs.push("normal");
-    }
+    monitorBarConfigs.push(1); // Start with mode1 (floating)
   }
   return monitorBarConfigs;
 };
-export const currentShellMode = Variable(initialMonitorShellModes(), {}); // normal, focus
+
+export const currentShellMode = Variable(initialMonitorShellModes(), {});
 
 // Mode switching
 const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
@@ -38,24 +38,15 @@ const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
   newValue[monitor] = mode;
   monitorShellModes.value = newValue;
 };
+
 globalThis["currentMode"] = currentShellMode;
 globalThis["cycleMode"] = () => {
   const monitor = Hyprland.active.monitor.id || 0;
-
-  if (currentShellMode.value[monitor] === "mode1") {
-    updateMonitorShellMode(currentShellMode, monitor, "mode2");
-  } else if (currentShellMode.value[monitor] === "mode2") {
-    updateMonitorShellMode(currentShellMode, monitor, "mode3");
-  } else if (currentShellMode.value[monitor] === "mode3") {
-    updateMonitorShellMode(currentShellMode, monitor, "mode4");
-  } else if (currentShellMode.value[monitor] === "mode4") {
-    updateMonitorShellMode(currentShellMode, monitor, "mode5");
+  const currentMode = currentShellMode.value[monitor];
   
-  } else if (currentShellMode.value[monitor] === "mode5") {
-    updateMonitorShellMode(currentShellMode, monitor, "mode6");
-  } else {
-    updateMonitorShellMode(currentShellMode, monitor, "mode1");
-  }
+  // Cycle through modes 1-6
+  const nextMode = (currentMode % 6) + 1;
+  updateMonitorShellMode(currentShellMode, monitor, nextMode);
 };
 
 // Window controls

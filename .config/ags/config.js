@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 // Import
 import Gdk from "gi://Gdk";
 import App from "resource:///com/github/Aylur/ags/app.js";
@@ -11,11 +11,8 @@ import {
 } from "./services/messages.js";
 //import { startAutoDarkModeService } from "./services/darkmode.js";
 // Widgets
-import {
-  Bar,
-  BarCornerTopleft,
-  BarCornerTopright,
-} from "./modules/bar/main.js";
+import Bar from "./modules/bar/main.js";
+import { BarCornerTopleft, BarCornerTopright } from "./modules/bar/barcorners.js";
 // import Cheatsheet from "./modules/cheatsheet/main.js";
 import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
