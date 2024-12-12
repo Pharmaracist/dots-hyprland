@@ -76,7 +76,7 @@ elif [ -n "$1" ]; then
     img_extension="${1##*.}"
 
     # Create symbolic link for the image with the correct extension
-    ln -sf "$1" "$LINK_PATH.$img_extension" >/dev/null 2>&1
+    ln -sf "$1" "$LINK_PATH.jpg" >/dev/null 2>&1
 
     # Execute the custom script after processing
     execute_custom_script
