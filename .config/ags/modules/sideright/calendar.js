@@ -6,6 +6,8 @@ import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../.widgetutils/cursorhover.js';
 
 import { TodoWidget } from "./todolist.js";
+import { TimerWidget } from "./timers.js";
+import { PrayerTimesWidget } from "./prayertimes.js";
 import { getCalendarLayout } from "./calendar_layout.js";
 
 // Кэшируем часто используемые значения
@@ -134,12 +136,14 @@ const CalendarWidget = () => {
     });
 };
 
-const defaultShown = 'calendar';
+const defaultShown = 'prayers';
 const contentStack = Widget.Stack({
     hexpand: true,
     children: {
+        'prayers': PrayerTimesWidget(),
         'calendar': CalendarWidget(),
         'todo': TodoWidget(),
+        'timers': TimerWidget(),
     },
     transition: 'slide_up_down',
     transitionDuration: userOpts.animations.durationLarge,
@@ -183,8 +187,10 @@ export const ModuleCalendar = () => Box({
             vertical: true,
             className: 'sidebar-navrail spacing-v-10',
             children: [
+                StackButton('prayers', 'mosque', getString('Prayers')),
                 StackButton('calendar', 'calendar_month', getString('Calendar')),
                 StackButton('todo', 'done_outline', getString('To Do')),
+                StackButton('timers', 'timer', getString('Timers')),
             ]
         }), false, false, 0);
         box.pack_end(contentStack, false, false, 0);

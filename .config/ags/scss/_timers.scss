@@ -1,0 +1,104 @@
+// Timer Module Styles
+.sidebar-timer {
+    @include normal-rounding;
+    background-color: $surfaceContainer;
+    padding: 0.682rem;
+    margin-bottom: 1.341rem;
+}
+
+.sidebar-timer:hover {
+    background-color: mix($surfaceContainerLow, $surfaceContainerLow, 85%);
+}
+
+.sidebar-timer:active {
+    background-color: mix($surfaceContainerLow, $surfaceContainerLow, 70%);
+}
+
+.sidebar-timer-display {
+    @include small-rounding;
+    padding: 0.682rem;
+    @include mainfont;
+    // background-color: $surfaceContainerLowest;
+    color: $primary;
+    margin: 0.341rem 0;
+    font-size: 1.8164em;
+    font-weight: 600;
+}
+
+.sidebar-timer-controls {
+    @include small-rounding;
+    padding: 0.341rem;
+    margin: 0.341rem 0;
+    margin:0rem 1rem;
+    // background-color: $surfaceContainerLowest;
+}
+
+.sidebar-timer-btn {
+    @include full-rounding;
+    @include element_decel;
+    min-width: 1.9045rem;
+    min-height: 2.045rem;
+    background-color: $surfaceContainerHigh;
+    color: $onSurfaceVariant;
+    margin: 0 0.271rem;
+}
+
+.sidebar-timer-btn:first-child {
+    margin-left: 0;
+}
+
+.sidebar-timer-btn:last-child {
+    margin-right: 0;
+}
+
+.sidebar-timer-btn:hover {
+    background-color: mix($surfaceContainerHigh, $surfaceContainerHighest, 85%);
+}
+
+.sidebar-timer-btn:active {
+    background-color: mix($surfaceContainerHigh, $surfaceContainerHighest, 70%);
+}
+
+.sidebar-timer-btn-start {
+    background-color: $primary;
+    color: $onPrimary;
+}
+
+.sidebar-timer-btn-start:hover {
+    background-color: mix($primary, $surfaceContainerHighest, 85%);
+}
+
+.sidebar-timer-btn-start:active {
+    background-color: mix($primary, $surfaceContainerHighest, 70%);
+}
+
+.sidebar-timer-btn-stop {
+    background-color: $error;
+    color: $onError;
+}
+
+.sidebar-timer-btn-stop:hover {
+    background-color: mix($error, $surfaceContainerHighest, 85%);
+}
+
+.sidebar-timer-btn-stop:active {
+    background-color: mix($error, $surfaceContainerHighest, 70%);
+}
+
+// Timer form styles
+.sidebar-timer-entry {
+    @include small-rounding;
+    background-color: $surfaceContainerLow;
+    color: $onSurface;
+    caret-color: $primary;
+    padding: 0.341rem 0.682rem;
+    margin-bottom: 0.341rem;
+}
+
+.sidebar-timer-entry:focus {
+    background-color: mix($surfaceContainerLow, $surfaceContainerLowest, 85%);
+}
+
+.sidebar-timer-entry:last-child {
+    margin-bottom: 0.682rem;
+}
