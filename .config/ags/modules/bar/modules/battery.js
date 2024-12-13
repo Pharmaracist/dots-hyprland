@@ -62,7 +62,7 @@ const BarBatteryProgress = () => {
         circprog.css = css;
         circprog.toggleClassName("bar-bat-circprog-low", Battery.percent <= (userOptions.battery?.low || 20));
         circprog.toggleClassName("bar-bat-circprog-full", Battery.charged);
-        circprog.toggleClassName("bar-bat-charging", Battery.charging);
+        circprog.toggleClassName("bar-bat-circprog-charging", Battery.charging);
     };
     return AnimatedCircProg({
         className: "bar-bat-circprog",
@@ -92,7 +92,8 @@ const BatteryContent = () => {
     });
 
     const percentageBox = Box({
-        className: "margin-rl-10",
+        className: "margin-rl-5",
+        css:"margin-right:20px",
         children: [
             percentageLabel,
             detailsBox,
@@ -102,7 +103,7 @@ const BatteryContent = () => {
     const detailsRevealer = Revealer({
         transitionDuration: userOptions.animations?.durationLarge || 150,
         transition: "slide_right",
-        revealChild: false,
+        revealChild: true,
         child: percentageBox,
     });
 
