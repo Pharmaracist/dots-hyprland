@@ -15,7 +15,7 @@ import MusicStuff from "./music.js";
 import Cava from "./cava.js";
 import { BarCornerTopleft, BarCornerTopright } from "../barcorners.js";
 import ClassWindow from "../modules/window_title.js";
-
+import WeatherWidget from "./weather.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -124,6 +124,7 @@ export const InfoModules = {
     indicators() { return Indicators(); },
     title: wrapAsyncModule(asyncModules.title),
     statusIndicators() { return System(); },
+    weather() { return WeatherWidget(); },
 };
 
 export const MediaModules = {

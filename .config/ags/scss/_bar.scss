@@ -613,13 +613,13 @@ $bar_ws_width_focus_active: 6.045rem;
 /* Cava Visualizer */
 .cava-module {
     background: transparent;
-    min-width: 3rem;
+    min-width: 4rem;
     padding:0px 3px;
 }
 
 .cava-visualizer {
     @include techfont;
-    font-size: 18px ;
+    font-size: 18px;
     padding: 0px 2px;
     // min-width: 5rem;
 }

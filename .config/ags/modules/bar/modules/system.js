@@ -13,6 +13,7 @@ import {
   NIGHT_WEATHER_SYMBOL,
 } from "../../.commondata/weather.js";
 
+// const userOptions = userOptions.asyncGet();
 const options = userOptions.asyncGet();
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
@@ -174,46 +175,180 @@ const Utilities = () => {
   box.on("destroy", unsubscriber);
   return box;
 };
-const BarBattery = () =>
-  Box({
+
+const WeatherWidget = () => {
+  const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+  let lastUpdate = 0;
+  let cachedData = null;
+
+  const getLocation = async () => {
+    try {
+      const response = await execAsync(['curl', '-s', '-k', 'https://ipapi.co/json/']);
+      const data = JSON.parse(response);
+      return data.city || userOptions.weather?.city || 'Cairo';
+    } catch (err) {
+      return userOptions.weather?.city || 'Cairo';
+    }
+  };
+
+  const updateWeatherForCity = async (city) => {
+    // Check cache first
+    const now = Date.now();
+    if (cachedData && (now - lastUpdate) < CACHE_DURATION) {
+      return cachedData;
+    }
+
+    try {
+      const encodedCity = encodeURIComponent(city.trim());
+      const cmd = ['curl', '-s', '-k', '--connect-timeout', '5', `https://wttr.in/${encodedCity}?format=j1`];
+      const response = await execAsync(cmd);
+      
+      if (!response) {
+        throw new Error('Empty response from weather API');
+      }
+
+      const data = JSON.parse(response);
+      if (!data || !data.current_condition || !data.current_condition[0]) {
+        throw new Error('Invalid weather data format');
+      }
+
+      const weatherData = {
+        temp: data.current_condition[0].temp_C,
+        feelsLike: data.current_condition[0].FeelsLikeC,
+        weatherDesc: data.current_condition[0].weatherDesc[0].value,
+        weatherCode: data.current_condition[0].weatherCode,
+      };
+
+      // Update cache
+      cachedData = weatherData;
+      lastUpdate = now;
+
+      return weatherData;
+    } catch (err) {
+      return null;
+    }
+  };
+
+  const updateWidget = async () => {
+    try {
+      const city = await getLocation();
+      const weatherData = await updateWeatherForCity(city);
+
+      if (!weatherData) {
+        tempLabel.label = "N/A";
+        feelsLikeLabel.label = "";
+        feelsLikeTextLabel.visible = false;
+        tempLabel.tooltipText = "Weather data unavailable";
+        return;
+      }
+
+      const { temp, feelsLike, weatherDesc } = weatherData;
+      tempLabel.label = `${temp}°C  `;
+      feelsLikeLabel.label = ` ${feelsLike}°C   `;
+      feelsLikeTextLabel.visible = true;
+      tempLabel.tooltipText = `${weatherDesc}\nFeels like: ${feelsLike}°C`;
+    } catch (err) {
+      tempLabel.label = "N/A";
+      feelsLikeLabel.label = "";
+      feelsLikeTextLabel.visible = false;
+      tempLabel.tooltipText = "Weather data unavailable";
+    }
+  };
+
+  const tempLabel = Widget.Label({
+    className: "txt-small txt",
+    label: "Loading...",
+  });
+
+  const feelsLikeTextLabel = Widget.Label({
+    className: "txt-smalltxt-onLayer1",
+    label: "Feels like",
+  });
+
+  const feelsLikeLabel = Widget.Label({
+    className: "txt-small txt-onLayer1",
+    label: "",
+  });
+
+  const weatherBox = Box({
+    hexpand: true,
+    hpack: 'center',
+    className: 'spacing-h-4 bar-group-pad txt-onSurfaceVariant',
+    css: "min-width:5rem",
+    children: [
+      MaterialIcon('device_thermostat', 'small'),
+      Box({
+        className: 'spacing-h-2',
+        children: [
+          tempLabel,
+          feelsLikeTextLabel,
+          feelsLikeLabel
+        ]
+      })
+    ],
+    setup: self => {
+      // Initial update
+      updateWidget();
+
+      // Update every 15 minutes
+      self.poll(900000, () => {
+        updateWidget();
+        return true;
+      });
+    }
+  });
+
+  return weatherBox;
+};
+
+const BarBattery = () => {
+  const chargingIcon = MaterialIcon("bolt", "norm", { tooltipText: "Charging" });
+  const chargingRevealer = Revealer({
+    transitionDuration: userOptions.asyncGet().animations.durationSmall,
+    revealChild: false,
+    transition: "slide_right",
+    child: chargingIcon,
+    setup: (self) =>
+      self.hook(Battery, () => {
+        self.revealChild = Battery.charging;
+      }),
+  });
+
+  const percentLabel = Label({
+    className: "txt-smallie",
+    setup: (self) =>
+      self.hook(Battery, () => {
+        self.label = `${Number.parseFloat(Battery.percent.toFixed(1))}%`;
+      }),
+  });
+
+  const batteryIcon = Widget.Box({
+    vpack: "center",
+    className: "bar-batt",
+    homogeneous: true,
+    children: [MaterialIcon("battery_full", "small")],
+    setup: (self) =>
+      self.hook(Battery, () => {
+        self.toggleClassName(
+          "bar-batt-low",
+          Battery.percent <= userOptions.asyncGet().battery.low,
+        );
+        self.toggleClassName("bar-batt-full", Battery.charged);
+      }),
+  });
+
+  return Box({
     className: "spacing-h-4 bar-batt-txt",
     children: [
-      Revealer({
-        transitionDuration: userOptions.asyncGet().animations.durationSmall,
-        revealChild: false,
-        transition: "slide_right",
-        child: MaterialIcon("bolt", "norm", { tooltipText: "Charging" }),
-        setup: (self) =>
-          self.hook(Battery, (revealer) => {
-            self.revealChild = Battery.charging;
-          }),
-      }),
-      Label({
-        className: "txt-smallie",
-        setup: (self) =>
-          self.hook(Battery, (label) => {
-            label.label = `${Number.parseFloat(Battery.percent.toFixed(1))}%`;
-          }),
-      }),
+      chargingRevealer,
+      percentLabel,
       Overlay({
-        child: Widget.Box({
-          vpack: "center",
-          className: "bar-batt",
-          homogeneous: true,
-          children: [MaterialIcon("battery_full", "small")],
-          setup: (self) =>
-            self.hook(Battery, (box) => {
-              box.toggleClassName(
-                "bar-batt-low",
-                Battery.percent <= userOptions.asyncGet().battery.low,
-              );
-              box.toggleClassName("bar-batt-full", Battery.charged);
-            }),
-        }),
+        child: batteryIcon,
         overlays: [BarBatteryProgress()],
       }),
     ],
   });
+};
 
 const BarGroup = ({ child }) =>
   Widget.Box({
@@ -226,12 +361,11 @@ const BarGroup = ({ child }) =>
     ],
   });
 
-const BatteryModule = () =>
-  Box({
+const BatteryModule = () => {
+  const batteryWidget = Box({
     className: "spacing-h-5",
     children: [
-      BarGroup({ child: BarClock() }),
-      BarGroup({ child:Utilities() }),
+      BarGroup({ child: Utilities() }),
       Stack({
         transitionDuration: userOptions.asyncGet().animations.durationLarge,
         transition: "slide_up_down",
@@ -240,18 +374,20 @@ const BatteryModule = () =>
           hidden: Widget.Box({}),
         },
         setup: (stack) => {
-          stack.hook(globalThis.devMode, () => {
-            if (globalThis.devMode.value) {
-              stack.shown = "laptop";
-            } else {
-              if (!Battery.available) stack.shown = "hidden";
-              else stack.shown = "laptop";
-            }
+          // Initialize the stack to show laptop by default
+          stack.shown = "laptop";
+          
+          // Only hide if battery is explicitly not available
+          stack.hook(Battery, () => {
+            stack.shown = Battery.available ? "laptop" : "hidden";
           });
         },
       }),
     ],
   });
+  
+  return batteryWidget;
+};
 
 const switchToRelativeWorkspace = async (self, num) => {
   try {
@@ -275,7 +411,18 @@ export default () =>
     onScrollDown: (self) => switchToRelativeWorkspace(self, +1),
     onPrimaryClick: () => App.toggleWindow("sideright"),
     child: Widget.Box({
-      className: "spacing-h-4",
-      children: [BatteryModule()],
+      className: "spacing-h-5",
+      children: [
+      
+          Widget.Box({
+            className: "spacing-h-5",
+            children: [      
+              BarGroup({ child: BarClock() }),          
+              BarGroup({ child: WeatherWidget() }),
+              BarGroup({ child: BatteryModule() }),
+            ],
+          }),
+        
+      ],
     }),
   });

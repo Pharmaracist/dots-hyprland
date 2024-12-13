@@ -29,17 +29,7 @@ export default () => {
             return Widget.Label({
                 label: char,
                 class_name: isHigh ? 'cava-bar-high' : 'cava-bar-low',
-                css: `
-                    opacity: ${isHigh ? 1 : 0.6};
-                    margin: 0;
-                    padding: 0;
-                    border: 0;
-                    outline: 0;
-                    box-shadow: none;
-                    line-height: 1;
-                    transform: scaleY(${isHigh ? 1 : 0.8}) translateZ(0);
-                    transition: all 0.1s ease;
-                `
+                
             })
         })
 

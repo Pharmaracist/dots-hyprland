@@ -18,7 +18,6 @@ export const BarLayouts = {
             start: [Widget.Box({
                 className: 'bar-round-padding',
                 children: [
-                   
                     modules.StatusModules.battery(),
                     modules.workspaces.normal(),
                 ],
@@ -27,7 +26,6 @@ export const BarLayouts = {
                 className: 'bar-round-padding',
                 children: [
                     modules.ControlModules.shortcuts(),
-
                 ],
             }),
         ],
@@ -35,11 +33,17 @@ export const BarLayouts = {
             className: 'bar-round-padding',
             children: [
                 modules.InfoModules.clock(),
-                modules.MediaModules.cava()
-                ],
-            })
+                modules.MediaModules.cava(),
             ],
-            end: [
+        })
+    ],
+    end: [
+                Widget.Box({
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.InfoModules.weather(),
+                    ],
+                }),
                 Widget.Box({
                 className: 'bar-round-padding',
                 children: [
@@ -53,7 +57,6 @@ export const BarLayouts = {
                 ],
             }),
             modules.ControlModules.button(),
-            
         ],
     }),
     },
@@ -155,35 +158,42 @@ export const BarLayouts = {
 export const createBarContent = async (layout, modules) => {
     try {
         const config = layout.layout(modules);
+        
+        // Create boxes for each section
+        const startBox = Widget.Box({
+            className: 'bar-start spacing-h-5',
+            hpack: 'start',
+        });
+
+        const centerBox = Widget.Box({
+            className: 'bar-center spacing-h-5',
+            hpack: 'center',
+        });
+
+        const endBox = Widget.Box({
+            className: 'bar-end spacing-h-5',
+            hpack: 'end',
+        });
+
+        // Set children after box creation to avoid widget reuse issues
+        startBox.children = config.start?.filter(Boolean) || [];
+        centerBox.children = config.center?.filter(Boolean) || [];
+        endBox.children = config.end?.filter(Boolean) || [];
+
         const content = Widget.Box({
             className: layout.className || '',
             css: layout.css || '',
-            children: [
-                Widget.CenterBox({
-                    className: 'bar-content',
-                    startWidget: Widget.Box({
-                        className: 'bar-start spacing-h-5',
-                        hpack: 'start',
-                        children: config.start?.filter(Boolean) || [],
-                    }),
-                    centerWidget: Widget.Box({
-                        className: 'bar-center spacing-h-5',
-                        hpack: 'center',
-                        children: config.center?.filter(Boolean) || [],
-                    }),
-                    endWidget: Widget.Box({
-                        className: 'bar-end spacing-h-5',
-                        hpack: 'end',
-                        children: config.end?.filter(Boolean) || [],
-                    }),
-                }),
-            ],
-           
+            child: Widget.CenterBox({
+                className: 'bar-content',
+                startWidget: startBox,
+                centerWidget: centerBox,
+                endWidget: endBox,
+            }),
         });
 
         return content;
     } catch (error) {
-        console.error(`Error creating bar content for layout ${layout.name}:`, error);
+        print(`Error creating bar content: ${error.message}`);
         return Widget.Box({ 
             className: "bar-error",
             child: Widget.Label({ label: `Error: ${error.message}` }),

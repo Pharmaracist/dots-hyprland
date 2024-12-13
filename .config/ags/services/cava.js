@@ -23,7 +23,6 @@ class AudioVisualizerService extends Service {
 
         // Watch for config file changes
         Utils.monitorFile(this.#configFile, () => {
-            console.log('Config file changed, reloading...')
             this.#loadConfig()
         })
     }
@@ -33,12 +32,11 @@ class AudioVisualizerService extends Service {
             const content = Utils.readFile(this.#configFile)
             const options = JSON.parse(content)
             if (options?.visualizer) {
-                console.log('Loaded visualizer config:', options.visualizer)
                 this.#config = options.visualizer
                 this.#initCava()
             }
         } catch (error) {
-            console.error('Error loading config:', error)
+            // Silent error handling
         }
     }
 
@@ -57,6 +55,7 @@ class AudioVisualizerService extends Service {
 
         // Create a temporary config file for cava
         const configPath = '/tmp/cava.config'
+
         const config = `
 [general]
 bars = ${this.#config.bars || 13}
@@ -106,7 +105,6 @@ sensitivity = ${this.#config.sensitivity || 100}
 20=1
 `
         Utils.writeFile(config, configPath)
-        console.log('Starting Cava with config:', this.#config, 'Source:', audioSource)
 
         this.#proc = Utils.subprocess([
             'cava',
@@ -131,12 +129,14 @@ sensitivity = ${this.#config.sensitivity || 100}
                 this.#output = bars
                 this.emit('output-changed', this.#output)
             }
+
         }, error => {
-            console.error('Cava error:', error)
+            // Silent error handling
             this.#output = "▁".repeat(this.#config.bars || 13)
             this.emit('output-changed', this.#output)
         })
     }
+
 
     #detectAudioSource() {
         try {
@@ -144,11 +144,10 @@ sensitivity = ${this.#config.sensitivity || 100}
             const paOutput = Utils.exec('pactl info')
             const defaultSinkMatch = paOutput.match(/Default Sink: (.+)/)
             if (defaultSinkMatch) {
-                console.log('Using PulseAudio default sink:', defaultSinkMatch[1])
                 return defaultSinkMatch[1] + '.monitor'
             }
         } catch (e) {
-            console.error('Failed to get PulseAudio default sink:', e)
+            // Silent error handling
         }
 
         try {
@@ -157,17 +156,16 @@ sensitivity = ${this.#config.sensitivity || 100}
             const sinkLines = sinks.split('\n')
             if (sinkLines.length > 0) {
                 const firstSink = sinkLines[0].split('\t')[1]
-                console.log('Using first available sink:', firstSink)
                 return firstSink + '.monitor'
             }
         } catch (e) {
-            console.error('Failed to list PulseAudio sinks:', e)
+            // Silent error handling
         }
 
         // Absolute fallback
-        console.log('Falling back to default source')
         return 'auto'
     }
+
 
     get output() { return this.#output }
 
