@@ -631,3 +631,20 @@ $bar_ws_width_focus_active: 6.045rem;
 .cava-bar-low {
     color: $surfaceVariant;
 }
+
+.bar-weather {
+    @include element_decel;
+    transition: all 400ms cubic-bezier(0.1, 0.7, 0.2, 1);
+
+    .weather-content {
+        transition: all 400ms cubic-bezier(0.1, 0.7, 0.2, 1);
+    }
+
+    .prayer-content {
+        transition: all 400ms cubic-bezier(0.1, 0.7, 0.2, 1);
+    }
+
+    .weather-icon {
+        transition: all 400ms cubic-bezier(0.1, 0.7, 0.2, 1);
+    }
+}
