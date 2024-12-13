@@ -18,23 +18,23 @@ import { BarCornerTopleft, BarCornerTopright } from "../barcorners.js";
 import ClassWindow from "../modules/window_title.js";
 
 // Cache for initialized modules
-const moduleCache = new Map();
+// const moduleCache = new Map();
 
 // Async module initializers with caching
-const asyncModules = {
-    windowTitle: async () => {
-        if (!moduleCache.has('windowTitle')) {
-            moduleCache.set('windowTitle', await WindowTitle());
-        }
-        return moduleCache.get('windowTitle');
-    },
-    title: async () => {
-        if (!moduleCache.has('title')) {
-            moduleCache.set('title', await ClassWindow());
-        }
-        return moduleCache.get('title');
-    },
-};
+// const asyncModules = {
+//     windowTitle: async () => {
+//         if (!moduleCache.has('windowTitle')) {
+//             moduleCache.set('windowTitle', await WindowTitle());
+//         }
+//         return moduleCache.get('windowTitle');
+//     },
+//     title: async () => {
+//         if (!moduleCache.has('title')) {
+//             moduleCache.set('title', await ClassWindow());
+//         }
+//         return moduleCache.get('title');
+//     },
+// };
 
 // Workspace modules are loaded dynamically based on the environment
 const loadWorkspaces = async () => {
@@ -85,9 +85,9 @@ export const ControlModules = {
 export const InfoModules = {
     clock: () => BarClock(),
     simpleClock: () => simpleClock(),
-    windowTitle: () => asyncModules.windowTitle(),
+    windowTitle: () => WindowTitle(),
     indicators: () => Indicators(),
-    title: () => asyncModules.title(),
+    title: () => ClassWindow(),
 };
 
 export const MediaModules = {
@@ -97,14 +97,14 @@ export const MediaModules = {
 };
 
 // Initialize all async modules
-const initializeAsyncModules = async () => {
-    await Promise.all(Object.values(asyncModules).map(fn => fn()));
-};
+// const initializeAsyncModules = async () => {
+//     await Promise.all(Object.values(asyncModules).map(fn => fn()));
+// };
 
 // Function to initialize all modules
 export const initializeModules = async () => {
     const workspaces = await loadWorkspaces();
-    await initializeAsyncModules();
+    // await initializeAsyncModules();
     return {
         workspaces,
         CornerModules,

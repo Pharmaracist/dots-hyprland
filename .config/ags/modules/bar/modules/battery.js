@@ -65,7 +65,7 @@ const BarBatteryProgress = () => {
         circprog.toggleClassName("bar-bat-charging", Battery.charging);
     };
     return AnimatedCircProg({
-        className: "bar-batt-circprog",
+        className: "bar-bat-circprog",
         vpack: "center",
         hpack: "center",
         extraSetup: (self) => self.hook(Battery, _updateProgress),
@@ -76,9 +76,9 @@ const BatteryContent = () => {
     let timeoutId = 0;
 
     const percentageLabel = Label({
-        className: "sec-txt txt-large",
+        className: "sec-txt txt-percent txt-hugerass",
         setup: (self) => self.hook(Battery, (label) => {
-            label.label = `${Battery.percent.toFixed(0)}%  `;
+            label.label = `${Battery.percent.toFixed(0)}%   `;
         }),
     });
 

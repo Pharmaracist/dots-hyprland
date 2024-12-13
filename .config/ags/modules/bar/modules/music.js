@@ -15,7 +15,7 @@ export default () =>
         Label({
           className: "bar-music-txt",
           truncate: "end",
-          maxWidthChars: 100,
+          maxWidthChars: 30,
           setup: (self) => {
             const update = () => {
               const mpris = Mpris.getPlayer(""); // Get active player

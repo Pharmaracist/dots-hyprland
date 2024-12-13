@@ -2,7 +2,7 @@ const { Gtk } = imports.gi;
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 export const BarButton = ({
-  label = "\udb81\ude33",
+  label = " \ue732 ",
   onPrimaryClick = () => {
     closeEverything();
     Utils.timeout(1, () => openWindowOnAllMonitors("session"));

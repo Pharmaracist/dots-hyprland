@@ -15,6 +15,24 @@ $bar_ws_width_focus_active: 6.045rem;
     padding: 3px;
     -gtk-outline-radius: 10rem;
 }
+.bar-floating-short {
+    background-color: $layer0;
+    @include elevation2;
+    @include large-rounding;
+    margin: 8px 200px;
+    border-radius: 1.37rem;
+    padding: 3px;
+    -gtk-outline-radius: 10rem;
+}
+.bar-floating-shorter {
+    background-color: $layer0;
+    @include elevation2;
+    @include large-rounding;
+    margin: 8px 500px;
+    border-radius: 1.37rem;
+    padding: 3px;
+    -gtk-outline-radius: 10rem;
+}
 .bar-hang {
     background-color: $layer0;
     /* padding: 0.3rem 1.1rem; */
@@ -39,7 +57,8 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .bar-bg {
     background-color: $layer0;
-    min-height: 3.027rem;
+    padding :0px;
+    min-height: 3.3rem;
 }
 
 .bar-bg-focus {
@@ -59,7 +78,10 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-sidespace {
     min-width: 1.5rem;
 }
+.txt-percent{
+    @include numbertext;
 
+}
 .bar-group-margin {
     padding: 0.273rem 0rem;
 }
@@ -93,6 +115,7 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-group-round {
     border-radius: 10rem;
     -gtk-outline-radius: 10rem;
+    padding:4px;
 }
 
 .bar-group-middle {
@@ -169,7 +192,7 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-time {
     @include titlefont;
-    font-size: 1.2727rem;
+    font-size: 1.3727rem;
     color: $timeOnLayer1;
 }
 
@@ -487,3 +510,9 @@ $bar_ws_width_focus_active: 6.045rem;
     padding: 0 0.682rem;
 }
 
+.bar-round-padding{
+    padding:0.3rem 1rem ;
+    background-color: $layer0;
+    @include large-rounding;
+    @include elevation2 
+}

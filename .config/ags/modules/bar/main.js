@@ -12,7 +12,7 @@ const createBarContents = async (monitor) => {
     const contents = {};
 
     // Create content for each mode
-    for (const mode of [1, 2, 3]) { // Normal, Floating, Minimal
+    for (const mode of [1, 2, 3, 4, 5, 6, 7, 8, 9]) { // Normal, Floating, Minimal
         try {
             const layout = BarLayouts[mode];
             if (layout) {
@@ -43,7 +43,7 @@ const createBar = async (monitor = 0) => {
     const stack = Widget.Stack({
         homogeneous: false,
         transition: "slide_up_down",
-        transitionDuration: options.animations?.durationSmall || 110,
+        transitionDuration: options.animations?.durationSmall || 60,
         children: contents,
     });
 
@@ -53,7 +53,7 @@ const createBar = async (monitor = 0) => {
         exclusivity: "exclusive",
         visible: true,
         child: Widget.Box({
-            css: 'min-height: 2px;',
+            css: 'min-height: 3rem;',
             children: [stack],
         }),
     });

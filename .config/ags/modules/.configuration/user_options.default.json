@@ -150,8 +150,8 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 8,
-    "focus": 4
+    "shown": 10,
+    "focus": 6
   },
   "dock": {
     "enabled": true,
@@ -240,6 +240,7 @@
     }
   },
   "bar": {
+    "mode":"mode1",
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }

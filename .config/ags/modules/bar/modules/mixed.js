@@ -163,7 +163,7 @@ export default () => {
     hexpand: true,
     className: "txt-smallie bar-music-txt",
     truncate: "end",
-    maxWidthChars: 40,
+    maxWidthChars: 20,
     setup: (self) => {
       const update = () => {
         const mpris = Mpris.getPlayer("");
