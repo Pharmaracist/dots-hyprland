@@ -11,7 +11,7 @@ export const Dent = () => Widget.Box({
 });
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    4: { // Floating
+    1: { // Pads
         name: 'Pads',
         className: 'bar-nothing',
         layout:  (modules) => ({
@@ -35,6 +35,7 @@ export const BarLayouts = {
             className: 'bar-round-padding',
             children: [
                 modules.InfoModules.clock(),
+                modules.MediaModules.cava()
                 ],
             })
             ],
@@ -56,7 +57,7 @@ export const BarLayouts = {
         ],
     }),
     },
-    1: { // Floating
+    4: { // Floating
         name: 'Floating',
         className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
