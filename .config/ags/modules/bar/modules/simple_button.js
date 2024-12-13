@@ -9,7 +9,7 @@ export const BarButton = ({
   },
 } = {}) =>
   Widget.EventBox({
-    className: "txt-hugerass icon-nerd sec-txt",
+    className: "txt-gigantic icon-nerd sec-txt",
     child: Widget.Label({
       label,
     }),

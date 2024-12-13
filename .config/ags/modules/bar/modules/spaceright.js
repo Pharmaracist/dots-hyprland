@@ -106,7 +106,7 @@ export default (monitor = 0) => {
         Widget.Box({
           hexpand: true,
           className: "spacing-h-5",
-          children: [emptyArea, barTray, indicatorArea],
+          children: [barTray, indicatorArea],
         }),
       ],
     }),

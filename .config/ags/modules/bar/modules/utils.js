@@ -46,10 +46,10 @@ const Shortcuts = () => {
     onClicked: () => Utils.execAsync(`firefox --new-window github.com/pharmaracist`),
   });
 
-  const desktopClockButton = createNerdButton({
-    name: getString("toggle on screen clock"),
-    icon: "\udb80\udd09",
-    onClicked: () => App.toggleWindow("desktopbackground"),
+  const yt = createNerdButton({
+    name: getString("YT"),
+    icon: "\uf166",
+    onClicked: () => Utils.execAsync(`firefox --new-window youtube.com`),
   });
 
   const agsTweaksButton = createUtilButton({
@@ -78,10 +78,10 @@ const Shortcuts = () => {
     hpack: "center",
     className: "spacing-h-10",
     children: [
-      gitHubButton,
-      desktopClockButton,
+      yt,
       agsTweaksButton,
-      chatGPTButton,
+      gitHubButton,
+      // chatGPTButton,
       screenSnipButton,
       colorPickerButton,
     ],
