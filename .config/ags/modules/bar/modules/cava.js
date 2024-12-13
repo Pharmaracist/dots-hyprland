@@ -1,128 +1,66 @@
-import Widget from "resource:///com/github/Aylur/ags/widget.js";
-const { Gtk } = imports.gi;
-import { Variable } from "resource:///com/github/Aylur/ags/variable.js";
-import { exec } from "resource:///com/github/Aylur/ags/utils.js";
+import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+import Service from 'resource:///com/github/Aylur/ags/service.js';
+import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
+import cava from "../../../services/cava.js"
 
-const Cava = ({
-  bars = 20,
-  barHeight = 100,
-  align = "end",
-  vertical = false,
-  smooth = false,
-}) =>
-  Widget.DrawingArea({
-    class_name: "cava",
-    attribute: {
-      cavaVar: Variable([], {
-        listen: [
-          [
-            "bash",
-            "-c",
-            `printf "[general]\n  \
-                    framerate=60\n    \
-                    bars = ${bars}\n  \
-                    [input]\n \
-                    method = pulse\n \
-                    [output]\n        \
-                    channels = mono\n \
-                    method = raw\n    \
-                    raw_target = /dev/stdout\n \
-                    data_format = ascii\n \
-                    ascii_max_range = ${barHeight}\n" | \
-                    cava -p /dev/stdin`,
-          ],
-          (out) => {
-            return out.split(";").slice(0, -1);
-          },
-        ],
-      }),
-    },
-    setup: (widget) => {
-      if (vertical) widget.set_size_request(barHeight, bars);
-      else widget.set_size_request(bars, barHeight);
-      const varHandler = widget.attribute.cavaVar.connect("changed", () =>
-        widget.queue_draw(),
-      );
-      widget.on("destroy", () => {
-        widget.attribute.cavaVar.stopListen();
-        widget.attribute.cavaVar.disconnect(varHandler);
-      });
-    },
-  }).on("draw", (widget, cr) => {
-    const context = widget.get_style_context();
-    const h = widget.get_allocated_height();
-    const w = widget.get_allocated_width();
+export default () => {
+    // Create the visualization widget
+    const visualizer = Widget.Box({
+        class_name: 'cava-visualizer',
+        spacing: 0,
+    })
 
-    const bg = context.get_property("background-color", Gtk.StateFlags.NORMAL);
-    const fg = context.get_property("color", Gtk.StateFlags.NORMAL);
-    const radius = context.get_property("border-radius", Gtk.StateFlags.NORMAL);
+    // Update the widget
+    const updateWidget = () => {
+        const config = cava.getConfig()
+        if (!cava.output) return
 
-    cr.arc(radius, radius, radius, Math.PI, (3 * Math.PI) / 2);
-    cr.arc(w - radius, radius, radius, (3 * Math.PI) / 2, 0);
-    cr.arc(w - radius, h - radius, radius, 0, Math.PI / 2);
-    cr.arc(radius, h - radius, radius, Math.PI / 2, Math.PI);
-    cr.closePath();
-    cr.clip();
+        // Analyze the output to determine high threshold dynamically
+        const chars = cava.output.split('')
+        const charCodes = chars.map(char => char.charCodeAt(0) - 9601)
+        const maxHeight = Math.max(...charCodes)
+        const highThreshold = maxHeight * 0.6  // 60% of max height is considered high
 
-    cr.setSourceRGBA(bg.red, bg.green, bg.blue, bg.alpha);
-    cr.rectangle(0, 0, w, h);
-    cr.fill();
+        // Create bar widgets with more nuanced representation
+        const bars = chars.map(char => {
+            const height = char.charCodeAt(0) - 9601 // Convert Unicode block to height (0-7)
+            const isHigh = height >= highThreshold
+            
+            return Widget.Label({
+                label: char,
+                class_name: isHigh ? 'cava-bar-high' : 'cava-bar-low',
+                css: `
+                    opacity: ${isHigh ? 1 : 0.6};
+                    margin: 0;
+                    padding: 0;
+                    border: 0;
+                    outline: 0;
+                    box-shadow: none;
+                    line-height: 1;
+                    transform: scaleY(${isHigh ? 1 : 0.8}) translateZ(0);
+                    transition: all 0.1s ease;
+                `
+            })
+        })
 
-    cr.setSourceRGBA(fg.red, fg.green, fg.blue, fg.alpha);
-    if (!smooth) {
-      for (let i = 0; i < widget.attribute.cavaVar.value.length; i++) {
-        const height = h * (widget.attribute.cavaVar.value[i] / barHeight);
-        let y = 0;
-        let x = 0;
-        switch (align) {
-          case "start":
-            y = 0;
-            x = 0;
-            break;
-          case "center":
-            y = (h - height) / 2;
-            x = (w - height) / 2;
-            break;
-          case "end":
-          default:
-            y = h - height;
-            x = w - height;
-            break;
-        }
-        if (vertical) cr.rectangle(x, i * (h / bars), height, h / bars);
-        else cr.rectangle(i * (w / bars), y, w / bars, height);
-        cr.fill();
-      }
-    } else {
-      let lastX = 0;
-      let lastY = h - h * (widget.attribute.cavaVar.value[0] / barHeight);
-      cr.moveTo(lastX, lastY);
-      for (let i = 1; i < widget.attribute.cavaVar.value.length; i++) {
-        const height = h * (widget.attribute.cavaVar.value[i] / barHeight);
-        let y = h - height;
-        cr.curveTo(
-          lastX + w / (bars - 1) / 2,
-          lastY,
-          lastX + w / (bars - 1) / 2,
-          y,
-          i * (w / (bars - 1)),
-          y,
-        );
-        lastX = i * (w / (bars - 1));
-        lastY = y;
-      }
-      cr.lineTo(w, h);
-      cr.lineTo(0, h);
-      cr.fill();
+        visualizer.children = bars
     }
-  });
 
-let CavaWidget;
-if (exec("which cava") != "") CavaWidget = Cava;
-else {
-  console.warn("cava is not installed. Cava module has been disabled.");
-  CavaWidget = () => Widget.Box();
+    // Create the container
+    const container = Widget.Box({
+        class_name: 'cava-module',
+        child: visualizer,
+        setup: self => {
+            // Update on any change
+            self.poll(100, () => {
+                updateWidget()
+                return true
+            })
+
+            // Initial update
+            updateWidget()
+        }
+    })
+
+    return container
 }
-
-export default Cava;
-export { Cava };
