@@ -35,7 +35,7 @@ generate_colors() {
 
     # Silent execution of color generation commands
     "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$imgpath" --apply --smart >/dev/null 2>&1
-    wal -s -i"$imgpath" --saturate 0.8 >/dev/null 2>&1
+    wal -s -i"$imgpath" --backend [material] --saturate 0.8 >/dev/null 2>&1
 
     # Refresh applications asynchronously, ensuring all output is suppressed
     (pywal-discord -p ~/.config/vesktop/themes >/dev/null 2>&1 &)
