@@ -9,10 +9,10 @@ const BRIGHTNESS_STEP = 0.05;
 const DEFAULT_WORKSPACE_LABEL = 'Desktop';
 const MAX_TITLE_LENGTH = 25;
 
-const WindowTitle = async () => {
+export default async () => {
     try {
         const Hyprland = (await import('resource:///com/github/Aylur/ags/service/hyprland.js')).default;
-        
+
         const findAppIcon = (appClass) => {
             if (!appClass) return null;
             
@@ -34,7 +34,6 @@ const WindowTitle = async () => {
                     } catch (e) { }
                 }
             }
-            
             return null;
         };
 
@@ -49,12 +48,10 @@ const WindowTitle = async () => {
             setup: (self) => self.hook(Hyprland.active.client, () => {
                 const classname = Hyprland.active.client.class;
                 const icon = findAppIcon(classname);
-
                 if (!icon) {
                     self.visible = false;
                     return;
                 }
-
                 self.icon = icon;
                 self.visible = true;
             }),
@@ -80,55 +77,41 @@ const WindowTitle = async () => {
             }),
         });
 
-        return Widget.Box({
-            children: [
-                appIcon,
-                Widget.Box({ className: 'bar-wintitle-icon-spacer' }),
-                Widget.Box({
-                    vertical: true,
-                    children: [
-                        topLabel,
-                        bottomLabel
-                    ]
-                })
-            ]
-        });
-    } catch {
-        return null;
-    }
-}
+        const handleScroll = (direction) => {
+            Indicator.popup(1);
+            Brightness[0].screen_value += direction * BRIGHTNESS_STEP;
+        };
 
-export default async (monitor = 0) => {
-    const optionalWindowTitleInstance = await WindowTitle();
-    
-    const handleScroll = (direction) => {
-        Indicator.popup(1);
-        Brightness[monitor].screen_value += direction * BRIGHTNESS_STEP;
-    };
-
-    return Widget.EventBox({
-        onScrollUp: () => handleScroll(1),
-        onScrollDown: () => handleScroll(-1),
-        onPrimaryClick: () => App.toggleWindow('sideleft'),
-        child: Widget.Box({
-            homogeneous: false,
-            children: [
-                Widget.Box({ className: 'bar-corner-spacing' }),
-                Widget.Overlay({
-                    overlays: [
-                        Widget.Box({ hexpand: true }),
-                        Widget.Box({
-                            className: 'bar-sidemodule',
-                            hexpand: true,
-                            children: [Widget.Box({
+        return Widget.EventBox({
+            onScrollUp: () => handleScroll(1),
+            onScrollDown: () => handleScroll(-1),
+            onPrimaryClick: () => App.toggleWindow('overview'),
+            child: Widget.Box({
+                homogeneous: false,
+                className: 'bar-space-button',
+                spacing: 8,
+                children: [
+                    Widget.Box({ className: 'bar-corner-spacing' }),
+                    Widget.Box({
+                        className: 'bar-wintitle',
+                        spacing: 8,
+                        children: [
+                            appIcon,
+                            Widget.Box({
                                 vertical: true,
-                                className: 'bar-space-button',
-                                children: [optionalWindowTitleInstance]
-                            })]
-                        }),
-                    ]
-                })
-            ]
-        })
-    });
-}
+                                spacing: 2,
+                                children: [
+                                    topLabel,
+                                    bottomLabel
+                                ]
+                            })
+                        ]
+                    })
+                ]
+            })
+        });
+    } catch (error) {
+        console.error('Failed to initialize WindowTitle:', error);
+        return Widget.Box({}); // Return empty box on error
+    }
+};

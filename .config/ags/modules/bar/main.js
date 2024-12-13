@@ -32,7 +32,7 @@ const createBarContents = async (monitor) => {
 // Create the bar window
 const createBar = async (monitor = 0) => {
     const contents = await createBarContents(monitor);
-    const options = globalThis.userOptions?.asyncGet?.() || {};
+    const options = await globalThis.userOptions?.asyncGet?.() || {};
 
     // Default to mode1 if no contents are available
     if (!contents.mode1) {
@@ -49,7 +49,7 @@ const createBar = async (monitor = 0) => {
 
     const bar = Widget.Window({
         name: `bar-${monitor}`,
-        anchor: [userOptions.asyncGet().bar.position, 'left', 'right'],
+        anchor: [await userOptions.asyncGet().bar.position, 'left', 'right'],
         exclusivity: "exclusive",
         visible: true,
         child: Widget.Box({
@@ -59,8 +59,8 @@ const createBar = async (monitor = 0) => {
     });
 
     // Set up mode switching
-    currentShellMode.connect('changed', () => {
-        const mode = currentShellMode.value?.[monitor] || 1;
+    currentShellMode.connect('changed', async () => {
+        const mode = await currentShellMode.value?.[monitor] || 1;
         const modeKey = `mode${mode}`;
         if (contents[modeKey]) {
             stack.shown = modeKey;
@@ -68,7 +68,7 @@ const createBar = async (monitor = 0) => {
     });
 
     // Set initial mode
-    const initialMode = currentShellMode.value?.[monitor] || 1;
+    const initialMode = await currentShellMode.value?.[monitor] || 1;
     stack.shown = `mode${initialMode}`;
 
     return bar;

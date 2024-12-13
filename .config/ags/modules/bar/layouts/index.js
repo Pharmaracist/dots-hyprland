@@ -1,6 +1,5 @@
 // Layout definitions for different bar modes
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import ClassWindow from "../modules/window_title.js";
 
 // Utility component for visual separation
 export const Separator = () => Widget.Box({
@@ -12,14 +11,14 @@ export const Dent = () => Widget.Box({
 });
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    1: { // Floating
+    4: { // Floating
         name: 'Pads',
         className: 'bar-nothing',
-        // css: "min-height:1rem",
         layout:  (modules) => ({
             start: [Widget.Box({
                 className: 'bar-round-padding',
                 children: [
+                   
                     modules.StatusModules.battery(),
                     modules.workspaces.normal(),
                 ],
@@ -39,30 +38,40 @@ export const BarLayouts = {
                 ],
             })
             ],
-            end: [Widget.Box({
+            end: [
+                Widget.Box({
+                className: 'bar-round-padding',
+                children: [
+                    modules.StatusModules.systemResources(),
+                ],
+            }),
+            Widget.Box({
                 className: 'bar-round-padding',
                 children: [
                     modules.InfoModules.indicators(),
-                    modules.ControlModules.button(),
                 ],
-            })
-            ],
-        }),
+            }),
+            modules.ControlModules.button(),
+            
+        ],
+    }),
     },
-    7: { // Floating
+    1: { // Floating
         name: 'Floating',
-        className: 'bar-floating',
+        className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
         layout:  (modules) => ({
             start: [
                 modules.workspaces.focus(),
+                // modules.InfoModules.title(),
             ],
             center: [
                 modules.InfoModules.clock(),
             ],
             end: [
+                Separator(),
                 modules.InfoModules.indicators(),
-            modules.StatusModules.battery(),
+                modules.StatusModules.battery(),
             ],
         }),
     },
@@ -90,6 +99,7 @@ export const BarLayouts = {
         css: "min-height:3.2rem",
         layout:  (modules) => ({
             start: [
+                
                 modules.StatusModules.battery(),
                 Separator(),
                 modules.ControlModules.shortcuts(),
@@ -104,30 +114,12 @@ export const BarLayouts = {
             ],
         }),
     },
-    4: { // Notch
-        name: 'Notch',
-        className: 'bar-nothing',
-        layout: (modules) => ({
-            // start: [modules.InfoModules.windowTitle()],
-            center: [Widget.Box({
-                className: "bar-notch spacing-h-5",
-                css: "min-height:3.2rem",
-                children: [
-                    modules.MediaModules.music(),
-                    modules.workspaces.normal(),
-                    modules.StatusModules.system(),
-                ]
-            })],
-            end: [
-                modules.InfoModules.indicators(),
-            ],
-        }),
-    },
+   
     5: { // Normal
         name: 'Normal',
-        className: 'bar-bg spacing-h-5',
+        className: 'bar-bg',
         layout: (modules) => ({
-            // start: [modules.InfoModules.title()],
+            start: [modules.InfoModules.windowTitle()],
             center: [
                 modules.MediaModules.music(),
                 modules.workspaces.normal(),
@@ -143,8 +135,9 @@ export const BarLayouts = {
         className: 'bar-floating-short',
         css:"min-height:2.8rem",
         layout: (modules) => ({
-            start: [modules.ControlModules.button(),Separator(),modules.ControlModules.shortcuts()],
+            start: [modules.InfoModules.title()],
             center: [
+
                 modules.MediaModules.music(),
                 modules.workspaces.normal(),
                 modules.StatusModules.system(),
@@ -158,11 +151,11 @@ export const BarLayouts = {
 };
 
 // Create bar content with proper layout and error handling
-export const createBarContent = (layout, modules) => {
+export const createBarContent = async (layout, modules) => {
     try {
         const config = layout.layout(modules);
-        return Widget.Box({
-            className: layout.className || 'bar-bg',
+        const content = Widget.Box({
+            className: layout.className || '',
             css: layout.css || '',
             children: [
                 Widget.CenterBox({
@@ -184,7 +177,10 @@ export const createBarContent = (layout, modules) => {
                     }),
                 }),
             ],
+           
         });
+
+        return content;
     } catch (error) {
         console.error(`Error creating bar content for layout ${layout.name}:`, error);
         return Widget.Box({ 
