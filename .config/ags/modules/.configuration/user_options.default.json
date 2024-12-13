@@ -240,7 +240,6 @@
     }
   },
   "bar": {
-    "modes": ["mode5"],
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }

@@ -45,7 +45,7 @@ globalThis["cycleMode"] = () => {
   const currentMode = currentShellMode.value[monitor];
   
   // Cycle through modes 1-6
-  const nextMode = (currentMode % 6) + 1;
+  const nextMode = (currentMode % 4) + 1;
   updateMonitorShellMode(currentShellMode, monitor, nextMode);
 };
 

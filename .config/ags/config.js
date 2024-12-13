@@ -62,9 +62,9 @@ const Windows = () => [
         forMonitors((id) => Corner(id, "bottom right", true)),
       ]
     : []),
-  ...(userOptions.asyncGet().appearance.barRoundCorners
-    ? [forMonitors(BarCornerTopleft), forMonitors(BarCornerTopright)]
-    : []),
+  // ...(userOptions.asyncGet().appearance.barRoundCorners
+  //   ? [forMonitors(BarCornerTopleft), forMonitors(BarCornerTopright)]
+  //   : []),
   Wallselect(),
 ];
 

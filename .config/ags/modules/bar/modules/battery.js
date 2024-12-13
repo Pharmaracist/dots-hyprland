@@ -72,7 +72,7 @@ const BarBatteryProgress = () => {
     });
 };
 
-const BarBattery = () => {
+const BatteryContent = () => {
     let timeoutId = 0;
 
     const percentageLabel = Label({
@@ -127,52 +127,54 @@ const BarBattery = () => {
         powerDrawLabel.label = `Power: ${powerDraw}`;
 
         try {
-          const result = await Utils.execAsync("upower -i /org/freedesktop/UPower/devices/battery_BAT0");
-          const lines = result.split('\n');
-          let timeToEmptyFull = "N/A";
+            const result = await Utils.execAsync("upower -i /org/freedesktop/UPower/devices/battery_BAT0");
+            const lines = result.split('\n');
+            let timeToEmptyFull = "N/A";
 
-          for (const line of lines) {
-              if (line.includes("time to")) {
-                  timeToEmptyFull = line.split(":")[1].trim();
-                  break; // Found the time, no need to continue
-              }
-          }
-          timeToEmptyFullLabel.label =  timeToEmptyFull ;
-      } catch (error) {
-          console.error("Error getting battery info with upower:", error)
-          timeToEmptyFullLabel.label = "Error";
-      }
-  };
-
-    const batteryBox = EventBox({
-        onPrimaryClick: () => detailsRevealer.revealChild = !detailsRevealer.revealChild,
-        child: Box({
-            className: "sec-txt", 
-            children: [batteryIcon],
-        }),
-    });
+            for (const line of lines) {
+                if (line.includes("time to")) {
+                    timeToEmptyFull = line.split(":")[1].trim();
+                    break;
+                }
+            }
+            timeToEmptyFullLabel.label = timeToEmptyFull;
+        } catch (error) {
+            console.error("Error getting battery info with upower:", error);
+            timeToEmptyFullLabel.label = "Error";
+        }
+    };
 
     // Initial update
     updateBatteryDetails();
 
-    // Periodic updates for time/power draw (less frequent)
+    // Periodic updates
     timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 5000, () => {
         updateBatteryDetails();
         return GLib.SOURCE_CONTINUE;
     });
 
-    batteryBox.destroy = () => {
-        if (timeoutId) {
-            GLib.source_remove(timeoutId);
-            timeoutId = 0;
-        }
-        batteryBox.parent_instance.destroy();
-    };
-
     return Box({
-        className: "bar-battery-module spacing-h-10",  
-        children: [batteryBox, detailsRevealer],
+        className: "bar-battery-module spacing-h-10",
+        children: [
+            Box({
+                className: "bar-battery-content",
+                children: [batteryIcon]
+            }),
+            detailsRevealer
+        ],
+        setup: (self) => {
+            self.revealer = detailsRevealer;
+        },
     });
 };
 
-export default BarBattery;
+export default () => Widget.EventBox({
+    onPrimaryClick: (self) => {
+        self.child.revealer.revealChild = !self.child.revealer.revealChild;
+    },
+    onSecondaryClick: () => {
+        Utils.execAsync(['xfce4-power-manager-settings']).catch(print);
+    },
+    onMiddleClick: () => {},
+    child: BatteryContent(),
+});

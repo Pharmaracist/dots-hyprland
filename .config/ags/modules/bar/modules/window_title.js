@@ -7,28 +7,27 @@ import GLib from "gi://GLib";
 const BRIGHTNESS_STEP = 0.05;
 const DEFAULT_WORKSPACE_LABEL = "";
 
-const ClassWindow = async () => {
+const createClassWindow = async () => {
   try {
     const Hyprland = (
       await import("resource:///com/github/Aylur/ags/service/hyprland.js")
     ).default;
 
-    const topLabel = Widget.Label({
-      className: "wintitle  txt-norm",
+    return Widget.Label({
+      className: "wintitle txt-norm",
       setup: (self) =>
         self.hook(Hyprland.active.client, () => {
           self.label = Hyprland.active.client.class || DEFAULT_WORKSPACE_LABEL;
         }),
     });
-
-    return topLabel;
   } catch {
     return null;
   }
 };
 
 export default async (monitor = 0) => {
-  const topLabelInstance = await ClassWindow();
+  const topLabel = await createClassWindow();
+  if (!topLabel) return null;
 
   const handleScroll = (direction) => {
     Indicator.popup(1);
@@ -40,16 +39,7 @@ export default async (monitor = 0) => {
     onScrollDown: () => handleScroll(-1),
     onPrimaryClick: () => App.toggleWindow("sideleft"),
     child: Widget.Box({
-      children: [
-        Widget.Box({
-          // className: "bar-sidemodule",
-          children: [
-            Widget.Box({
-              children: [topLabelInstance],
-            }),
-          ],
-        }),
-      ],
+      children: [topLabel],
     }),
   });
 };
