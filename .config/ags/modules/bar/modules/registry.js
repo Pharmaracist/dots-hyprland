@@ -49,18 +49,18 @@ const wrapAsyncModule = (asyncFn) => {
     return () => {
         const placeholder = Widget.Box({});
         asyncFn().then(widget => {
-            if (widget && placeholder.mapped) {
+            if (widget) {
                 placeholder.children = [widget];
             }
         }).catch(error => {
-            console.error('Failed to load async module:', error);
+            console.error('Failed to load module:', error);
         });
         return placeholder;
     };
 };
 
 // Workspace modules are loaded dynamically based on the environment
-async function loadWorkspaces() {
+const loadWorkspaces = async () => {
     try {
         const hyprland = await import("./workspaces_hyprland.js");
         const hyprlandFocus = await import("./workspaces_hyprland_focus.js");
@@ -68,66 +68,77 @@ async function loadWorkspaces() {
             normal: () => hyprland.default(),
             focus: () => hyprlandFocus.default(),
         };
-    } catch (error) {
-        console.error('Failed to load workspace modules:', error);
-        return {
-            normal: () => Widget.Box({}),
-            focus: () => Widget.Box({}),
-        };
+    } catch {
+        try {
+            const sway = await import("./workspaces_sway.js");
+            return {
+                normal: () => sway.default(),
+                focus: () => sway.default(),
+            };
+        } catch {
+            return {
+                normal: () => Widget.Box({}),
+                focus: () => Widget.Box({}),
+            };
+        }
     }
-}
+};
 
 // Helper function to determine if a layout should have corners
-function shouldHaveCorners(layoutNumber) {
+const shouldHaveCorners = (layoutNumber) => {
     // List of layout numbers that should have corners
     const cornerLayouts = [5]; // Only the Normal layout (5) should have corners
+    
+    // Return true if the layout number is in the list
     return cornerLayouts.includes(layoutNumber);
-}
+};
 
 // Module groups for easier management
 export const CornerModules = {
-    topleft: (layout) => shouldHaveCorners(layout?.number) ? BarCornerTopleft() : null,
-    topright: (layout) => shouldHaveCorners(layout?.number) ? BarCornerTopright() : null,
+    async topleft(layout) {
+        return shouldHaveCorners(layout?.number) ? await BarCornerTopleft() : null;
+    },
+    async topright(layout) {
+        return shouldHaveCorners(layout?.number) ? await BarCornerTopright() : null;
+    },
 };
 
 export const StatusModules = {
-    battery: () => Battery(),
-    powerDraw: () => PowerDraw(),
-    systemResources: () => SystemResources(),
-    system: () => System(),
+    battery() { return Battery(); },
+    powerDraw() { return PowerDraw(); },
+    systemResources() { return SystemResources(); },
+    system() { return System(); },
 };
 
 export const ControlModules = {
-    toggles: () => BarToggles(),
-    button: () => BarButton(),
-    shortcuts: () => Shortcuts(),
-    keyboard: () => KbLayout(),
+    toggles() { return BarToggles(); },
+    button() { return BarButton(); },
+    shortcuts() { return Shortcuts(); },
+    keyboard() { return KbLayout(); },
 };
 
 export const InfoModules = {
-    clock: () => BarClock(),
-    simpleClock: () => simpleClock(),
+    clock() { return BarClock(); },
+    simpleClock() { return simpleClock(); },
     windowTitle: wrapAsyncModule(asyncModules.windowTitle),
-    indicators: () => Indicators(),
+    indicators() { return Indicators(); },
     title: wrapAsyncModule(asyncModules.title),
-    statusIndicators: () => Indicators(),
+    statusIndicators() { return System(); },
 };
 
 export const MediaModules = {
-    music: () => Music(),
-    musicStuff: () => MusicStuff(),
-    cava: () => Cava(),
+    music() { return Music(); },
+    musicStuff() { return MusicStuff(); },
+    cava() { return Cava(); },
 };
 
 // Initialize all async modules
-async function initializeAsyncModules() {
-    for (const moduleInit of Object.values(asyncModules)) {
-        await moduleInit();
-    }
-}
+const initializeAsyncModules = async () => {
+    await Promise.all(Object.values(asyncModules).map(fn => fn()));
+};
 
 // Function to initialize all modules
-export async function initializeModules() {
+export const initializeModules = async () => {
     await initializeAsyncModules();
     const workspaces = await loadWorkspaces();
     
@@ -139,4 +150,4 @@ export async function initializeModules() {
         InfoModules,
         MediaModules,
     };
-}
+};
