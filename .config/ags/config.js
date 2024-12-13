@@ -13,7 +13,7 @@ import {
 // Widgets
 import Bar from "./modules/bar/main.js";
 import { BarCornerTopleft, BarCornerTopright } from "./modules/bar/barcorners.js";
-// import Cheatsheet from "./modules/cheatsheet/main.js";
+import Cheatsheet from "./modules/cheatsheet/main.js";
 import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
 import Corner from "./modules/screencorners/main.js";
@@ -48,7 +48,7 @@ const Windows = () => [
   // forMonitors(Crosshair),
   Overview(),
   forMonitors(Indicator),
-  // forMonitors(Cheatsheet),
+  forMonitors(Cheatsheet),
   SideLeft(),
   SideRight(),
   // forMonitors(Osk),
