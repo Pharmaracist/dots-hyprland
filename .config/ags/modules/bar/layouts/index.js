@@ -7,37 +7,44 @@ export const Separator = () => Widget.Box({
     css:"font-weight:100;",
     child: Widget.Label({ label: "| " }),
 });
-export const Dent = () => Widget.Box({
-});
+
+export const Dent = () => Widget.Box({});
+
 // Bar layout configurations for different modes
 export const BarLayouts = {
     1: { // Pads
         name: 'Pads',
         className: 'bar-nothing',
-        layout:  (modules) => ({
-            start: [Widget.Box({
-                className: 'bar-round-padding',
-                children: [
-                    modules.StatusModules.battery(),
-                    modules.workspaces.normal(),
-                ],
-            }),
-            Widget.Box({
-                className: 'bar-round-padding',
-                children: [
-                    modules.ControlModules.shortcuts(),
-                ],
-            }),
-        ],
-        center: [Widget.Box({
-            className: 'bar-round-padding',
-            children: [
-                modules.InfoModules.clock(),
-                modules.MediaModules.cava(),
+        corners: {
+            topLeft: true,
+            topRight: true,
+            bottomLeft: false,
+            bottomRight: false,
+        },
+        layout: (modules, monitor) => ({
+            start: [
+                Widget.Box({
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.StatusModules.battery(),
+                        modules.workspaces.normal(),
+                    ],
+                }),
+                Widget.Box({
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.ControlModules.shortcuts(),
+                    ],
+                })
             ],
-        })
-    ],
-    end: [
+            center: [Widget.Box({
+                className: 'bar-round-padding',
+                children: [
+                    modules.InfoModules.clock(),
+                    modules.MediaModules.cava(),
+                ],
+            })],
+            end: [
                 Widget.Box({
                     className: 'bar-round-padding',
                     children: [
@@ -45,29 +52,34 @@ export const BarLayouts = {
                     ],
                 }),
                 Widget.Box({
-                className: 'bar-round-padding',
-                children: [
-                    modules.StatusModules.systemResources(),
-                ],
-            }),
-            Widget.Box({
-                className: 'bar-round-padding',
-                children: [
-                    modules.InfoModules.indicators(),
-                ],
-            }),
-            modules.ControlModules.button(),
-        ],
-    }),
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.StatusModules.systemResources(),
+                    ],
+                }),
+                Widget.Box({
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.InfoModules.indicators(),
+                    ],
+                }),
+                modules.ControlModules.button(),
+            ],
+        }),
     },
     4: { // Floating
         name: 'Floating',
         className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
-        layout:  (modules) => ({
+        corners: {
+            topLeft: false,
+            topRight: false,
+            bottomLeft: false,
+            bottomRight: false,
+        },
+        layout: (modules) => ({
             start: [
                 modules.workspaces.focus(),
-                // modules.InfoModules.title(),
             ],
             center: [
                 modules.InfoModules.clock(),
@@ -79,11 +91,17 @@ export const BarLayouts = {
             ],
         }),
     },
-    2: { // Floating
+    2: { // Short
         name: 'Short',
         className: 'bar-floating-short',
         css: "min-height:3.2rem",
-        layout:  (modules) => ({
+        corners: {
+            topLeft: false,
+            topRight: false,
+            bottomLeft: false,
+            bottomRight: false,
+        },
+        layout: (modules) => ({
             start: [
                 modules.workspaces.focus(),
             ],
@@ -93,21 +111,24 @@ export const BarLayouts = {
             end: [
                 modules.InfoModules.indicators(),
                 modules.StatusModules.battery(),
-
             ],
         }),
     },
-    3: { // Floating
+    3: { // Shorter
         name: 'Shorter',
         className: 'bar-floating-shorter',
         css: "min-height:3.2rem",
-        layout:  (modules) => ({
+        corners: {
+            topLeft: false,
+            topRight: false,
+            bottomLeft: false,
+            bottomRight: false,
+        },
+        layout: (modules) => ({
             start: [
-                
                 modules.StatusModules.battery(),
                 Separator(),
                 modules.ControlModules.shortcuts(),
-                
             ],
             center: [
                 modules.workspaces.focus(),
@@ -118,12 +139,21 @@ export const BarLayouts = {
             ],
         }),
     },
-   
     5: { // Normal
         name: 'Normal',
+        number: 1,
         className: 'bar-bg',
+        corners: {
+            topLeft: true,
+            topRight: true,
+            bottomLeft: false,
+            bottomRight: false,
+        },
         layout: (modules) => ({
-            start: [modules.InfoModules.windowTitle()],
+            start: [
+                modules.CornerModules.topleft(),
+                modules.InfoModules.windowTitle(),
+            ],
             center: [
                 modules.MediaModules.music(),
                 modules.workspaces.normal(),
@@ -131,17 +161,25 @@ export const BarLayouts = {
             ],
             end: [
                 modules.InfoModules.indicators(),
+                modules.CornerModules.topright(),
             ],
         }),
     },
-    6: { //floatnorm
+    6: { // floatnorm
         name: 'Minimal',
         className: 'bar-floating-short',
         css:"min-height:2.8rem",
+        corners: {
+            topLeft: false,
+            topRight: false,
+            bottomLeft: false,
+            bottomRight: false,
+        },
         layout: (modules) => ({
-            start: [modules.InfoModules.title()],
+            start: [
+                modules.InfoModules.title(),
+            ],
             center: [
-
                 modules.MediaModules.music(),
                 modules.workspaces.normal(),
                 modules.StatusModules.system(),
@@ -151,13 +189,12 @@ export const BarLayouts = {
             ],
         }),
     },
-    
 };
 
 // Create bar content with proper layout and error handling
-export const createBarContent = async (layout, modules) => {
+export const createBarContent = async (layout, modules, monitor) => {
     try {
-        const config = layout.layout(modules);
+        const config = await layout.layout(modules, monitor);
         
         // Create boxes for each section
         const startBox = Widget.Box({
@@ -180,6 +217,22 @@ export const createBarContent = async (layout, modules) => {
         centerBox.children = config.center?.filter(Boolean) || [];
         endBox.children = config.end?.filter(Boolean) || [];
 
+        // Dynamically handle corner rendering
+        const corners = layout.corners || {
+            topLeft: false,
+            topRight: false,
+            bottomLeft: false,
+            bottomRight: false,
+        };
+
+        // Add corner modules dynamically if they exist and are enabled
+        if (corners.topLeft && modules.CornerModules?.topleft) {
+            startBox.children.unshift(modules.CornerModules.topleft());
+        }
+        if (corners.topRight && modules.CornerModules?.topright) {
+            endBox.children.push(modules.CornerModules.topright());
+        }
+
         const content = Widget.Box({
             className: layout.className || '',
             css: layout.css || '',
@@ -193,10 +246,8 @@ export const createBarContent = async (layout, modules) => {
 
         return content;
     } catch (error) {
-        print(`Error creating bar content: ${error.message}`);
-        return Widget.Box({ 
-            className: "bar-error",
-            child: Widget.Label({ label: `Error: ${error.message}` }),
-        });
+        console.error('Error creating bar content:', error);
+        return Widget.Box(); // Return an empty box in case of error
     }
 };
+ 

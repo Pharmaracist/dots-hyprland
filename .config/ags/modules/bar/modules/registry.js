@@ -16,6 +16,7 @@ import Cava from "./cava.js";
 import { BarCornerTopleft, BarCornerTopright } from "../barcorners.js";
 import ClassWindow from "../modules/window_title.js";
 import WeatherWidget from "./weather.js";
+
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -84,23 +85,10 @@ const loadWorkspaces = async () => {
     }
 };
 
-// Helper function to determine if a layout should have corners
-const shouldHaveCorners = (layoutNumber) => {
-    // List of layout numbers that should have corners
-    const cornerLayouts = [5]; // Only the Normal layout (5) should have corners
-    
-    // Return true if the layout number is in the list
-    return cornerLayouts.includes(layoutNumber);
-};
-
 // Module groups for easier management
 export const CornerModules = {
-    async topleft(layout) {
-        return shouldHaveCorners(layout?.number) ? await BarCornerTopleft() : null;
-    },
-    async topright(layout) {
-        return shouldHaveCorners(layout?.number) ? await BarCornerTopright() : null;
-    },
+    topleft() { return BarCornerTopleft(); },
+    topright() { return BarCornerTopright(); },
 };
 
 export const StatusModules = {

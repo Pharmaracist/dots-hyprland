@@ -12,7 +12,7 @@ const createBarContents = async (monitor) => {
     const contents = {};
 
     // Create content for each mode
-    for (const mode of [1, 2, 3, 4, 5, 6, 7, 8, 9]) { // Normal, Floating, Minimal
+    for (const mode of [1, 2, 3, 4, 5, 6]) { // Normal, Floating, Minimal
         try {
             const layout = BarLayouts[mode];
             if (layout) {
