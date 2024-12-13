@@ -8,10 +8,13 @@ export const Separator = () => Widget.Box({
     child: Widget.Label({ label: "| " }),
 });
 export const Dent = () => Widget.Box({
+    // css:"mind-width:2rem;",
+    className:'margin-rl-5',
+    child: Widget.Label({ label: "   " }),
 });
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    4: { // Floating
+    1: { // Floating
         name: 'Pads',
         className: 'bar-nothing',
         layout:  (modules) => ({
@@ -35,9 +38,9 @@ export const BarLayouts = {
             className: 'bar-round-padding',
             children: [
                 modules.InfoModules.clock(),
-                ],
-            })
+                modules.MediaModules.cava(),
             ],
+        })],
             end: [
                 Widget.Box({
                 className: 'bar-round-padding',
@@ -56,20 +59,21 @@ export const BarLayouts = {
         ],
     }),
     },
-    1: { // Floating
+    4: { // Floating
         name: 'Floating',
         className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
         layout:  (modules) => ({
             start: [
                 modules.workspaces.focus(),
-                // modules.InfoModules.title(),
+                Dent(),
+                modules.ControlModules.shortcuts(),
             ],
             center: [
                 modules.InfoModules.clock(),
+                modules.MediaModules.cava(),
             ],
             end: [
-                Separator(),
                 modules.InfoModules.indicators(),
                 modules.StatusModules.battery(),
             ],
@@ -101,9 +105,7 @@ export const BarLayouts = {
             start: [
                 
                 modules.StatusModules.battery(),
-                Separator(),
-                modules.ControlModules.shortcuts(),
-                
+               
             ],
             center: [
                 modules.workspaces.focus(),
@@ -161,17 +163,17 @@ export const createBarContent = async (layout, modules) => {
                 Widget.CenterBox({
                     className: 'bar-content',
                     startWidget: Widget.Box({
-                        className: 'bar-start spacing-h-5',
+                        className: 'bar-start spacing-h-15',
                         hpack: 'start',
                         children: config.start?.filter(Boolean) || [],
                     }),
                     centerWidget: Widget.Box({
-                        className: 'bar-center spacing-h-5',
+                        className: 'bar-center spacing-h-15',
                         hpack: 'center',
                         children: config.center?.filter(Boolean) || [],
                     }),
                     endWidget: Widget.Box({
-                        className: 'bar-end spacing-h-5',
+                        className: 'bar-end spacing-h-15',
                         hpack: 'end',
                         children: config.end?.filter(Boolean) || [],
                     }),

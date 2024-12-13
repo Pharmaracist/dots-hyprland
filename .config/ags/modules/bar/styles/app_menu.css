@@ -1,0 +1,62 @@
+.app-menu-box {
+    padding: 0 8px;
+    spacing: 8px;
+}
+
+.app-name-button {
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.app-name-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item-button {
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.menu-item-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-popup {
+    background-color: @theme_bg_color;
+    border: 1px solid @borders;
+    border-radius: 6px;
+    padding: 4px;
+    margin-top: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.submenu-item {
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+.submenu-item:hover {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+/* Cava Visualizer */
+.cava-module {
+    background: transparent;
+}
+
+.cava-visualizer {
+    font-family: monospace;
+    font-size: 14px;
+    padding: 2px;
+}
+
+.cava-bar-high {
+    color: @theme_selected_bg_color;
+    font-family: monospace;
+}
+
+.cava-bar-low {
+    color: @theme_fg_color;
+    font-family: monospace;
+}

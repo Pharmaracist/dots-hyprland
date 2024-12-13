@@ -2,6 +2,47 @@
 $bar_ws_width: 1.774rem;
 $bar_ws_width_focus: 1rem;
 $bar_ws_width_focus_active: 6.045rem;
+.app-menu-box {
+    padding: 0 8px;
+}
+
+.app-name-button {
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.app-name-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item-button {
+    padding: 0 8px;
+    border-radius: 4px;
+}
+
+.menu-item-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-popup {
+    background-color: $layer0;
+    border: 1px solid $onLayer0;
+    border-radius: 6px;
+    padding: 4px;
+    margin-top: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    min-width: 200px;
+}
+
+.submenu-item {
+    padding: 6px 12px;
+    border-radius: 4px;
+}
+
+.submenu-item:hover {
+    background-color: $layer0;
+    color: $onLayer0;
+}
 
 @mixin bar-group-rounding {
     @include small-rounding;
@@ -250,6 +291,12 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $errorContainer;
 }
 
+
+.bar-bat-circprog-charging {
+    color: $green;
+    background-color: $battLayer2;
+}
+
 .bar-batt-low {
     background-color: $error;
     color: $errorContainer;
@@ -472,7 +519,18 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .bar-button {
     color: $utilsOnLayer2;
+    
+    .icon-material {
+        transition: all 0.2s ease;
+    }
+    
+    &.active {
+        .icon-material {
+            // color: $layer0;
+        }
+    }
 }
+
 .bar-spaceright {
     color: $barspacerightOnLayer0;
 }
@@ -515,4 +573,61 @@ $bar_ws_width_focus_active: 6.045rem;
     background-color: $layer0;
     @include large-rounding;
     @include elevation2 
+}
+
+.idle-inhibitor {
+    padding: 0.3rem;
+    
+    .toggle-button {
+        transition: all 0.2s ease;
+        
+        .toggle-button-pill {
+            min-width: 2.2em;
+            min-height: 1em;
+            margin: 0 0.3rem;
+            padding: 0.2rem;
+            border-radius: 1em;
+            // background-color: $bg2;
+            transition: all 0.2s ease;
+
+            .toggle-button-pill-indicator {
+                min-width: 0.8em;
+                min-height: 0.8em;
+                border-radius: 50%;
+                // background-color: $fg;
+                transition: all 0.2s ease;
+            }
+        }
+    }
+
+    &.active {
+        .toggle-button-pill {
+            // background-color: $accent;
+
+            .toggle-button-pill-indicator {
+                // background-color: $bg;
+            }
+        }
+    }
+}
+/* Cava Visualizer */
+.cava-module {
+    background: transparent;
+    min-width: 3rem;
+    padding:0px 3px;
+}
+
+.cava-visualizer {
+    @include techfont;
+    font-size: 18px ;
+    padding: 0px 2px;
+    // min-width: 5rem;
+}
+
+.cava-bar-high {
+    color: $secondary;
+}
+
+.cava-bar-low {
+    color: $surfaceVariant;
 }
