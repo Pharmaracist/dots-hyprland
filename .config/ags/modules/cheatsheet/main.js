@@ -2,6 +2,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import { setupCursorHover } from "../.widgetutils/cursorhover.js";
 import PopupWindow from '../.widgethacks/popupwindow.js';
 import Keybinds from "./keybinds.js";
+import PeriodicTable from "./periodictable.js";
 import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 import clickCloseRegion from '../.commonwidgets/clickcloseregion.js';
@@ -11,6 +12,11 @@ const cheatsheets = [
         name: getString('Keybinds'),
         materialIcon: 'keyboard',
         contentWidget: Keybinds,
+    },
+    {
+        name: getString('Periodic table'),
+        materialIcon: 'experiment',
+        contentWidget: PeriodicTable,
     },
 ];
 
