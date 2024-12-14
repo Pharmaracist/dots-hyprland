@@ -9,7 +9,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include elevation-border;
     @include elevation2;
     border-radius: $rounding_large - $elevation_margin + 0.068rem;
-    min-width: 27.818rem;
+    // min-width: 25.818rem;
     background-color: $background;
     padding: 1.023rem;
 }
@@ -19,7 +19,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include elevation-border;
     @include elevation2;
     border-radius: $rounding_large - $elevation_margin + 0.068rem;
-    min-width: 27.818rem;
+    min-width: 25.818rem;
     background-color: $background;
     padding: 1.023rem;
 }
@@ -1218,6 +1218,63 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     font-size: 0.818rem;
     color: mix($onSecondaryContainer, $secondaryContainer, 60%);
     margin: 0.273rem 0;
+}
+// Timer Module Styles
+.sidebar-timer {
+    @include normal-rounding;
+    
+    &-btn {
+        @include normal-rounding;
+        padding: 0.2em;
+        min-width: 1.8em;
+        min-height: 1.8em;
+        
+        &-start {
+            background-color: $primary;
+            color: $onPrimary;
+            
+            &:hover {
+                background-color: mix($primary, $surfaceContainerHighest, 85%);
+            }
+        }
+    }
+
+    &-icon {
+        @include icon-material;
+        font-size: 1.1em;
+    }
+}
+
+.sidebar-todo-add {
+    @include normal-rounding;
+    background-color: $layer2;
+    padding: 0.3em 0.5em;
+    margin: 0 0.5em;
+    
+    &:focus {
+        background-color: mix($primary, $surfaceContainerHighest, 15%);
+    }
+}
+
+.sidebar-todo-new {
+    padding: 0.3em;
+    margin: 0 0.5em;
+    
+    &:hover {
+        background-color: mix($primary, $surfaceContainerHighest, 15%);
+    }
+}
+
+.sidebar-timer-presets {
+    @include normal-rounding;
+    background-color: $layer1;
+    padding: 0.5em;
+    margin: 0 0.5em;
+    
+    .sidebar-timer-btn {
+        margin: 0.2em;
+        padding: 0.3em;
+    }
 }
 // Todo Module Styles
 .sidebar-todo {

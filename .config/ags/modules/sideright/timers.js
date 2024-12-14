@@ -1,9 +1,20 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { Box, Button, Label, Entry, Revealer, Scrollable } = Widget;
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../.widgetutils/cursorhover.js';
-import TimersService from "../../services/timers.js";
+import userOptions from '../.configuration/user_options.js';
+import timers from '../../services/timers.js';
+import { execAsync } from 'resource:///com/github/Aylur/ags/utils.js';
+
+const options = userOptions.asyncGet();
+const PRESET_TIMERS = options.timers.presets.map(preset => ({
+    name: preset.name,
+    duration: preset.duration,
+    icon: preset.icon || 'timer',
+    tooltip: `${preset.name}: ${Math.floor(preset.duration / 60)} minutes`,
+}));
+
+const ANIMATION_DURATION = options.animations.durationSmall;
 
 const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -11,217 +22,141 @@ const formatTime = (seconds) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
+const getEndTime = (remainingSeconds) => {
+    const now = new Date();
+    const endTime = new Date(now.getTime() + remainingSeconds * 1000);
+    return endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 const TimerItem = (timer) => {
-    const timerDisplay = Label({
-        className: 'sidebar-timer-display',
-        label: formatTime(timer.remaining),
+    const timerBox = Box({
+        className: 'spacing-h-5',
     });
 
-    const updateDisplay = () => {
-        timerDisplay.label = formatTime(timer.remaining);
+    const notifyComplete = () => {
+        execAsync(['notify-send', `Timer Complete`, `${timer.name} timer has finished!`]);
+        execAsync(['paplay', '/usr/share/sounds/freedesktop/stereo/complete.oga']);
     };
 
-    const startStopBtn = Button({
-        className: `sidebar-timer-btn ${timer.running ? 'sidebar-timer-btn-stop' : 'sidebar-timer-btn-start'}`,
-        child: MaterialIcon(timer.running ? 'stop' : 'play_arrow', 'norm'),
+    const updateDisplay = () => {
+        timeLabel.label = formatTime(timer.remaining);
+        endTimeLabel.label = getEndTime(timer.remaining);
+        
+        // Check if timer just finished
+        if (timer.remaining === 0 && !timer.notified) {
+            notifyComplete();
+            timer.notified = true;
+        }
+    };
+
+    const updateButtonState = (running) => {
+        startBtn.child = MaterialIcon(running ? 'pause' : 'play_arrow', 'norm', {
+            className: 'sidebar-timer-icon',
+        });
+    };
+
+    const timeLabel = Label({
+        className: 'txt-norm',
+    });
+
+    const endTimeLabel = Label({
+        className: 'txt-smallie txt-subtext',
+    });
+
+    const startBtn = Button({
+        className: 'sidebar-timer-btn sidebar-timer-btn-start',
+        child: MaterialIcon(timer.running ? 'pause' : 'play_arrow', 'norm', {
+            className: 'sidebar-timer-icon',
+        }),
         setup: setupCursorHover,
         onClicked: () => {
             if (timer.running) {
-                TimersService.stopTimer(timer.id);
+                timers.stopTimer(timer.id);
+                updateButtonState(false);
             } else {
-                TimersService.startTimer(timer.id);
+                timers.startTimer(timer.id);
+                updateButtonState(true);
             }
         },
     });
 
     const resetBtn = Button({
-        className: 'sidebar-timer-btn',
-        child: MaterialIcon('restart_alt', 'norm'),
+        className: 'sidebar-timer-btn sidebar-timer-btn-start',
+        child: MaterialIcon('restart_alt', 'norm', { className: 'sidebar-timer-icon' }),
         setup: setupCursorHover,
-        onClicked: () => TimersService.resetTimer(timer.id),
+        onClicked: () => timers.resetTimer(timer.id),
     });
 
     const deleteBtn = Button({
-        className: 'sidebar-timer-btn',
-        child: MaterialIcon('delete', 'norm'),
+        className: 'sidebar-timer-btn sidebar-timer-btn-start',
+        child: MaterialIcon('delete', 'norm', { className: 'sidebar-timer-icon' }),
         setup: setupCursorHover,
-        onClicked: () => {
-            if (deleteBtn.hook) deleteBtn.hook.unhook();
-            TimersService.removeTimer(timer.id);
-        },
+        onClicked: () => timers.removeTimer(timer.id),
     });
 
     const controls = Box({
-        className: 'sidebar-timer-controls spacing-h-5',
-        homogeneous: true,
-        children: [startStopBtn, resetBtn, deleteBtn],
+        className: 'spacing-h-5',
+        children: [startBtn, resetBtn, deleteBtn],
     });
 
-    const timerBox = Box({
-        vertical: true,
-        className: 'sidebar-timer',
+    const timerContent = Box({
+        className: 'spacing-h-10',
+        hexpand: true,
         children: [
-            Label({
-                xalign: 0,
-                className: 'txt txt-norm',
-                hpack:'center',
-                label: timer.name,
+            Box({
+                vertical: true,
+                children: [
+                    Box({
+                        className: 'spacing-h-5',
+                        children: [
+                            Label({
+                                xalign: 0,
+                                hexpand: true,
+                                className: 'txt-smallie',
+                                label: timer.name,
+                            }),
+                            timeLabel,
+                        ],
+                    }),
+                    endTimeLabel,
+                ],
             }),
-            timerDisplay,
             controls,
         ],
     });
 
+    timerBox.child = timerContent;
+
     // Update display when timer updates
-    timerBox.hook = timerBox.hook(TimersService, () => {
-        const updatedTimer = TimersService.getTimer(timer.id);
+    timerBox.hook(timers, () => {
+        const updatedTimer = timers.getTimer(timer.id);
         if (updatedTimer) {
             updateDisplay();
-            startStopBtn.child = MaterialIcon(updatedTimer.running ? 'stop' : 'play_arrow', 'norm');
-            startStopBtn.toggleClassName('sidebar-timer-btn-stop', updatedTimer.running);
-            startStopBtn.toggleClassName('sidebar-timer-btn-start', !updatedTimer.running);
+            // Only update button if running state changed
+            if (timer.running !== updatedTimer.running) {
+                updateButtonState(updatedTimer.running);
+            }
+            timer = updatedTimer;
         }
     }, 'updated');
 
-    timerBox.connect('destroy', () => {
-        if (timerBox.hook) timerBox.hook.unhook();
-    });
-
+    updateDisplay();
     return timerBox;
 };
 
-const NewTimerForm = () => {
-    const newTaskButton = Revealer({
-        transition: 'slide_left',
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
-        revealChild: true,
-        child: Button({
-            className: 'txt-small sidebar-todo-new',
-            halign: 'end',
-            vpack: 'center',
-            label: getString('+ New timer'),
-            setup: setupCursorHover,
-            onClicked: (self) => {
-                newTaskButton.revealChild = false;
-                newTaskEntryRevealer.revealChild = true;
-                confirmAddTask.revealChild = true;
-                cancelAddTask.revealChild = true;
-                nameEntry.grab_focus();
-            }
-        })
-    });
-
-    const cancelAddTask = Revealer({
-        transition: 'slide_right',
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
-        revealChild: false,
-        child: Button({
-            className: 'txt-norm icon-material sidebar-todo-add',
-            halign: 'end',
-            vpack: 'center',
-            label: 'close',
-            setup: setupCursorHover,
-            onClicked: (self) => {
-                newTaskEntryRevealer.revealChild = false;
-                confirmAddTask.revealChild = false;
-                cancelAddTask.revealChild = false;
-                newTaskButton.revealChild = true;
-                nameEntry.text = '';
-                durationEntry.text = '';
-            }
-        })
-    });
-
-    const nameEntry = Entry({
-        className: 'sidebar-timer-entry',
-        placeholderText: getString('Timer name'),
-        onAccept: () => {
-            const duration = parseInt(durationEntry.text) * 60; // Convert minutes to seconds
-            if (nameEntry.text && !isNaN(duration) && duration > 0) {
-                TimersService.addTimer(nameEntry.text, duration);
-                nameEntry.text = '';
-                durationEntry.text = '';
-                newTaskEntryRevealer.revealChild = false;
-                confirmAddTask.revealChild = false;
-                cancelAddTask.revealChild = false;
-                newTaskButton.revealChild = true;
-            }
-        },
-    });
-
-    const durationEntry = Entry({
-        className: 'sidebar-timer-entry',
-        placeholderText: getString('Duration (minutes)'),
-        onAccept: () => {
-            const duration = parseInt(durationEntry.text) * 60; // Convert minutes to seconds
-            if (nameEntry.text && !isNaN(duration) && duration > 0) {
-                TimersService.addTimer(nameEntry.text, duration);
-                nameEntry.text = '';
-                durationEntry.text = '';
-                newTaskEntryRevealer.revealChild = false;
-                confirmAddTask.revealChild = false;
-                cancelAddTask.revealChild = false;
-                newTaskButton.revealChild = true;
-            }
-        },
-    });
-
-    const confirmAddTask = Revealer({
-        transition: 'slide_right',
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
-        revealChild: false,
-        child: Button({
-            className: 'txt-norm icon-material sidebar-todo-add',
-            halign: 'end',
-            vpack: 'center',
-            label: 'arrow_upward',
-            setup: setupCursorHover,
-            onClicked: () => {
-                const duration = parseInt(durationEntry.text) * 60; // Convert minutes to seconds
-                if (nameEntry.text && !isNaN(duration) && duration > 0) {
-                    TimersService.addTimer(nameEntry.text, duration);
-                    nameEntry.text = '';
-                    durationEntry.text = '';
-                    newTaskEntryRevealer.revealChild = false;
-                    confirmAddTask.revealChild = false;
-                    cancelAddTask.revealChild = false;
-                    newTaskButton.revealChild = true;
-                }
-            },
-        })
-    });
-
-    const newTaskEntryRevealer = Revealer({
-        transition: 'slide_right',
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
-        revealChild: false,
-        child: Box({
-            vertical: true,
-            className: 'spacing-v-5',
-            children: [nameEntry, durationEntry],
-        }),
-    });
-
-    return Box({
-        setup: (self) => {
-            self.pack_start(cancelAddTask, false, false, 0);
-            self.pack_start(newTaskEntryRevealer, true, true, 0);
-            self.pack_start(confirmAddTask, false, false, 0);
-            self.pack_start(newTaskButton, false, false, 0);
-        }
-    });
-};
+const TimersList = () => Box({
+    vertical: true,
+    className: 'spacing-v-5 txt-norm',
+    connections: [[timers, box => {
+        box.children = timers.timers.map(timer => TimerItem(timer));
+    }]],
+});
 
 export const TimerWidget = () => {
     const timersList = Box({
         vertical: true,
         className: 'spacing-v-5 txt-norm',
     });
-
-    const update = () => {
-        const timers = TimersService.timers;
-        timersList.children = timers.map(timer => TimerItem(timer));
-    };
 
     const header = Box({
         css:"margin-top:0.4rem",
@@ -231,7 +166,7 @@ export const TimerWidget = () => {
                 hexpand: true,
                 xalign: 0,
                 className: 'txt txt-large txt-bold',
-                label: getString('Timers'),
+                label: 'Timers',
             }),
         ],
     });
@@ -245,15 +180,55 @@ export const TimerWidget = () => {
         },
     });
 
+    const presetButtons = Box({
+        className: 'sidebar-timer-presets',
+        children: [
+            Box({
+                hexpand: true,
+                child: Scrollable({
+                    hexpand: true,
+                    hscroll: 'always',
+                    vscroll: 'never',
+                    child: Box({
+                        hexpand: true,
+                        className: 'spacing-h-5',
+                        children: PRESET_TIMERS.map(preset => Button({
+                            className: 'sidebar-timer-btn sidebar-timer-btn-start',
+                            tooltipText: preset.tooltip,
+                            child: MaterialIcon(preset.icon, 'norm', { className: 'sidebar-timer-icon' }),
+                            setup: setupCursorHover,
+                            onClicked: () => {
+                                const name = preset.name;
+                                const duration = preset.duration;
+                                timers.addTimer(name, duration);
+                            },
+                        })),
+                    }),
+                }),
+            }),
+        ],
+    });
+
     return Box({
         vertical: true,
-        className: 'spacing-v-10',
-        setup: (box) => {
-            const hook = box.hook(TimersService, update, 'updated');
-            box.connect('destroy', () => box.unhook(hook));
-            
-            box.children = [header, scrollArea, NewTimerForm()];
-            update();
+        className: 'sidebar-group spacing-v-5',
+        children: [
+            header, 
+            scrollArea,
+            Box({  // Separator
+                className: 'txt-subtext txt-small',
+                hpack: 'center',
+                child: Label({
+                    label: 'Quick Presets',
+                }),
+            }),
+            presetButtons,
+        ],
+        connections: [['destroy', self => self.hook?.unhook()]],
+        setup: self => {
+            self.hook = self.hook(timers, () => {
+                timersList.children = timers.timers.map(timer => TimerItem(timer));
+            }, 'updated');
         },
     });
 };

@@ -148,6 +148,65 @@
     "dateInterval": 500000,
     "dateFormat": "%d/%m"
   },
+  "timers": {
+    "presets": [
+      {
+        "name": "Pomodoro",
+        "duration": 1500,
+        "icon": "timer"
+      },
+      {
+        "name": "Short Break",
+        "duration": 300,
+        "icon": "coffee"
+      },
+      {
+        "name": "Long Break",
+        "duration": 900,
+        "icon": "self_improvement"
+      },
+      {
+        "name": "Quick Timer",
+        "duration": 60,
+        "icon": "bolt"
+      },
+      {
+        "name": "Tea",
+        "duration": 180,
+        "icon": "local_cafe"
+      },
+      {
+        "name": "Workout",
+        "duration": 2700,
+        "icon": "fitness_center"
+      },
+      {
+        "name": "Reading",
+        "duration": 1800,
+        "icon": "menu_book"
+      },
+      {
+        "name": "Meditation",
+        "duration": 600,
+        "icon": "spa"
+      },
+      {
+        "name": "test",
+        "duration": 2,
+        "icon": "「」"
+      },
+      {
+        "name": "Power Nap",
+        "duration": 1200,
+        "icon": "bedtime"
+      },
+      {
+        "name": "Cooking",
+        "duration": 1200,
+        "icon": "restaurant"
+      }
+    ]
+  },
   "weather": {
     "city": "Cairo",
     "preferredUnit": "C"

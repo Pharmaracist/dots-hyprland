@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "c8jhkmpeuva",
+    "name": "test",
+    "duration": 2
+  },
+  {
+    "id": "lpnyy8z39hn",
+    "name": "Long Break",
+    "duration": 900
+  }
+]

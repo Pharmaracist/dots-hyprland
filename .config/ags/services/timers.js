@@ -1,6 +1,7 @@
 const { Gio, GLib } = imports.gi;
 import Service from 'resource:///com/github/Aylur/ags/service.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import App from 'resource:///com/github/Aylur/ags/app.js';
 const { exec, execAsync } = Utils;
 
 class TimersService extends Service {
@@ -9,13 +10,18 @@ class TimersService extends Service {
             this,
             { 
                 'updated': [],
+                'active-changed': ['boolean'],
+                'timer-tick': ['string', 'int'],
                 'timer-complete': ['string'],
+                'urgent-notification': ['string'],
             },
         );
     }
 
-    _timers = new Map();
+    _timers = {};
     _configPath = '';
+    _notified = new Set();
+    _activeTimer = null;
 
     constructor() {
         super();
@@ -30,12 +36,13 @@ class TimersService extends Service {
             const content = Utils.readFile(this._configPath);
             const savedTimers = JSON.parse(content);
             savedTimers.forEach(timer => {
-                this._timers.set(timer.id, {
+                this._timers[timer.id] = {
                     ...timer,
                     running: false,
                     remaining: timer.duration,
                     interval: null,
-                });
+                    notified: false,
+                };
             });
         } catch {
             Utils.writeFile('[]', this._configPath);
@@ -43,7 +50,7 @@ class TimersService extends Service {
     }
 
     _save() {
-        const timersArray = Array.from(this._timers.values()).map(timer => ({
+        const timersArray = Object.values(this._timers).map(timer => ({
             id: timer.id,
             name: timer.name,
             duration: timer.duration,
@@ -51,64 +58,110 @@ class TimersService extends Service {
         Utils.writeFile(JSON.stringify(timersArray, null, 2), this._configPath);
     }
 
+    _notifyComplete(timer) {
+        if (timer.notified) return;
+        
+        timer.notified = true;
+        App.notify({
+            summary: `Timer Complete: ${timer.name}`,
+            body: 'Your timer has finished!',
+            urgency: 'critical',
+        });
+        Utils.execAsync(['paplay', '/usr/share/sounds/freedesktop/stereo/complete.oga']);
+
+    }
+
+    get activeTimer() {
+        if (!this._activeTimer) return null;
+        return this._timers[this._activeTimer];
+    }
+
     addTimer(name, duration) {
-        const id = `timer_${Date.now()}`;
-        this._timers.set(id, {
+        const id = Math.random().toString(36).substring(2, 15);
+        this._timers[id] = {
             id,
             name,
             duration,
-            running: false,
             remaining: duration,
+            running: false,
             interval: null,
-        });
+            notified: false,
+        };
         this._save();
         this.emit('updated');
         return id;
     }
 
     removeTimer(id) {
-        const timer = this._timers.get(id);
-        if (timer && timer.interval) {
-            GLib.source_remove(timer.interval);
+        if (this._timers[id]) {
+            if (this._timers[id].interval) {
+                clearInterval(this._timers[id].interval);
+            }
+            delete this._timers[id];
+            this._save();
+            this.emit('updated');
         }
-        this._timers.delete(id);
-        this._save();
-        this.emit('updated');
     }
 
     startTimer(id) {
-        const timer = this._timers.get(id);
+        const timer = this._timers[id];
         if (!timer || timer.running) return;
 
-        timer.running = true;
-        timer.interval = Utils.interval(1000, () => {
-            timer.remaining--;
-            this.emit('updated');
-
-            if (timer.remaining <= 0) {
-                this.stopTimer(id);
-                this.emit('timer-complete', timer.name);
-                return false;
+        // Stop any other running timer
+        Object.values(this._timers).forEach(t => {
+            if (t.running && t.id !== id) {
+                this.stopTimer(t.id);
             }
-            return true;
         });
+
+        timer.running = true;
+        timer.notified = false;
+        this._activeTimer = id;
+        this.emit('active-changed', true);
+        
+        timer.interval = setInterval(() => {
+            if (timer.remaining > 0) {
+                timer.remaining--;
+                this.emit('timer-tick', timer.name, timer.remaining);
+                this.emit('updated');
+            } else {
+                clearInterval(timer.interval);
+                timer.interval = null;
+                this.ring();
+                this.ring();
+                this.emit('urgent-notification', timer.name);
+                const repeatSound = setInterval(() => this.ring(), 1000);
+                timer.running = false;
+                this._activeTimer = null;
+                this.emit('active-changed', false);
+                this._notifyComplete(timer);
+                this.emit('timer-complete', timer.name);
+                this.emit('updated');
+                clearInterval(repeatSound);
+                clearInterval(timer.interval);
+            }
+        }, 1000);
         this.emit('updated');
     }
 
     stopTimer(id) {
-        const timer = this._timers.get(id);
+        const timer = this._timers[id];
         if (!timer || !timer.running) return;
 
         if (timer.interval) {
-            GLib.source_remove(timer.interval);
+            clearInterval(timer.interval);
         }
         timer.running = false;
         timer.interval = null;
+        if (this._activeTimer === id) {
+            this._activeTimer = null;
+            this.emit('active-changed', false);
+        }
         this.emit('updated');
     }
 
     resetTimer(id) {
-        const timer = this._timers.get(id);
+        const timer = this._timers[id];
         if (!timer) return;
 
         this.stopTimer(id);
@@ -117,11 +170,11 @@ class TimersService extends Service {
     }
 
     getTimer(id) {
-        return this._timers.get(id);
+        return this._timers[id];
     }
 
     get timers() {
-        return Array.from(this._timers.values());
+        return Object.values(this._timers);
     }
 }
 
