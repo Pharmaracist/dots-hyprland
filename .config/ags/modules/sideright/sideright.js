@@ -20,6 +20,7 @@ import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
 // import ModulePowerProfiles from "./centermodules/powerprofiles.js";
 import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleConfigure from "./centermodules/configure.js";
+import ModuleMusicControls from "./centermodules/musiccontrols.js";
 // import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import { ModuleCalendar } from "./calendar.js";
 import { getDistroIcon } from "../.miscutils/system.js";
@@ -36,11 +37,7 @@ const centerWidgets = [
     materialIcon: "notifications",
     contentWidget: ModuleNotificationList,
   },
-  // {
-  //   name: getString("Music"),
-  //   materialIcon: "music_note",
-  //   contentWidget: ModuleMusicControls,
-  // },
+  
   {
     name: getString("Audio controls"),
     materialIcon: "volume_up",
@@ -181,6 +178,7 @@ export default () =>
             className: "sidebar-group",
             children: [sidebarOptionsStack],
           }),
+          ModuleMusicControls(),
           Box({
             vexpand: false,
             children: [ModuleCalendar()],
