@@ -1,0 +1,133 @@
+window.music-player {
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 12px;
+    margin: 8px;
+    padding: 16px;
+    
+    .music-player-box {
+        min-width: 300px;
+        spacing: 16px;
+    }
+
+    .track-info {
+        padding: 8px;
+
+        .album-art {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .track-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .track-artist {
+            font-size: 1em;
+            color: #ccc;
+        }
+
+        .track-album {
+            font-size: 0.9em;
+            color: #999;
+        }
+    }
+
+    .music-visualizer {
+        min-height: 50px;
+        padding: 8px;
+        margin: 4px 0;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.2);
+
+        .cava-visualizer {
+            min-height: 40px;
+            padding: 4px;
+
+            .cava-bar {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-radius: 4px;
+                min-width: 4px;
+                transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
+
+                &.low {
+                    background: linear-gradient(to top, 
+                        rgba(255, 255, 255, 0.2),
+                        rgba(255, 255, 255, 0.4)
+                    );
+                }
+
+                &.high {
+                    background: linear-gradient(to top, 
+                        rgba(255, 255, 255, 0.4),
+                        rgba(255, 255, 255, 0.8)
+                    );
+                    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+                }
+            }
+        }
+    }
+
+    .progress-bar-box {
+        padding: 0 8px;
+
+        .progress-bar {
+            margin: 4px 0;
+            
+            trough {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+                min-height: 4px;
+            }
+
+            highlight {
+                background: linear-gradient(to right, #666, #fff);
+                border-radius: 4px;
+            }
+        }
+
+        .progress-labels {
+            color: #999;
+            font-size: 0.8em;
+            font-family: monospace;
+            margin: 0 4px;
+        }
+    }
+
+    .media-controls {
+        padding: 8px;
+        spacing: 16px;
+
+        .media-button {
+            padding: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 200ms ease;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            &:active {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            &.active {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+            }
+
+            image {
+                color: white;
+            }
+        }
+
+        .play {
+            padding: 12px;
+        }
+    }
+}

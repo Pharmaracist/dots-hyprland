@@ -103,7 +103,7 @@ const BatteryContent = () => {
     const detailsRevealer = Revealer({
         transitionDuration: userOptions.animations?.durationLarge || 150,
         transition: "slide_right",
-        revealChild: true,
+        revealChild: false,
         child: percentageBox,
     });
 

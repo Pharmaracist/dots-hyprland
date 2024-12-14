@@ -63,7 +63,7 @@ const wrapAsyncModule = (asyncFn) => {
 // Workspace modules are loaded dynamically based on the environment
 const loadWorkspaces = async () => {
     try {
-        const hyprland = await import("./workspaces_hyprland.js");
+        const hyprland = await import("./uniworkspace.js");
         const hyprlandFocus = await import("./workspaces_hyprland_focus.js");
         return {
             normal: () => hyprland.default(),
