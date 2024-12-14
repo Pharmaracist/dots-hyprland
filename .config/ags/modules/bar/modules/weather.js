@@ -300,9 +300,15 @@ const WeatherWidget = () => {
       // Initial update
       updateWidget();
 
-      // Update every CACHE_DURATION
+      // Update weather every CACHE_DURATION
       self.poll(CACHE_DURATION, () => {
         updateWidget();
+      });
+
+      // Auto toggle every 5 seconds
+      self.poll(5000, () => {
+        toggleDisplay();
+        return true;
       });
     },
   });

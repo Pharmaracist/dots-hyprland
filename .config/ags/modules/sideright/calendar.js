@@ -107,7 +107,6 @@ const CalendarWidget = () => {
     });
 
     const calendarDays = Widget.Box({
-        hexpand: true,
         vertical: true,
         className: 'spacing-v-5',
         setup: box => addCalendarChildren(box, calendarJson)
@@ -119,9 +118,9 @@ const CalendarWidget = () => {
         child: Widget.Box({
             hpack: 'center',
             children: [Widget.Box({
-                hexpand: true,
                 vertical: true,
                 className: 'spacing-v-5',
+                css: 'min-width: 15rem; min-width: 18rem;',  // Changed from max-width to min-width
                 children: [
                     calendarHeader,
                     Widget.Box({
@@ -139,6 +138,7 @@ const CalendarWidget = () => {
 const defaultShown = 'prayers';
 const contentStack = Widget.Stack({
     hexpand: true,
+    css: 'min-width: 15rem; max-width: 10rem;',
     children: {
         'prayers': PrayerTimesWidget(),
         'calendar': CalendarWidget(),
@@ -180,6 +180,7 @@ const StackButton = (stackItemName, icon, name) => Widget.Button({
 
 export const ModuleCalendar = () => Box({
     className: 'sidebar-group spacing-h-5',
+    hexpand: false,
     setup: box => {
         box.pack_start(Box({
             vpack: 'center',
@@ -189,10 +190,10 @@ export const ModuleCalendar = () => Box({
             children: [
                 StackButton('prayers', 'mosque', getString('Prayers')),
                 StackButton('calendar', 'calendar_month', getString('Calendar')),
-                StackButton('todo', 'done_outline', getString('To Do')),
+                StackButton('todo', 'done_outline', getString('Todo')),
                 StackButton('timers', 'timer', getString('Timers')),
             ]
         }), false, false, 0);
-        box.pack_end(contentStack, false, false, 0);
+        box.pack_end(contentStack, true, true, 0);
     }
 });

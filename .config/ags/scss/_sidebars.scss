@@ -193,8 +193,8 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
 }
 
 .sidebar-calendar-btn-txt {
-    margin-left: -10.341rem;
-    margin-right: -10.341rem;
+    margin-left: -0.341rem;
+    margin-right: -0.341rem;
 }
 
 .sidebar-calendar-btn-today {
@@ -703,23 +703,6 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     background-color: $surfaceVariant;
 }
 
-.btn {
-    @include element_decel;
-    background-color: $utilsLayer2;
-    padding: 5px;
-    color: $utilsOnLayer2;
-    border-radius: 10px;
-    -gtk-outline-radius: 10px;
-}
-
-.btn:hover,
-.btn:focus {
-    background-color: $layer2Hover;
-}
-.btn:active {
-    background-color: $layer2Active;
-}
-
 .sidebar-chat-codeblock-code {
     @include techfont;
     padding: 0.682rem;
@@ -769,11 +752,11 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-chat-chip-action:hover,
 .sidebar-chat-chip-action:focus {
-    background-color: $hovercolor;
+    background-color: $layer2Hover;
 }
 
 .sidebar-chat-chip-action:active {
-    background-color: $activecolor;
+    background-color: $layer2Active;
 }
 
 .sidebar-chat-chip-action-active {
@@ -978,4 +961,102 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-module-box {
     padding: 0.341rem 0.682rem;
+}
+
+.sidebar-music-controls {
+    padding: 0.341rem;
+    margin: 0.341rem;
+}
+
+.sidebar-music-btn {
+    @include full-rounding;
+    @include element_decel;
+    padding: 0.682rem;
+    background-color: $layer2;
+    color: $onSurface;
+}
+
+.sidebar-music-btn:hover {
+    background-color: $hovercolor;
+}
+
+.sidebar-music-btn:active {
+    background-color: $activecolor;
+}
+
+.sidebar-music-btn-play {
+    background-color: $primary;
+    color: $onPrimary;
+    padding: 1.023rem;
+}
+
+.sidebar-music-btn-play:hover {
+    background-color: mix($primary, $hovercolor, 70%);
+}
+
+.sidebar-music-btn-play:active {
+    background-color: mix($primary, $activecolor, 70%);
+}
+
+.sidebar-music-cover {
+    @include normal-rounding;
+    background-color: $layer2;
+    min-height: 200px;
+    background-size: cover;
+    background-position: center;
+}
+
+.sidebar-music-progress {
+    margin: 0.341rem 0;
+}
+
+.sidebar-music-empty {
+    padding: 2.045rem;
+    color: $outline;
+}
+
+.sidebar-music-visualizer {
+    @include normal-rounding;
+    background-color: $layer2;
+    padding: 1.364rem;
+    margin: 0.682rem 0;
+    min-height: 100px;
+}
+
+.sidebar-music-bar-low {
+    color: mix($outline, $primary, 70%);
+    font-family: "JetBrainsMono Nerd Font";
+    transition: all 0.1s ease;
+    margin: 0 2px;
+    font-size: 20px;
+}
+
+.sidebar-music-bar-high {
+    color: $primary;
+    font-family: "JetBrainsMono Nerd Font";
+    transition: all 0.1s ease;
+    margin: 0 2px;
+    font-size: 20px;
+}
+
+.btn {
+    @include element_decel;
+    background-color: $utilsLayer2;
+    padding: 5px;
+    color: $utilsOnLayer2;
+    border-radius: 10px;
+    -gtk-outline-radius: 10px;
+}
+
+.btn:hover,
+.btn:focus {
+    background-color: $layer2Hover;
+}
+.btn:active {
+    background-color: $layer2Active;
+}
+
+.sidebar-chat-codeblock-code {
+    @include techfont;
+    padding: 0.682rem;
 }

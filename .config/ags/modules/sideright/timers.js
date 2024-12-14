@@ -45,7 +45,10 @@ const TimerItem = (timer) => {
         className: 'sidebar-timer-btn',
         child: MaterialIcon('delete', 'norm'),
         setup: setupCursorHover,
-        onClicked: () => TimersService.removeTimer(timer.id),
+        onClicked: () => {
+            if (deleteBtn.hook) deleteBtn.hook.unhook();
+            TimersService.removeTimer(timer.id);
+        },
     });
 
     const controls = Box({
@@ -70,7 +73,7 @@ const TimerItem = (timer) => {
     });
 
     // Update display when timer updates
-    const hook = timerBox.hook(TimersService, () => {
+    timerBox.hook = timerBox.hook(TimersService, () => {
         const updatedTimer = TimersService.getTimer(timer.id);
         if (updatedTimer) {
             updateDisplay();
@@ -81,7 +84,7 @@ const TimerItem = (timer) => {
     }, 'updated');
 
     timerBox.connect('destroy', () => {
-        timerBox.unhook(hook);
+        if (timerBox.hook) timerBox.hook.unhook();
     });
 
     return timerBox;
