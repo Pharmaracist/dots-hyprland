@@ -1358,3 +1358,184 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-todo-add-available {
     color: $primary;
 }
+
+.ytmusic-widget {
+    .media-controls {
+        @include normal-rounding;
+        @include element_decel;
+        background-color: $surfaceContainerLow;
+        padding: $elevation_margin;
+        margin-top: $elevation_margin;
+
+        .now-playing {
+            @include normal-rounding;
+            background-color: $surfaceContainerLowest;
+            padding: $elevation_margin;
+            margin-bottom: $elevation_margin;
+            
+            .thumbnail {
+                @include small-rounding;
+                min-width: 3.409rem;
+                min-height: 3.409rem;
+                margin-right: $elevation_margin;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+            
+            .track-info {
+                margin-left: $elevation_margin;
+                
+                .title {
+                    @include titlefont;
+                    color: $onSurface;
+                    margin-bottom: 0.273rem;
+                    font-size: 1.1em;
+                }
+
+                .artist {
+                    @include mainfont;
+                    color: $onSurfaceVariant;
+                    font-size: 0.9em;
+                }
+            }
+        }
+
+        .controls {
+            margin: $elevation_margin 0;
+            
+            .control-button {
+                @include full-rounding;
+                @include element_decel;
+                min-width: 2.727rem;
+                min-height: 2.727rem;
+                padding: 0.409rem;
+                background-color: $surfaceContainerLowest;
+                color: $onSurfaceVariant;
+
+                &:hover {
+                    background-color: $hovercolor;
+                }
+
+                &:active {
+                    background-color: $activecolor;
+                }
+            }
+        }
+
+        .volume-control {
+            @include element_decel;
+            margin-top: $elevation_margin;
+            padding: 0 $elevation_margin;
+            
+            .volume-icon {
+                margin-right: $elevation_margin;
+                color: $onSurfaceVariant;
+            }
+            
+            .volume-slider {
+                @include small-rounding;
+                background-color: transparent;
+                color: $onSurface;
+
+                trough {
+                    @include small-rounding;
+                    min-height: 0.341rem;
+                    background-color: $surfaceContainerLowest;
+                }
+
+                highlight {
+                    @include small-rounding;
+                    min-height: 0.341rem;
+                    background-color: $primary;
+                }
+
+                slider {
+                    @include full-rounding;
+                    min-height: 0.682rem;
+                    min-width: 0.682rem;
+                    background-color: $primary;
+                }
+            }
+        }
+    }
+}
+
+.music-item {
+    @include normal-rounding;
+    @include element_decel;
+    background-color: $surfaceContainerLow;
+    padding: $elevation_margin;
+    margin-bottom: $elevation_margin;
+
+    &:hover {
+        background-color: $hovercolor;
+    }
+
+    .music-title {
+        @include titlefont;
+        color: $onSurface;
+    }
+
+    .music-artist {
+        @include mainfont;
+        color: $onSurfaceVariant;
+    }
+}
+
+.now-playing {
+    @include normal-rounding;
+    @include titlefont;
+    background-color: $surfaceContainerLow;
+    color:$onSurfaceVariant;
+    &-title {
+        @include titlefont;
+        font-size: 1.1em;
+        // color: $onSurface;
+    }
+
+    &-artist {
+        @include mainfont;
+        color: $onSurfaceVariant;
+    }
+
+    &-controls {
+        
+        @include small-rounding;
+        @include icon-material;
+        color:$secondary;
+        // padding: $spacing_small;
+        margin: 0 0.25rem;
+        
+    }
+}
+
+.control-btn {
+    @include small-rounding;
+    @include icon-material;
+    color:$secondary;
+    // padding: $spacing_small;
+    margin: 0 0.25rem;
+    
+    // &:hover {
+    //     background-color: $hovercolor;
+    // }
+    
+    // &:active {
+    //     background-color: $activecolor;
+    // }
+}
+
+.search-results {
+    @include titlefont;
+    opacity:1;
+    font-size:1rem;
+     margin-top: 1.5rem;
+    color:$secondary;
+    .search-header {
+        @include titlefont;
+        opacity: 0;
+        // color: $onSurface;
+        // margin-bottom: $spacing_small;
+    }
+}

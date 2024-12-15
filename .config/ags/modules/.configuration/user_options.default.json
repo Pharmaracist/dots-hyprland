@@ -110,7 +110,7 @@
     "pages": {
       "order": ["apis", "tools", "github"],
       "apis": {
-        "order": ["gemini", "gpt", "translater"]
+        "order": ["gemini", "gpt", "translater","ytmusic"]
       }
     },
     "translater": {

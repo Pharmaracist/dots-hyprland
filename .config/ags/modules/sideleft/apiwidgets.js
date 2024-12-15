@@ -4,19 +4,24 @@ import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { Box, Button, CenterBox, Entry, EventBox, Icon, Label, Overlay, Revealer, Scrollable, Stack } = Widget;
 const { execAsync, exec } = Utils;
 import { setupCursorHover, setupCursorHoverInfo } from '../.widgetutils/cursorhover.js';
-// APIs
-import GPTService from '../../services/gpt.js';
-import Gemini from '../../services/gemini.js';
-import { geminiView, geminiCommands, sendMessage as geminiSendMessage, geminiTabIcon } from './apis/gemini.js';
-import { chatGPTView, chatGPTCommands, sendMessage as chatGPTSendMessage, chatGPTTabIcon } from './apis/chatgpt.js';
-import { TranslaterView, translaterCommands, sendMessage as translaterSendMessage, translaterIcon } from './apis/translater.js';
+import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
 import { checkKeybind } from '../.widgetutils/keybind.js';
-const TextView = Widget.subclass(Gtk.TextView, "AgsTextView");
-
 import { widgetContent } from './sideleft.js';
 import { IconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { writable } from '../../modules/.miscutils/store.js';
+const TextView = Widget.subclass(Gtk.TextView, "AgsTextView");
+
+// APIs
+import GPTService from '../../services/gpt.js';
+import Gemini from '../../services/gemini.js';
+import YTMusic from '../../services/ytmusic.js';
+import { geminiView, geminiCommands, sendMessage as geminiSendMessage, geminiTabIcon } from './apis/gemini.js';
+import { chatGPTView, chatGPTCommands, sendMessage as chatGPTSendMessage, chatGPTTabIcon } from './apis/chatgpt.js';
+import { TranslaterView, translaterCommands, sendMessage as translaterSendMessage, translaterIcon } from './apis/translater.js';
+import { ytmusicView, ytmusicCommands, sendMessage as ytmusicSendMessage, ytmusicTabIcon, MediaControls } from './apis/ytmusic.js';
+
+// Create a custom icon for YouTube Music
 
 const EXPAND_INPUT_THRESHOLD = 30;
 const APILIST = {
@@ -44,6 +49,14 @@ const APILIST = {
         commandBar: translaterCommands,
         placeholderText: 'Translate the text...'
     },
+    'ytmusic': {
+    name: 'YouTube Music',
+    sendCommand: ytmusicSendMessage,
+    contentWidget: ytmusicView,
+    commandBar: ytmusicCommands,
+    tabIcon: ytmusicTabIcon,
+    placeholderText: 'Search music...',
+},
 }
 
 let APIS = writable ([]);
@@ -60,8 +73,13 @@ function apiSendMessage(textView) {
     const [start, end] = buffer.get_bounds();
     const text = buffer.get_text(start, end, true).trimStart();
     if (!text || text.length == 0) return;
-    // Send
-    APIS.asyncGet()[currentApiId].sendCommand(text)
+    
+    // Only send if the current API has a sendCommand function
+    const currentApi = APIS.asyncGet()[currentApiId];
+    if (currentApi && currentApi.sendCommand) {
+        currentApi.sendCommand(text);
+    }
+    
     // Reset
     buffer.set_text("", -1);
     chatEntryWrapper.toggleClassName('sidebar-chat-wrapper-extended', false);
