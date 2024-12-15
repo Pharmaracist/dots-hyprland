@@ -1,5 +1,4 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import Service from 'resource:///com/github/Aylur/ags/service.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import cava from "../../../services/cava.js"
 
@@ -10,26 +9,30 @@ export default () => {
         spacing: 0,
     })
 
-    // Update the widget
+    // Update the widget with the latest cava output
     const updateWidget = () => {
         const config = cava.getConfig()
-        if (!cava.output) return
+        const output = cava.output
+        if (!output) return
 
         // Analyze the output to determine high threshold dynamically
-        const chars = cava.output.split('')
+        const chars = output.split('')
         const charCodes = chars.map(char => char.charCodeAt(0) - 9601)
         const maxHeight = Math.max(...charCodes)
         const highThreshold = maxHeight * 0.6  // 60% of max height is considered high
 
-        // Create bar widgets with more nuanced representation
+        // Create bar widgets with dynamic classes
         const bars = chars.map(char => {
-            const height = char.charCodeAt(0) - 9601 // Convert Unicode block to height (0-7)
+            const height = char.charCodeAt(0) - 9601
             const isHigh = height >= highThreshold
             
             return Widget.Label({
                 label: char,
-                class_name: isHigh ? 'cava-bar-high' : 'cava-bar-low',
-                
+                class_name: `cava-bar ${isHigh ? 'cava-bar-high' : 'cava-bar-low'}`,
+                css: `
+                    margin: 0 1px;
+                    transition: all 50ms ease;
+                `
             })
         })
 
@@ -37,11 +40,16 @@ export default () => {
     }
 
     // Create the container
-    const container = Widget.Box({
+    return Widget.Box({
         class_name: 'cava-module',
         child: visualizer,
         setup: self => {
-            // Update on any change
+            // Update on cava output changes
+            self.hook(cava, (_, output) => {
+                updateWidget()
+            }, 'output-changed')
+
+            // Also poll for updates in case we miss some
             self.poll(100, () => {
                 updateWidget()
                 return true
@@ -51,6 +59,4 @@ export default () => {
             updateWidget()
         }
     })
-
-    return container
 }

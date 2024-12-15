@@ -1,42 +1,56 @@
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import Service from 'resource:///com/github/Aylur/ags/service.js';
 import GLib from 'gi://GLib'
+import App from 'resource:///com/github/Aylur/ags/app.js'
 
 class AudioVisualizerService extends Service {
     static {
         Service.register(this, {
             'output-changed': ['string'],
-        }, {
-            'output': ['string'],
         });
     }
 
-    #output = ""
+    #output = "▁".repeat(13)
     #proc = null
     #config = {}
     #configFile = GLib.build_filenamev([App.configDir, 'modules/.configuration/user_options.default.json'])
 
     constructor() {
         super()
+        
+        // Set default config
+        this.#config = {
+            bars: 15,
+            framerate: 60,
+            sensitivity: 150,
+            mode: 'waves',
+            smoothing: 0.77,
+            barWidth: 1,
+            monstercat: 1,
+            noise_reduction: 0.77
+        }
+        
         this.#loadConfig()
         this.#initCava()
 
         // Watch for config file changes
         Utils.monitorFile(this.#configFile, () => {
             this.#loadConfig()
+            this.#initCava()
         })
     }
 
     #loadConfig() {
         try {
             const content = Utils.readFile(this.#configFile)
+            if (!content) return
+            
             const options = JSON.parse(content)
             if (options?.visualizer) {
-                this.#config = options.visualizer
-                this.#initCava()
+                this.#config = { ...this.#config, ...options.visualizer }
             }
         } catch (error) {
-            // Silent error handling
+            console.error('Failed to load cava config:', error)
         }
     }
 
@@ -58,12 +72,12 @@ class AudioVisualizerService extends Service {
 
         const config = `
 [general]
-bars = ${this.#config.bars || 13}
-framerate = ${this.#config.framerate || 60}
-sensitivity = ${this.#config.sensitivity || 150}
-mode = ${this.#config.mode || 'scientific'}
-smoothing = ${this.#config.smoothing || 0.9}
-barWidth = ${this.#config.barWidth || 4}
+bars = ${this.#config.bars}
+framerate = ${this.#config.framerate}
+sensitivity = ${this.#config.sensitivity}
+mode = ${this.#config.mode}
+smoothing = ${this.#config.smoothing}
+barWidth = ${this.#config.barWidth}
 spacing = 0
 
 [input]
@@ -78,9 +92,8 @@ channels = mono
 ascii_max_range = 7
 
 [smoothing]
-monstercat = ${this.#config.monstercat || 1}
-noise_reduction = ${this.#config.smoothing || 0.9}
-sensitivity = ${this.#config.sensitivity || 100}
+monstercat = ${this.#config.monstercat}
+#noise_reduction = ${this.#config.noise_reduction}
 
 [eq]
 1=1
@@ -96,47 +109,49 @@ sensitivity = ${this.#config.sensitivity || 100}
 11=1
 12=1
 13=1
-14=1
+14=1.2 
 15=1
-16=1
-17=1
-18=1
-19=1
-20=1
 `
         Utils.writeFile(config, configPath)
 
-        this.#proc = Utils.subprocess([
-            'cava',
-            '-p', configPath
-        ], output => {
-            if (!output.trim()) return
+        // Start cava with error handling
+        try {
+            this.#proc = Utils.subprocess([
+                'cava',
+                '-p', configPath
+            ], output => {
+                if (!output?.trim()) return
 
-            // Clean the output and convert numbers to bars
-            const values = output.trim().split('').map(char => char.charCodeAt(0) - 48)
-            
-            // Take only the number of bars we want
-            const bars = values.slice(0, this.#config.bars || 13)
-                .map(n => {
-                    // Logarithmic scaling to prevent maximum height artifacts
-                    const scaledValue = Math.log1p(n) / Math.log1p(7)
-                    const level = Math.min(Math.max(1, Math.floor(scaledValue * 7)))
-                    return ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"][level]
-                })
-                .join('')
+                // Clean the output and convert numbers to bars
+                const values = output.trim().split('').map(char => char.charCodeAt(0) - 48)
+                
+                // Take only the number of bars we want
+                const bars = values.slice(0, this.#config.bars)
+                    .map(n => {
+                        // Logarithmic scaling to prevent maximum height artifacts
+                        const scaledValue = Math.log1p(n) / Math.log1p(7)
+                        const level = Math.min(Math.max(0, Math.floor(scaledValue * 8)))
+                        return ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"][level]
+                    })
+                    .join('')
 
-            if (bars !== this.#output) {
-                this.#output = bars
-                this.emit('output-changed', this.#output)
-            }
-
-        }, error => {
-            // Silent error handling
-            this.#output = "▁".repeat(this.#config.bars || 13)
+                if (bars !== this.#output) {
+                    this.#output = bars
+                    this.emit('output-changed', bars)
+                }
+            }, error => {
+                console.error('Cava error:', error)
+                if (!this.#output) {
+                    this.#output = "▁".repeat(this.#config.bars)
+                    this.emit('output-changed', this.#output)
+                }
+            })
+        } catch (error) {
+            console.error('Failed to start cava:', error)
+            this.#output = "▁".repeat(this.#config.bars)
             this.emit('output-changed', this.#output)
-        })
+        }
     }
-
 
     #detectAudioSource() {
         try {
@@ -147,25 +162,11 @@ sensitivity = ${this.#config.sensitivity || 100}
                 return defaultSinkMatch[1] + '.monitor'
             }
         } catch (e) {
-            // Silent error handling
+            console.error('Failed to detect default sink:', e)
         }
 
-        try {
-            // Fallback to auto
-            const sinks = Utils.exec('pactl list short sinks')
-            const sinkLines = sinks.split('\n')
-            if (sinkLines.length > 0) {
-                const firstSink = sinkLines[0].split('\t')[1]
-                return firstSink + '.monitor'
-            }
-        } catch (e) {
-            // Silent error handling
-        }
-
-        // Absolute fallback
         return 'auto'
     }
-
 
     get output() { return this.#output }
 
