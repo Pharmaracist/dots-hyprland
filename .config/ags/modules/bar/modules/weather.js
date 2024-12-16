@@ -209,7 +209,7 @@ const WeatherWidget = () => {
         hpack: 'center',
         vpack: 'center',
         children: [
-          tempLabel,
+          // tempLabel,
           feelsLikeTextLabel,
           feelsLikeLabel
         ]

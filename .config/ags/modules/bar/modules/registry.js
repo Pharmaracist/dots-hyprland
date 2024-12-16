@@ -16,7 +16,7 @@ import Cava from "./cava.js";
 import { BarCornerTopleft, BarCornerTopright } from "../barcorners.js";
 import ClassWindow from "../modules/window_title.js";
 import WeatherWidget from "./weather.js";
-
+import { Systray } from "../../systray/systray.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -96,6 +96,7 @@ export const StatusModules = {
     powerDraw() { return PowerDraw(); },
     systemResources() { return SystemResources(); },
     system() { return System(); },
+    tray()  {return Systray();}
 };
 
 export const ControlModules = {

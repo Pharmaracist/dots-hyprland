@@ -22,7 +22,7 @@ let LANGUAGES = writable ({
     // "af": "Afrikaans",
     // "sq": "Albanian",
     // "am": "Amharic",
-    // "ar": "Arabic",
+    "ar": "Arabic",
     // "hy": "Armenian",
     // "az": "Azerbaijani",
     // "eu": "Basque",

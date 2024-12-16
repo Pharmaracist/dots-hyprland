@@ -1,0 +1,261 @@
+{
+  "currentTrack": null,
+  "playlist": [],
+  "volume": 100,
+  "playing": true,
+  "repeat": true,
+  "shuffle": false,
+  "searchResults": [
+    {
+      "videoId": "iKo7Xth3Ttc",
+      "title": "تلاوة بهيّة لسورة الزمر كاملة للشيخ أحمد بن طالب ~ Sūrah Al-Zumar by Sheikh Ahmad Taleb",
+      "artists": [
+        {
+          "name": "آيُ القرآن"
+        }
+      ],
+      "album": "",
+      "duration": "23:56",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/iKo7Xth3Ttc/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA0tjyH41k34qAPZdEVw9M1Jc9gUw",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/iKo7Xth3Ttc/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB7DHznSbsP7HnOJ33G2K7SIg6xJg",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "vVyVLYeyupU",
+      "title": "الشيخ احمد بن طالب من سورة الأعراف ( تلاوة روحانية ) 🎧",
+      "artists": [
+        {
+          "name": "تلاوات فريدة Quran"
+        }
+      ],
+      "album": "",
+      "duration": "19:46",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/vVyVLYeyupU/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCWBJzZyoJ9LDhTHEL6WWWAuq_abA",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/vVyVLYeyupU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBO0NXjYVEWV8W0YJlrA0nTTxm60w",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "dLiRoxVXuu0",
+      "title": "الشيخ احمد بن طالب سورة الزخرف و الدخان ( تلاوة آسره ) 🎧",
+      "artists": [
+        {
+          "name": "تلاوات فريدة Quran"
+        }
+      ],
+      "album": "",
+      "duration": "21:39",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/dLiRoxVXuu0/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDk4AqjlqlXQfc_oPOVIE3vDKPe_w",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/dLiRoxVXuu0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCyvy_yFtTPqHYIJpcN0tJWQK1LZw",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "jmfQL-yWlD4",
+      "title": "سورة البقرة كاملة بأداء عالي وجميل للشيخ أحمد بن طالب حميد - من المسجد النبوي",
+      "artists": [
+        {
+          "name": "صلاة التراويح من الحرمين \" تلاوات مرتّلة \""
+        }
+      ],
+      "album": "",
+      "duration": "98:20",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/jmfQL-yWlD4/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBbO9OjEDSiTbbD-wSNeXUCJBzNdw",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/jmfQL-yWlD4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAUXaoUVAZKWRDFDg3ehLXfFh19XQ",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "8WgHYgfk4NI",
+      "title": "2/ Surat al Baqarah | Ahmed bin Talib",
+      "artists": [
+        {
+          "name": "The criterion - الفرقان"
+        }
+      ],
+      "album": "",
+      "duration": "101:24",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/8WgHYgfk4NI/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDMofnRrPbzgcqdrKyGhuc1hAPkug",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/8WgHYgfk4NI/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAoE_hksyLzkeKKSLedYzR3p5yoag",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "qDa7-YhwQCA",
+      "title": "إبداع متجدد وتحبير متألق | جميع تلاوات الشيخ أحمد بن طالب في رمضان عام ١٤٤٥ هـ",
+      "artists": [
+        {
+          "name": "تلاوات فريدة Quran"
+        }
+      ],
+      "album": "",
+      "duration": "209:03",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/qDa7-YhwQCA/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBU9n9TQHtqrpvxWKE8H7CZn-7A6g",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/qDa7-YhwQCA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDAkbEVuh3wdHDjYgg85lTTE8eidA",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "l80oy__qDNE",
+      "title": "تلاوة بهيّة لـ سورة الزمر كاملة بصوت الشيخ أحمد بن طالب حميد - من فجريات الحرم النبوي",
+      "artists": [
+        {
+          "name": "صلاة التراويح من الحرمين \" تلاوات مرتّلة \""
+        }
+      ],
+      "album": "",
+      "duration": "23:37",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/l80oy__qDNE/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAUAW2uuqopeU98ot1XQ-WMJ02Vow",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/l80oy__qDNE/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB6fx4Wdemz9QcIvsXhZBBLXaICnQ",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "i_kX8dQ_DJs",
+      "title": "Surah Az-Zukhruf | Full | by Sheikh Ahmed bin Taleb | سورة الزخرف کاملة للشیخ احمد بن طالب",
+      "artists": [
+        {
+          "name": "AL HAMED | الحامد"
+        }
+      ],
+      "album": "",
+      "duration": "15:08",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/i_kX8dQ_DJs/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCj3c46yTBGYtsQ6IXaq3NcFUKTyg",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/i_kX8dQ_DJs/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDm_5SHz6TWsvJgpKri8Uyo9bYkoQ",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "7C6f8HGEF1E",
+      "title": "تلاوة لا مثيل لها للشيخ: أحمد بن طالب حميد | ما تيسّر من سورة القصص |#عبق #التلاوات #أحمد_بن_طالب",
+      "artists": [
+        {
+          "name": "عَبَق التلاوات"
+        }
+      ],
+      "album": "",
+      "duration": "16:54",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/7C6f8HGEF1E/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAmtWBXd4gwqE3cI-c63hG6LiFpcw",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/7C6f8HGEF1E/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDgqhZNqldfNAwhDBV5FaG5f8XrmQ",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    },
+    {
+      "videoId": "7sLqMVQaVZg",
+      "title": "أحمد طالب حميد يمتع الأسماع بتحبير بديع ليلة التاسع من رمضان 1444",
+      "artists": [
+        {
+          "name": "صلاة التراويح من الحرمين \" تلاوات مرتّلة \""
+        }
+      ],
+      "album": "",
+      "duration": "22:05",
+      "thumbnail": "",
+      "thumbnails": [
+        {
+          "url": "https://i.ytimg.com/vi/7sLqMVQaVZg/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDJwgkvk3J7Z4M-jZPlDUXMUo0M4w",
+          "height": 202,
+          "width": 360
+        },
+        {
+          "url": "https://i.ytimg.com/vi/7sLqMVQaVZg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBo_J7BPv5Q3b96C535w4EHiXumqw",
+          "height": 404,
+          "width": 720
+        }
+      ]
+    }
+  ],
+  "position": 370.327696,
+  "duration": 1435.421,
+  "loading": true,
+  "cachingStatus": {
+    "wCUhzvpeb5w": "cached",
+    "8lJqXnf5wUw": "cached",
+    "hxJH_jSNUwM": "cached",
+    "Hz9dnmWh-B0": "cached",
+    "wYAmJ327NEI": "cached",
+    "iKo7Xth3Ttc": "cached"
+  }
+}

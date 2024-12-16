@@ -321,5 +321,36 @@
     "mode":"mode1",
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
+  },
+  "notifications": {
+    "position": "top right",
+    "blacklist": ["Spotify"]
+  },
+  "ytmusic": {
+    "audioQuality": {
+      "type": "enum",
+      "default": "low",
+      "enums": ["low", "medium", "high"],
+      "descriptions": {
+        "low": "Low quality (saves data)",
+        "medium": "Medium quality (128kbps)",
+        "high": "High quality (best opus/audio)"
+      }
+    },
+    "autoQueue": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically queue similar tracks"
+    },
+    "queueSize": {
+      "type": "number",
+      "default": 5,
+      "description": "Number of tracks to auto-queue"
+    },
+    "cacheTimeout": {
+      "type": "number",
+      "default": 30,
+      "description": "Cache timeout in minutes"
+    }
   }
 }

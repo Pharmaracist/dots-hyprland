@@ -1,0 +1,92 @@
+{
+  "currentTrack": null,
+  "playlist": [],
+  "volume": 100,
+  "playing": true,
+  "repeat": true,
+  "shuffle": false,
+  "searchResults": [
+    {
+      "videoId": "wYAmJ327NEI",
+      "title": "Track wYAmJ327NEI",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "ftoPDspTo1U",
+      "title": "Track ftoPDspTo1U",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "Hz9dnmWh-B0",
+      "title": "Track Hz9dnmWh-B0",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "hxJH_jSNUwM",
+      "title": "Track hxJH_jSNUwM",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "iKo7Xth3Ttc",
+      "title": "Track iKo7Xth3Ttc",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "wCUhzvpeb5w",
+      "title": "Track wCUhzvpeb5w",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    },
+    {
+      "videoId": "8lJqXnf5wUw",
+      "title": "Track 8lJqXnf5wUw",
+      "artists": [
+        {
+          "name": "Unknown Artist"
+        }
+      ],
+      "cached": true
+    }
+  ],
+  "position": 160.343862,
+  "duration": 775.521,
+  "loading": false,
+  "cachingStatus": {
+    "wCUhzvpeb5w": "cached",
+    "8lJqXnf5wUw": "cached",
+    "hxJH_jSNUwM": "cached",
+    "Hz9dnmWh-B0": "cached",
+    "wYAmJ327NEI": "cached",
+    "iKo7Xth3Ttc": "cached",
+    "ftoPDspTo1U": "cached"
+  }
+}

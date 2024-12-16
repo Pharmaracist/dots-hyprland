@@ -4,7 +4,8 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import Bluetooth from "resource:///com/github/Aylur/ags/service/bluetooth.js";
 import Network from "resource:///com/github/Aylur/ags/service/network.js";
 import Notifications from "resource:///com/github/Aylur/ags/service/notifications.js";
-import { MaterialIcon } from "./materialicon.js";
+import { MaterialIcon } from '../.commonwidgets/materialicon.js';
+import { Systray } from '../systray/systray.js';
 
 export const NotificationIndicator = (notifCenterName = "sideright") => {
   const widget = Widget.Revealer({
@@ -60,6 +61,7 @@ export const NotificationIndicator = (notifCenterName = "sideright") => {
   });
   return widget;
 };
+
 export const BluetoothIndicator = () =>
   Widget.Stack({
     transition: "slide_up_down",
@@ -242,16 +244,18 @@ export const NetworkIndicator = () =>
 export const StatusIcons = (props = {}, monitor = 0) =>
   Widget.Box({
     ...props,
-    child: Widget.Box({
-      className: "spacing-h-10",
-      children: [
-        Widget.Box({
-          className: "spacing-h-10 ",
-          children: [NotificationIndicator()],
-        }),
-        NetworkIndicator(),
-        BluetoothDevices(),
-        BluetoothIndicator(),
-      ],
-    }),
+    className: 'statusicons spacing-h-5',
+    css:"padding:0 8px; ",
+    children: [
+      NotificationIndicator(),
+      Widget.Box({
+        className: 'statusicons-network',
+        children: [NetworkIndicator()],
+      }),
+      Widget.Box({
+        className: 'statusicons-bluetooth spacing-h-5',
+        children: [BluetoothIndicator(), BluetoothDevices()],
+      }),
+      // Systray(),
+    ],
   });

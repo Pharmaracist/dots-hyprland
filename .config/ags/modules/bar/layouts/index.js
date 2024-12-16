@@ -41,6 +41,10 @@ export const BarLayouts = {
                 className: 'bar-round-padding',
                 children: [
                     modules.InfoModules.clock(),
+                ],
+            }),Widget.Box({
+                className: 'bar-round-padding',
+                children: [
                     modules.MediaModules.cava(),
                 ],
             })],
@@ -49,6 +53,12 @@ export const BarLayouts = {
                     className: 'bar-round-padding',
                     children: [
                         modules.InfoModules.weather(),
+                    ],
+                }),
+                Widget.Box({
+                    className: 'bar-round-padding',
+                    children: [
+                        modules.StatusModules.tray(),
                     ],
                 }),
                 Widget.Box({

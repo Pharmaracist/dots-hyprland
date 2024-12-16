@@ -1,4 +1,4 @@
-const { Gtk } = imports.gi;
+const { Gtk, Gdk, GObject } = imports.gi;
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import YTMusic from '../../../services/ytmusic.js';
@@ -10,299 +10,340 @@ import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget;
 
 // Media Controls
-export const MediaControls = () => {
-    const mprisPlayer = () => Mpris.players.find(p => p.identity === 'mpv');
-
-    return Box({
-        className: 'media-controls',
-        vertical: true,
-        children: [
-            Box({
-                className: 'now-playing',
-                children: [
-                    Box({
-                        className: 'thumbnail',
-                        setup: box => {
-                            box.hook(YTMusic, (box, track) => {
+export const MediaControls = () => Box({
+    className: 'ytm-controls',
+    vertical: true,
+    children: [
+        // Now Playing Section
+        Box({
+            className: 'ytm-now-playing',
+            children: [
+                Box({
+                    className: 'ytm-now-playing-thumb',
+                    setup: box => {
+                        box.connect('realize', () => {
+                            const update = () => {
+                                const track = YTMusic.currentTrack;
                                 box.css = track?.thumbnail ? 
                                     `background-image: url("${track.thumbnail}");` : 
                                     'background-image: none;';
-                            }, 'current-track');
-                        },
-                    }),
+                            };
+                            YTMusic.connect('notify::current-track', update);
+                            update();
+                        });
+                    },
+                }),
+                Box({
+                    className: 'ytm-now-playing-info',
+                    vertical: true,
+                    children: [
+                        Label({
+                            className: 'ytm-now-playing-title',
+                            xalign: 0,
+                            justification: 'left',
+                            wrap: true,
+                            setup: label => {
+                                label.connect('realize', () => {
+                                    const update = () => {
+                                        const track = YTMusic.currentTrack;
+                                        label.label = track?.title || 'Not playing';
+                                    };
+                                    YTMusic.connect('notify::current-track', update);
+                                    update();
+                                });
+                            },
+                        }),
+                        Label({
+                            className: 'ytm-now-playing-artist',
+                            xalign: 0,
+                            justification: 'left',
+                            wrap: true,
+                            setup: label => {
+                                label.connect('realize', () => {
+                                    const update = () => {
+                                        const track = YTMusic.currentTrack;
+                                        const artists = track?.artists?.map(a => a.name || a).filter(Boolean) || [];
+                                        label.label = artists.join(', ');
+                                    };
+                                    YTMusic.connect('notify::current-track', update);
+                                    update();
+                                });
+                            },
+                        }),
+                        Box({
+                            className: 'ytm-progress',
+                            children: [
+                                Slider({
+                                    className: 'ytm-progress-slider',
+                                    drawValue: false,
+                                    onChange: ({ value }) => YTMusic.seek(value),
+                                    setup: slider => {
+                                        const update = () => {
+                                            slider.adjustment.upper = YTMusic._duration || 100;
+                                            slider.value = YTMusic._position || 0;
+                                        };
+                                        YTMusic.connect('notify::position', update);
+                                        YTMusic.connect('notify::duration', update);
+                                        update();
+                                    },
+                                }),
+                                Label({
+                                    className: 'ytm-progress-time',
+                                    setup: label => {
+                                        const formatTime = (seconds) => {
+                                            if (!seconds) return '0:00';
+                                            const mins = Math.floor(seconds / 60);
+                                            const secs = Math.floor(seconds % 60);
+                                            return `${mins}:${secs.toString().padStart(2, '0')}`;
+                                        };
+                                        const update = () => {
+                                            const position = formatTime(YTMusic._position);
+                                            const duration = formatTime(YTMusic._duration);
+                                            label.label = `${position} / ${duration}`;
+                                        };
+                                        YTMusic.connect('notify::position', update);
+                                        YTMusic.connect('notify::duration', update);
+                                        update();
+                                    },
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+        }),
+        // Controls Section
+        Box({
+            className: 'ytm-playback-controls',
+            hpack: 'center',
+            spacing: 8,
+            children: [
+                Button({
+                    className: 'control-button',
+                    child: MaterialIcon(YTMusic.shuffle ? 'shuffle_on' : 'shuffle', 'norm'),
+                    onClicked: () => {
+                        YTMusic.shuffle = !YTMusic.shuffle;
+                        YTMusic._sendMpvCommand(['playlist-shuffle']);
+                        return true;
+                    },
+                    setup: button => {
+                        setupCursorHover(button);
+                        YTMusic.connect('notify::shuffle', () => {
+                            button.child.label = YTMusic.shuffle ? 'shuffle_on' : 'shuffle';
+                        });
+                    },
+                }),
+
+                Button({
+                    className: 'control-button',
+                    child: MaterialIcon('skip_previous', 'norm'),
+                    onClicked: () => {
+                        YTMusic._sendMpvCommand(['playlist-prev']);
+                        return true;
+                    },
+                    setup: setupCursorHover,
+                }),
+
+                Box({
+                    className: 'play-button-container',
+                    setup: box => {
+                        const playButton = Button({
+                            className: 'control-button',
+                            child: MaterialIcon(YTMusic.playing ? 'pause' : 'play_arrow', 'large'),
+                            onClicked: () => {
+                                YTMusic.togglePlay();
+                                return true;
+                            },
+                            setup: button => {
+                                setupCursorHover(button);
+                                YTMusic.connect('notify::playing', () => {
+                                    if (!YTMusic._loading) {
+                                        button.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
+                                    }
+                                });
+                            },
+                        });
+
+                        YTMusic.connect('notify::loading', () => {
+                            if (YTMusic._loading) {
+                                playButton.child.label = 'hourglass_empty';
+                            } else {
+                                playButton.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
+                            }
+                        });
+
+                        box.children = [playButton];
+                    },
+                }),
+
+                Button({
+                    className: 'control-button',
+                    child: MaterialIcon('skip_next', 'norm'),
+                    onClicked: () => {
+                        YTMusic._sendMpvCommand(['playlist-next']);
+                        return true;
+                    },
+                    setup: setupCursorHover,
+                }),
+
+                Button({
+                    className: 'control-button',
+                    child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'norm'),
+                    onClicked: () => {
+                        YTMusic.repeat = !YTMusic.repeat;
+                        YTMusic._sendMpvCommand(['cycle-values', 'loop-file', 'inf', 'no']);
+                        return true;
+                    },
+                    setup: button => {
+                        setupCursorHover(button);
+                        YTMusic.connect('notify::repeat', () => {
+                            button.child.label = YTMusic.repeat ? 'repeat_one' : 'repeat';
+                        });
+                    },
+                }),
+                Button({
+                    className: 'control-button',
+                    child: MaterialIcon(YTMusic.showDownloaded ? '󰇄' : '󰇣', 'norm'),
+                    onClicked: () => YTMusic.toggleDownloadedView(),
+                    setup: button => {
+                        setupCursorHover(button);
+                        YTMusic.connect('notify::show-downloaded', () => {
+                            button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
+                        });
+                    },
+                }),
+            ],
+        }),
+    ],
+});
+
+// Search Header
+const SearchHeader = () => Box({
+    className: 'ytm-header',
+    children: [
+        Entry({
+            className: 'ytm-search',
+            placeholderText: 'Search YouTube Music...',
+            onAccept: ({ text }) => YTMusic.search(text),
+        }),
+        Button({
+            className: 'ytm-toggle-view-button control-button',
+            child: MaterialIcon('󰇣', 'norm'),
+            onClicked: () => YTMusic.toggleDownloadedView(),
+            setup: button => {
+                setupCursorHover(button);
+                YTMusic.connect('notify::show-downloaded', () => {
+                    button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
+                });
+            },
+        }),
+    ],
+});
+
+// Search Results
+const SearchResults = () => Box({
+    className: 'ytm-results',
+    vertical: true,
+    setup: box => {
+        const update = () => {
+            const results = YTMusic.searchResults;
+            if (!results || !Array.isArray(results) || results.length === 0) {
+                box.children = [
                     Box({
-                        className: 'track-info',
                         vertical: true,
+                        className: 'ytm-no-results',
                         children: [
+                            MaterialIcon('music_note', 'large'),
                             Label({
+                                label: YTMusic.showDownloaded ? 
+                                    'No downloaded songs found' : 
+                                    'Search for music on YouTube',
                                 className: 'title',
-                                xalign: 0,
-                                justification: 'left',
-                                wrap: true,
-                                setup: label => {
-                                    label.hook(YTMusic, (label, track) => {
-                                        if (track) {
-                                            label.label = track.title;
-                                        } else {
-                                            const player = mprisPlayer();
-                                            label.label = player?.trackTitle || 'Not playing';
-                                        }
-                                    }, 'current-track');
-                                    label.hook(Mpris, (label) => {
-                                        if (!YTMusic.currentTrack) {
-                                            const player = mprisPlayer();
-                                            label.label = player?.trackTitle || 'Not playing';
-                                        }
-                                    }, 'player-changed');
-                                },
-                            }),
-                            Label({
-                                className: 'artist',
-                                xalign: 0,
-                                justification: 'left',
-                                wrap: true,
-                                setup: label => {
-                                    label.hook(YTMusic, (label, track) => {
-                                        if (track) {
-                                            label.label = track.artists?.map(a => a.name).join(', ') || '';
-                                        } else {
-                                            const player = mprisPlayer();
-                                            label.label = player?.trackArtists?.join(', ') || '';
-                                        }
-                                    }, 'current-track');
-                                    label.hook(Mpris, (label) => {
-                                        if (!YTMusic.currentTrack) {
-                                            const player = mprisPlayer();
-                                            label.label = player?.trackArtists?.join(', ') || '';
-                                        }
-                                    }, 'player-changed');
-                                },
                             }),
                         ],
                     }),
-                ],
-            }),
-            Box({
-                className: 'controls',
-                hpack: 'center',
-                spacing: 8,
-                children: [
-                    Button({
-                        className: 'control-button',
-                        child: MaterialIcon('skip_previous', 'large'),
-                        setup: setupCursorHover,
-                        onClicked: () => {
-                            if (YTMusic.currentTrack) {
-                                YTMusic.previous();
-                            } else {
-                                const player = mprisPlayer();
-                                player?.previous();
-                            }
-                        },
-                    }),
-                    Button({
-                        className: 'control-button',
-                        setup: button => {
-                            setupCursorHover(button);
-                            const updatePlayState = () => {
-                                const player = mprisPlayer();
-                                const isPlaying = YTMusic.currentTrack ? 
-                                    YTMusic.playing : 
-                                    player?.playBackStatus === 'Playing';
-                                button.child = MaterialIcon(isPlaying ? 'pause' : 'play_arrow', 'large');
-                            };
-                            button.hook(YTMusic, updatePlayState, 'playing');
-                            button.hook(Mpris, updatePlayState, 'player-changed');
-                        },
-                        onClicked: () => {
-                            if (YTMusic.currentTrack) {
-                                YTMusic.togglePlay();
-                            } else {
-                                const player = mprisPlayer();
-                                player?.playPause();
-                            }
-                        },
-                    }),
-                    Button({
-                        className: 'control-button',
-                        child: MaterialIcon('skip_next', 'large'),
-                        setup: setupCursorHover,
-                        onClicked: () => {
-                            if (YTMusic.currentTrack) {
-                                YTMusic.next();
-                            } else {
-                                const player = mprisPlayer();
-                                player?.next();
-                            }
-                        },
-                    }),
-                ],
-            }),
-            Box({
-                className: 'volume-control',
-                children: [
-                    Box({
-                        className: 'volume-icon',
-                        child: MaterialIcon('volume_up', 'large'),
-                    }),
-                    Slider({
-                        className: 'volume-slider',
-                        drawValue: false,
-                        hexpand: true,
-                        value: 1.0,
-                        setup: slider => {
-                            const updateVolume = () => {
-                                if (YTMusic.currentTrack) {
-                                    slider.value = YTMusic.volume;
-                                } else {
-                                    const player = mprisPlayer();
-                                    if (player) slider.value = player.volume;
-                                }
-                            };
-                            slider.hook(YTMusic, updateVolume, 'volume');
-                            slider.hook(Mpris, updateVolume, 'player-changed');
-                        },
-                        onChange: ({ value }) => {
-                            if (typeof value === 'number') {
-                                if (YTMusic.currentTrack) {
-                                    YTMusic.setVolume(value);
-                                } else {
-                                    const player = mprisPlayer();
-                                    if (player) player.volume = value;
-                                }
-                            }
-                        },
-                    }),
-                ],
-            }),
-        ],
-    });
-};
+                ];
+                return;
+            }
 
-// Search Results Item
-const SearchResultItem = ({ videoId, title, artists, album }) => Button({
-    className: 'music-item',
-    onClicked: () => YTMusic.play(videoId),
-    child: Box({
-        children: [
-            Box({
-                vertical: true,
-                children: [
-                    Label({
-                        className: 'music-title',
-                        label: title || 'Unknown Title',
-                        xalign: 0,
-                        justification: 'left',
-                        wrap: true,
-                    }),
-                    Label({
-                        className: 'music-artist',
-                        label: artists?.map(a => a.name).join(', ') || 'Unknown Artist',
-                        xalign: 0,
-                        justification: 'left',
-                        wrap: true,
-                    }),
-                   
-                ],
-            }),
-        ],
-    }),
-    setup: setupCursorHover,
-});
-
-// Error Message
-const ErrorMessage = () => Box({
-    vertical: true,
-    className: 'error-message',
-    children: [
-        MaterialIcon('error', 'large'),
-        Label({
-            className: 'error-title',
-            label: YTMusic.bind('error').transform(error => error?.title || ''),
-        }),
-        Label({
-            className: 'error-description',
-            label: YTMusic.bind('error').transform(error => error?.description || ''),
-        }),
-    ],
-    visible: YTMusic.bind('error').transform(error => !!error),
-});
-
-// Search Results List
-const SearchResults = () => {
-    console.log('YTMusic Widget: Creating SearchResults component');
-    return Box({
-        vertical: true,
-        className: 'search-results',
-        children: [
-            Scrollable({
-                vexpand: true,
+            box.children = results.map(item => Button({
+                className: `ytm-result ${item.cached ? 'cached' : ''}`,
+                onClicked: () => YTMusic.play(item.videoId),
                 child: Box({
-                    className: 'results-list',
-                    vertical: true,
-                    setup: box => {
-                        box.hook(YTMusic, (box, results) => {
-                            console.log('YTMusic Widget: Got search results update:', results);
-                            if (!results || results.length === 0) {
-                                console.log('YTMusic Widget: No results, showing empty state');
-                                box.children = [Label({
-                                    label: 'No results found',
-                                    className: 'search-header',
-                                    vpack: 'center',
-                                    hpack: 'center',
-                                })];
-                            } else {
-                                console.log('YTMusic Widget: Mapping results to items');
-                                box.children = results.map(result => {
-                                    console.log('YTMusic Widget: Creating item for:', result);
-                                    return SearchResultItem(result);
-                                });
-                            }
-                        }, 'search-results');
-                    }
+                    children: [
+                        Box({
+                            vertical: true,
+                            children: [
+                                Label({
+                                    label: item.title,
+                                    xalign: 0,
+                                    justification: 'left',
+                                    className: 'title',
+                                    wrap: true,
+                                }),
+                                Label({
+                                    label: item.artists.map(a => a.name).join(', '),
+                                    xalign: 0,
+                                    justification: 'left',
+                                    className: 'artist',
+                                    wrap: true,
+                                }),
+                            ],
+                        }),
+                        Box({
+                            className: 'actions',
+                            children: [
+                                Button({
+                                    className: 'cache-btn',
+                                    visible: !item.cached,
+                                    child: MaterialIcon('download', 'small'),
+                                    onClicked: () => YTMusic.cacheTrack(item.videoId),
+                                    setup: setupCursorHover,
+                                }),
+                                Label({
+                                    className: 'cache-status',
+                                    setup: label => {
+                                        const update = () => {
+                                            const status = YTMusic.cachingStatus[item.videoId];
+                                            label.label = status === 'caching' ? '󰇚' :
+                                                         status === 'cached' ? '󰇘' :
+                                                         status === 'error' ? '󰇙' : '';
+                                        };
+                                        YTMusic.connect('notify::caching-status', update);
+                                        update();
+                                    },
+                                }),
+                            ],
+                        }),
+                    ],
                 }),
-            }),
-        ],
-    });
-};
+            }));
+        };
+
+        YTMusic.connect('notify::search-results', update);
+        YTMusic.connect('notify::show-downloaded', update);
+        update();
+    },
+});
 
 // Export the view
 export const ytmusicView = Box({
     className: 'ytmusic-view',
     vertical: true,
     children: [
-        SearchResults(),
-        MediaControls(),
-    ],
-});
-
-// Export the widget
-export const YTMusicWidget = Box({
-    className: 'ytmusic-widget',
-    vertical: true,
-    children: [
-        // Search Bar
-        Box({
-            className: 'search-box',
-            children: [
-                Entry({
-                    className: 'search-input',
-                    hexpand: true,
-                    placeholderText: 'Search YouTube Music...',
-                    onAccept: ({ text }) => YTMusic.search(text),
-                    setup: setupCursorHover,
-                }),
-            ],
+        SearchHeader(),
+        Scrollable({
+            vexpand: true,
+            child: SearchResults(),
         }),
-        // Error Message
-        ErrorMessage(),
+        MediaControls(),
     ],
 });
 
 // Send message function for the API
 export const sendMessage = (text) => {
     if (!text) return;
-    YTMusic.search(text);
+    YTMusic.search(text).catch(console.error);
 };
 
 // Export the commands
@@ -310,8 +351,11 @@ export const ytmusicCommands = Box({
     className: 'commands-box',
 });
 
-// Export the tab icon
-export const ytmusicTabIcon = MaterialIcon('music_note', 'large');
+// Export the icon
+export const ytmusicTabIcon = Icon({
+    className: 'txt-norm icon-material ',
+    icon: 'music-note',
+});
 
 // Add styles
 

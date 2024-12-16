@@ -553,6 +553,7 @@ $bar_ws_width_focus_active: 6.045rem;
 .status-icons-group {
     padding-left: 0.273rem;
     padding-right: 1rem;
+    
 }
 
 .time-with-margin {
@@ -614,14 +615,15 @@ $bar_ws_width_focus_active: 6.045rem;
 .cava-module {
     background: transparent;
     min-width: 4rem;
+    margin:0 1px;
     padding:0px 3px;
 }
 
 .cava-visualizer {
-    // @include techfont;
+    @include techfont;
     font-size: 18px;
-    padding: 0px 2px;
-    // min-width: 5rem;
+    // padding: 0px 2px;
+    min-width: 5rem;
 }
 
 .cava-bar-high {
