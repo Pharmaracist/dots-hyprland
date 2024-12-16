@@ -233,112 +233,71 @@ class YouTubeMusicService extends Service {
     }
 
     async play(videoId = null) {
-        if (!videoId) return;
-
         try {
-            this._loading = true;
-            this.notify('loading');
-
-            // Clear update interval if exists
-            if (this._updateInterval) {
-                GLib.source_remove(this._updateInterval);
-                this._updateInterval = null;
-            }
-
-            // Kill any existing MPV instance
-            await Utils.execAsync(['killall', '-9', 'mpv']).catch(() => {});
-
-            // Reset current track info
-            this._currentVideoId = videoId;
-            this._currentTrack = null;
-            this._playing = false;
-            this._position = 0;
-            this._duration = 0;
+            if (!videoId && !this._currentVideoId) return;
             
-            this.notify('current-track');
-            this.notify('playing');
-            this.notify('position');
-            this.notify('duration');
+            if (videoId) {
+                this._currentVideoId = videoId;
+                
+                // Get track info first
+                const trackInfo = await this._getTrackInfo(videoId);
+                if (trackInfo) {
+                    this._currentTrack = {
+                        videoId,
+                        title: trackInfo.title,
+                        artists: trackInfo.artists,
+                        thumbnail: trackInfo.thumbnail,
+                        duration: trackInfo.duration
+                    };
+                    this.notify('current-track');
+                }
 
-            // Check if song is cached first
-            const cacheDir = this._getOption('cacheDir');
-            const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
-            
-            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                const cached = this._trackInfoCache.get(videoId);
-                const initialTitle = cached?.data?.title || 'Loading...';
-                const initialArtist = cached?.data?.artists?.[0]?.name || '';
+                // Get audio URL
+                const audioUrl = await this._getAudioUrl(videoId);
+                if (!audioUrl) {
+                    throw new Error('Failed to get audio URL');
+                }
 
-                await Utils.execAsync(['bash', '-c', `
-                    mpv \\
-                        --config-dir="${App.configDir}/services" \\
-                        --force-media-title="${initialTitle}${initialArtist ? ` - ${initialArtist}` : ''}" \\
-                        --title="${initialTitle}" \\
-                        --metadata-codepage=auto \\
-                        --volume=${this._volume} \\
-                        --input-ipc-server=/tmp/mpv-socket \\
-                        ${this._repeat ? '--loop-file=inf' : ''} \\
-                        "file://${cachedFile}" &
-                    disown
-                `]);
-
-                // Start the update interval
-                this._updateInterval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-                    this._updatePlayingState();
-                    return GLib.SOURCE_CONTINUE;
-                });
+                // Start playback with mpv
+                await Utils.execAsync([
+                    'mpv',
+                    '--no-video',
+                    '--no-terminal',
+                    '--force-window=no',
+                    '--ytdl=no',
+                    '--no-resume-playback',
+                    '--audio-display=no',
+                    audioUrl
+                ]);
 
                 this._playing = true;
-                this._loading = false;
                 this.notify('playing');
-                this.notify('loading');
-                return;
+
+                // Set metadata for MPRIS
+                if (this._currentTrack) {
+                    const metadata = {
+                        'xesam:title': this._currentTrack.title,
+                        'xesam:artist': [this._currentTrack.artists[0].name],
+                        'mpris:artUrl': this._currentTrack.thumbnail,
+                        'mpris:trackid': `/org/mpris/MediaPlayer2/Track/${videoId}`,
+                        'mpris:length': this._duration * 1000000
+                    };
+                    
+                    // Update MPRIS metadata
+                    if (this._mprisPlayer) {
+                        this._mprisPlayer.metadata = metadata;
+                    }
+                }
+            } else {
+                // Resume playback
+                await this._setMpvProperty('pause', false);
+                this._playing = true;
+                this.notify('playing');
             }
-
-            // If not cached, check online status
-            const isOnline = await this._isOnline();
-            if (!isOnline) {
-                this._showNotification(
-                    'Playback Failed',
-                    'No internet connection and song is not cached',
-                    'critical'
-                );
-                this._loading = false;
-                this.notify('loading');
-                return;
-            }
-
-            // Start streaming and caching
-            const url = `https://music.youtube.com/watch?v=${videoId}`;
-
-            await Utils.execAsync(['bash', '-c', `
-                mpv \\
-                    --config-dir="${App.configDir}/services" \\
-                    --force-media-title="Loading..." \\
-                    --title="Loading..." \\
-                    --metadata-codepage=auto \\
-                    --volume=${this._volume} \\
-                    --input-ipc-server=/tmp/mpv-socket \\
-                    ${this._repeat ? '--loop-file=inf' : ''} \\
-                    "${url}" &
-                disown
-            `]);
-
-            this._playing = true;
-            this._loading = false;
+        } catch (e) {
+            logError('Error playing track:', e);
+            this._playing = false;
             this.notify('playing');
-            this.notify('loading');
-
-            // Start caching in background
-            this.cacheTrack(videoId).catch(logError);
-
-            if (!this._repeat) {
-                await this._queueSimilarTracks();
-            }
-        } catch (error) {
-            logError(error);
-            this._loading = false;
-            this.notify('loading');
         }
     }
 
@@ -425,21 +384,30 @@ class YouTubeMusicService extends Service {
 
         // Listen for metadata changes
         this._mprisPlayer.connect('changed', () => {
+            if (this._currentTrack) {
+                // Ensure our metadata is set in MPRIS
+                const metadata = {
+                    'xesam:title': this._currentTrack.title,
+                    'xesam:artist': [this._currentTrack.artists[0].name],
+                    'mpris:artUrl': this._currentTrack.thumbnail,
+                    'mpris:trackid': `/org/mpris/MediaPlayer2/Track/${this._currentVideoId}`,
+                    'mpris:length': this._duration * 1000000
+                };
+                
+                // Only update if different
+                if (JSON.stringify(this._mprisPlayer.metadata) !== JSON.stringify(metadata)) {
+                    this._mprisPlayer.metadata = metadata;
+                }
+            }
             this._updateTrackFromMpris();
         });
 
-        // Listen for playback status changes
-        this._mprisPlayer.connect('playback-status', () => {
+        // Listen for playback status changes using the correct signal
+        this._mprisPlayer.connect('changed', () => {
             const status = this._mprisPlayer.playBackStatus;
-            this._playing = status === 'Playing';
-            this.notify('playing');
-
-            // Start state update interval when playing
-            if (this._playing && !this._updateInterval) {
-                this._updateInterval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-                    this._updatePlayingState();
-                    return GLib.SOURCE_CONTINUE;
-                });
+            if (status) {
+                this._playing = status === 'Playing';
+                this.notify('playing');
             }
         });
     }

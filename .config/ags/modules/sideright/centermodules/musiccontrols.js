@@ -71,10 +71,6 @@ const ControlButton = ({ icon, action, sensitive = true }) => Button({
 export default () => Box({
     className: 'sideright-music',
     setup: self => {
-        // Hook both MPRIS and YTMusic for updates
-        self.hook(Mpris, () => updateCover());
-        self.hook(YTMusic, () => updateCover());
-
         const updateCover = () => {
             const player = Mpris.players[0];
             if (!player) {
@@ -82,12 +78,15 @@ export default () => Box({
                 return;
             }
 
-            // Try to get cover from MPRIS first
-            let coverUrl = player.trackCoverUrl;
-
-            // If no MPRIS cover and it's our YTMusic player, try to get from current track
-            if (!coverUrl && player.identity === 'mpv' && YTMusic.currentTrack?.thumbnail) {
+            // Try to get cover from YTMusic first if it's our player
+            let coverUrl = null;
+            if (player.identity === 'mpv' && YTMusic.currentTrack?.thumbnail) {
                 coverUrl = YTMusic.currentTrack.thumbnail;
+            }
+
+            // Fallback to MPRIS cover if no YTMusic thumbnail
+            if (!coverUrl) {
+                coverUrl = player.trackCoverUrl;
             }
 
             if (!coverUrl) {
@@ -102,8 +101,8 @@ export default () => Box({
             }
         };
 
-        // Initial update
-        updateCover();
+        // Use polling instead of hooks for more reliable updates
+        self.poll(1000, updateCover);
     },
     vertical: false,
     spacing: 4,

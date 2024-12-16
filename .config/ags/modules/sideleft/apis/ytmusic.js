@@ -357,7 +357,7 @@ const SearchResults = () => Box({
             vertical: true,
             className: 'ytm-no-results',
             children: [
-                MaterialIcon('music_note', 'large'),
+                MaterialIcon('library_music', 'large'),
                 Label({
                     label: 'No results',
                     className: 'title',
