@@ -16,11 +16,11 @@ const AUDIO_FORMATS = {
 
 // Default options
 const DEFAULT_OPTIONS = {
-    audioQuality: 'high',
-    queueSize: 5,
+    audioQuality: 'low',
+    queueSize: 1,
     cacheTimeout: 30,
     cacheDir: GLib.build_filenamev([GLib.get_user_cache_dir(), 'ytmusic']),
-    maxCacheSize: 1024 * 1024 * 1024, // 1GB
+    maxCacheSize: 10240 * 10240 * 10240, // 1GB
 };
 
 class YouTubeMusicService extends Service {
@@ -424,7 +424,7 @@ class YouTubeMusicService extends Service {
         if (!this._mprisPlayer) return;
 
         // Listen for metadata changes
-        this._mprisPlayer.connect('metadata', () => {
+        this._mprisPlayer.connect('changed', () => {
             this._updateTrackFromMpris();
         });
 
@@ -496,6 +496,77 @@ class YouTubeMusicService extends Service {
                 this._updateInterval = null;
             }
             return GLib.SOURCE_REMOVE;
+        }
+    }
+
+    async _updateTrackFromMpris() {
+        if (!this._mprisPlayer) return;
+
+        try {
+            // Get metadata from MPRIS
+            const metadata = this._mprisPlayer.metadata;
+            if (!metadata) return;
+
+            // Extract track info
+            const title = metadata['xesam:title'] || '';
+            const artist = metadata['xesam:artist']?.[0] || '';
+            const artUrl = metadata['mpris:artUrl'] || '';
+            const trackid = metadata['mpris:trackid'] || '';
+            const videoId = trackid.split('/').pop() || this._currentVideoId;
+
+            // Try to get thumbnail from cache if not in MPRIS
+            let thumbnail = artUrl;
+            if (!thumbnail && videoId) {
+                const trackInfo = await this._getTrackInfo(videoId);
+                if (trackInfo?.thumbnail) {
+                    thumbnail = trackInfo.thumbnail;
+                }
+            }
+
+            // Update current track
+            const trackUpdate = {
+                title,
+                artists: [{ name: artist }],
+                thumbnail,
+                videoId,
+            };
+
+            // Always update thumbnail if it changes
+            const thumbnailChanged = !this._currentTrack?.thumbnail && thumbnail;
+            
+            // Check for other changes
+            const hasChanges = !this._currentTrack ||
+                this._currentTrack.title !== trackUpdate.title ||
+                this._currentTrack.artists[0].name !== trackUpdate.artists[0].name ||
+                thumbnailChanged;
+
+            if (hasChanges || thumbnailChanged) {
+                this._currentTrack = trackUpdate;
+                this.notify('current-track');
+
+                // Show notification for track change
+                if (hasChanges) {
+                    this._showNotification(
+                        'Now Playing',
+                        `${title} - ${artist}`
+                    );
+                }
+            }
+
+            // Update position and duration
+            const length = metadata['mpris:length'] || 0;
+            if (length > 0) {
+                this._duration = Math.floor(length / 1000000);
+                this.notify('duration');
+            }
+
+            const position = this._mprisPlayer.position || 0;
+            if (position > 0) {
+                this._position = Math.floor(position / 1000000);
+                this.notify('position');
+            }
+        } catch (e) {
+            logError('Error updating track from MPRIS:', e);
         }
     }
 
@@ -1020,42 +1091,49 @@ class YouTubeMusicService extends Service {
     }
 
     _updateTrackFromMpris() {
-        if (!this._mprisPlayer || !this._currentVideoId) return;
+        if (!this._mprisPlayer) return;
 
-        const metadata = this._mprisPlayer.metadata;
-        if (!metadata) return;
+        try {
+            // Get metadata from MPRIS
+            const metadata = this._mprisPlayer.metadata;
+            if (!metadata) return;
 
-        // Extract track info from MPRIS metadata
-        const trackInfo = {
-            videoId: this._currentVideoId,
-            title: metadata['xesam:title'] || 'Unknown Title',
-            artists: [{ name: (metadata['xesam:artist']?.[0] || 'Unknown Artist') }],
-            album: metadata['xesam:album'] || '',
-            duration: this._formatDuration(Math.floor((metadata['mpris:length'] || 0) / 1000000)),
-            thumbnail: metadata['mpris:artUrl'] || '',
-        };
+            // Extract track info
+            const title = metadata['xesam:title'] || '';
+            const artist = metadata['xesam:artist']?.[0] || '';
+            const artUrl = metadata['mpris:artUrl'] || '';
+            const trackid = metadata['mpris:trackid'] || '';
 
-        // Only update if the metadata actually changed
-        const currentTitle = this._currentTrack?.title;
-        const currentArtist = this._currentTrack?.artists?.[0]?.name;
-        
-        if (trackInfo.title !== currentTitle || 
-            trackInfo.artists[0].name !== currentArtist) {
-            
-            this._currentTrack = trackInfo;
-            this.notify('current-track');
+            // Update current track
+            if (this._currentTrack) {
+                this._currentTrack.title = title;
+                this._currentTrack.artists = [{ name: artist }];
+                this._currentTrack.thumbnail = artUrl;
+                this.notify('current-track');
+            } else {
+                this._currentTrack = {
+                    title,
+                    artists: [{ name: artist }],
+                    thumbnail: artUrl,
+                    videoId: trackid.split('/').pop()
+                };
+                this.notify('current-track');
+            }
 
-            // Cache the metadata
-            this._trackInfoCache.set(this._currentVideoId, {
-                data: trackInfo,
-                timestamp: Date.now()
-            });
+            // Update position and duration
+            const length = metadata['mpris:length'] || 0;
+            if (length > 0) {
+                this._duration = Math.floor(length / 1000000);
+                this.notify('duration');
+            }
 
-            // Show notification for track change
-            this._showNotification(
-                'Now Playing',
-                `${trackInfo.title} - ${trackInfo.artists[0].name}`
-            );
+            const position = this._mprisPlayer.position || 0;
+            if (position > 0) {
+                this._position = Math.floor(position / 1000000);
+                this.notify('position');
+            }
+        } catch (e) {
+            logError('Error updating track from MPRIS:', e);
         }
     }
 

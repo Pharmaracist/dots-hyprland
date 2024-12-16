@@ -1,6 +1,7 @@
 const { GLib, GObject } = imports.gi;
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
+import YTMusic from '../../../services/ytmusic.js';
 const { Box, EventBox, Icon, Scrollable, Label, Button, Revealer } = Widget;
 
 import {MaterialIcon}  from "../../.commonwidgets/materialicon.js";
@@ -69,25 +70,41 @@ const ControlButton = ({ icon, action, sensitive = true }) => Button({
 
 export default () => Box({
     className: 'sideright-music',
-    setup: (self) => self.hook(Mpris, (self) => {
-        const player = Mpris.players[0];
-        if (!player) {
-            self.visible = false;
-            return;
-        }
-        self.visible = true;
-        
-        if (!player?.trackCoverUrl) {
-            self.css = 'min-height: 8rem;';
-        } else {
-            self.css = `
-                min-height: 8rem;
-                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url('${player.trackCoverUrl}');
-                background-size: cover;
-                background-position: center;
-            `;
-        }
-    }),
+    setup: self => {
+        // Hook both MPRIS and YTMusic for updates
+        self.hook(Mpris, () => updateCover());
+        self.hook(YTMusic, () => updateCover());
+
+        const updateCover = () => {
+            const player = Mpris.players[0];
+            if (!player) {
+                self.css = 'min-height: 8rem;';
+                return;
+            }
+
+            // Try to get cover from MPRIS first
+            let coverUrl = player.trackCoverUrl;
+
+            // If no MPRIS cover and it's our YTMusic player, try to get from current track
+            if (!coverUrl && player.identity === 'mpv' && YTMusic.currentTrack?.thumbnail) {
+                coverUrl = YTMusic.currentTrack.thumbnail;
+            }
+
+            if (!coverUrl) {
+                self.css = 'min-height: 8rem;';
+            } else {
+                self.css = `
+                    min-height: 8rem;
+                    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url('${coverUrl}');
+                    background-size: cover;
+                    background-position: center;
+                `;
+            }
+        };
+
+        // Initial update
+        updateCover();
+    },
     vertical: false,
     spacing: 4,
     children: [

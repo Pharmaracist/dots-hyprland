@@ -6,6 +6,7 @@ import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
+import GLib from 'gi://GLib';
 
 const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget;
 
@@ -24,11 +25,37 @@ export const MediaControls = () => Box({
                         box.connect('realize', () => {
                             const update = () => {
                                 const track = YTMusic.currentTrack;
+                                const mpris = Mpris.players.find(p => p.identity === 'mpv');
                                 box.css = track?.thumbnail ? 
-                                    `background-image: url("${track.thumbnail}");` : 
-                                    'background-image: none;';
+                                    `
+                                    background-image: url("${track.thumbnail}");
+                                    min-width: 48px;
+                                    min-height: 48px;
+                                    margin: 8px;
+                                    background-size: cover;
+                                    background-position: center;
+                                    border-radius: 4px;
+                                    ` : 
+                                    mpris?.coverPath ? 
+                                    `
+                                    background-image: url("${mpris.coverPath}");
+                                    min-width: 48px;
+                                    min-height: 48px;
+                                    margin: 8px;
+                                    background-size: cover;
+                                    background-position: center;
+                                    border-radius: 4px;
+                                    ` :
+                                    `
+                                    min-width: 48px;
+                                    min-height: 48px;
+                                    margin: 8px;
+                                    background-color: rgba(255, 255, 255, 0.1);
+                                    border-radius: 4px;
+                                    `;
                             };
                             YTMusic.connect('notify::current-track', update);
+                            Mpris.connect('player-changed', update);
                             update();
                         });
                     },
@@ -46,9 +73,11 @@ export const MediaControls = () => Box({
                                 label.connect('realize', () => {
                                     const update = () => {
                                         const track = YTMusic.currentTrack;
-                                        label.label = track?.title || 'Not playing';
+                                        const mpris = Mpris.players.find(p => p.identity === 'mpv');
+                                        label.label = track?.title || mpris?.trackTitle || 'Not playing';
                                     };
                                     YTMusic.connect('notify::current-track', update);
+                                    Mpris.connect('player-changed', update);
                                     update();
                                 });
                             },
@@ -62,10 +91,13 @@ export const MediaControls = () => Box({
                                 label.connect('realize', () => {
                                     const update = () => {
                                         const track = YTMusic.currentTrack;
-                                        const artists = track?.artists?.map(a => a.name || a).filter(Boolean) || [];
+                                        const mpris = Mpris.players.find(p => p.identity === 'mpv');
+                                        const artists = track?.artists?.map(a => a.name || a).filter(Boolean) || 
+                                                      mpris?.trackArtists || [];
                                         label.label = artists.join(', ');
                                     };
                                     YTMusic.connect('notify::current-track', update);
+                                    Mpris.connect('player-changed', update);
                                     update();
                                 });
                             },
@@ -245,39 +277,31 @@ const SearchResults = () => Box({
     className: 'ytm-results',
     vertical: true,
     setup: box => {
-        const update = () => {
-            const results = YTMusic.searchResults;
-            if (!results || !Array.isArray(results) || results.length === 0) {
-                box.children = [
-                    Box({
-                        vertical: true,
-                        className: 'ytm-no-results',
-                        children: [
-                            MaterialIcon('music_note', 'large'),
-                            Label({
-                                label: YTMusic.showDownloaded ? 
-                                    'No downloaded songs found' : 
-                                    'Search for music on YouTube',
-                                className: 'title',
-                            }),
-                        ],
-                    }),
-                ];
-                return;
+        const itemCache = new Map();
+        
+        const createTrackItem = (item) => {
+            if (itemCache.has(item.videoId)) {
+                return itemCache.get(item.videoId);
             }
 
-            box.children = results.map(item => Button({
+            const trackItem = Button({
                 className: 'track-item',
                 onClicked: () => YTMusic.play(item.videoId),
                 child: Box({
                     children: [
                         Box({
                             className: 'track-item-thumb',
-                            setup: box => {
-                                box.css = item.thumbnail ? 
-                                    `background-image: url("${item.thumbnail}");` : 
-                                    'background-image: none;min-width:1rem;min-height:1rem;padding:1rem;';
-                            },
+                            css: item.thumbnail ? 
+                                `min-width: 48px;
+                                min-height: 48px;
+                                margin: 8px;
+                                background: url("${item.thumbnail}") center/cover no-repeat;
+                                border-radius: 4px;` : 
+                                `min-width: 48px;
+                                min-height: 48px;
+                                margin: 8px;
+                                background-color: rgba(255, 255, 255, 0.1);
+                                border-radius: 4px;`,
                         }),
                         Box({
                             className: 'track-item-info',
@@ -302,42 +326,74 @@ const SearchResults = () => Box({
                         Box({
                             className: 'track-item-tags',
                             children: [
-                                // Downloaded tag
                                 item.isDownloaded && Label({
                                     className: 'track-item-tag',
                                     label: 'Downloaded',
                                 }),
-                                // Caching status tag
                                 Label({
                                     className: `track-item-caching ${YTMusic.cachingStatus[item.videoId] || ''}`,
-                                    setup: label => {
-                                        const update = () => {
-                                            const status = YTMusic.cachingStatus[item.videoId];
-                                            label.label = status === 'caching' ? 'Caching...' :
-                                                         status === 'cached' ? 'Cached' :
-                                                         status === 'error' ? 'Error' : '';
-                                            label.visible = !!status;
-                                        };
-                                        YTMusic.connect('notify::caching-status', update);
-                                        update();
-                                    },
+                                    visible: !!YTMusic.cachingStatus[item.videoId],
+                                    label: YTMusic.cachingStatus[item.videoId] === 'caching' ? 'Caching...' :
+                                           YTMusic.cachingStatus[item.videoId] === 'cached' ? 'Cached' :
+                                           YTMusic.cachingStatus[item.videoId] === 'error' ? 'Error' : '',
                                 }),
-                                // Download button (only show if not downloaded/cached)
                                 !item.isDownloaded && Button({
                                     className: 'control-button',
                                     child: MaterialIcon('download', 'small'),
                                     onClicked: () => YTMusic.cacheTrack(item.videoId),
                                     setup: setupCursorHover,
                                 }),
-                            ].filter(Boolean), // Remove null/undefined items
+                            ].filter(Boolean),
                         }),
                     ],
                 }),
-            }));
+            });
+
+            itemCache.set(item.videoId, trackItem);
+            return trackItem;
+        };
+
+        const noResultsView = Box({
+            vertical: true,
+            className: 'ytm-no-results',
+            children: [
+                MaterialIcon('music_note', 'large'),
+                Label({
+                    label: 'No results',
+                    className: 'title',
+                }),
+            ],
+        });
+
+        const update = () => {
+            const results = YTMusic.searchResults;
+            if (!results?.length) {
+                noResultsView.children[1].label = YTMusic.showDownloaded ? 
+                    'No downloaded songs found' : 
+                    'Search for music on YouTube';
+                box.children = [noResultsView];
+                return;
+            }
+
+            // Clear cache of old items
+            const currentIds = new Set(results.map(item => item.videoId));
+            for (const [id] of itemCache) {
+                if (!currentIds.has(id)) {
+                    itemCache.delete(id);
+                }
+            }
+
+            box.children = results.map(createTrackItem);
         };
 
         YTMusic.connect('notify::search-results', update);
         YTMusic.connect('notify::show-downloaded', update);
+        YTMusic.connect('notify::caching-status', () => {
+            // Only update if we have items
+            if (box.children.length > 1) {
+                update();
+            }
+        });
         update();
     },
 });
@@ -347,7 +403,6 @@ export const ytmusicView = Box({
     className: 'ytmusic-view',
     vertical: true,
     children: [
-        SearchHeader(),
         Scrollable({
             vexpand: true,
             child: SearchResults(),
