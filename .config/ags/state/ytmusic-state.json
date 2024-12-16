@@ -3,90 +3,134 @@
   "playlist": [],
   "volume": 100,
   "playing": true,
-  "repeat": true,
-  "shuffle": false,
+  "repeat": false,
+  "shuffle": true,
   "searchResults": [
     {
-      "videoId": "wYAmJ327NEI",
-      "title": "Track wYAmJ327NEI",
+      "videoId": "HOh4iXgtU20",
+      "title": "Keda",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Samar Tarik"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/bxYGWgdfrZVN-St_y7Ulmzmis_7aWYW2_zY710-kyABKYnRNzTISwn_YWLm8bI4cnkDwU7_4-9lTAx6I-g=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "ftoPDspTo1U",
-      "title": "Track ftoPDspTo1U",
+      "videoId": "g17zASr61F8",
+      "title": "Keify Keda (feat. Disco Misr)",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Wegz"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/xddgCYs4k2xi0lIqbAXZR1c7HCWedPflGDvQYs3HYRyv-0fYyqQheGwwXwzlaolsSUJD-LMgXHp6UxzH=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "Hz9dnmWh-B0",
-      "title": "Track Hz9dnmWh-B0",
+      "videoId": "rfXZ5zTShbo",
+      "title": "Kedah Leeh Beidary",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Ruby"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/hKICkbyMopOE9BPlwNq9sFi_xz0_fh1SRy_zfHumwau8Gnta_kd70rEMfP62ZICdvwbqcHsruuA4vHeA=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "hxJH_jSNUwM",
-      "title": "Track hxJH_jSNUwM",
+      "videoId": "z1TnuzN4SKw",
+      "title": "Keda Keda Bayza (feat. Aly Fathalla)",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Mahmoud El Esseily"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/YJLOeURQsu3Ueu7ZvlavNSk-QYUAz-cr5CGInKeMNE9EzgaZk6aUe0tMRQZH4aDk4JpjO1Op3RBicjW1=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "iKo7Xth3Ttc",
-      "title": "Track iKo7Xth3Ttc",
+      "videoId": "vKsKBmJm7bo",
+      "title": "Kedah Ya Qalbi",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "sherine"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/VSK0D_MPVI-QMJiWo0ZcWje2kT6-2JrsiJXiuRXZ08NpJL-wsYDhOmyQOiXIEQv3tuuRDO6X5MeT2JQO=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "wCUhzvpeb5w",
-      "title": "Track wCUhzvpeb5w",
+      "videoId": "b6yybTcvgX4",
+      "title": "El Hob Keda",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Om Kolthoum"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/c44BLCx0ymdii9iBzqJPpsM5aesWT0NKB7c0OXsAvUcFudvcx1wFwAZaJNYBL2CF6kQ-CHp3l6vRckE=w120-h120-l90-rj",
+      "isDownloaded": false
     },
     {
-      "videoId": "8lJqXnf5wUw",
-      "title": "Track 8lJqXnf5wUw",
+      "videoId": "zX7ZTPTJLRM",
+      "title": "Leh Beydary Keda",
       "artists": [
         {
-          "name": "Unknown Artist"
+          "name": "Ruby"
         }
       ],
-      "cached": true
+      "thumbnail": "https://lh3.googleusercontent.com/hKICkbyMopOE9BPlwNq9sFi_xz0_fh1SRy_zfHumwau8Gnta_kd70rEMfP62ZICdvwbqcHsruuA4vHeA=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "XxbWgwPbyjs",
+      "title": "Keda",
+      "artists": [
+        {
+          "name": "Shereen"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/JOPi_zp5GCVp3PIZbJw6D1NPZm-UodbC6ppHMAfV0c0rZGhNqJdAGoehYzwlic01UbDkotaLkXBC-wlA=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "tLlyyBFYg-M",
+      "title": "#YMDLLAA (feat. KEDA)",
+      "artists": [
+        {
+          "name": "Carmen Antunez"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/dHSLNHTQVG5UYrcZylJcRdFI6LWQDyKI_QAX4VQG0NZQyk6hilctcH1ZCOIqipAbs8BH6D2TMlsfcwGJ=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "xn2EFTxUyoo",
+      "title": "Keda Keda",
+      "artists": [
+        {
+          "name": "Fejo"
+        },
+        {
+          "name": "Sampreet"
+        },
+        {
+          "name": "MALLU HYPEBEAST"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/HJklRGXrpO3b7TCR6gihKI3O9c8A56pSYoOOrfd7y_mMkzWg9TSDL21i6PJQ0aWs-DA_PoGusKmPZZXN=w120-h120-l90-rj",
+      "isDownloaded": false
     }
   ],
-  "position": 160.343862,
-  "duration": 775.521,
+  "position": 49.889056,
+  "duration": 179.121,
   "loading": false,
   "cachingStatus": {
     "wCUhzvpeb5w": "cached",
-    "8lJqXnf5wUw": "cached",
-    "hxJH_jSNUwM": "cached",
     "Hz9dnmWh-B0": "cached",
     "wYAmJ327NEI": "cached",
-    "iKo7Xth3Ttc": "cached",
-    "ftoPDspTo1U": "cached"
+    "ftoPDspTo1U": "cached",
+    "XxbWgwPbyjs": "caching"
   }
 }

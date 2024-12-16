@@ -8,10 +8,10 @@ import Notifications from 'resource:///com/github/Aylur/ags/service/notification
 
 // Audio quality formats
 const AUDIO_FORMATS = {
-    'low': 'worstaudio',
+    'low': 'worstaudio/bestaudio[abr<=64]',
     'medium': 'bestaudio[abr<=128]/bestaudio',
     'high': 'bestaudio[acodec=opus]/bestaudio',
-    'best': 'bestaudio[acodec=opus]/bestaudio'
+    'best': 'bestaudio'
 };
 
 // Default options
@@ -216,7 +216,10 @@ class YouTubeMusicService extends Service {
     }
 
     get downloadedTracks() {
-        return this._downloadedTracks;
+        return this._downloadedTracks.map(track => ({
+            ...track,
+            isDownloaded: true, // Add a tag to show it's downloaded
+        }));
     }
 
     // Playback controls
@@ -518,65 +521,81 @@ class YouTubeMusicService extends Service {
         this.notify('playlist');
     }
 
-    async search(query) {
-        if (this._showDownloaded) {
-            // Search in downloaded tracks
-            if (!query) {
-                this._searchResults = this._downloadedTracks;
-            } else {
-                const lowerQuery = query.toLowerCase();
-                this._searchResults = this._downloadedTracks.filter(track => 
-                    track.title.toLowerCase().includes(lowerQuery) ||
-                    track.artists.some(artist => 
-                        artist.name.toLowerCase().includes(lowerQuery)
-                    )
-                );
+    async _performSearch(query) {
+        try {
+            const result = await Utils.execAsync([
+                'python3',
+                `${App.configDir}/services/ytmusic_helper.py`,
+                'search',
+                query
+            ]);
+
+            if (!result) return [];
+            
+            const parsed = JSON.parse(result);
+            if (parsed.error) {
+                this._showNotification('Search Failed', parsed.error, 'error');
+                return [];
             }
+            
+            return parsed;
+        } catch (error) {
+            logError(error);
+            return [];
+        }
+    }
+
+    async search(query) {
+        if (!query) {
+            this._searchResults = this._showDownloaded ? this._downloadedTracks : [];
             this.notify('search-results');
             return;
         }
 
-        // Online search
         try {
-            if (!query) {
-                this._searchResults = [];
-                this.notify('search-results');
-                return;
-            }
-
             this._loading = true;
             this.notify('loading');
 
-            const isOnline = await this._isOnline();
-            if (!isOnline) {
-                this._showNotification(
-                    'Search Failed',
-                    'No internet connection',
-                    'error'
-                );
-                this._loading = false;
-                this.notify('loading');
-                return;
+            let results;
+            const lowerQuery = query.toLowerCase();
+
+            if (this._showDownloaded) {
+                // Optimize local search with pre-filtering
+                results = this._downloadedTracks.filter(track => {
+                    const titleMatch = track.title?.toLowerCase().includes(lowerQuery);
+                    const artistMatch = track.artists?.some(artist => 
+                        artist.name?.toLowerCase().includes(lowerQuery)
+                    );
+                    return titleMatch || artistMatch;
+                });
+            } else {
+                // Online search
+                const isOnline = await this._isOnline();
+                if (!isOnline) {
+                    this._showNotification('Search Failed', 'No internet connection', 'error');
+                    return;
+                }
+
+                results = await this._performSearch(query);
+                
+                // Update download status efficiently
+                const cacheDir = this._getOption('cacheDir');
+                results = results.map(result => ({
+                    ...result,
+                    isDownloaded: GLib.file_test(
+                        GLib.build_filenamev([cacheDir, `${result.videoId}.opus`]),
+                        GLib.FileTest.EXISTS
+                    )
+                }));
+
+                this._lastOnlineResults = results;
             }
 
-            const results = await this._performSearch(query);
-            
-            // Update cache status for results
-            results.forEach(result => {
-                const cachedFile = GLib.build_filenamev([this._getOption('cacheDir'), `${result.videoId}.opus`]);
-                result.cached = GLib.file_test(cachedFile, GLib.FileTest.EXISTS);
-            });
-
-            this._lastOnlineResults = results;
             this._searchResults = results;
             this.notify('search-results');
         } catch (error) {
             logError(error);
-            this._showNotification(
-                'Search Failed',
-                'Failed to search YouTube Music',
-                'error'
-            );
+            this._showNotification('Search Failed', error.message, 'error');
         } finally {
             this._loading = false;
             this.notify('loading');
@@ -585,67 +604,287 @@ class YouTubeMusicService extends Service {
 
     toggleDownloadedView() {
         this._showDownloaded = !this._showDownloaded;
+        this.notify('show-downloaded');
         
-        // Force update downloaded tracks when switching to downloaded view
         if (this._showDownloaded) {
-            this._updateDownloadedTracks().then(() => {
-                this._searchResults = this._downloadedTracks;
-                this.notify('search-results');
-                this.notify('show-downloaded');
-            });
-        } else {
-            // Restore last search results if any
-            this._searchResults = this._lastOnlineResults || [];
+            // Use cached downloaded tracks first for instant feedback
+            this._searchResults = this._downloadedTracks;
             this.notify('search-results');
-            this.notify('show-downloaded');
+            
+            // Then update in background
+            this._updateDownloadedTracks().catch(logError);
+        } else {
+            this._searchResults = this._lastOnlineResults;
+            this.notify('search-results');
         }
     }
 
     async _updateDownloadedTracks() {
         const cacheDir = this._getOption('cacheDir');
-        try {
-            // List all files in cache directory
-            const files = await Utils.execAsync(['find', cacheDir, '-name', '*.opus']);
-            const tracks = [];
+        const files = await Utils.execAsync(['find', cacheDir, '-name', '*.opus']);
+        
+        if (!files) {
+            this._downloadedTracks = [];
+            return;
+        }
+
+        const tracks = [];
+        for (const file of files.split('\n').filter(Boolean)) {
+            const videoId = GLib.path_get_basename(file).replace('.opus', '');
+            const metadataFile = GLib.build_filenamev([cacheDir, `${videoId}.json`]);
             
-            if (files) {
-                // Process each cached file
-                const cachedFiles = files.split('\n').filter(f => f);
-                for (const file of cachedFiles) {
-                    const videoId = file.split('/').pop().replace('.opus', '');
-                    const cached = this._trackInfoCache.get(videoId);
-                    
-                    if (cached?.data) {
-                        tracks.push({
-                            ...cached.data,
-                            cached: true,
-                            videoId,
-                        });
-                    } else {
-                        // If no cached metadata, create basic entry
-                        tracks.push({
-                            videoId,
-                            title: `Track ${videoId}`,
-                            artists: [{ name: 'Unknown Artist' }],
-                            cached: true,
-                        });
+            try {
+                let trackInfo;
+                if (GLib.file_test(metadataFile, GLib.FileTest.EXISTS)) {
+                    // Read from cached metadata
+                    const [ok, contents] = GLib.file_get_contents(metadataFile);
+                    if (ok) {
+                        trackInfo = JSON.parse(new TextDecoder().decode(contents));
+                    }
+                } else {
+                    // Fetch and cache metadata
+                    trackInfo = await this._getTrackInfo(videoId);
+                    if (trackInfo) {
+                        GLib.file_set_contents(
+                            metadataFile,
+                            JSON.stringify(trackInfo, null, 2)
+                        );
                     }
                 }
+                
+                if (trackInfo) {
+                    tracks.push({
+                        ...trackInfo,
+                        isDownloaded: true,
+                    });
+                }
+            } catch (error) {
+                logError(error);
+            }
+        }
+
+        this._downloadedTracks = tracks;
+        this.notify('downloaded-tracks');
+    }
+
+    async cacheTrack(videoId) {
+        if (!videoId) return;
+
+        const cacheDir = this._getOption('cacheDir');
+        const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
+        const metadataFile = GLib.build_filenamev([cacheDir, `${videoId}.json`]);
+
+        // If already cached, do nothing
+        if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+            this._updateCachingStatus(videoId, 'cached');
+            return;
+        }
+
+        try {
+            // Get track info first for notifications
+            const trackInfo = await this._getTrackInfo(videoId);
+            const url = `https://music.youtube.com/watch?v=${videoId}`;
+            
+            // Update status and notify about caching start
+            this._updateCachingStatus(videoId, 'caching');
+            this._showNotification(
+                'Caching Song',
+                `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
+            );
+
+            const quality = this._getOption('audioQuality');
+            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
+            
+            // Download the file to cache with proper encoding
+            await Utils.execAsync([
+                'yt-dlp',
+                '--format', audioFormat,
+                '--extract-audio',
+                '--audio-format', 'opus',
+                '--audio-quality', '0',
+                '--output', cachedFile,
+                '--no-playlist',
+                '--force-encoding', 'UTF-8',
+                url
+            ]);
+            
+            // Cache metadata separately
+            if (trackInfo) {
+                GLib.file_set_contents(
+                    metadataFile,
+                    JSON.stringify(trackInfo, null, 2)
+                );
             }
             
-            this._downloadedTracks = tracks;
-            this.notify('downloaded-tracks');
-            
-            // Update search results if in downloaded view
-            if (this._showDownloaded) {
-                this._searchResults = tracks;
-                this.notify('search-results');
+            // Verify file was downloaded
+            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+                this._updateCachingStatus(videoId, 'cached');
+                this._showNotification(
+                    'Caching Complete',
+                    `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
+                );
+                
+                // Update downloaded tracks list
+                await this._updateDownloadedTracks();
+            } else {
+                throw new Error('File not found after download');
+            }
+        } catch (e) {
+            logError(e);
+            this._updateCachingStatus(videoId, 'error');
+            this._showNotification(
+                'Caching Failed',
+                `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
+                'critical'
+            );
+        }
+    }
+
+    async _getTrackInfo(videoId) {
+        try {
+            if (!videoId) return null;
+
+            // Check cache first
+            const cached = this._trackInfoCache.get(videoId);
+            if (cached) {
+                const { data, timestamp } = cached;
+                if (Date.now() - timestamp < this._cacheTimeout) {
+                    return data;
+                }
+                this._trackInfoCache.delete(videoId);
             }
 
-            return tracks;
-        } catch (e) {
-            logError('Error updating downloaded tracks:', e);
-            return [];
+            const url = `https://music.youtube.com/watch?v=${videoId}`;
+            
+            // Get full video info first
+            const result = await Utils.execAsync([
+                'yt-dlp',
+                '--format', 'bestvideo[height<=480]+bestaudio/best[height<=480]',
+                '--dump-json',
+                url
+            ]);
+
+            if (!result) return null;
+
+            const info = JSON.parse(result);
+            const trackInfo = {
+                videoId: info.id,
+                title: info.title,
+                artists: info.artist ? [{ name: info.artist }] : 
+                        info.uploader ? [{ name: info.uploader }] : 
+                        [{ name: 'Unknown Artist' }],
+                album: info.album || '',
+                duration: info.duration_string || '',
+                thumbnail: info.thumbnail || info.thumbnails?.[0]?.url || '',
+                thumbnails: info.thumbnails || []
+            };
+
+            // Cache the result
+            this._trackInfoCache.set(videoId, {
+                data: trackInfo,
+                timestamp: Date.now()
+            });
+
+            return trackInfo;
+        } catch (error) {
+            logError(error);
+            return null;
+        }
+    }
+
+    async _getAudioUrl(videoId) {
+        try {
+            if (!videoId) return null;
+
+            const cacheDir = this._getOption('cacheDir');
+            const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
+
+            // Check if file exists in cache
+            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+                this._updateCachingStatus(videoId, 'cached');
+                return `file://${cachedFile}`;
+            }
+
+            // Check memory cache for URL
+            const cached = this._audioUrlCache.get(videoId);
+            if (cached) {
+                const { data, timestamp } = cached;
+                if (Date.now() - timestamp < this._cacheTimeout) {
+                    return data;
+                }
+                this._audioUrlCache.delete(videoId);
+            }
+
+            const url = `https://music.youtube.com/watch?v=${videoId}`;
+            
+            // Get audio format based on quality setting
+            const quality = this._getOption('audioQuality');
+            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
+            
+            // Update status and notify about caching start
+            this._updateCachingStatus(videoId, 'caching');
+            const trackInfo = await this._getTrackInfo(videoId);
+            this._showNotification(
+                'Caching Song',
+                `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
+            );
+            
+            // Download the file to cache
+            try {
+                await Utils.execAsync([
+                    'yt-dlp',
+                    '--format', audioFormat,
+                    '--extract-audio',
+                    '--audio-format', 'opus',
+                    '--audio-quality', '0',
+                    '--output', cachedFile,
+                    '--no-playlist',
+                    '--force-encoding', 'UTF-8',
+                    url
+                ]);
+                
+                // Verify file was downloaded
+                if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+                    this._updateCachingStatus(videoId, 'cached');
+                    this._showNotification(
+                        'Caching Complete',
+                        `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
+                    );
+                    return `file://${cachedFile}`;
+                }
+            } catch (e) {
+                this._updateCachingStatus(videoId, 'error');
+                this._showNotification(
+                    'Caching Failed',
+                    `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
+                    'critical'
+                );
+            }
+            
+            // Fallback to streaming URL if download failed
+            const result = await Utils.execAsync([
+                'yt-dlp',
+                '--format', audioFormat,
+                '--get-url',
+                '--no-playlist',
+                url
+            ]);
+            
+            if (!result) return null;
+            
+            const audioUrl = result.trim();
+            
+            // Cache the URL
+            this._audioUrlCache.set(videoId, {
+                data: audioUrl,
+                timestamp: Date.now()
+            });
+            
+            return audioUrl;
+        } catch (error) {
+            logError(error);
+            this._updateCachingStatus(videoId, 'error');
+            return null;
         }
     }
 
@@ -861,253 +1100,6 @@ class YouTubeMusicService extends Service {
     _updateCachingStatus(videoId, status) {
         this._cachingStatus.set(videoId, status);
         this.notify('caching-status');
-    }
-
-    // Cache a song without playing it
-    async cacheTrack(videoId) {
-        if (!videoId) return;
-
-        const cacheDir = this._getOption('cacheDir');
-        const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
-
-        // If already cached, do nothing
-        if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-            this._updateCachingStatus(videoId, 'cached');
-            return;
-        }
-
-        // Get track info for notifications
-        const trackInfo = await this._getTrackInfo(videoId);
-        const url = `https://music.youtube.com/watch?v=${videoId}`;
-        
-        // Update status and notify about caching start
-        this._updateCachingStatus(videoId, 'caching');
-        this._showNotification(
-            'Caching Song',
-            `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
-        );
-        
-        try {
-            const quality = this._getOption('audioQuality');
-            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
-            
-            // Download the file to cache
-            await Utils.execAsync([
-                'yt-dlp',
-                '--format', audioFormat,
-                '--output', cachedFile,
-                '--no-playlist',
-                url
-            ]);
-            
-            // Verify file was downloaded
-            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                this._updateCachingStatus(videoId, 'cached');
-                this._showNotification(
-                    'Caching Complete',
-                    `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
-                );
-            }
-        } catch (e) {
-            this._updateCachingStatus(videoId, 'error');
-            this._showNotification(
-                'Caching Failed',
-                `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
-                'critical'
-            );
-        }
-    }
-
-    async _getTrackInfo(videoId) {
-        try {
-            if (!videoId) return null;
-
-            // Check cache first
-            const cached = this._trackInfoCache.get(videoId);
-            if (cached) {
-                const { data, timestamp } = cached;
-                if (Date.now() - timestamp < this._cacheTimeout) {
-                    return data;
-                }
-                this._trackInfoCache.delete(videoId);
-            }
-
-            const url = `https://music.youtube.com/watch?v=${videoId}`;
-            
-            // Get full video info first
-            const result = await Utils.execAsync([
-                'yt-dlp',
-                '--format', 'bestvideo[height<=480]+bestaudio/best[height<=480]',
-                '--dump-json',
-                url
-            ]);
-
-            if (!result) return null;
-
-            const info = JSON.parse(result);
-            const trackInfo = {
-                videoId: info.id,
-                title: info.title,
-                artists: info.artist ? [{ name: info.artist }] : 
-                        info.uploader ? [{ name: info.uploader }] : 
-                        [{ name: 'Unknown Artist' }],
-                album: info.album || '',
-                duration: info.duration_string || '',
-                thumbnail: info.thumbnail || info.thumbnails?.[0]?.url || '',
-                thumbnails: info.thumbnails || []
-            };
-
-            // Cache the result
-            this._trackInfoCache.set(videoId, {
-                data: trackInfo,
-                timestamp: Date.now()
-            });
-
-            return trackInfo;
-        } catch (error) {
-            logError(error);
-            return null;
-        }
-    }
-
-    async _getAudioUrl(videoId) {
-        try {
-            if (!videoId) return null;
-
-            const cacheDir = this._getOption('cacheDir');
-            const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
-
-            // Check if file exists in cache
-            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                this._updateCachingStatus(videoId, 'cached');
-                return `file://${cachedFile}`;
-            }
-
-            // Check memory cache for URL
-            const cached = this._audioUrlCache.get(videoId);
-            if (cached) {
-                const { data, timestamp } = cached;
-                if (Date.now() - timestamp < this._cacheTimeout) {
-                    return data;
-                }
-                this._audioUrlCache.delete(videoId);
-            }
-
-            const url = `https://music.youtube.com/watch?v=${videoId}`;
-            
-            // Get audio format based on quality setting
-            const quality = this._getOption('audioQuality');
-            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
-            
-            // Update status and notify about caching start
-            this._updateCachingStatus(videoId, 'caching');
-            const trackInfo = await this._getTrackInfo(videoId);
-            this._showNotification(
-                'Caching Song',
-                `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
-            );
-            
-            // Download the file to cache
-            try {
-                await Utils.execAsync([
-                    'yt-dlp',
-                    '--format', audioFormat,
-                    '--output', cachedFile,
-                    '--no-playlist',
-                    url
-                ]);
-                
-                // Verify file was downloaded
-                if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                    this._updateCachingStatus(videoId, 'cached');
-                    this._showNotification(
-                        'Caching Complete',
-                        `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
-                    );
-                    return `file://${cachedFile}`;
-                }
-            } catch (e) {
-                this._updateCachingStatus(videoId, 'error');
-                this._showNotification(
-                    'Caching Failed',
-                    `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
-                    'critical'
-                );
-            }
-            
-            // Fallback to streaming URL if download failed
-            const result = await Utils.execAsync([
-                'yt-dlp',
-                '--format', audioFormat,
-                '--get-url',
-                '--no-playlist',
-                url
-            ]);
-            
-            if (!result) return null;
-            
-            const audioUrl = result.trim();
-            
-            // Cache the URL
-            this._audioUrlCache.set(videoId, {
-                data: audioUrl,
-                timestamp: Date.now()
-            });
-            
-            return audioUrl;
-        } catch (error) {
-            logError(error);
-            this._updateCachingStatus(videoId, 'error');
-            return null;
-        }
-    }
-
-    async _updateDownloadedTracks() {
-        const cacheDir = this._getOption('cacheDir');
-        try {
-            // List all files in cache directory
-            const files = await Utils.execAsync(['find', cacheDir, '-name', '*.opus']);
-            const tracks = [];
-            
-            if (files) {
-                // Process each cached file
-                const cachedFiles = files.split('\n').filter(f => f);
-                for (const file of cachedFiles) {
-                    const videoId = file.split('/').pop().replace('.opus', '');
-                    const cached = this._trackInfoCache.get(videoId);
-                    
-                    if (cached?.data) {
-                        tracks.push({
-                            ...cached.data,
-                            cached: true,
-                            videoId,
-                        });
-                    } else {
-                        // If no cached metadata, create basic entry
-                        tracks.push({
-                            videoId,
-                            title: `Track ${videoId}`,
-                            artists: [{ name: 'Unknown Artist' }],
-                            cached: true,
-                        });
-                    }
-                }
-            }
-            
-            this._downloadedTracks = tracks;
-            this.notify('downloaded-tracks');
-            
-            // Update search results if in downloaded view
-            if (this._showDownloaded) {
-                this._searchResults = tracks;
-                this.notify('search-results');
-            }
-
-            return tracks;
-        } catch (e) {
-            logError('Error updating downloaded tracks:', e);
-            return [];
-        }
     }
 
     _initDownloadedTracks() {

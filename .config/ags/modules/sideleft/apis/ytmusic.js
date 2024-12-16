@@ -267,53 +267,69 @@ const SearchResults = () => Box({
             }
 
             box.children = results.map(item => Button({
-                className: `ytm-result ${item.cached ? 'cached' : ''}`,
+                className: 'track-item',
                 onClicked: () => YTMusic.play(item.videoId),
                 child: Box({
                     children: [
                         Box({
+                            className: 'track-item-thumb',
+                            setup: box => {
+                                box.css = item.thumbnail ? 
+                                    `background-image: url("${item.thumbnail}");` : 
+                                    'background-image: none;min-width:1rem;min-height:1rem;padding:1rem;';
+                            },
+                        }),
+                        Box({
+                            className: 'track-item-info',
                             vertical: true,
                             children: [
                                 Label({
                                     label: item.title,
                                     xalign: 0,
                                     justification: 'left',
-                                    className: 'title',
+                                    className: 'track-item-title',
                                     wrap: true,
                                 }),
                                 Label({
                                     label: item.artists.map(a => a.name).join(', '),
                                     xalign: 0,
                                     justification: 'left',
-                                    className: 'artist',
+                                    className: 'track-item-artist',
                                     wrap: true,
                                 }),
                             ],
                         }),
                         Box({
-                            className: 'actions',
+                            className: 'track-item-tags',
                             children: [
-                                Button({
-                                    className: 'cache-btn',
-                                    visible: !item.cached,
-                                    child: MaterialIcon('download', 'small'),
-                                    onClicked: () => YTMusic.cacheTrack(item.videoId),
-                                    setup: setupCursorHover,
+                                // Downloaded tag
+                                item.isDownloaded && Label({
+                                    className: 'track-item-tag',
+                                    label: 'Downloaded',
                                 }),
+                                // Caching status tag
                                 Label({
-                                    className: 'cache-status',
+                                    className: `track-item-caching ${YTMusic.cachingStatus[item.videoId] || ''}`,
                                     setup: label => {
                                         const update = () => {
                                             const status = YTMusic.cachingStatus[item.videoId];
-                                            label.label = status === 'caching' ? '󰇚' :
-                                                         status === 'cached' ? '󰇘' :
-                                                         status === 'error' ? '󰇙' : '';
+                                            label.label = status === 'caching' ? 'Caching...' :
+                                                         status === 'cached' ? 'Cached' :
+                                                         status === 'error' ? 'Error' : '';
+                                            label.visible = !!status;
                                         };
                                         YTMusic.connect('notify::caching-status', update);
                                         update();
                                     },
                                 }),
-                            ],
+                                // Download button (only show if not downloaded/cached)
+                                !item.isDownloaded && Button({
+                                    className: 'control-button',
+                                    child: MaterialIcon('download', 'small'),
+                                    onClicked: () => YTMusic.cacheTrack(item.videoId),
+                                    setup: setupCursorHover,
+                                }),
+                            ].filter(Boolean), // Remove null/undefined items
                         }),
                     ],
                 }),

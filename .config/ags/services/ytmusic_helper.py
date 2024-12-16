@@ -8,21 +8,15 @@ from ytmusicapi import YTMusic
 def init_ytmusic():
     """Initialize YTMusic with or without authentication."""
     try:
+        # Try to use cached instance first
+        if hasattr(init_ytmusic, '_instance'):
+            return init_ytmusic._instance
+
         ytmusic = YTMusic()
-        print(f"Debug: YTMusic initialized without auth", file=sys.stderr)
+        init_ytmusic._instance = ytmusic
         return ytmusic
     except Exception as e:
-        print(f"Debug: Failed to initialize without auth: {e}", file=sys.stderr)
-        # Try with browser.json from home directory as fallback
-        auth_path = os.path.expanduser("~/browser.json")
-        if os.path.exists(auth_path):
-            try:
-                ytmusic = YTMusic(auth_path)
-                print(f"Debug: YTMusic initialized with auth file", file=sys.stderr)
-                return ytmusic
-            except Exception as e:
-                print(f"Debug: Failed to initialize with auth: {e}", file=sys.stderr)
-                return None
+        print(f"Debug: Failed to initialize YTMusic: {e}", file=sys.stderr)
         return None
 
 def get_track_info(video_id):
@@ -32,25 +26,33 @@ def get_track_info(video_id):
         return json.dumps({"error": "Failed to initialize YTMusic"})
 
     try:
-        # First try to get info from watch playlist as it's faster
+        # Use watch playlist for faster info retrieval
         watch_info = ytmusic.get_watch_playlist(video_id)
         if watch_info and 'tracks' in watch_info and watch_info['tracks']:
             track = watch_info['tracks'][0]
-        else:
-            # Fallback to full song info
-            track = ytmusic.get_song(video_id)
-            if not track:
-                return json.dumps({"error": "Track not found"})
+            
+            # Only include essential fields
+            info = {
+                'videoId': video_id,
+                'title': track.get('title', 'Unknown Title'),
+                'artists': [{'name': a.get('name', 'Unknown Artist')} for a in track.get('artists', [])],
+                'thumbnail': next((t.get('url', '') for t in reversed(track.get('thumbnails', []))), '')
+            }
+            print(json.dumps(info))
+            return
 
-        # Format track info
+        # Fallback to song info if watch playlist fails
+        track = ytmusic.get_song(video_id)
+        if not track:
+            print(json.dumps({"error": "Track not found"}))
+            return
+
         info = {
             'videoId': video_id,
             'title': track.get('title', 'Unknown Title'),
             'artists': [{'name': a.get('name', 'Unknown Artist')} for a in track.get('artists', [])],
-            'album': track.get('album', {}).get('name', '') if isinstance(track.get('album'), dict) else track.get('album', ''),
-            'thumbnail': next((t.get('url', '') for t in reversed(track.get('thumbnails', [{}]))), ''),
+            'thumbnail': next((t.get('url', '') for t in reversed(track.get('thumbnails', []))), '')
         }
-        
         print(json.dumps(info))
     except Exception as e:
         print(json.dumps({"error": str(e)}), file=sys.stderr)
@@ -62,21 +64,25 @@ def search_songs(query):
         return json.dumps({"error": "Failed to initialize YTMusic"})
 
     try:
-        results = ytmusic.search(query, filter="songs", limit=10)
+        # Optimize search by limiting fields and results
+        results = ytmusic.search(query, filter="songs", limit=20)
         tracks = []
         
         for result in results:
-            if result['resultType'] != 'song':
+            if result['resultType'] != 'song' or not result.get('videoId'):
                 continue
                 
+            # Only include essential fields
             track = {
-                'videoId': result.get('videoId'),
-                'title': result.get('title'),
-                'artists': [{'name': a.get('name')} for a in result.get('artists', [])],
-                'album': result.get('album', {}).get('name', ''),
-                'thumbnail': result.get('thumbnails', [{}])[-1].get('url', ''),
+                'videoId': result['videoId'],
+                'title': result.get('title', 'Unknown Title'),
+                'artists': [{'name': a.get('name', 'Unknown Artist')} for a in result.get('artists', [])],
+                'thumbnail': next((t.get('url', '') for t in reversed(result.get('thumbnails', []))), '')
             }
             tracks.append(track)
+            
+            if len(tracks) >= 10:  # Limit to 10 results for better performance
+                break
             
         print(json.dumps(tracks))
     except Exception as e:

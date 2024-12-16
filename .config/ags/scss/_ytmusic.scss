@@ -1,0 +1,216 @@
+// YouTube Music styles
+.ytmusic-view {
+    padding: 1rem;
+
+    .ytm-controls {
+        margin-bottom: 1rem;
+    }
+
+    .ytm-now-playing {
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 1rem;
+
+        &-thumb {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+        }
+
+        &-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        &-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        &-artist {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+    }
+
+    .ytm-progress {
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &-slider {
+            flex: 1;
+        }
+
+        &-time {
+            font-size: 0.8em;
+            opacity: 0.8;
+            min-width: 80px;
+            text-align: right;
+        }
+    }
+
+    .ytm-playback-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+
+        .control-button {
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        .play-button-container {
+            .control-button {
+                padding: 0.75rem;
+            }
+        }
+    }
+
+    .ytm-search-results {
+        margin-top: 1rem;
+
+        .track-item {
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: background-color 0.2s;
+            position: relative;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            &-content {
+                flex: 1;
+                padding: 0;
+                background: none;
+                border: none;
+
+                > box {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
+            }
+
+            &-thumb {
+                width: 48px;
+                height: 48px;
+                min-width: 48px;
+                background-size: cover !important;
+                background-position: center;
+                border-radius: 4px;
+                background-repeat: no-repeat !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            &-info {
+                flex: 1;
+                min-width: 0;
+                margin-right: 48px;
+
+                .title {
+                    font-weight: bold;
+                    margin-bottom: 0.25rem;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .artist {
+                    opacity: 0.8;
+                    font-size: 0.9em;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            .download-button {
+                position: absolute;
+                right: 0.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                padding: 0.5rem;
+                border-radius: 50%;
+                transition: all 0.2s;
+                background-color: rgba(255, 255, 255, 0.1);
+                min-width: 32px;
+                min-height: 32px;
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.2);
+                }
+
+                &.cached {
+                    color: #4CAF50;
+                }
+
+                &.caching {
+                    color: #FFC107;
+                    animation: spin 1s linear infinite;
+                }
+
+                &.error {
+                    color: #F44336;
+                }
+            }
+
+            // Downloaded tag style
+            &-tag {
+                font-size: 0.8em;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                background-color: rgba(0, 255, 0, 0.2);
+                color: #b3ffb3;
+                margin-left: auto;
+            }
+
+            // Caching status tag
+            &-caching {
+                font-size: 0.8em;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                margin-left: 0.5rem;
+
+                &.cached {
+                    background-color: rgba(0, 255, 0, 0.2);
+                    color: #b3ffb3;
+                }
+
+                &.caching {
+                    background-color: rgba(255, 165, 0, 0.2);
+                    color: #ffd699;
+                }
+
+                &.error {
+                    background-color: rgba(255, 0, 0, 0.2);
+                    color: #ffb3b3;
+                }
+            }
+        }
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: translateY(-50%) rotate(0deg);
+    }
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
