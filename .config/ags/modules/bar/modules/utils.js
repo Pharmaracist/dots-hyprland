@@ -34,6 +34,12 @@ const Shortcuts = () => {
     onClicked: () => App.toggleWindow("wallselect"),
   });
 
+  const unixporn = createUtilButton({
+    name: getString("Unix Porn"),
+    icon: "\udb81\udfea ",
+    onClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
+  });
+
   const chatGPTButton = createUtilButton({
     name: getString("ChatGPT"),
     icon: "smart_toy",
@@ -81,6 +87,7 @@ const Shortcuts = () => {
       yt,
       agsTweaksButton,
       gitHubButton,
+      unixporn,
       // chatGPTButton,
       screenSnipButton,
       colorPickerButton,

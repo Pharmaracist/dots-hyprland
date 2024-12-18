@@ -13,6 +13,7 @@ const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget
 // Media Controls
 export const MediaControls = () => Box({
     className: 'ytm-controls',
+    css:"margin-bottom :-0.55rem",
     vertical: true,
     children: [
         // Now Playing Section
@@ -29,9 +30,10 @@ export const MediaControls = () => Box({
                                 box.css = track?.thumbnail ? 
                                     `
                                     background-image: url("${track.thumbnail}");
-                                    min-width: 48px;
-                                    min-height: 48px;
+                                    min-width: 64px;
+                                    min-height: 64px;
                                     margin: 8px;
+                                    margin-left:12px;
                                     background-size: cover;
                                     background-position: center;
                                     border-radius: 4px;
@@ -39,17 +41,19 @@ export const MediaControls = () => Box({
                                     mpris?.coverPath ? 
                                     `
                                     background-image: url("${mpris.coverPath}");
-                                    min-width: 48px;
-                                    min-height: 48px;
+                                    min-width: 64px;
+                                    min-height: 64px;
                                     margin: 8px;
+                                    margin-left:12px;
                                     background-size: cover;
                                     background-position: center;
                                     border-radius: 4px;
                                     ` :
                                     `
-                                    min-width: 48px;
-                                    min-height: 48px;
+                                    min-width: 64px;
+                                    min-height: 64px;
                                     margin: 8px;
+                                    margin-left:12px;
                                     background-color: rgba(255, 255, 255, 0.1);
                                     border-radius: 4px;
                                     `;
@@ -61,13 +65,15 @@ export const MediaControls = () => Box({
                     },
                 }),
                 Box({
-                    className: 'ytm-now-playing-info',
+                    className: 'sec-txt ytm-now-playing-info',
                     vertical: true,
+                    hpack: 'center',
+                    hexpand: true,
                     children: [
                         Label({
-                            className: 'ytm-now-playing-title',
-                            xalign: 0,
-                            justification: 'left',
+                            className: 'sec-txt ytm-now-playing-title',
+                            // xalign: 0,
+                            // justification: 'left',
                             wrap: true,
                             setup: label => {
                                 label.connect('realize', () => {
@@ -83,9 +89,9 @@ export const MediaControls = () => Box({
                             },
                         }),
                         Label({
-                            className: 'ytm-now-playing-artist',
-                            xalign: 0,
-                            justification: 'left',
+                            className: 'ytm-now-playing-artist sec-txt',
+                            // xalign: 0,
+                            // justification: 'left',
                             wrap: true,
                             setup: label => {
                                 label.connect('realize', () => {
@@ -103,174 +109,176 @@ export const MediaControls = () => Box({
                             },
                         }),
                         Box({
-                            className: 'ytm-progress',
+                            className: 'ytm-playback-controls',
+                            hpack: 'center',
+                            spacing: 8,
+                            css:"margin-top : 0.5rem",
                             children: [
-                                Slider({
-                                    className: 'ytm-progress-slider',
-                                    drawValue: false,
-                                    onChange: ({ value }) => YTMusic.seek(value),
-                                    setup: slider => {
-                                        const update = () => {
-                                            slider.adjustment.upper = YTMusic._duration || 100;
-                                            slider.value = YTMusic._position || 0;
-                                        };
-                                        YTMusic.connect('notify::position', update);
-                                        YTMusic.connect('notify::duration', update);
-                                        update();
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon(YTMusic.shuffle ? 'shuffle_on' : 'shuffle', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic.shuffle = !YTMusic.shuffle;
+                                        YTMusic._sendMpvCommand(['playlist-shuffle']);
+                                        return true;
+                                    },
+                                    setup: button => {
+                                        setupCursorHover(button);
+                                        YTMusic.connect('notify::shuffle', () => {
+                                            button.child.label = YTMusic.shuffle ? 'shuffle_on' : 'shuffle';
+                                        });
                                     },
                                 }),
-                                Label({
-                                    className: 'ytm-progress-time',
-                                    setup: label => {
-                                        const formatTime = (seconds) => {
-                                            if (!seconds) return '0:00';
-                                            const mins = Math.floor(seconds / 60);
-                                            const secs = Math.floor(seconds % 60);
-                                            return `${mins}:${secs.toString().padStart(2, '0')}`;
-                                        };
-                                        const update = () => {
-                                            const position = formatTime(YTMusic._position);
-                                            const duration = formatTime(YTMusic._duration);
-                                            label.label = `${position} / ${duration}`;
-                                        };
-                                        YTMusic.connect('notify::position', update);
-                                        YTMusic.connect('notify::duration', update);
-                                        update();
+                
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon('skip_previous', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic._sendMpvCommand(['playlist-prev']);
+                                        return true;
+                                    },
+                                    setup: setupCursorHover,
+                                }),
+                
+                                Box({
+                                    className: 'play-button-container',
+                                    setup: box => {
+                                        const playButton = Button({
+                                            className: 'control-button sec-txt',
+                                            child: MaterialIcon(YTMusic.playing ? 'pause' : 'play_arrow', 'larger'),
+                                            onClicked: () => {
+                                                YTMusic.togglePlay();
+                                                return true;
+                                            },
+                                            setup: button => {
+                                                setupCursorHover(button);
+                                                YTMusic.connect('notify::playing', () => {
+                                                    if (!YTMusic._loading) {
+                                                        button.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
+                                                    }
+                                                });
+                                            },
+                                        });
+                
+                                        YTMusic.connect('notify::loading', () => {
+                                            if (YTMusic._loading) {
+                                                playButton.child.label = 'hourglass_empty';
+                                            } else {
+                                                playButton.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
+                                            }
+                                        });
+                
+                                        box.children = [playButton];
+                                    },
+                                }),
+                
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon('skip_next', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic._sendMpvCommand(['playlist-next']);
+                                        return true;
+                                    },
+                                    setup: setupCursorHover,
+                                }),
+                
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic.repeat = !YTMusic.repeat;
+                                        YTMusic._sendMpvCommand(['cycle-values', 'loop-file', 'inf', 'no']);
+                                        return true;
+                                    },
+                                    setup: button => {
+                                        setupCursorHover(button);
+                                        YTMusic.connect('notify::repeat', () => {
+                                            button.child.label = YTMusic.repeat ? 'repeat_one' : 'repeat';
+                                        });
+                                    },
+                                }),
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon(YTMusic.showDownloaded ? '󰇄' : '󰇣', 'larger'),
+                                    onClicked: () => YTMusic.toggleDownloadedView(),
+                                    setup: button => {
+                                        setupCursorHover(button);
+                                        YTMusic.connect('notify::show-downloaded', () => {
+                                            button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
+                                        });
                                     },
                                 }),
                             ],
                         }),
+                        // Box({
+                        //     className: 'ytm-progress',
+                        //     children: [
+                        //         Slider({
+                        //             className: 'ytm-progress-slider',
+                        //             drawValue: false,
+                        //             onChange: ({ value }) => YTMusic.seek(value),
+                        //             setup: slider => {
+                        //                 const update = () => {
+                        //                     slider.adjustment.upper = YTMusic._duration || 100;
+                        //                     slider.value = YTMusic._position || 0;
+                        //                 };
+                        //                 YTMusic.connect('notify::position', update);
+                        //                 YTMusic.connect('notify::duration', update);
+                        //                 update();
+                        //             },
+                        //         }),
+                        //         Label({
+                        //             className: 'ytm-progress-time',
+                        //             setup: label => {
+                        //                 const formatTime = (seconds) => {
+                        //                     if (!seconds) return '0:00';
+                        //                     const mins = Math.floor(seconds / 60);
+                        //                     const secs = Math.floor(seconds % 60);
+                        //                     return `${mins}:${secs.toString().padStart(2, '0')}`;
+                        //                 };
+                        //                 const update = () => {
+                        //                     const position = formatTime(YTMusic._position);
+                        //                     const duration = formatTime(YTMusic._duration);
+                        //                     label.label = `${position} / ${duration}`;
+                        //                 };
+                        //                 YTMusic.connect('notify::position', update);
+                        //                 YTMusic.connect('notify::duration', update);
+                        //                 update();
+                        //             },
+                        //         }),
+                        //     ],
+                        // }),
                     ],
                 }),
             ],
         }),
         // Controls Section
-        Box({
-            className: 'ytm-playback-controls',
-            hpack: 'center',
-            spacing: 8,
-            children: [
-                Button({
-                    className: 'control-button',
-                    child: MaterialIcon(YTMusic.shuffle ? 'shuffle_on' : 'shuffle', 'norm'),
-                    onClicked: () => {
-                        YTMusic.shuffle = !YTMusic.shuffle;
-                        YTMusic._sendMpvCommand(['playlist-shuffle']);
-                        return true;
-                    },
-                    setup: button => {
-                        setupCursorHover(button);
-                        YTMusic.connect('notify::shuffle', () => {
-                            button.child.label = YTMusic.shuffle ? 'shuffle_on' : 'shuffle';
-                        });
-                    },
-                }),
-
-                Button({
-                    className: 'control-button',
-                    child: MaterialIcon('skip_previous', 'norm'),
-                    onClicked: () => {
-                        YTMusic._sendMpvCommand(['playlist-prev']);
-                        return true;
-                    },
-                    setup: setupCursorHover,
-                }),
-
-                Box({
-                    className: 'play-button-container',
-                    setup: box => {
-                        const playButton = Button({
-                            className: 'control-button',
-                            child: MaterialIcon(YTMusic.playing ? 'pause' : 'play_arrow', 'large'),
-                            onClicked: () => {
-                                YTMusic.togglePlay();
-                                return true;
-                            },
-                            setup: button => {
-                                setupCursorHover(button);
-                                YTMusic.connect('notify::playing', () => {
-                                    if (!YTMusic._loading) {
-                                        button.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
-                                    }
-                                });
-                            },
-                        });
-
-                        YTMusic.connect('notify::loading', () => {
-                            if (YTMusic._loading) {
-                                playButton.child.label = 'hourglass_empty';
-                            } else {
-                                playButton.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
-                            }
-                        });
-
-                        box.children = [playButton];
-                    },
-                }),
-
-                Button({
-                    className: 'control-button',
-                    child: MaterialIcon('skip_next', 'norm'),
-                    onClicked: () => {
-                        YTMusic._sendMpvCommand(['playlist-next']);
-                        return true;
-                    },
-                    setup: setupCursorHover,
-                }),
-
-                Button({
-                    className: 'control-button',
-                    child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'norm'),
-                    onClicked: () => {
-                        YTMusic.repeat = !YTMusic.repeat;
-                        YTMusic._sendMpvCommand(['cycle-values', 'loop-file', 'inf', 'no']);
-                        return true;
-                    },
-                    setup: button => {
-                        setupCursorHover(button);
-                        YTMusic.connect('notify::repeat', () => {
-                            button.child.label = YTMusic.repeat ? 'repeat_one' : 'repeat';
-                        });
-                    },
-                }),
-                Button({
-                    className: 'control-button',
-                    child: MaterialIcon(YTMusic.showDownloaded ? '󰇄' : '󰇣', 'norm'),
-                    onClicked: () => YTMusic.toggleDownloadedView(),
-                    setup: button => {
-                        setupCursorHover(button);
-                        YTMusic.connect('notify::show-downloaded', () => {
-                            button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
-                        });
-                    },
-                }),
-            ],
-        }),
+      
     ],
 });
 
 // Search Header
-const SearchHeader = () => Box({
-    className: 'ytm-header',
-    children: [
-        Entry({
-            className: 'ytm-search',
-            placeholderText: 'Search YouTube Music...',
-            onAccept: ({ text }) => YTMusic.search(text),
-        }),
-        Button({
-            className: 'ytm-toggle-view-button control-button',
-            child: MaterialIcon('󰇣', 'norm'),
-            onClicked: () => YTMusic.toggleDownloadedView(),
-            setup: button => {
-                setupCursorHover(button);
-                YTMusic.connect('notify::show-downloaded', () => {
-                    button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
-                });
-            },
-        }),
-    ],
-});
+// const SearchHeader = () => Box({
+//     className: 'ytm-header',
+//     children: [
+//         Entry({
+//             className: 'ytm-search',
+//             placeholderText: 'Search YouTube Music...',
+//             onAccept: ({ text }) => YTMusic.search(text),
+//         }),
+//         Button({
+//             className: 'ytm-toggle-view-button control-button sec-txt',
+//             child: MaterialIcon('󰇣', 'larger'),
+//             onClicked: () => YTMusic.toggleDownloadedView(),
+//             setup: button => {
+//                 setupCursorHover(button);
+//                 YTMusic.connect('notify::show-downloaded', () => {
+//                     button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
+//                 });
+//             },
+//         }),
+//     ],
+// });
 
 // Search Results
 const SearchResults = () => Box({
@@ -287,65 +295,76 @@ const SearchResults = () => Box({
             const trackItem = Button({
                 className: 'track-item',
                 onClicked: () => YTMusic.play(item.videoId),
-                child: Box({
-                    children: [
-                        Box({
-                            className: 'track-item-thumb',
-                            css: item.thumbnail ? 
-                                `min-width: 48px;
-                                min-height: 48px;
-                                margin: 8px;
-                                background: url("${item.thumbnail}") center/cover no-repeat;
-                                border-radius: 4px;` : 
-                                `min-width: 48px;
-                                min-height: 48px;
-                                margin: 8px;
-                                background-color: rgba(255, 255, 255, 0.1);
-                                border-radius: 4px;`,
-                        }),
-                        Box({
-                            className: 'track-item-info',
-                            vertical: true,
-                            children: [
-                                Label({
-                                    label: item.title,
-                                    xalign: 0,
-                                    justification: 'left',
-                                    className: 'track-item-title',
-                                    wrap: true,
-                                }),
-                                Label({
-                                    label: item.artists.map(a => a.name).join(', '),
-                                    xalign: 0,
-                                    justification: 'left',
-                                    className: 'track-item-artist',
-                                    wrap: true,
-                                }),
-                            ],
-                        }),
-                        Box({
-                            className: 'track-item-tags',
-                            children: [
-                                item.isDownloaded && Label({
-                                    className: 'track-item-tag',
-                                    label: 'Downloaded',
-                                }),
-                                Label({
-                                    className: `track-item-caching ${YTMusic.cachingStatus[item.videoId] || ''}`,
-                                    visible: !!YTMusic.cachingStatus[item.videoId],
-                                    label: YTMusic.cachingStatus[item.videoId] === 'caching' ? 'Caching...' :
-                                           YTMusic.cachingStatus[item.videoId] === 'cached' ? 'Cached' :
-                                           YTMusic.cachingStatus[item.videoId] === 'error' ? 'Error' : '',
-                                }),
-                                !item.isDownloaded && Button({
-                                    className: 'control-button',
-                                    child: MaterialIcon('download', 'small'),
-                                    onClicked: () => YTMusic.cacheTrack(item.videoId),
-                                    setup: setupCursorHover,
-                                }),
-                            ].filter(Boolean),
-                        }),
-                    ],
+                child: Scrollable({
+                    hscroll: 'automatic',
+                    vscroll: 'never',
+                    child: Box({
+                        children: [
+                            Box({
+                                className: 'track-content',
+                                children: [
+                                    Box({
+                                        className: 'track-item-thumb',
+                                        css: item.thumbnail ? 
+                                            `min-width: 48px;
+                                            min-height: 48px;
+                                            margin: 8px;
+                                            background: url("${item.thumbnail}") center/cover no-repeat;
+                                            border-radius: 4px;` : 
+                                            `min-width: 48px;
+                                            min-height: 48px;
+                                            margin: 8px;
+                                            background-color: rgba(255, 255, 255, 0.1);
+                                            border-radius: 4px;`,
+                                    }),
+                                    Box({
+                                        className: 'track-item-info',
+                                        vertical: true,
+                                        children: [
+                                            Label({
+                                                label: item.title,
+                                                xalign: 0,
+                                                justification: 'left',
+                                                className: 'track-item-title',
+                                                wrap: true,
+                                            }),
+                                            Label({
+                                                label: item.artists.map(a => a.name).join(', '),
+                                                xalign: 0,
+                                                justification: 'left',
+                                                className: 'track-item-artist',
+                                            }),
+                                        ],
+                                    
+                                    }),
+                                ],
+                            }),
+                            Box({
+                                className: 'track-item-buttons',
+                                hpack: 'end',
+                                hexpand: true,
+                                children: [
+                                    item.isDownloaded && Label({
+                                        className: 'track-item-tag',
+                                        label: 'Downloaded',
+                                    }),
+                                    Label({
+                                        className: `track-item-caching ${YTMusic.cachingStatus[item.videoId] || ''}`,
+                                        visible: !!YTMusic.cachingStatus[item.videoId],
+                                        label: YTMusic.cachingStatus[item.videoId] === 'caching' ? 'Caching...' :
+                                               YTMusic.cachingStatus[item.videoId] === 'cached' ? 'Cached' :
+                                               YTMusic.cachingStatus[item.videoId] === 'error' ? 'Error' : '',
+                                    }),
+                                    !item.isDownloaded && Button({
+                                        className: 'control-button sec-txt',
+                                        child: MaterialIcon('download', 'larger'),
+                                        onClicked: () => YTMusic.cacheTrack(item.videoId),
+                                        setup: setupCursorHover,
+                                    }),
+                                ].filter(Boolean),
+                            }),
+                        ],
+                    }),
                 }),
             });
 
@@ -355,9 +374,10 @@ const SearchResults = () => Box({
 
         const noResultsView = Box({
             vertical: true,
-            className: 'ytm-no-results',
+            className: 'ytm-no-results sec-txt',
+            css:"margin-top :1rem",
             children: [
-                MaterialIcon('library_music', 'large'),
+                MaterialIcon('library_music', 'hugeass'),
                 Label({
                     label: 'No results',
                     className: 'title',
@@ -401,13 +421,20 @@ const SearchResults = () => Box({
 // Export the view
 export const ytmusicView = Box({
     className: 'ytmusic-view',
+    // css:"margin-top :1rem",
+
     vertical: true,
     children: [
         Scrollable({
             vexpand: true,
             child: SearchResults(),
         }),
-        MediaControls(),
+        Widget.Box({
+            css:"margin-bottom:-0.871rem",
+            children: [
+                MediaControls(),
+            ],
+        }),
     ],
 });
 
@@ -425,7 +452,7 @@ export const ytmusicCommands = Box({
 // Export the icon
 export const ytmusicTabIcon = Box({
     className: 'txt-norm',
-    child: MaterialIcon('music_note', 'norm'),
+    child: MaterialIcon('music_note', 'larger'),
 });
 
 // Add styles

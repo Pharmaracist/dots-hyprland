@@ -1,127 +1,243 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-import Media from '../../services/media.js';
+import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 
-const formatTime = (seconds) => {
-    const min = Math.floor(seconds / 60);
-    const sec = Math.floor(seconds % 60);
-    return `${min}:${sec.toString().padStart(2, '0')}`;
+const COVER_CACHE = new Map();
+const POSITION_UPDATE_INTERVAL = 1000; // Update position every second
+
+const formatTime = (microseconds) => {
+    const seconds = Math.floor(microseconds / 1000000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 };
 
-const SongList = () => {
-    const list = Widget.Box({
+const PlayerControls = () => {
+    let positionBinding = null;
+    
+    const widget = Widget.Box({
+        className: 'media-box',
         vertical: true,
-        className: 'song-list',
-        children: [],
-    });
-
-    const update = () => {
-        const songs = Media.songs;
-        const currentSong = Media.currentSong;
-        console.log('Updating widget with songs:', songs);
-        
-        list.children = [
-            Widget.Button({
-                className: 'media-refresh-btn',
-                child: Widget.Label({ 
-                    className: 'txt-norm icon-material',
-                    label: 'refresh',
-                }),
-                onClicked: () => Media.refresh(),
-            }),
+        visible: false,
+        connections: [[Mpris, (box) => {
+            const player = Mpris.getPlayer();
+            box.visible = !!player;
+            
+            // Set up position updates
+            if (positionBinding) {
+                GLib.source_remove(positionBinding);
+                positionBinding = null;
+            }
+            
+            if (player) {
+                positionBinding = GLib.timeout_add(GLib.PRIORITY_DEFAULT, POSITION_UPDATE_INTERVAL, () => {
+                    if (!player.closed) {
+                        const position = player.position;
+                        widget.emit('position-changed', position);
+                        return GLib.SOURCE_CONTINUE;
+                    }
+                    positionBinding = null;
+                    return GLib.SOURCE_REMOVE;
+                });
+            }
+        }]],
+        children: [
             Widget.Box({
-                className: 'songs-container',
+                className: 'media-player',
                 vertical: true,
-                children: songs.map(song => {
-                    const metadata = Media.getMetadata(song);
-                    const isPlaying = currentSong === song;
-                    
-                    return Widget.Button({
-                        className: `song-item ${isPlaying ? 'playing' : ''}`,
-                        onClicked: () => {
-                            if (isPlaying) {
-                                Media.togglePlay();
-                            } else {
-                                Media.playSong(song);
-                            }
-                        },
-                        child: Widget.Box({
+                children: [
+                    // Current track info
+                    Widget.Box({
+                        className: 'media-info',
+                        children: [
+                            Widget.Box({
+                                className: 'media-art',
+                                children: [
+                                    Widget.Box({
+                                        className: 'media-art-box',
+                                        connections: [[Mpris, box => {
+                                            const player = Mpris.getPlayer();
+                                            const coverUrl = player?.trackCoverUrl;
+                                            
+                                            if (coverUrl) {
+                                                if (COVER_CACHE.has(coverUrl)) {
+                                                    box.css = `background-image: url('${coverUrl}');`;
+                                                } else {
+                                                    // Load image asynchronously
+                                                    const file = Gio.File.new_for_uri(coverUrl);
+                                                    file.read_async(GLib.PRIORITY_DEFAULT, null, (_, result) => {
+                                                        try {
+                                                            file.read_finish(result);
+                                                            COVER_CACHE.set(coverUrl, true);
+                                                            box.css = `background-image: url('${coverUrl}');`;
+                                                        } catch (error) {
+                                                            console.error('Error loading cover art:', error);
+                                                            box.css = 'background-image: none;';
+                                                        }
+                                                    });
+                                                }
+                                            } else {
+                                                box.css = 'background-image: none;';
+                                            }
+                                        }]],
+                                    }),
+                                ],
+                            }),
+                            Widget.Box({
+                                className: 'media-text',
+                                vertical: true,
+                                children: [
+                                    Widget.Label({
+                                        className: 'media-title',
+                                        xalign: 0,
+                                        justification: 'left',
+                                        truncate: 'end',
+                                        connections: [[Mpris, label => {
+                                            const player = Mpris.getPlayer();
+                                            label.label = player?.trackTitle || '';
+                                        }]],
+                                    }),
+                                    Widget.Label({
+                                        className: 'media-artist',
+                                        xalign: 0,
+                                        justification: 'left',
+                                        truncate: 'end',
+                                        connections: [[Mpris, label => {
+                                            const player = Mpris.getPlayer();
+                                            label.label = player?.trackArtists?.join(', ') || '';
+                                        }]],
+                                    }),
+                                ],
+                            }),
+                            Widget.Box({
+                                className: 'media-download-buttons',
+                                hpack: 'end',
+                                hexpand: true,
+                                children: [
+                                    Widget.Button({
+                                        className: 'download-audio',
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) {
+                                                // Your download audio logic here
+                                            }
+                                        },
+                                        child: Widget.Icon('audio-x-generic-symbolic'),
+                                    }),
+                                    Widget.Button({
+                                        className: 'download-video',
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) {
+                                                // Your download video logic here
+                                            }
+                                        },
+                                        child: Widget.Icon('video-x-generic-symbolic'),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+
+                    // Controls
+                    Widget.CenterBox({
+                        className: 'media-controls',
+                        startWidget: Widget.Label({
+                            className: 'media-position txt-norm',
+                            connections: [['position-changed', (label, position) => {
+                                label.label = formatTime(position);
+                            }]],
+                        }),
+                        centerWidget: Widget.Box({
+                            className: 'media-buttons',
                             children: [
-                                Widget.Label({
-                                    className: 'song-status txt-norm icon-material',
-                                    label: isPlaying ? (Media.isPlaying ? 'pause' : 'play_arrow') : 'play_arrow',
+                                Widget.Button({
+                                    className: 'media-button txt-norm icon-material',
+                                    label: 'skip_previous',
+                                    onClicked: () => {
+                                        const player = Mpris.getPlayer();
+                                        if (player?.canGoPrev) player.previous();
+                                    },
+                                    connections: [[Mpris, button => {
+                                        const player = Mpris.getPlayer();
+                                        button.visible = player?.canGoPrev || false;
+                                    }]],
                                 }),
-                                Widget.Box({
-                                    vertical: true,
-                                    children: [
-                                        Widget.Label({
-                                            className: 'song-title txt-bold',
-                                            label: metadata.title,
-                                            xalign: 0,
-                                            truncate: 'end',
-                                        }),
-                                        Widget.Label({
-                                            className: 'song-artist txt-norm',
-                                            label: metadata.artist,
-                                            xalign: 0,
-                                            truncate: 'end',
-                                        }),
-                                    ],
+                                Widget.Button({
+                                    className: 'media-button txt-norm icon-material',
+                                    onClicked: () => {
+                                        const player = Mpris.getPlayer();
+                                        if (player) {
+                                            if (player.playBackStatus === 'Playing') {
+                                                player.pause();
+                                            } else {
+                                                player.play();
+                                            }
+                                        }
+                                    },
+                                    connections: [[Mpris, button => {
+                                        const player = Mpris.getPlayer();
+                                        button.label = player?.playBackStatus === 'Playing' ? 'pause' : 'play_arrow';
+                                    }]],
                                 }),
-                                Widget.Box({ hexpand: true }),
-                                Widget.Label({
-                                    className: 'song-duration txt-norm',
-                                    label: formatTime(metadata.duration),
+                                Widget.Button({
+                                    className: 'media-button txt-norm icon-material',
+                                    label: 'skip_next',
+                                    onClicked: () => {
+                                        const player = Mpris.getPlayer();
+                                        if (player?.canGoNext) player.next();
+                                    },
+                                    connections: [[Mpris, button => {
+                                        const player = Mpris.getPlayer();
+                                        button.visible = player?.canGoNext || false;
+                                    }]],
                                 }),
                             ],
                         }),
-                    });
-                }),
-            }),
-        ];
-    };
+                        endWidget: Widget.Label({
+                            className: 'media-length txt-norm',
+                            connections: [[Mpris, label => {
+                                const player = Mpris.getPlayer();
+                                label.label = player ? formatTime(player.length) : '0:00';
+                            }]],
+                        }),
+                    }),
 
-    // Initial update
-    update();
-
-    // Listen for updates
-    Media.connect('songs-updated', () => {
-        console.log('Got songs-updated signal');
-        update();
-    });
-    
-    Media.connect('status-changed', () => {
-        console.log('Got status-changed signal');
-        update();
-    });
-    
-    Media.connect('song-changed', () => {
-        console.log('Got song-changed signal');
-        update();
-    });
-
-    Media.connect('metadata', () => {
-        console.log('Got metadata signal');
-        update();
-    });
-
-    return Widget.Box({
-        className: 'media-list-box',
-        vertical: true,
-        children: [
-            Widget.Scrollable({
-                vexpand: true,
-                child: list,
+                    // Position slider
+                    Widget.Slider({
+                        className: 'media-position',
+                        drawValue: false,
+                        onChange: ({ value }) => {
+                            const player = Mpris.getPlayer();
+                            if (player?.canSeek) {
+                                player.position = value * player.length;
+                            }
+                        },
+                        connections: [
+                            [Mpris, slider => {
+                                const player = Mpris.getPlayer();
+                                if (!player?.length || !player?.canSeek) {
+                                    slider.visible = false;
+                                    return;
+                                }
+                                slider.visible = true;
+                                slider.value = player.position / player.length;
+                            }],
+                            ['position-changed', (slider, position) => {
+                                const player = Mpris.getPlayer();
+                                if (player?.length) {
+                                    slider.value = position / player.length;
+                                }
+                            }],
+                        ],
+                    }),
+                ],
             }),
         ],
     });
+
+    return widget;
 };
 
-export default () => {
-    console.log('Media module initializing');
-    return Widget.Box({
-        className: 'media-box',
-        vertical: true,
-        children: [SongList()],
-        setup: () => Media.refresh(),
-    });
-};
+export default PlayerControls;

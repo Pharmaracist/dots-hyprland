@@ -40,6 +40,57 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     ;
 }
 
+.osd-music-info {
+    margin: 1.023rem 0rem;
+    padding: 1rem;
+    
+    .osd-music-cover-art {
+        margin-right: 1rem;
+        
+        background-size: cover;
+        background-position: center;
+        border-radius: 0.5rem;
+        min-width: 4rem;
+        min-height: 4rem;
+    }
+    
+    .osd-music-text {
+        margin-right: 1rem;
+        
+        .osd-music-title {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .osd-music-artists {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    }
+    
+    .osd-music-download-buttons {
+        padding-left: 1rem;
+        
+        .osd-music-controlbtn {
+            margin: 0 0.25rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: $secondaryContainer;
+            
+            &:hover {
+                background: mix($secondaryContainer, $onSecondaryContainer, 90%);
+            }
+            
+            &:active {
+                background: mix($secondaryContainer, $onSecondaryContainer, 85%);
+            }
+            
+            .osd-music-controlbtn-txt {
+                font-size: 1.2em;
+            }
+        }
+    }
+}
 
 .osd-music-cover-fallback {
     @include element_decel;
@@ -67,24 +118,6 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     min-height: 7.5rem;
     background-size: cover;
     background-position: center;
-}
-
-.osd-music-info {
-    margin: 1.023rem 0rem;
-}
-
-.osd-music-title {
-    @include element_decel;
-    @include titlefont;
-    font-size: 1.364rem;
-    color: $onSecondaryContainer;
-}
-
-.osd-music-artists {
-    @include element_decel;
-    @include mainfont;
-    font-size: 0.955rem;
-    color: mix($onSecondaryContainer, $secondaryContainer, 80%);
 }
 
 .osd-music-pill {
@@ -153,4 +186,55 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     @include icon-material;
     font-size: 1.364rem;
     margin: -0.1rem 0rem;
+}
+
+.track-item {
+    color: $onLayer1;
+    
+    @include titlefont;
+    padding: 4px;
+    margin: 2px 0;
+    transition: background-color 0.2s ease;
+    @include normal-rounding;
+    &:hover {
+        background-color: $hovercolor;
+    }
+
+    .track-item-info {
+        margin: 8px;
+        margin-left: 0;
+        
+        .track-item-title {
+            @include titlefont;
+            color:$onLayer0;
+            // font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .track-item-artist {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+    }
+.ytm-now-playing-artist{
+    opacity: 0.8;
+    font-size: 1rem;   
+    color:$onLayer0;
+}
+    .track-item-buttons {
+        margin: 8px;
+        font-size   : 20px;
+        
+        button {
+            padding: 8px;
+            margin: 0 4px;
+            border-radius: 8px;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+            &:hover {
+                opacity: 1;
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+    }
 }

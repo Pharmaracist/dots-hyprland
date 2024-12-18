@@ -1,226 +1,187 @@
 import Service from 'resource:///com/github/Aylur/ags/service.js';
-import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
-
-const MUSIC_DIR = GLib.build_filenamev([GLib.get_home_dir(), 'Music']);
+import GLib from 'gi://GLib';
 
 class MediaService extends Service {
     static {
-        Service.register(this, {
-            'songs-updated': ['jsobject'],
-            'song-changed': ['jsobject'], 
-            'status-changed': ['boolean'], 
-            'metadata': ['jsobject'], 
-            'position': ['float'], 
-        });
+        Service.register(this);
     }
 
-    _songs = [];
-    _currentSong = null;
-    _isPlaying = false;
-    _metadata = new Map();
-    _position = 0;
-    _updateInterval = null;
+    #player = null;
+    #lastPlayerName = '';
+    #positionBinding = null;
 
     constructor() {
         super();
 
-        // Start MPD if not running
-        Utils.execAsync(['systemctl', '--user', 'start', 'mpd']).catch(console.error);
+        // Initialize player tracking
+        this._setupPlayerTracking();
 
-        // Initial update
-        this._initMPD();
-        
-        // Set up position update interval
-        this._updateInterval = setInterval(() => {
-            this._updatePosition();
-        }, 1000);
+        // Connect to Mpris signals
+        Mpris.connect('player-added', (_, name) => {
+            this._onPlayerAdded(name);
+        });
+
+        Mpris.connect('changed', () => {
+            this._onPlayerChanged();
+        });
     }
 
-    async _initMPD() {
-        try {
-            // Clear and rescan MPD database
-            await Utils.execAsync(['mpc', 'clear']);
-            await Utils.execAsync(['mpc', 'update', '--wait']);
-            await Utils.execAsync(['mpc', 'add', '/']);
-            
-            // Get initial state
-            await this._updateState();
-            
-            // Set up file monitoring for Music directory
-            const file = Gio.File.new_for_path(MUSIC_DIR);
-            const monitor = file.monitor_directory(Gio.FileMonitorFlags.NONE, null);
-            monitor.connect('changed', () => {
-                Utils.execAsync(['mpc', 'update', '--wait']).then(() => {
-                    this.refresh();
-                });
+    _setupPlayerTracking() {
+        // Initial player setup
+        this.#player = Mpris.getPlayer();
+        if (this.#player) {
+            this.#lastPlayerName = this.#player.identity;
+            this.emit('changed');
+            this._setupPlayerBindings();
+        }
+    }
+
+    _onPlayerAdded(name) {
+        if (!this.#player || name === this.#lastPlayerName) {
+            this.#lastPlayerName = name;
+            this.#player = Mpris.getPlayer(name);
+            this.emit('changed');
+            this._setupPlayerBindings();
+        }
+    }
+
+    _onPlayerChanged() {
+        const newPlayer = Mpris.getPlayer();
+        if (newPlayer !== this.#player) {
+            this.#player = newPlayer;
+            this.#lastPlayerName = newPlayer?.identity || '';
+            this.emit('changed');
+            this._setupPlayerBindings();
+        }
+    }
+
+    _setupPlayerBindings() {
+        // Clean up previous binding
+        if (this.#positionBinding) {
+            GLib.source_remove(this.#positionBinding);
+            this.#positionBinding = null;
+        }
+
+        // Set up new binding if we have a player
+        if (this.#player) {
+            this.#positionBinding = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+                if (this.#player && !this.#player.closed) {
+                    this.emit('changed');
+                    return GLib.SOURCE_CONTINUE;
+                }
+                this.#positionBinding = null;
+                return GLib.SOURCE_REMOVE;
             });
 
-            // Initial refresh
-            this.refresh();
-        } catch (error) {
-            console.error('Error initializing MPD:', error);
+            // Connect to player signals
+            this.#player.connect('changed', () => {
+                this.emit('changed');
+            });
         }
     }
 
-    async _updateState() {
-        try {
-            const status = await Utils.execAsync(['mpc', 'status']);
-            const lines = status.split('\n');
-            
-            if (lines.length > 1) {
-                // Update current song and get metadata
-                const currentSong = lines[0];
-                const metadata = await this._getCurrentMetadata();
-                
-                // Update state with metadata
-                this._currentSong = {
-                    name: currentSong,
-                    ...metadata
-                };
-                
-                // Emit current song with metadata
-                this.emit('song-changed', this._currentSong);
+    get player() {
+        return this.#player;
+    }
 
-                // Update playback status
-                const isPlaying = lines[1].includes('[playing]');
-                if (this._isPlaying !== isPlaying) {
-                    this._isPlaying = isPlaying;
-                    this.emit('status-changed', isPlaying);
-                }
+    get position() {
+        return this.#player?.position || 0;
+    }
 
-                // Store metadata
-                if (metadata) {
-                    this._metadata.set(currentSong, metadata);
-                    this.emit('metadata', metadata);
-                }
-            } else {
-                this._currentSong = null;
-                this.emit('song-changed', null);
+    set position(value) {
+        if (this.#player?.canSeek) {
+            this.#player.position = value;
+        }
+    }
+
+    get length() {
+        return this.#player?.length || 0;
+    }
+
+    get canPlay() {
+        return this.#player?.canPlay || false;
+    }
+
+    get canPause() {
+        return this.#player?.canPause || false;
+    }
+
+    get canGoNext() {
+        return this.#player?.canGoNext || false;
+    }
+
+    get canGoPrev() {
+        return this.#player?.canGoPrev || false;
+    }
+
+    get canSeek() {
+        return this.#player?.canSeek || false;
+    }
+
+    get playbackStatus() {
+        return this.#player?.playbackStatus || 'Stopped';
+    }
+
+    get trackTitle() {
+        return this.#player?.trackTitle || '';
+    }
+
+    get trackArtists() {
+        return this.#player?.trackArtists || [];
+    }
+
+    get trackCoverUrl() {
+        return this.#player?.trackCoverUrl || '';
+    }
+
+    play() {
+        if (this.#player?.canPlay) {
+            this.#player.play();
+        }
+    }
+
+    pause() {
+        if (this.#player?.canPause) {
+            this.#player.pause();
+        }
+    }
+
+    playPause() {
+        if (this.#player) {
+            if (this.playbackStatus === 'Playing' && this.canPause) {
+                this.pause();
+            } else if (this.canPlay) {
+                this.play();
             }
-        } catch (error) {
-            console.error('Error updating MPD state:', error);
         }
     }
 
-    async _updatePosition() {
-        if (!this._currentSong) return;
-        
-        try {
-            const status = await Utils.execAsync(['mpc', 'status', '%position%']);
-            const position = parseInt(status) || 0;
-            if (position !== this._position) {
-                this._position = position;
-                this.emit('position', position);
-            }
-        } catch (error) {
-            console.error('Error updating position:', error);
+    next() {
+        if (this.#player?.canGoNext) {
+            this.#player.next();
         }
     }
 
-    async _getCurrentMetadata() {
-        try {
-            const format = '%title%\\n%artist%\\n%album%\\n%time%';
-            const output = await Utils.execAsync(['mpc', 'current', '-f', format]);
-            const [title, artist, album, time] = output.split('\n');
-            
-            return {
-                title: title || 'Unknown Title',
-                artist: artist || 'Unknown Artist',
-                album: album || 'Unknown Album',
-                duration: time ? this._parseTime(time) : 0
-            };
-        } catch (error) {
-            console.error('Error getting metadata:', error);
-            return {
-                title: 'Unknown Title',
-                artist: 'Unknown Artist',
-                album: 'Unknown Album',
-                duration: 0
-            };
+    previous() {
+        if (this.#player?.canGoPrev) {
+            this.#player.previous();
         }
     }
 
-    _parseTime(timeStr) {
-        const parts = timeStr.split(':');
-        if (parts.length === 2) {
-            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-        }
-        return 0;
-    }
-
-    async refresh() {
-        try {
-            const playlist = await Utils.execAsync(['mpc', 'playlist']);
-            this._songs = playlist.split('\n').filter(s => s);
-            this.emit('songs-updated', this._songs);
-            
-            // Update current state after refresh
-            await this._updateState();
-        } catch (error) {
-            console.error('Error refreshing playlist:', error);
+    seek(offset) {
+        if (this.#player?.canSeek) {
+            this.#player.seek(offset);
         }
     }
-
-    getMetadata(song) {
-        if (typeof song === 'object' && song !== null) {
-            return song; // Already has metadata
-        }
-        return this._metadata.get(song) || {
-            title: song,
-            artist: 'Unknown Artist',
-            album: 'Unknown Album',
-            duration: 0
-        };
-    }
-
-    async playSong(song) {
-        if (!song) return;
-        
-        try {
-            const songName = typeof song === 'object' ? song.name : song;
-            const index = this._songs.indexOf(songName) + 1;
-            if (index > 0) {
-                await Utils.execAsync(['mpc', 'play', index.toString()]);
-                await this._updateState();
-            }
-        } catch (error) {
-            console.error('Error playing song:', error);
-        }
-    }
-
-    async togglePlay() {
-        try {
-            await Utils.execAsync(['mpc', 'toggle']);
-            await this._updateState();
-        } catch (error) {
-            console.error('Error toggling playback:', error);
-        }
-    }
-
-    async stop() {
-        try {
-            await Utils.execAsync(['mpc', 'stop']);
-            await this._updateState();
-        } catch (error) {
-            console.error('Error stopping playback:', error);
-        }
-    }
-
-    get songs() { return this._songs; }
-    get currentSong() { return this._currentSong; }
-    get isPlaying() { return this._isPlaying; }
-    get position() { return this._position; }
 
     destroy() {
-        if (this._updateInterval) {
-            clearInterval(this._updateInterval);
+        if (this.#positionBinding) {
+            GLib.source_remove(this.#positionBinding);
+            this.#positionBinding = null;
         }
         super.destroy();
     }
 }
 
-const service = new MediaService();
-export default service;
+export default new MediaService();

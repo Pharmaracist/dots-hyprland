@@ -5,6 +5,7 @@ import Gio from 'gi://Gio';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
+import YTMusicAPI from './ytmusic_api.js';
 
 // Audio quality formats
 const AUDIO_FORMATS = {
@@ -338,15 +339,9 @@ class YouTubeMusicService extends Service {
 
         try {
             // Get recommendations from ytmusic_helper.py
-            const result = await Utils.execAsync([
-                'python3',
-                `${App.configDir}/services/ytmusic_helper.py`,
-                'get_radio',
-                this._currentVideoId,
-                this._autoQueueSize.toString()
-            ]);
+            const result = await YTMusicAPI.getRadio(this._currentVideoId);
 
-            const tracks = JSON.parse(result);
+            const tracks = result;
             for (const track of tracks) {
                 if (!this._queuedTracks.has(track.videoId)) {
                     this.addToPlaylist(track);
@@ -562,22 +557,8 @@ class YouTubeMusicService extends Service {
 
     async _performSearch(query) {
         try {
-            const result = await Utils.execAsync([
-                'python3',
-                `${App.configDir}/services/ytmusic_helper.py`,
-                'search',
-                query
-            ]);
-
-            if (!result) return [];
-            
-            const parsed = JSON.parse(result);
-            if (parsed.error) {
-                this._showNotification('Search Failed', parsed.error, 'error');
-                return [];
-            }
-            
-            return parsed;
+            const result = await YTMusicAPI.searchSongs(query);
+            return result;
         } catch (error) {
             logError(error);
             return [];
@@ -780,54 +761,32 @@ class YouTubeMusicService extends Service {
     }
 
     async _getTrackInfo(videoId) {
+        if (!videoId) return null;
         try {
-            if (!videoId) return null;
-
-            // Check cache first
-            const cached = this._trackInfoCache.get(videoId);
-            if (cached) {
-                const { data, timestamp } = cached;
-                if (Date.now() - timestamp < this._cacheTimeout) {
-                    return data;
-                }
-                this._trackInfoCache.delete(videoId);
-            }
-
-            const url = `https://music.youtube.com/watch?v=${videoId}`;
-            
-            // Get full video info first
-            const result = await Utils.execAsync([
-                'yt-dlp',
-                '--format', 'bestvideo[height<=480]+bestaudio/best[height<=480]',
-                '--dump-json',
-                url
-            ]);
-
-            if (!result) return null;
-
-            const info = JSON.parse(result);
-            const trackInfo = {
-                videoId: info.id,
-                title: info.title,
-                artists: info.artist ? [{ name: info.artist }] : 
-                        info.uploader ? [{ name: info.uploader }] : 
-                        [{ name: 'Unknown Artist' }],
-                album: info.album || '',
-                duration: info.duration_string || '',
-                thumbnail: info.thumbnail || info.thumbnails?.[0]?.url || '',
-                thumbnails: info.thumbnails || []
-            };
-
-            // Cache the result
-            this._trackInfoCache.set(videoId, {
-                data: trackInfo,
-                timestamp: Date.now()
-            });
-
-            return trackInfo;
+            return await YTMusicAPI.getTrackInfo(videoId);
         } catch (error) {
-            logError(error);
+            console.error('Error getting track info:', error);
             return null;
+        }
+    }
+
+    async _searchSongs(query) {
+        if (!query) return [];
+        try {
+            return await YTMusicAPI.searchSongs(query);
+        } catch (error) {
+            console.error('Error searching songs:', error);
+            return [];
+        }
+    }
+
+    async _getRadio(videoId) {
+        if (!videoId) return [];
+        try {
+            return await YTMusicAPI.getRadio(videoId);
+        } catch (error) {
+            console.error('Error getting radio:', error);
+            return [];
         }
     }
 

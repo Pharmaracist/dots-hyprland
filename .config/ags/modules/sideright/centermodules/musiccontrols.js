@@ -15,11 +15,11 @@ function isRealPlayer(player) {
 
 export const getPlayer = () => Mpris.players[0] || null;
 
-function formatTime(length) {
-    const min = Math.floor(length / 60);
-    const sec = Math.floor(length % 60);
-    const sec0 = sec < 10 ? '0' : '';
-    return `${min}:${sec0}${sec}`;
+function formatTime(microseconds) {
+    const seconds = Math.floor(microseconds / 1000000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
 const TrackTitle = ({ player }) => Label({
@@ -130,17 +130,33 @@ export default () => Box({
                                     self.children = [
                                         ControlButton({
                                             icon: 'skip_previous',
-                                            action: () => player?.previous(),
+                                            action: () => {
+                                                if (player?.canGoPrev) {
+                                                    player.previous();
+                                                }
+                                            },
                                             sensitive: player?.canGoPrev || false,
                                         }),
                                         ControlButton({
-                                            icon: player?.playBackStatus === 'Playing' ? 'pause' : 'play_arrow',
-                                            action: () => player?.playBackStatus === 'Playing' ? player?.pause() : player?.play(),
+                                            icon: player?.playbackStatus === 'Playing' ? 'pause' : 'play_arrow',
+                                            action: () => {
+                                                if (player) {
+                                                    if (player.playbackStatus === 'Playing') {
+                                                        player.stop();
+                                                    } else {
+                                                        player.play();
+                                                    }
+                                                }
+                                            },
                                             sensitive: player?.canPlay || false,
                                         }),
                                         ControlButton({
                                             icon: 'skip_next',
-                                            action: () => player?.next(),
+                                            action: () => {
+                                                if (player?.canGoNext) {
+                                                    player.next();
+                                                }
+                                            },
                                             sensitive: player?.canGoNext || false,
                                         }),
                                     ];
