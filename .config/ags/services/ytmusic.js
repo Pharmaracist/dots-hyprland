@@ -36,7 +36,7 @@ class YouTubeMusicService extends Service {
             'position': ['double'],
             'duration': ['double'],
             'loading': ['boolean'],
-            'caching-status': ['jsobject'],  // New property for caching status
+            'caching-status': ['jsobject'],
             'show-downloaded': ['boolean'],
             'downloaded-tracks': ['jsobject'],
         });
@@ -69,6 +69,7 @@ class YouTubeMusicService extends Service {
     _currentSearchQuery = '';
     _lastDownloadedResults = [];
     _defaultContent = [];
+    _cache = new Map();
 
     constructor() {
         super();
@@ -358,57 +359,135 @@ class YouTubeMusicService extends Service {
     }
 
     _initMpris() {
-        Service.import('mpris')
-            .then(mpris => {
-                this._mpris = mpris;
-                this._mpris?.connect('player-added', (_, busName) => {
-                    if (busName.includes('mpv')) {
-                        this._mprisPlayer = this._mpris.getPlayer(busName);
-                        this._setupMprisHandlers();
-                    }
-                });
-                this._mpris?.connect('player-closed', (_, busName) => {
-                    if (busName.includes('mpv')) {
-                        this._mprisPlayer = null;
-                    }
-                });
-            })
-            .catch(e => {
-                logError('Failed to initialize MPRIS:', e);
-            });
+        Mpris.connect('player-added', (mpris, bus) => {
+            if (bus.includes('mpv')) {
+                this._mprisPlayer = Mpris.getPlayer(bus);
+                this._setupMprisHandlers();
+            }
+        });
+
+        Mpris.connect('player-closed', (mpris, bus) => {
+            if (bus.includes('mpv')) {
+                this._mprisPlayer = null;
+                this._cleanup();
+            }
+        });
     }
 
     _setupMprisHandlers() {
         if (!this._mprisPlayer) return;
 
-        // Listen for metadata changes
-        this._mprisPlayer.connect('changed', () => {
-            if (this._currentTrack) {
-                // Ensure our metadata is set in MPRIS
-                const metadata = {
-                    'xesam:title': this._currentTrack.title,
-                    'xesam:artist': [this._currentTrack.artists[0].name],
-                    'mpris:artUrl': this._currentTrack.thumbnail,
-                    'mpris:trackid': `/org/mpris/MediaPlayer2/Track/${this._currentVideoId}`,
-                    'mpris:length': this._duration * 1000000
-                };
-                
-                // Only update if different
-                if (JSON.stringify(this._mprisPlayer.metadata) !== JSON.stringify(metadata)) {
-                    this._mprisPlayer.metadata = metadata;
+        // Update position more frequently for smoother progress
+        if (this._updateInterval) {
+            GLib.source_remove(this._updateInterval);
+        }
+
+        this._updateInterval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+            if (!this._mprisPlayer) return GLib.SOURCE_REMOVE;
+            
+            try {
+                // Get position and duration
+                const position = this._mprisPlayer.position / 1000000; // Convert to seconds
+                const metadata = this._mprisPlayer.metadata || {};
+                const duration = (metadata['mpris:length'] || 0) / 1000000;
+
+                // Update only if values have changed
+                if (Math.abs(this._position - position) > 0.1) {
+                    this._position = position;
+                    this.notify('position');
                 }
+
+                if (Math.abs(this._duration - duration) > 0.1) {
+                    this._duration = duration;
+                    this.notify('duration');
+                }
+
+            } catch (e) {
+                console.error('Error updating playback state:', e);
             }
-            this._updateTrackFromMpris();
+
+            return GLib.SOURCE_CONTINUE;
         });
 
-        // Listen for playback status changes using the correct signal
+        // Handle playback status changes
         this._mprisPlayer.connect('changed', () => {
             const status = this._mprisPlayer.playBackStatus;
             if (status) {
                 this._playing = status === 'Playing';
                 this.notify('playing');
             }
+
+            // Update metadata
+            const metadata = this._mprisPlayer.metadata;
+            if (metadata) {
+                try {
+                    const track = {
+                        title: metadata['xesam:title'] || '',
+                        artists: metadata['xesam:artist']?.map(name => ({ name })) || [],
+                        album: metadata['xesam:album'] || '',
+                        artUrl: metadata['mpris:artUrl'] || '',
+                        length: metadata['mpris:length'] || 0,
+                    };
+                    this._currentTrack = track;
+                    this.emit('notify::current-track');
+                } catch (e) {
+                    console.error('Error updating metadata:', e);
+                }
+            }
         });
+    }
+
+    async seek(position) {
+        if (!this._mprisPlayer || !this._duration) return;
+
+        try {
+            // Clamp position between 0 and duration
+            const clampedPosition = Math.max(0, Math.min(position, this._duration));
+            
+            // Convert to microseconds for MPRIS
+            const positionUs = Math.floor(clampedPosition * 1000000);
+            
+            // Update position immediately for responsive UI
+            this._position = clampedPosition;
+            this.notify('position');
+
+            // Send seek command to MPV
+            await this._sendMpvCommand(['seek', clampedPosition, 'absolute']);
+            
+            // Verify seek succeeded
+            const actualPosition = await this._getMpvProperty('time-pos');
+            if (Math.abs(actualPosition - clampedPosition) > 1) {
+                // Seek didn't work as expected, update UI with actual position
+                this._position = actualPosition;
+                this.notify('position');
+            }
+        } catch (e) {
+            console.error('Error seeking:', e);
+            // Revert to actual position on error
+            const actualPosition = await this._getMpvProperty('time-pos').catch(() => 0);
+            this._position = actualPosition;
+            this.notify('position');
+        }
+    }
+
+    async _getMpvProperty(property) {
+        try {
+            const result = await Utils.execAsync(['sh', '-c', `echo '{ "command": ["get_property", "${property}"] }' | socat - /tmp/mpvsocket`]);
+            return JSON.parse(result).data;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async _sendMpvCommand(command) {
+        try {
+            const cmdJson = JSON.stringify({ command });
+            await Utils.execAsync(['sh', '-c', `echo '${cmdJson}' | socat - /tmp/mpvsocket`]);
+            return true;
+        } catch (e) {
+            console.error('Error sending MPV command:', e);
+            return false;
+        }
     }
 
     async _updatePlayingState() {
@@ -1019,16 +1098,6 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async seek(position) {
-        try {
-            await this._setMpvProperty('time-pos', position);
-            this._position = position;
-            this.notify('position');
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
     async setVolume(volume) {
         try {
             await this._setMpvProperty('volume', volume);
@@ -1241,6 +1310,49 @@ class YouTubeMusicService extends Service {
         } finally {
             this._loading = false;
             this.notify('loading');
+        }
+    }
+
+    _notifyError(message) {
+        Notifications.notify({
+            summary: 'YouTube Music Error',
+            body: message,
+            icon: 'error',
+            urgency: 'normal',
+        });
+    }
+
+    _handleError(error, operation) {
+        console.error(`Error during ${operation}:`, error);
+        this._notifyError(`Failed to ${operation}: ${error.message}`);
+        this.emit('error', error);
+    }
+
+    _getCached(key) {
+        const cached = this._cache.get(key);
+        if (!cached) return null;
+        
+        if (Date.now() - cached.timestamp > this._cacheTimeout * 1000) {
+            this._cache.delete(key);
+            return null;
+        }
+        return cached.data;
+    }
+
+    _setCache(key, data) {
+        this._cache.set(key, {
+            data,
+            timestamp: Date.now(),
+        });
+        this._cleanCache();
+    }
+
+    _cleanCache() {
+        const now = Date.now();
+        for (const [key, value] of this._cache.entries()) {
+            if (now - value.timestamp > this._cacheTimeout * 1000) {
+                this._cache.delete(key);
+            }
         }
     }
 }

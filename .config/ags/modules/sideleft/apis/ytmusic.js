@@ -6,20 +6,98 @@ import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
+import { AnimatedCircProg } from '../../.commonwidgets/cairo_circularprogress.js';
+import { AnimatedSlider } from '../../.commonwidgets/cairo_slider.js';
 import GLib from 'gi://GLib';
+import Audio from 'resource:///com/github/Aylur/ags/service/audio.js';
 
 const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget;
+
+// Volume Control with Audio Service
+const VolumeControl = () => Box({
+    className: 'ytm-volume-control spacing-h-10 margin-rl-15',
+    setup: box => {
+        box.connect('scroll-event', (widget, event) => {
+            const direction = event.get_scroll_deltas()[2];
+            const step = 0.02;
+            const currentVolume = Audio.speaker?.volume || 0;
+            let newVolume;
+
+            if (direction < 0) {  // Scroll up
+                newVolume = Math.min(1, currentVolume + step);
+            } else if (direction > 0) {  // Scroll down
+                newVolume = Math.max(0, currentVolume - step);
+            }
+
+            if (newVolume !== undefined && newVolume !== currentVolume) {
+                Audio.speaker.volume = newVolume;
+                YTMusic.setVolume(Math.round(newVolume * 100));
+            }
+            return true;
+        });
+    },
+    children: [
+        Icon({
+            className: 'ytm-volume-icon',
+            vpack: 'center',
+            setup: self => {
+                const update = () => {
+                    const isMuted = Audio.speaker?.isMuted;
+                    const volume = Audio.speaker?.volume || 0;
+
+                    if (isMuted || volume === 0) {
+                        self.icon = 'audio-volume-muted-symbolic';
+                    } else if (volume < 0.3) {
+                        self.icon = 'audio-volume-low-symbolic';
+                    } else if (volume < 0.7) {
+                        self.icon = 'audio-volume-medium-symbolic';
+                    } else {
+                        self.icon = 'audio-volume-high-symbolic';
+                    }
+                };
+                Audio.connect('speaker-changed', update);
+                Audio.speaker?.connect('changed', update);
+                update();
+            },
+        }),
+        Box({
+            hexpand: true,
+            vpack: 'center',
+            vertical: true,
+            className: 'spacing-v-5',
+            children: [
+                Slider({
+                    drawValue: false,
+                    hpack: 'fill',
+                    className: 'sidebar-volmixer-stream-slider',
+                    value: Audio.speaker?.volume || 0,
+                    onChange: ({ value }) => {
+                        Audio.speaker.volume = value;
+                        YTMusic.setVolume(Math.round(value * 100));
+                    },
+                    setup: slider => {
+                        const update = () => {
+                            slider.value = Audio.speaker?.volume || 0;
+                        };
+                        Audio.connect('speaker-changed', update);
+                        Audio.speaker?.connect('changed', update);
+                        update();
+                    },
+                }),
+            ],
+        }),
+    ],
+});
 
 // Media Controls
 export const MediaControls = () => Box({
     className: 'ytm-controls',
-    css:"margin-bottom :-0.35rem",
     vertical: true,
     children: [
         // Now Playing Section
         Box({
             className: 'ytm-now-playing',
-            css:"font-size:1rem;font-weight:500",
+            css: 'font-size: 1rem; font-weight: 500',
             children: [
                 Box({
                     className: 'sec-txt ytm-now-playing-info',
@@ -37,7 +115,6 @@ export const MediaControls = () => Box({
                                         const track = YTMusic.currentTrack;
                                         const mpris = Mpris.players.find(p => p.identity === 'mpv');
                                         const title = track?.title || mpris?.trackTitle || 'Not playing';
-                                        // Wrap text at 30 characters
                                         label.label = title.length > 30 ? 
                                             title.slice(0, 30) + '...' : 
                                             title;
@@ -50,6 +127,7 @@ export const MediaControls = () => Box({
                         }),
                         Label({
                             className: 'ytm-now-playing-artist sec-txt',
+                            justification: 'center',
                             wrap: true,
                             setup: label => {
                                 label.connect('realize', () => {
@@ -57,11 +135,8 @@ export const MediaControls = () => Box({
                                         const track = YTMusic.currentTrack;
                                         const mpris = Mpris.players.find(p => p.identity === 'mpv');
                                         const artists = track?.artists?.map(a => a.name).join(', ') || 
-                                                      mpris?.trackArtists?.join(', ') || '';
-                                        // Wrap text at 35 characters
-                                        label.label = artists.length > 35 ? 
-                                            artists.slice(0, 35) + '...' : 
-                                            artists;
+                                                       mpris?.trackArtists?.join(', ') || '';
+                                        label.label = artists;
                                     };
                                     YTMusic.connect('notify::current-track', update);
                                     Mpris.connect('player-changed', update);
@@ -69,11 +144,73 @@ export const MediaControls = () => Box({
                                 });
                             },
                         }),
+                    ],
+                }),
+            ],
+        }),
+        
+        // Controls Section
+        Box({
+            className: 'ytm-controls-box',
+            vertical: true,
+            children: [
+                // Track Progress Slider
+                Box({
+                    className: 'ytm-seek-slider spacing-v-5 margin-rl-15',
+                    vertical: true,
+                    children: [
+                        Widget.Slider({
+                            className: 'track-progress',
+                            drawValue: false,
+                            onChange: ({ value }) => {
+                                if (!YTMusic.duration) return;
+                                YTMusic.seek(value * YTMusic.duration);
+                            },
+                            setup: slider => {
+                                slider.hook(YTMusic, () => {
+                                    if (!YTMusic.position || !YTMusic.duration) {
+                                        slider.visible = false;
+                                        return;
+                                    }
+                                    slider.visible = true;
+                                    slider.value = YTMusic.position / YTMusic.duration;
+                                });
+                            },
+                        }),
                         Box({
-                            className: 'ytm-playback-controls',
+                            homogeneous: true,
+                            children: [
+                                Label({
+                                    className: 'txt-smallie txt',
+                                    setup: label => {
+                                        label.hook(YTMusic, () => {
+                                            label.label = formatTime(YTMusic.position || 0);
+                                        });
+                                    },
+                                }),
+                                Label({
+                                    className: 'txt-smallie txt',
+                                    hpack: 'end',
+                                    setup: label => {
+                                        label.hook(YTMusic, () => {
+                                            label.label = formatTime(YTMusic.duration || 0);
+                                        });
+                                    },
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                
+                // Main Controls Row
+                Box({
+                    className: 'ytm-main-controls spacing-h-5 margin-rl-15',
+                    hexpand: true,
+                    children: [
+                        // Playback Mode Controls (Shuffle/Loop)
+                        Box({
+                            className: 'ytm-mode-controls spacing-h-5',
                             hpack: 'center',
-                            spacing: 8,
-                            css: "margin-top: 0.5rem",
                             children: [
                                 Button({
                                     className: 'control-button sec-txt',
@@ -90,6 +227,31 @@ export const MediaControls = () => Box({
                                         });
                                     },
                                 }),
+                                Button({
+                                    className: 'control-button sec-txt',
+                                    child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic.repeat = !YTMusic.repeat;
+                                        YTMusic._sendMpvCommand(['cycle-values', 'loop-file', 'inf', 'no']);
+                                        return true;
+                                    },
+                                    setup: button => {
+                                        setupCursorHover(button);
+                                        YTMusic.connect('notify::repeat', () => {
+                                            button.child.label = YTMusic.repeat ? 'repeat_one' : 'repeat';
+                                        });
+                                    },
+                                }),
+                            ],
+                        }),
+                        
+                        // Center - Main Controls
+                        Box({
+                            className: 'ytm-playback-controls',
+                            hpack: 'center',
+                            hexpand: true,
+                            spacing: 4,
+                            children: [
                                 Button({
                                     className: 'control-button sec-txt',
                                     child: MaterialIcon('skip_previous', 'larger'),
@@ -118,7 +280,7 @@ export const MediaControls = () => Box({
                                                 });
                                             },
                                         });
-
+                                        
                                         YTMusic.connect('notify::loading', () => {
                                             if (YTMusic._loading) {
                                                 playButton.child.label = 'hourglass_empty';
@@ -126,7 +288,7 @@ export const MediaControls = () => Box({
                                                 playButton.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
                                             }
                                         });
-
+            
                                         box.children = [playButton];
                                     },
                                 }),
@@ -139,55 +301,39 @@ export const MediaControls = () => Box({
                                     },
                                     setup: setupCursorHover,
                                 }),
-                                Button({
-                                    className: 'control-button sec-txt',
-                                    child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'larger'),
-                                    onClicked: () => {
-                                        YTMusic.repeat = !YTMusic.repeat;
-                                        YTMusic._sendMpvCommand(['cycle-values', 'loop-file', 'inf', 'no']);
-                                        return true;
-                                    },
-                                    setup: button => {
-                                        setupCursorHover(button);
-                                        YTMusic.connect('notify::repeat', () => {
-                                            button.child.label = YTMusic.repeat ? 'repeat_one' : 'repeat';
-                                        });
-                                    },
-                                }),
-                                Button({
-                                    className: 'ytm-toggle-view-button control-button sec-txt',
-                                    tooltipText: 'Toggle between home and downloads',
-                                    child: MaterialIcon('home', 'larger'),
-                                    onClicked: () => {
-                                        YTMusic.toggleDownloadedView();
-                                        // Trigger a search to refresh results
-                                        YTMusic.search(YTMusic._currentSearchQuery);
-                                    },
-                                    setup: button => {
-                                        setupCursorHover(button);
-                                        // Update icon based on current mode
-                                        const updateIcon = () => {
-                                            button.child.label = YTMusic.showDownloaded ? 'home' : 'download_done';
-                                        };
-                                        YTMusic.connect('notify::show-downloaded', updateIcon);
-                                        updateIcon();
-                                    },
-                                }),
                             ],
+                        }),
+                        
+                        // View Toggle
+                        Button({
+                            className: 'ytm-toggle-view-button control-button sec-txt',
+                            hpack: 'end',
+                            tooltipText: 'Toggle between home and downloads',
+                            child: MaterialIcon('home', 'larger'),
+                            onClicked: () => {
+                                YTMusic.toggleDownloadedView();
+                                YTMusic.search(YTMusic._currentSearchQuery);
+                            },
+                            setup: button => {
+                                setupCursorHover(button);
+                                const updateIcon = () => {
+                                    button.child.label = YTMusic.showDownloaded ? 
+                                        'home' : 
+                                        'download_done';
+                                };
+                                YTMusic.connect('notify::show-downloaded', updateIcon);
+                                updateIcon();
+                            },
                         }),
                     ],
                 }),
-            ],
-        }),
-        // Controls Section
-        Box({
-            className: 'ytm-controls-box',
-            children: [
+                
+                // Volume Control at the bottom
+                VolumeControl(),
             ],
         }),
     ],
 });
-
 
 // Search Results
 const SearchResults = () => Box({
@@ -353,7 +499,7 @@ export const ytmusicCommands = Box({
 // Export the icon
 export const ytmusicTabIcon = Box({
     className: 'txt-norm',
-    child: MaterialIcon('music_note', 'larger'),
+    child: MaterialIcon('music_note', 'large'),
 });
 
 // Add styles

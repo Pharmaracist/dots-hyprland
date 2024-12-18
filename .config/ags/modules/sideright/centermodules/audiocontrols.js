@@ -6,60 +6,85 @@ import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 import { iconExists } from '../../.miscutils/icons.js';
 
-const AppVolume = (stream) => Box({
-    className: 'sidebar-volmixer-stream spacing-h-10',
-    children: [
-        Icon({
-            className: 'sidebar-volmixer-stream-appicon',
-            vpack: 'center',
-            tooltipText: stream.stream.name,
-            setup: (self) => {
-                self.hook(stream, (self) => {
-                    self.icon = stream.stream.name.toLowerCase();
-                })
-            },
-        }),
-        Box({
-            hexpand: true,
-            vpack: 'center',
-            vertical: true,
-            className: 'spacing-v-5',
-            children: [
-                Label({
-                    xalign: 0,
-                    maxWidthChars: 1,
-                    truncate: 'end',
-                    label: stream.description,
-                    className: 'txt-small',
-                    setup: (self) => self.hook(stream, (self) => {
-                        self.label = `${stream.stream.name} • ${stream.description}`
-                    })
-                }),
-                Slider({
-                    drawValue: false,
-                    hpack: 'fill',
-                    className: 'sidebar-volmixer-stream-slider',
-                    value: stream.volume,
-                    min: 0, max: 1,
-                    onChange: ({ value }) => {
-                        stream.volume = value;
-                    },
-                    setup: (self) => self.hook(stream, (self) => {
-                        self.value = stream.volume;
-                    })
-                }),
-                // Box({
-                //     homogeneous: true,
-                //     className: 'test',
-                //     children: [AnimatedSlider({
-                //         className: 'sidebar-volmixer-stream-slider',
-                //         value: stream.volume,
-                //     })],
-                // })
-            ]
-        })
-    ]
-});
+const AppVolume = (stream) => {
+    let volumeUpdateTimeout = null;
+
+    return Box({
+        className: 'sidebar-volmixer-stream spacing-h-10',
+        setup: box => {
+            box.connect('scroll-event', (widget, event) => {
+                const step = 0.02;  // 2% step for smooth control
+                const currentVolume = stream.volume;
+                let newVolume;
+
+                const direction = event.get_scroll_deltas()[2];
+                if (direction < 0) {  // Scroll up
+                    newVolume = Math.min(1, currentVolume + step);
+                } else if (direction > 0) {  // Scroll down
+                    newVolume = Math.max(0, currentVolume - step);
+                }
+
+                if (newVolume !== undefined && newVolume !== currentVolume) {
+                    stream.volume = newVolume;
+                }
+                return true;
+            });
+        },
+        children: [
+            Icon({
+                className: 'sidebar-volmixer-stream-appicon',
+                vpack: 'center',
+                tooltipText: stream.stream.name,
+                setup: (self) => {
+                    self.hook(stream, (self) => {
+                        self.icon = stream.stream.name.toLowerCase();
+                    });
+                },
+            }),
+            Box({
+                hexpand: true,
+                vpack: 'center',
+                vertical: true,
+                className: 'spacing-v-5',
+                children: [
+                    Label({
+                        xalign: 0,
+                        maxWidthChars: 1,
+                        truncate: 'end',
+                        label: stream.description,
+                        className: 'txt-small',
+                        setup: (self) => self.hook(stream, (self) => {
+                            self.label = `${stream.stream.name} • ${stream.description}`;
+                        })
+                    }),
+                    Slider({
+                        drawValue: false,
+                        hpack: 'fill',
+                        className: 'sidebar-volmixer-stream-slider',
+                        value: stream.volume,
+                        min: 0,
+                        max: 1,
+                        onChange: ({ value }) => {
+                            if (volumeUpdateTimeout) {
+                                GLib.source_remove(volumeUpdateTimeout);
+                            }
+                            
+                            stream.volume = value;
+                            
+                            volumeUpdateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+                                volumeUpdateTimeout = null;
+                                return GLib.SOURCE_REMOVE;
+                            });
+                        },
+                        setup: (self) => self.hook(stream, (self) => {
+                            self.value = stream.volume;
+                        })
+                    }),
+                ]
+            })
+        ]
+    });
+};
 
 const AudioDevices = (input = false) => {
     const dropdownShown = Variable(false);
