@@ -5,31 +5,31 @@ const { Box, EventBox, Label } = Widget;
 import {
   ToggleIconBluetooth,
   ToggleIconWifi,
-  HyprToggleIcon,
+  // HyprToggleIcon,
   ModuleNightLight,
   ModuleIdleInhibitor,
-  ModuleReloadIcon,
-  ModuleSettingsIcon,
+  // ModuleReloadIcon,
+  // ModuleSettingsIcon,
   ModulePowerIcon,
-  ModuleRawInput,
+  // ModuleRawInput,
   ModuleCloudflareWarp,
 } from "./quicktoggles.js";
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
 // import ModulePowerProfiles from "./centermodules/powerprofiles.js";
-import ModuleBluetooth from "./centermodules/bluetooth.js";
-import ModuleConfigure from "./centermodules/configure.js";
+// import ModuleBluetooth from "./centermodules/bluetooth.js";
+// import ModuleConfigure from "./centermodules/configure.js";
 import ModuleMusicControls from "./centermodules/musiccontrols.js";
 // import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import { ModuleCalendar } from "./calendar.js";
 import { getDistroIcon } from "../.miscutils/system.js";
-import { MaterialIcon } from "../.commonwidgets/materialicon.js";
+// import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 import { ExpandingIconTabContainer } from "../.commonwidgets/tabcontainer.js";
 import { checkKeybind } from "../.widgetutils/keybind.js";
 // import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
-import GLib from "gi://GLib";
-import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
+// import GLib from "gi://GLib";
+// import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
 
 const centerWidgets = [
   {
@@ -44,22 +44,22 @@ const centerWidgets = [
     contentWidget: ModuleAudioControls,
   },
 
-  {
-    name: getString("Bluetooth"),
-    materialIcon: "bluetooth",
-    contentWidget: ModuleBluetooth,
-  },
-  {
-    name: getString("Wifi networks"),
-    materialIcon: "wifi",
-    contentWidget: ModuleWifiNetworks,
-    onFocus: () => execAsync("nmcli dev wifi list").catch(print),
-  },
-  {
-    name: getString("Live config"),
-    materialIcon: "tune",
-    contentWidget: ModuleConfigure,
-  },
+  // {
+  //   name: getString("Bluetooth"),
+  //   materialIcon: "bluetooth",
+  //   contentWidget: ModuleBluetooth,
+  // },
+  // {
+  //   name: getString("Wifi networks"),
+  //   materialIcon: "wifi",
+  //   contentWidget: ModuleWifiNetworks,
+  //   onFocus: () => execAsync("nmcli dev wifi list").catch(print),
+  // },
+  // {
+  //   name: getString("Live config"),
+  //   materialIcon: "tune",
+  //   contentWidget: ModuleConfigure,
+  // },
 ];
 
 const timeRow = Box({
@@ -178,11 +178,11 @@ export default () =>
             className: "sidebar-group",
             children: [sidebarOptionsStack],
           }),
-          ModuleMusicControls(),
           Box({
             vexpand: false,
             children: [ModuleCalendar()],
           }),
+          ModuleMusicControls(),
         ],
       }),
     ],

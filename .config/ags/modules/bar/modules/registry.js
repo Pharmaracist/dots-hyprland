@@ -17,6 +17,7 @@ import { BarCornerTopleft, BarCornerTopright } from "../barcorners.js";
 import ClassWindow from "../modules/window_title.js";
 import WeatherWidget from "./weather.js";
 import { Systray } from "../../systray/systray.js";
+import MediaIndicator from "./media.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -120,6 +121,7 @@ export const MediaModules = {
     music() { return Music(); },
     musicStuff() { return MusicStuff(); },
     cava() { return Cava(); },
+    mediaIndicator() { return MediaIndicator(); },
 };
 
 // Initialize all async modules

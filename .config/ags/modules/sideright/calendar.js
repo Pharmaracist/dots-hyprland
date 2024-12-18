@@ -9,6 +9,7 @@ import { TodoWidget } from "./todolist.js";
 import { TimerWidget } from "./timers.js";
 import { PrayerTimesWidget } from "./prayertimes.js";
 import { getCalendarLayout } from "./calendar_layout.js";
+import Media from "../media/media.js";
 
 // Кэшируем часто используемые значения
 let calendarJson = getCalendarLayout(undefined, true);
@@ -120,7 +121,7 @@ const CalendarWidget = () => {
             children: [Widget.Box({
                 vertical: true,
                 className: 'spacing-v-5',
-                css: 'min-width: 15rem; min-width: 18rem;',  // Changed from max-width to min-width
+             
                 children: [
                     calendarHeader,
                     Widget.Box({
@@ -138,12 +139,13 @@ const CalendarWidget = () => {
 const defaultShown = 'prayers';
 const contentStack = Widget.Stack({
     hexpand: true,
-    css: 'min-width: 15rem; max-width: 10rem;',
+    css: 'min-width: 15em; min-height: 30em;',
     children: {
         'prayers': PrayerTimesWidget(),
         'calendar': CalendarWidget(),
         'todo': TodoWidget(),
         'timers': TimerWidget(),
+        'media': Media(),
     },
     transition: 'slide_up_down',
     transitionDuration: userOpts.animations.durationLarge,
@@ -151,31 +153,26 @@ const contentStack = Widget.Stack({
 });
 
 const StackButton = (stackItemName, icon, name) => Widget.Button({
-    className: 'button-minsize sidebar-navrail-btn txt-small spacing-h-5',
-    onClicked: button => {
-        contentStack.shown = stackItemName;
-        button.get_parent().get_children().forEach(kid => {
-            kid.toggleClassName('sidebar-navrail-btn-active', kid === button);
-        });
-    },
+    className: 'sidebar-navrail-btn',
+    tooltipText: name,
     child: Box({
-        className: 'spacing-v-5',
         vertical: true,
+        className: 'spacing-v-5',
         children: [
-            Label({
-                className: 'txt icon-material txt-hugeass',
-                label: icon,
-            }),
+            MaterialIcon(icon, 'hugeass'),
             Label({
                 label: name,
-                className: 'txt txt-smallie',
+                className: 'txt-smaller',
             }),
-        ]
+        ],
     }),
-    setup: button => Utils.timeout(1, () => {
+    onClicked: () => contentStack.shown = stackItemName,
+    setup: (button) => {
         setupCursorHover(button);
-        button.toggleClassName('sidebar-navrail-btn-active', defaultShown === stackItemName);
-    })
+        contentStack.connect('notify::visible-child', () => {
+            button.toggleClassName('active', contentStack.shown === stackItemName);
+        });
+    },
 });
 
 export const ModuleCalendar = () => Box({
@@ -183,16 +180,28 @@ export const ModuleCalendar = () => Box({
     hexpand: false,
     setup: box => {
         box.pack_start(Box({
-            vpack: 'center',
-            homogeneous: true,
             vertical: true,
-            className: 'sidebar-navrail spacing-v-10',
-            children: [
-                StackButton('prayers', 'mosque', getString('Prayers')),
-                StackButton('calendar', 'calendar_month', getString('Calendar')),
-                StackButton('todo', 'done_outline', getString('Todo')),
-                StackButton('timers', 'timer', getString('Timers')),
-            ]
+            vpack: 'center',
+            className: 'sidebar-navrail',
+            css: 'min-height: 25rem; padding: 1rem 0.6rem; min-width: 4rem;',
+            child: Widget.Scrollable({
+                vexpand: true,
+                hscroll: 'never',
+                vscroll: 'automatic',
+                child: Box({
+                    vertical: true,
+                    vpack: 'center',
+                    className: 'spacing-v-15',
+                    css: 'padding: 0.5rem 0;',
+                    children: [
+                        StackButton('prayers', 'mosque', getString('Prayers')),
+                        StackButton('calendar', 'calendar_month', getString('Calendar')),
+                        StackButton('todo', 'done_outline', getString('Todo')),
+                        StackButton('timers', 'timer', getString('Timers')),
+                        StackButton('media', 'library_music', getString('Media')),
+                    ]
+                }),
+            }),
         }), false, false, 0);
         box.pack_end(contentStack, true, true, 0);
     }

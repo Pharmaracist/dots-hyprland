@@ -9,7 +9,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include elevation-border;
     @include elevation2;
     border-radius: $rounding_large - $elevation_margin + 0.068rem;
-    // min-width: 25.818rem;
+    min-width: 25.818rem;
     background-color: $background;
     padding: 1.023rem;
 }
@@ -1020,7 +1020,7 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     background-color: $layer2;
     padding: 1.364rem;
     margin: 0.682rem 0;
-    min-height: 100px;
+    min-height: 10px;
 }
 
 .sidebar-music-bar-low {

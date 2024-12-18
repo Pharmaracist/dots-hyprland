@@ -42,12 +42,7 @@ export const BarLayouts = {
                 children: [
                     modules.InfoModules.clock(),
                 ],
-            }),Widget.Box({
-                className: 'bar-round-padding',
-                children: [
-                    modules.MediaModules.cava(),
-                ],
-            })],
+            }),],
             end: [
                 Widget.Box({
                     className: 'bar-round-padding',
@@ -56,7 +51,6 @@ export const BarLayouts = {
                     ],
                 }),
                 Widget.Box({
-                    className: 'bar-round-padding',
                     children: [
                         modules.StatusModules.tray(),
                     ],
@@ -82,22 +76,25 @@ export const BarLayouts = {
         className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
         corners: {
-            topLeft: false,
-            topRight: false,
+            topLeft: true,
+            topRight: true,
             bottomLeft: false,
             bottomRight: false,
         },
         layout: (modules) => ({
             start: [
-                modules.workspaces.focus(),
+                modules.CornerModules.topleft(),
+                modules.StatusModules.battery(),
+                modules.workspaces.normal(),
+                modules.MediaModules.mediaIndicator(),
             ],
             center: [
-                modules.InfoModules.clock(),
+                modules.InfoModules.title(),
             ],
             end: [
-                Separator(),
-                modules.InfoModules.indicators(),
-                modules.StatusModules.battery(),
+                modules.ControlModules.toggles(),
+                modules.InfoModules.clock(),
+                modules.CornerModules.topright(),
             ],
         }),
     },

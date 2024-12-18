@@ -147,16 +147,15 @@ const TimerItem = (timer) => {
 const TimersList = () => Box({
     vertical: true,
     className: 'spacing-v-5 txt-norm',
-    connections: [[timers, box => {
-        box.children = timers.timers.map(timer => TimerItem(timer));
-    }]],
+    setup: self => {
+        self.hook(timers, () => {
+            self.children = timers.timers.map(timer => TimerItem(timer));
+        }, 'updated');
+    },
 });
 
 export const TimerWidget = () => {
-    const timersList = Box({
-        vertical: true,
-        className: 'spacing-v-5 txt-norm',
-    });
+    const timersList = TimersList();
 
     const header = Box({
         css:"margin-top:0.4rem",
@@ -224,9 +223,8 @@ export const TimerWidget = () => {
             }),
             presetButtons,
         ],
-        connections: [['destroy', self => self.hook?.unhook()]],
         setup: self => {
-            self.hook = self.hook(timers, () => {
+            self.hook(timers, () => {
                 timersList.children = timers.timers.map(timer => TimerItem(timer));
             }, 'updated');
         },

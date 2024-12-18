@@ -423,9 +423,9 @@ export const ytmusicCommands = Box({
 });
 
 // Export the icon
-export const ytmusicTabIcon = Icon({
-    className: 'txt-norm icon-material ',
-    icon: 'music-note',
+export const ytmusicTabIcon = Box({
+    className: 'txt-norm',
+    child: MaterialIcon('music_note', 'norm'),
 });
 
 // Add styles

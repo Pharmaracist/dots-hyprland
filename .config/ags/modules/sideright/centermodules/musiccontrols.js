@@ -1,4 +1,4 @@
-const { GLib, GObject } = imports.gi;
+const { GLib, GObject, Gtk } = imports.gi;
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import YTMusic from '../../../services/ytmusic.js';
@@ -71,33 +71,30 @@ const ControlButton = ({ icon, action, sensitive = true }) => Button({
 export default () => Box({
     className: 'sideright-music',
     setup: self => {
+        // Update cover and visibility
         const updateCover = () => {
-            const player = Mpris.players[0];
+            const player = getPlayer();
             if (!player) {
-                self.css = 'min-height: 8rem;';
+                self.visible = false;
                 return;
             }
 
-            // Try to get cover from YTMusic first if it's our player
-            let coverUrl = null;
-            if (player.identity === 'mpv' && YTMusic.currentTrack?.thumbnail) {
-                coverUrl = YTMusic.currentTrack.thumbnail;
-            }
+            self.visible = true;
 
-            // Fallback to MPRIS cover if no YTMusic thumbnail
-            if (!coverUrl) {
-                coverUrl = player.trackCoverUrl;
-            }
-
-            if (!coverUrl) {
-                self.css = 'min-height: 8rem;';
+            // Update cover art
+            const coverPath = player.coverPath;
+            if (coverPath) {
+                const styleContext = self.get_style_context();
+                const currentCoverPath = styleContext.get_property('background-image', Gtk.StateFlags.NORMAL);
+                if (!currentCoverPath || !currentCoverPath.includes(coverPath)) {
+                    self.css = `
+                        background-image: url('${coverPath}');
+                        background-size: cover;
+                        background-position: center;
+                    `;
+                }
             } else {
-                self.css = `
-                    min-height: 8rem;
-                    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8)), url('${coverUrl}');
-                    background-size: cover;
-                    background-position: center;
-                `;
+                self.css = '';
             }
         };
 
@@ -105,49 +102,55 @@ export default () => Box({
         self.poll(1000, updateCover);
     },
     vertical: false,
-    spacing: 4,
-    children: [
-        Box({
-            vertical: true,
-            hexpand: true,
-            className: 'sideright-music-info txt-large',
-            children: [
-                Box({
-                    vertical: true,
-                    spacing: 0,
-                    children: [
-                        TrackTitle({ player: Mpris.players[0] }),
-                        TrackArtists({ player: Mpris.players[0] }),
-                    ]
-                }),
-                TrackTime({ player: Mpris.players[0] }),
-            ]
-        }),
-        Box({
-            className: 'sideright-music-controls',
-            hpack: 'center',
-            vpack: 'center',
-            css: "padding-left:1rem",
-            setup: self => self.hook(Mpris, () => {
-                const player = Mpris.players[0];
-                self.children = [
-                    ControlButton({
-                        icon: 'skip_previous',
-                        action: () => player?.previous(),
-                        sensitive: player?.canGoPrev || false,
+    child: Box({
+        className: 'sideright-music-box',
+        vertical: true,
+        children: [
+            Box({
+                className: 'sideright-music-info',
+                vertical: true,
+                children: [
+                    Box({
+                        children: [
+                            Box({
+                                vertical: true,
+                                children: [
+                                    TrackTitle({ player: getPlayer() }),
+                                    TrackTime({ player: getPlayer() }),
+                                    // TrackArtists({ player: getPlayer() }),
+                                ],
+                            }),
+                            Box({ hexpand: true }),
+                            Box({
+                                className: 'sideright-music-controls',
+                                vexpand: false,
+                                vpack: 'end',
+                                setup: self => self.hook(Mpris, () => {
+                                    const player = getPlayer();
+                                    self.children = [
+                                        ControlButton({
+                                            icon: 'skip_previous',
+                                            action: () => player?.previous(),
+                                            sensitive: player?.canGoPrev || false,
+                                        }),
+                                        ControlButton({
+                                            icon: player?.playBackStatus === 'Playing' ? 'pause' : 'play_arrow',
+                                            action: () => player?.playBackStatus === 'Playing' ? player?.pause() : player?.play(),
+                                            sensitive: player?.canPlay || false,
+                                        }),
+                                        ControlButton({
+                                            icon: 'skip_next',
+                                            action: () => player?.next(),
+                                            sensitive: player?.canGoNext || false,
+                                        }),
+                                    ];
+                                }),
+                            }),
+          
+                        ],
                     }),
-                    ControlButton({
-                        icon: player?.playBackStatus === 'Playing' ? 'pause' : 'play_arrow',
-                        action: () => player?.playPause(),
-                        sensitive: player?.canPlay || false,
-                    }),
-                    ControlButton({
-                        icon: 'skip_next',
-                        action: () => player?.next(),
-                        sensitive: player?.canGoNext || false,
-                    }),
-                ];
+                ],
             }),
-        }),
-    ],
+        ],
+    }),
 });
