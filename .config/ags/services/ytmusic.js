@@ -66,6 +66,9 @@ class YouTubeMusicService extends Service {
     _showDownloaded = false;
     _downloadedTracks = [];
     _lastOnlineResults = [];
+    _currentSearchQuery = '';
+    _lastDownloadedResults = [];
+    _defaultContent = [];
 
     constructor() {
         super();
@@ -128,6 +131,7 @@ class YouTubeMusicService extends Service {
         });
 
         this._initDownloadedTracks();
+        this._initDefaultContent();
     }
 
     _initOptions() {
@@ -566,9 +570,19 @@ class YouTubeMusicService extends Service {
     }
 
     async search(query) {
+        this._currentSearchQuery = query;
+
         if (!query) {
-            this._searchResults = this._showDownloaded ? this._downloadedTracks : [];
+            // Show default content when no search query
+            this._searchResults = this._showDownloaded ? 
+                this._downloadedTracks : 
+                (this._defaultContent.length > 0 ? this._defaultContent : this._lastOnlineResults);
             this.notify('search-results');
+            
+            // Refresh default content in the background
+            if (!this._showDownloaded) {
+                this._initDefaultContent().catch(logError);
+            }
             return;
         }
 
@@ -588,6 +602,7 @@ class YouTubeMusicService extends Service {
                     );
                     return titleMatch || artistMatch;
                 });
+                this._lastDownloadedResults = results;
             } else {
                 // Online search
                 const isOnline = await this._isOnline();
@@ -626,16 +641,23 @@ class YouTubeMusicService extends Service {
         this._showDownloaded = !this._showDownloaded;
         this.notify('show-downloaded');
         
+        // Switch view immediately using cached results
         if (this._showDownloaded) {
-            // Use cached downloaded tracks first for instant feedback
-            this._searchResults = this._downloadedTracks;
-            this.notify('search-results');
-            
-            // Then update in background
-            this._updateDownloadedTracks().catch(logError);
+            // If we have a search query, use filtered downloaded results
+            if (this._currentSearchQuery) {
+                this._searchResults = this._lastDownloadedResults;
+            } else {
+                this._searchResults = this._downloadedTracks;
+            }
         } else {
+            // Switch back to online results
             this._searchResults = this._lastOnlineResults;
-            this.notify('search-results');
+        }
+        this.notify('search-results');
+        
+        // Perform the search again in the background if we have a query
+        if (this._currentSearchQuery) {
+            this.search(this._currentSearchQuery).catch(logError);
         }
     }
 
@@ -1180,6 +1202,45 @@ class YouTubeMusicService extends Service {
             }
         } catch (e) {
             logError(e);
+        }
+    }
+
+    async _initDefaultContent() {
+        try {
+            this._loading = true;
+            this.notify('loading');
+            
+            const isOnline = await this._isOnline();
+            if (!isOnline) {
+                this._defaultContent = this._downloadedTracks.slice(0, 20);
+                return;
+            }
+
+            // Get trending/recommended music
+            const results = await YTMusicAPI.getTrending();
+            
+            // Update download status
+            const cacheDir = this._getOption('cacheDir');
+            this._defaultContent = results.map(result => ({
+                ...result,
+                isDownloaded: GLib.file_test(
+                    GLib.build_filenamev([cacheDir, `${result.videoId}.opus`]),
+                    GLib.FileTest.EXISTS
+                )
+            }));
+
+            // If no search is active, show default content
+            if (!this._currentSearchQuery) {
+                this._searchResults = this._showDownloaded ? this._downloadedTracks : this._defaultContent;
+                this.notify('search-results');
+            }
+        } catch (error) {
+            logError(error);
+            // Fallback to downloaded tracks if available
+            this._defaultContent = this._downloadedTracks.slice(0, 20);
+        } finally {
+            this._loading = false;
+            this.notify('loading');
         }
     }
 }

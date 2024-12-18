@@ -13,57 +13,14 @@ const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget
 // Media Controls
 export const MediaControls = () => Box({
     className: 'ytm-controls',
-    css:"margin-bottom :-0.55rem",
+    css:"margin-bottom :-0.35rem",
     vertical: true,
     children: [
         // Now Playing Section
         Box({
             className: 'ytm-now-playing',
+            css:"font-size:1rem;font-weight:500",
             children: [
-                Box({
-                    className: 'ytm-now-playing-thumb',
-                    setup: box => {
-                        box.connect('realize', () => {
-                            const update = () => {
-                                const track = YTMusic.currentTrack;
-                                const mpris = Mpris.players.find(p => p.identity === 'mpv');
-                                box.css = track?.thumbnail ? 
-                                    `
-                                    background-image: url("${track.thumbnail}");
-                                    min-width: 64px;
-                                    min-height: 64px;
-                                    margin: 8px;
-                                    margin-left:12px;
-                                    background-size: cover;
-                                    background-position: center;
-                                    border-radius: 4px;
-                                    ` : 
-                                    mpris?.coverPath ? 
-                                    `
-                                    background-image: url("${mpris.coverPath}");
-                                    min-width: 64px;
-                                    min-height: 64px;
-                                    margin: 8px;
-                                    margin-left:12px;
-                                    background-size: cover;
-                                    background-position: center;
-                                    border-radius: 4px;
-                                    ` :
-                                    `
-                                    min-width: 64px;
-                                    min-height: 64px;
-                                    margin: 8px;
-                                    margin-left:12px;
-                                    background-color: rgba(255, 255, 255, 0.1);
-                                    border-radius: 4px;
-                                    `;
-                            };
-                            YTMusic.connect('notify::current-track', update);
-                            Mpris.connect('player-changed', update);
-                            update();
-                        });
-                    },
-                }),
                 Box({
                     className: 'sec-txt ytm-now-playing-info',
                     vertical: true,
@@ -72,15 +29,18 @@ export const MediaControls = () => Box({
                     children: [
                         Label({
                             className: 'sec-txt ytm-now-playing-title',
-                            // xalign: 0,
-                            // justification: 'left',
+                            justification: 'center',
                             wrap: true,
                             setup: label => {
                                 label.connect('realize', () => {
                                     const update = () => {
                                         const track = YTMusic.currentTrack;
                                         const mpris = Mpris.players.find(p => p.identity === 'mpv');
-                                        label.label = track?.title || mpris?.trackTitle || 'Not playing';
+                                        const title = track?.title || mpris?.trackTitle || 'Not playing';
+                                        // Wrap text at 30 characters
+                                        label.label = title.length > 30 ? 
+                                            title.slice(0, 30) + '...' : 
+                                            title;
                                     };
                                     YTMusic.connect('notify::current-track', update);
                                     Mpris.connect('player-changed', update);
@@ -90,17 +50,18 @@ export const MediaControls = () => Box({
                         }),
                         Label({
                             className: 'ytm-now-playing-artist sec-txt',
-                            // xalign: 0,
-                            // justification: 'left',
                             wrap: true,
                             setup: label => {
                                 label.connect('realize', () => {
                                     const update = () => {
                                         const track = YTMusic.currentTrack;
                                         const mpris = Mpris.players.find(p => p.identity === 'mpv');
-                                        const artists = track?.artists?.map(a => a.name || a).filter(Boolean) || 
-                                                      mpris?.trackArtists || [];
-                                        label.label = artists.join(', ');
+                                        const artists = track?.artists?.map(a => a.name).join(', ') || 
+                                                      mpris?.trackArtists?.join(', ') || '';
+                                        // Wrap text at 35 characters
+                                        label.label = artists.length > 35 ? 
+                                            artists.slice(0, 35) + '...' : 
+                                            artists;
                                     };
                                     YTMusic.connect('notify::current-track', update);
                                     Mpris.connect('player-changed', update);
@@ -112,7 +73,7 @@ export const MediaControls = () => Box({
                             className: 'ytm-playback-controls',
                             hpack: 'center',
                             spacing: 8,
-                            css:"margin-top : 0.5rem",
+                            css: "margin-top: 0.5rem",
                             children: [
                                 Button({
                                     className: 'control-button sec-txt',
@@ -129,7 +90,6 @@ export const MediaControls = () => Box({
                                         });
                                     },
                                 }),
-                
                                 Button({
                                     className: 'control-button sec-txt',
                                     child: MaterialIcon('skip_previous', 'larger'),
@@ -139,7 +99,6 @@ export const MediaControls = () => Box({
                                     },
                                     setup: setupCursorHover,
                                 }),
-                
                                 Box({
                                     className: 'play-button-container',
                                     setup: box => {
@@ -159,7 +118,7 @@ export const MediaControls = () => Box({
                                                 });
                                             },
                                         });
-                
+
                                         YTMusic.connect('notify::loading', () => {
                                             if (YTMusic._loading) {
                                                 playButton.child.label = 'hourglass_empty';
@@ -167,11 +126,10 @@ export const MediaControls = () => Box({
                                                 playButton.child.label = YTMusic.playing ? 'pause' : 'play_arrow';
                                             }
                                         });
-                
+
                                         box.children = [playButton];
                                     },
                                 }),
-                
                                 Button({
                                     className: 'control-button sec-txt',
                                     child: MaterialIcon('skip_next', 'larger'),
@@ -181,7 +139,6 @@ export const MediaControls = () => Box({
                                     },
                                     setup: setupCursorHover,
                                 }),
-                
                                 Button({
                                     className: 'control-button sec-txt',
                                     child: MaterialIcon(YTMusic.repeat ? 'repeat_one' : 'repeat', 'larger'),
@@ -198,87 +155,39 @@ export const MediaControls = () => Box({
                                     },
                                 }),
                                 Button({
-                                    className: 'control-button sec-txt',
-                                    child: MaterialIcon(YTMusic.showDownloaded ? '󰇄' : '󰇣', 'larger'),
-                                    onClicked: () => YTMusic.toggleDownloadedView(),
+                                    className: 'ytm-toggle-view-button control-button sec-txt',
+                                    tooltipText: 'Toggle between home and downloads',
+                                    child: MaterialIcon('home', 'larger'),
+                                    onClicked: () => {
+                                        YTMusic.toggleDownloadedView();
+                                        // Trigger a search to refresh results
+                                        YTMusic.search(YTMusic._currentSearchQuery);
+                                    },
                                     setup: button => {
                                         setupCursorHover(button);
-                                        YTMusic.connect('notify::show-downloaded', () => {
-                                            button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
-                                        });
+                                        // Update icon based on current mode
+                                        const updateIcon = () => {
+                                            button.child.label = YTMusic.showDownloaded ? 'home' : 'download_done';
+                                        };
+                                        YTMusic.connect('notify::show-downloaded', updateIcon);
+                                        updateIcon();
                                     },
                                 }),
                             ],
                         }),
-                        // Box({
-                        //     className: 'ytm-progress',
-                        //     children: [
-                        //         Slider({
-                        //             className: 'ytm-progress-slider',
-                        //             drawValue: false,
-                        //             onChange: ({ value }) => YTMusic.seek(value),
-                        //             setup: slider => {
-                        //                 const update = () => {
-                        //                     slider.adjustment.upper = YTMusic._duration || 100;
-                        //                     slider.value = YTMusic._position || 0;
-                        //                 };
-                        //                 YTMusic.connect('notify::position', update);
-                        //                 YTMusic.connect('notify::duration', update);
-                        //                 update();
-                        //             },
-                        //         }),
-                        //         Label({
-                        //             className: 'ytm-progress-time',
-                        //             setup: label => {
-                        //                 const formatTime = (seconds) => {
-                        //                     if (!seconds) return '0:00';
-                        //                     const mins = Math.floor(seconds / 60);
-                        //                     const secs = Math.floor(seconds % 60);
-                        //                     return `${mins}:${secs.toString().padStart(2, '0')}`;
-                        //                 };
-                        //                 const update = () => {
-                        //                     const position = formatTime(YTMusic._position);
-                        //                     const duration = formatTime(YTMusic._duration);
-                        //                     label.label = `${position} / ${duration}`;
-                        //                 };
-                        //                 YTMusic.connect('notify::position', update);
-                        //                 YTMusic.connect('notify::duration', update);
-                        //                 update();
-                        //             },
-                        //         }),
-                        //     ],
-                        // }),
                     ],
                 }),
             ],
         }),
         // Controls Section
-      
+        Box({
+            className: 'ytm-controls-box',
+            children: [
+            ],
+        }),
     ],
 });
 
-// Search Header
-// const SearchHeader = () => Box({
-//     className: 'ytm-header',
-//     children: [
-//         Entry({
-//             className: 'ytm-search',
-//             placeholderText: 'Search YouTube Music...',
-//             onAccept: ({ text }) => YTMusic.search(text),
-//         }),
-//         Button({
-//             className: 'ytm-toggle-view-button control-button sec-txt',
-//             child: MaterialIcon('󰇣', 'larger'),
-//             onClicked: () => YTMusic.toggleDownloadedView(),
-//             setup: button => {
-//                 setupCursorHover(button);
-//                 YTMusic.connect('notify::show-downloaded', () => {
-//                     button.child.label = YTMusic.showDownloaded ? '󰇄' : '󰇣';
-//                 });
-//             },
-//         }),
-//     ],
-// });
 
 // Search Results
 const SearchResults = () => Box({
@@ -295,76 +204,70 @@ const SearchResults = () => Box({
             const trackItem = Button({
                 className: 'track-item',
                 onClicked: () => YTMusic.play(item.videoId),
-                child: Scrollable({
-                    hscroll: 'automatic',
-                    vscroll: 'never',
-                    child: Box({
-                        children: [
-                            Box({
-                                className: 'track-content',
-                                children: [
-                                    Box({
-                                        className: 'track-item-thumb',
-                                        css: item.thumbnail ? 
-                                            `min-width: 48px;
-                                            min-height: 48px;
-                                            margin: 8px;
-                                            background: url("${item.thumbnail}") center/cover no-repeat;
-                                            border-radius: 4px;` : 
-                                            `min-width: 48px;
-                                            min-height: 48px;
-                                            margin: 8px;
-                                            background-color: rgba(255, 255, 255, 0.1);
-                                            border-radius: 4px;`,
-                                    }),
-                                    Box({
-                                        className: 'track-item-info',
-                                        vertical: true,
-                                        children: [
-                                            Label({
-                                                label: item.title,
-                                                xalign: 0,
-                                                justification: 'left',
-                                                className: 'track-item-title',
-                                                wrap: true,
-                                            }),
-                                            Label({
-                                                label: item.artists.map(a => a.name).join(', '),
-                                                xalign: 0,
-                                                justification: 'left',
-                                                className: 'track-item-artist',
-                                            }),
-                                        ],
-                                    
-                                    }),
-                                ],
-                            }),
-                            Box({
-                                className: 'track-item-buttons',
-                                hpack: 'end',
-                                hexpand: true,
-                                children: [
-                                    item.isDownloaded && Label({
-                                        className: 'track-item-tag',
-                                        label: 'Downloaded',
-                                    }),
-                                    Label({
-                                        className: `track-item-caching ${YTMusic.cachingStatus[item.videoId] || ''}`,
-                                        visible: !!YTMusic.cachingStatus[item.videoId],
-                                        label: YTMusic.cachingStatus[item.videoId] === 'caching' ? 'Caching...' :
-                                               YTMusic.cachingStatus[item.videoId] === 'cached' ? 'Cached' :
-                                               YTMusic.cachingStatus[item.videoId] === 'error' ? 'Error' : '',
-                                    }),
-                                    !item.isDownloaded && Button({
-                                        className: 'control-button sec-txt',
-                                        child: MaterialIcon('download', 'larger'),
-                                        onClicked: () => YTMusic.cacheTrack(item.videoId),
-                                        setup: setupCursorHover,
-                                    }),
-                                ].filter(Boolean),
-                            }),
-                        ],
-                    }),
+                child: Box({
+                    children: [
+                        Box({
+                            className: 'track-content',
+                            children: [
+                                Box({
+                                    className: 'track-item-thumb',
+                                    css: item.thumbnail ? 
+                                        `min-width: 48px;
+                                        min-height: 48px;
+                                        margin: 8px;
+                                        background: url("${item.thumbnail}") center/cover no-repeat;
+                                        border-radius: 4px;` : 
+                                        `min-width: 48px;
+                                        min-height: 48px;
+                                        margin: 8px;
+                                        background-color: rgba(255, 255, 255, 0.1);
+                                        border-radius: 4px;`,
+                                }),
+                                Box({
+                                    className: 'track-item-info',
+                                    vertical: true,
+                                    hexpand: true,
+                                    children: [
+                                        Box({
+                                            css: 'padding-right: 48px;',
+                                            children: [
+                                                Label({
+                                                    label: item.title,
+                                                    xalign: 0,
+                                                    justification: 'left',
+                                                    className: 'track-item-title',
+                                                    wrap: true,
+                                                    css: 'margin-right: 8px;',
+                                                }),
+                                            ],
+                                        }),
+                                        Label({
+                                            label: item.artists.map(a => a.name).join(', '),
+                                            xalign: 0,
+                                            justification: 'left',
+                                            className: 'track-item-artist',
+                                            wrap: true,
+                                            css: 'margin-right: 48px;',
+                                        }),
+                                    ],
+                                }),
+                            ],
+                        }),
+                        Button({
+                            className: 'control-button sec-txt',
+                            css: 'margin: 8px;',
+                            child: MaterialIcon(
+                                item.isDownloaded ? 'download_done' :
+                                YTMusic.cachingStatus[item.videoId] === 'caching' ? 'downloading' :
+                                YTMusic.cachingStatus[item.videoId] === 'cached' ? 'download_done' :
+                                YTMusic.cachingStatus[item.videoId] === 'error' ? 'error' :
+                                'download', 
+                                'larger'
+                            ),
+                            onClicked: () => !item.isDownloaded && YTMusic.cacheTrack(item.videoId),
+                            setup: setupCursorHover,
+                        }),
+                    ],
                 }),
             });
 
@@ -421,16 +324,14 @@ const SearchResults = () => Box({
 // Export the view
 export const ytmusicView = Box({
     className: 'ytmusic-view',
-    // css:"margin-top :1rem",
-
     vertical: true,
     children: [
+    
         Scrollable({
             vexpand: true,
             child: SearchResults(),
         }),
         Widget.Box({
-            css:"margin-bottom:-0.871rem",
             children: [
                 MediaControls(),
             ],

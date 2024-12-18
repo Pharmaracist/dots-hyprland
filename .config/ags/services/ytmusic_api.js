@@ -75,6 +75,36 @@ class YTMusicAPI {
         }
     }
 
+    async getTrending() {
+        try {
+            // Get trending music from explore page
+            const response = await this._makeRequest('/browse', {
+                params: 'EgWKAQIQAWoKEAMQBBAJEAoQBQ%3D%3D', // Trending music parameter
+            });
+
+            const results = response?.contents?.singleColumnBrowseResultsRenderer?.tabs?.[0]
+                ?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]
+                ?.musicCarouselShelfRenderer?.contents || [];
+
+            return results.map(item => {
+                const data = item.musicResponsiveListItemRenderer;
+                if (!data) return null;
+                
+                return {
+                    videoId: data.playlistItemData?.videoId,
+                    title: data.flexColumns[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.text,
+                    artists: data.flexColumns[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs
+                        ?.filter((run, i) => i % 2 === 0)
+                        ?.map(artist => ({ name: artist.text })) || [],
+                    thumbnail: data.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails?.slice(-1)?.[0]?.url,
+                };
+            }).filter(Boolean); // Remove any null results
+        } catch (error) {
+            console.error('Error getting trending music:', error);
+            return [];
+        }
+    }
+
     async getRadio(videoId, limit = 5) {
         try {
             const response = await this._makeRequest('/next', {

@@ -8,7 +8,7 @@ const createUtilButton = ({ name, icon, onClicked }) =>
     vpack: "center",
     tooltipText: name,
     onClicked,
-    className: "icon-material sec-txt txt-large",
+    className: "icon-material sec-txt txt-larger",
     label: icon, // No need for template literal here
   });
 
@@ -36,7 +36,8 @@ const Shortcuts = () => {
 
   const unixporn = createUtilButton({
     name: getString("Unix Porn"),
-    icon: "\udb81\udfea ",
+    css:"font-size:1.8rem",
+    icon: "\udb81\udfea",
     onClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
   });
 
