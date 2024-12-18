@@ -1,298 +1,370 @@
 {
-  "currentTrack": null,
+  "currentTrack": {
+    "videoId": "OpP5MPgecc4",
+    "title": "CENTER",
+    "artists": [
+      {
+        "name": "Lege-Cy"
+      },
+      {
+        "name": "CENTER"
+      },
+      {
+        "name": "2024"
+      }
+    ],
+    "thumbnail": "https://lh3.googleusercontent.com/ddCM4QcUne9UM9S9xeBJ5BQU07xVfSmEaOZuqUX87tjVrE3TomVtxuhmBU-aJqOoGDYG2zgk1wLDFrF0=w544-h544-l90-rj"
+  },
   "playlist": [],
   "volume": 100,
   "playing": false,
   "repeat": false,
-  "shuffle": true,
+  "shuffle": false,
   "searchResults": [
     {
-      "videoId": "hwW9hbvWozM",
-      "title": "ياما ليالي وانت مش معايا",
+      "videoId": "OpP5MPgecc4",
+      "title": "CENTER",
       "artists": [
         {
-          "name": "Sara Haitham"
+          "name": "Lege-Cy"
         },
         {
-          "name": "30M plays"
+          "name": "CENTER"
+        },
+        {
+          "name": "2:43"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/uU0NNV4ia_naXCqFsRWQkEYp3kU0bHRI7BT6ocEkJFpFOgxi-Jn5Pu_QCWcER7zam74UPIjN9WbNv3k=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/ddCM4QcUne9UM9S9xeBJ5BQU07xVfSmEaOZuqUX87tjVrE3TomVtxuhmBU-aJqOoGDYG2zgk1wLDFrF0=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "4vgbdYiB9IU",
-      "title": "نجاة الصغيرة - الا انت",
+      "videoId": "N_DcJ4ACTAw",
+      "title": "El Neyya",
       "artists": [
         {
-          "name": "Hossam Shawky"
+          "name": "Lege-Cy"
         },
         {
-          "name": "19M views"
+          "name": "El Neyya"
+        },
+        {
+          "name": "2:41"
         }
       ],
-      "thumbnail": "https://i.ytimg.com/vi/4vgbdYiB9IU/hqdefault.jpg?sqp=-oaymwEWCMACELQBIAQqCghQEJADGFogjgJIWg&rs=AMzJL3mZnoSLU2antFNBXJCSWPzGZPyJUg",
+      "thumbnail": "https://lh3.googleusercontent.com/aEwsiSBOdcW8cLuhvhVO5boaC10gIf1wEAl6gyeEJP8IauFNE_6SxBOVFvdOBishQJGCg2V_3SVrjP7E=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "bGlZ3zYx5eE",
-      "title": "اللي تعبنا سنين في هواه",
+      "videoId": "jmib1zGHIq0",
+      "title": "El Waat El Daye3",
       "artists": [
         {
-          "name": "Sherine Abdel Wahhab"
+          "name": "Lege-Cy"
         },
         {
-          "name": "1.7M plays"
+          "name": "El Waat El Daye3"
+        },
+        {
+          "name": "2:55"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/g9mI9T6e3ikioYhzSZQvmXkv5Ffw95DWamBzh-lC0mptAE5ug71qV87dwYWoVENpjjdubWeVHptUlnUIJA=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/lrsW19SR4UuZoJo1wXbgAHJZDVPAOyH6VOx307z4IdfG8U32VMkXTxRj2udJc_cEtbMRaMP2LWNi8H8Ing=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "7mct7NrQq_A",
-      "title": "علشان خاطر العدرا يارب",
+      "videoId": "6GTeX2_QNy0",
+      "title": "تتر مسلسل ٦ شهور",
       "artists": [
         {
-          "name": "Aghapy choir"
+          "name": "Lege-Cy"
         },
         {
-          "name": "2.4M plays"
+          "name": "تتر مسلسل ٦ شهور"
+        },
+        {
+          "name": "3:10"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/Rk8h9iPbT2GVO_pA5aur-49j3vmWJza4GRNLrpcXIlXSgMl5thNQSnXzsNYZNPeRQoT82_Yp-ZeKnits=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/jAtYzX3xo3LKKrj4SIPUar8xbBZliokBnQHjec1y-1JKJJHmNICSg241_9oRM42QW6pgGZtRpVyym34=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "J9reOTF3qYw",
-      "title": "فرحه الدلوعه",
+      "videoId": "IJE9IlaC0WM",
+      "title": "Fel Galeed",
       "artists": [
         {
-          "name": "ميدو مزيكا"
+          "name": "Lege-Cy"
         },
         {
-          "name": "8M plays"
+          "name": "Placebo"
+        },
+        {
+          "name": "3:08"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/3_TonJJhL6a7qXp-gfceOdPYJbF21QtbEcgWQcoHCkH2x5vUHFbJaRZyAq7eG-v6oSfFs6Bztfk3AZs=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/0s35EkvA6nYihcdD3nDOimqiGuBIyKyCHqH3BxSJxVzFleM0fkSuCKQr-QE9vIek2LKKB8eZz9_6gcNk=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "Rn6xaTMQ6iE",
-      "title": "Ana Hont Alik - انا هونت عليك ( وجالك قلب )",
+      "videoId": "xE2OOlj1BKI",
+      "title": "Betadeen",
       "artists": [
         {
-          "name": "Houda Bondok - حودة بندق"
+          "name": "Lege-Cy"
         },
         {
-          "name": "35M plays"
+          "name": "Agzakhana"
+        },
+        {
+          "name": "3:27"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/8FSc56gblxJK7xfEPXmCPL9m_jWi3EtPC9b3jyoVheg_9A74H037XPyhpJ53w_sf7C9HiCFMPNnRSh6J=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/7GI0Pjz17bXSKuxaHFURz3L-XnQeZuBvU5D2mUFKbTLaJ7d5264fJB9qra77WRjNjHKG9GhUreYCPetk=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "gMrkWVQuxqA",
-      "title": "هو انت مين",
+      "videoId": "53dlPVnwdC0",
+      "title": "Msh Da Elle Ekhtarto",
       "artists": [
         {
-          "name": "Angham"
+          "name": "Lege-Cy"
         },
         {
-          "name": "18M plays"
+          "name": "Msh Da Elle Ekhtarto"
+        },
+        {
+          "name": "3:03"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/elUOQSxZJJPaCj3jGNIeoomDiTqHrEreyUiJ5hwvLKZe4d9bOjyTMcMOqahz7kywzXIOgBZ_MPlonTDe=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/z2hq65-w3MSi-E7HzGekorPxLC_JzaYNQhPMX_VTk2pKO3Jmcucjv1mTgvFfJVzlFreqwF7UkmD-0nqQ=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "_MuRtKVA7w4",
-      "title": "ماتيجي اعدي عليكي",
+      "videoId": "llB5VLGzZ9Y",
+      "title": "Fel Gneena",
       "artists": [
         {
-          "name": "TUL8TE"
+          "name": "Lege-Cy"
         },
         {
-          "name": "5.8M plays"
+          "name": "Fel Gneena"
+        },
+        {
+          "name": "2:15"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/76fLJ5CHZ6-p9CX5LJ6I9rz1DwgJjOzAdbmwJzyUs95DQBeLup_cKOsiJv9ctWgZQakrtwJ7JEWENaz7Lg=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/AxXQQsn3QcC-S_Aa11YoD7dOvXMRTHbZvgdmTB-F91uN8NvcZu6DUEdRlekHlJBexQ3WMGxJFQn56i7K=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "XqoanTj5pNY",
-      "title": "Someone Like You",
+      "videoId": "IZh_9flDHVU",
+      "title": "99",
       "artists": [
         {
-          "name": "Adele"
+          "name": "Lege-Cy"
         },
         {
-          "name": "2.9B plays"
+          "name": "Placebo"
+        },
+        {
+          "name": "3:16"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/y6b4yT6dCKEVmzBvATUWodOFLYc81vwxuK0nTgE-scZ3BvyuY9639NL_UyGc6zc_ASoELG67fDUNta0=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/0s35EkvA6nYihcdD3nDOimqiGuBIyKyCHqH3BxSJxVzFleM0fkSuCKQr-QE9vIek2LKKB8eZz9_6gcNk=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "LzHQ87dXCbo",
-      "title": "بحارب فيها",
+      "videoId": "kh-vbzF_Owc",
+      "title": "Mafesh Mane3",
       "artists": [
         {
-          "name": "BigSam"
+          "name": "Lege-Cy"
         },
         {
-          "name": "29M plays"
+          "name": "Mafesh Mane3"
+        },
+        {
+          "name": "3:41"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/Jj-cEElLSrZYGDlZ3x79ZxdLKU4OMJ1miqpSbn9SyBwIy7RSVcDh9PrXGp9DrvPULv6UXDiONSX0qQQ=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/4Zd-Mmagr0cdjpz23XeGpqGgFZ10iYCE6OaBMzpxGy5dwxF4mRFUS8O_-k0Ky8-SGqhysYLwhcp2QKG5BQ=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "nDGxCrjv3KY",
-      "title": "أبيع الدنيا",
+      "videoId": "C7gszTUfzTo",
+      "title": "02:00 Am",
       "artists": [
         {
-          "name": "بوسي"
+          "name": "Lege-Cy"
         },
         {
-          "name": "14M plays"
+          "name": "02:00 Am"
+        },
+        {
+          "name": "3:22"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/I2sMaasEQmmyzjRPi5Do02MzjO9SxgJzjcfqHbFHZrDsf6SiySetVEVIUc0SV2kC6t7zJzQbD5kY6uk=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/TBmIOiv5YlulVJh92GHZWycMviGXGi3QZP_oVcLYaVc9KJ8WmzDU_7z2rKd0DaLxxE7PbHCK-N8l4CjC=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "Ks7TjGPygos",
-      "title": "اتنسينا",
+      "videoId": "6rHPabeWWWY",
+      "title": "Tharthara",
       "artists": [
         {
-          "name": "Youssif Elashry"
+          "name": "Lege-Cy"
         },
         {
-          "name": "20M plays"
+          "name": "Plan-B"
+        },
+        {
+          "name": "2:59"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/vEjuJLw_oHpeXo9mj8BTS2hagRUUH9JFJOLxwQMjCWB2uNhvS8pVaNK1TPHAs48I-OGepy7vI2UVLCdsEA=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/GojBaB-huIVSY0Ex6U4HOgji9VngseU36HwhFxak0F5DBJ7OBw9YcoFvKGQfpVfyEBjQJfnKOJDNbbR8=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "rSFya5h0gAA",
-      "title": "Ana Baba",
+      "videoId": "CvGia6WoKLQ",
+      "title": "El Ters",
       "artists": [
         {
-          "name": "Pousi"
+          "name": "Lege-Cy"
         },
         {
-          "name": "Muslim"
+          "name": "El Ters"
         },
         {
-          "name": "14M plays"
+          "name": "2:30"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/wRzTKn6kPOry-igtazJVJ-dVbtmMsqjSxvegpIHfqIQmZ9m-wJ6Bk6xzZc41JVOwfaQItrFzgnfmjYz3=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/Rg8y0FbYC2DzFKF2ff_CA5PSBNmO-SRldIIDMl89tvc9cw6gm5vzTQ52nMuaFn9AhrOKuLpdTKihyE8Y=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "R1snCTA6zk4",
-      "title": "Enta Ekhtart",
+      "videoId": "f4ti2Lw_-vE",
+      "title": "Arafa",
       "artists": [
         {
-          "name": "Tamer Ashour"
+          "name": "Lege-Cy"
         },
         {
-          "name": "105M views"
+          "name": "Arafa"
+        },
+        {
+          "name": "2:42"
         }
       ],
-      "thumbnail": "https://i.ytimg.com/vi/R1snCTA6zk4/sddefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCghqEJQEGHgg6AJIWg&rs=AMzJL3mME0mD163Tr9WWBjfe237Nu3DCNQ",
+      "thumbnail": "https://lh3.googleusercontent.com/ECOMeW7tt-PM3Xo8AFdyjpsL5R3-QJg_Saddu-NDQb7M3Apu-kqUp2aKMtjw-BVuXns3xtyoaIlLuxroXw=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "Wf7uWdpUPQ0",
-      "title": "Ana Meen",
+      "videoId": "sToOyqB_hF0",
+      "title": "A'ool Eh",
       "artists": [
         {
-          "name": "زاد"
+          "name": "Lege-Cy"
         },
         {
-          "name": "4M plays"
+          "name": "191-181"
+        },
+        {
+          "name": "5:13"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/gRyepBE43xCjx1kVA4co4luGFf0pAXEBMPYG9S5OTdMMBjnOu4SVIAkVKzsLxCIUL-CV4Kc8AswGx6Q=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/LMUKWN2I19c-SBkDT18WrEQx28XN_abRgY6GMnlt4neCKH4S7YjiRawqFumT5AJs6gDGE1EpTd2HsCNtww=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "pYWINJZUaNc",
-      "title": "Dwali",
+      "videoId": "Ag69p0jevy4",
+      "title": "Fantazia",
       "artists": [
         {
-          "name": "Al Shami"
+          "name": "Lege-Cy"
         },
         {
-          "name": "85M plays"
+          "name": "Plan-B"
+        },
+        {
+          "name": "2:34"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/Jm77bymncYpdv4HAGIHi6Ug9a-WfrTg8rPjAanbcbE04Z4UVaywYfCG4C0yuGdtLKRcRiJnxXurX2T_g=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/GojBaB-huIVSY0Ex6U4HOgji9VngseU36HwhFxak0F5DBJ7OBw9YcoFvKGQfpVfyEBjQJfnKOJDNbbR8=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "iMdZYRwZiK0",
-      "title": "KEBDA",
+      "videoId": "vPOa_kJxa4k",
+      "title": "Tany",
       "artists": [
         {
-          "name": "Afroto ft. ONUY"
+          "name": "Lege-Cy"
         },
         {
-          "name": "19M plays"
+          "name": "Tany"
+        },
+        {
+          "name": "2:47"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/A3EscWr7KXBH2W-5aLUX945oz2oeHMvTJw1JG9PYEqTzk3Pi1mN8mz1VvZe5YK0-OnjZnylzuJJ2HQE=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/z7i6iy3cpNjplxoG-uesJcu5QX7PrYFL1tF8WkAKUUuzg7ZWr8mVp0Xirc0FqJS-3kG0UTr931GuuEE=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "pfRZomobZdQ",
-      "title": "لِلّي",
+      "videoId": "Flw8KIWHwyQ",
+      "title": "Daftar",
       "artists": [
         {
-          "name": "Mohamed Mounir"
+          "name": "Lege-Cy"
         },
         {
-          "name": "74M plays"
+          "name": "Placebo"
+        },
+        {
+          "name": "3:20"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/3UD2cEJSGWPru7NSYNmWJ6dSHW97pSG76slTlHwlQk8tHsMKNr0ACUVftLiPGHp8sVSk-E1BkviYbX0NvQ=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/0s35EkvA6nYihcdD3nDOimqiGuBIyKyCHqH3BxSJxVzFleM0fkSuCKQr-QE9vIek2LKKB8eZz9_6gcNk=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "NpEqBeVL-A4",
-      "title": "مالناش كبير كبيرنا فوق",
+      "videoId": "vEsRuHjjS4c",
+      "title": "Lma Tgheeby",
       "artists": [
         {
-          "name": "Eslam Kabonga"
+          "name": "Lege-Cy"
         },
         {
-          "name": "5.9M plays"
+          "name": "Placebo"
+        },
+        {
+          "name": "3:22"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/n0dAD7Z2euDx9wp1FNvpGfZ4JdQYm8ZbSoVX_7e_HdrLxOdGgOwIPR2GsoGogL8hegL09hNHrmeYtSpx=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/0s35EkvA6nYihcdD3nDOimqiGuBIyKyCHqH3BxSJxVzFleM0fkSuCKQr-QE9vIek2LKKB8eZz9_6gcNk=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
-      "videoId": "Us3y7js9SO8",
-      "title": "Ana Mn Gherak",
+      "videoId": "4bqM0s4ZhXw",
+      "title": "Cima",
       "artists": [
         {
-          "name": "Bahaa Sultan"
+          "name": "Lege-Cy"
         },
         {
-          "name": "21M plays"
+          "name": "191-181"
+        },
+        {
+          "name": "3:52"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/EDeOoXPsaXEJ4laCKWxoYGZkNjiDo3phavU16j6xhba6hTpwQWKhKa9nC2IVX4HL4rpLt7oM4-aixhtx=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/LMUKWN2I19c-SBkDT18WrEQx28XN_abRgY6GMnlt4neCKH4S7YjiRawqFumT5AJs6gDGE1EpTd2HsCNtww=w120-h120-l90-rj",
       "isDownloaded": false
     }
   ],
   "position": 0,
-  "duration": 151.4,
-  "loading": false,
+  "duration": 0,
+  "loading": true,
   "cachingStatus": {
     "wCUhzvpeb5w": "cached",
     "Hz9dnmWh-B0": "cached",
@@ -300,6 +372,7 @@
     "ftoPDspTo1U": "cached",
     "HOh4iXgtU20": "cached",
     "3DH9FtyvYJU": "cached",
-    "7IyOfjgNbtA": "cached"
+    "7IyOfjgNbtA": "cached",
+    "OpP5MPgecc4": "error"
   }
 }

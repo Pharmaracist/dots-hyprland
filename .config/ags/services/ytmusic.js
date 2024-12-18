@@ -16,11 +16,14 @@ const AUDIO_FORMATS = {
 
 // Default options
 const DEFAULT_OPTIONS = {
-    audioQuality: 'medium',
-    queueSize: 1,
+    audioQuality: 'best',
+    queueSize: 10,
     cacheTimeout: 90,
     cacheDir: GLib.build_filenamev([GLib.get_user_cache_dir(), 'ytmusic']),
     maxCacheSize: 10240 * 10240 * 10240, // 1GB
+    maxMemoryCacheSize: 50,  // Maximum number of cached URLs
+    preloadEnabled: true,    // Enable/disable preloading
+    aggressiveCaching: true  // Cache more aggressively
 };
 
 class YouTubeMusicService extends Service {
@@ -69,7 +72,11 @@ class YouTubeMusicService extends Service {
     _mprisPlayer = null;
     _options = { ...DEFAULT_OPTIONS };
     _audioUrlCache = new Map();
+    _audioUrlCacheOrder = [];
     _trackInfoCache = new Map();
+    _trackInfoCacheOrder = [];
+    _preloadQueue = new Set();
+    _maxPreloadItems = 3;
     _cacheTimeout = 30 * 60 * 1000;
     _currentVideoId = null;
     _playlist = [];
@@ -84,6 +91,9 @@ class YouTubeMusicService extends Service {
 
     constructor() {
         super();
+        
+        // Initialize MPV socket
+        this._initMpv();
         
         // Initialize with default values
         this._currentTrack = null;
@@ -222,7 +232,13 @@ class YouTubeMusicService extends Service {
         this.notify('loading');
     }
 
-    get cachingStatus() { return Object.fromEntries(this._cachingStatus); }
+    get cachingStatus() {
+        const status = {};
+        for (const [videoId, state] of this._cachingStatus.entries()) {
+            status[videoId] = state;
+        }
+        return status;
+    }
 
     get showDownloaded() { return this._showDownloaded; }
 
@@ -248,67 +264,84 @@ class YouTubeMusicService extends Service {
             if (!videoId && !this._currentVideoId) return;
             
             if (videoId) {
-                this._currentVideoId = videoId;
+                // Kill any existing MPV instances before starting new playback
+                await this._killAllMpv();
                 
-                // Get track info first
-                const trackInfo = await this._getTrackInfo(videoId);
-                if (trackInfo) {
-                    this._currentTrack = {
-                        videoId,
-                        title: trackInfo.title,
-                        artists: trackInfo.artists,
-                        thumbnail: trackInfo.thumbnail,
-                        duration: trackInfo.duration
-                    };
-                    this.notify('current-track');
-                }
+                this._currentVideoId = videoId;
+                this.loading = true;
+                
+                try {
+                    // Load track info and audio URL in parallel
+                    const [trackInfo, audioUrl] = await Promise.all([
+                        this._getTrackInfo(videoId),
+                        this._getAudioUrl(videoId)
+                    ]);
 
-                // Get audio URL
-                const audioUrl = await this._getAudioUrl(videoId);
-                if (!audioUrl) {
-                    throw new Error('Failed to get audio URL');
-                }
-
-                // Start playback with mpv
-                await Utils.execAsync([
-                    'mpv',
-                    '--no-video',
-                    '--no-terminal',
-                    '--force-window=no',
-                    '--ytdl=no',
-                    '--no-resume-playback',
-                    '--audio-display=no',
-                    audioUrl
-                ]);
-
-                this._playing = true;
-                this.notify('playing');
-
-                // Set metadata for MPRIS
-                if (this._currentTrack) {
-                    const metadata = {
-                        'xesam:title': this._currentTrack.title,
-                        'xesam:artist': [this._currentTrack.artists[0].name],
-                        'mpris:artUrl': this._currentTrack.thumbnail,
-                        'mpris:trackid': `/org/mpris/MediaPlayer2/Track/${videoId}`,
-                        'mpris:length': this._duration * 1000000
-                    };
-                    
-                    // Update MPRIS metadata
-                    if (this._mprisPlayer) {
-                        this._mprisPlayer.metadata = metadata;
+                    if (trackInfo) {
+                        this._currentTrack = {
+                            videoId,
+                            title: trackInfo.title,
+                            artists: trackInfo.artists,
+                            thumbnail: trackInfo.thumbnail,
+                            duration: trackInfo.duration
+                        };
+                        this.notify('current-track');
                     }
+
+                    if (!audioUrl) {
+                        throw new Error('Failed to get audio URL');
+                    }
+
+                    // Ensure socket is ready
+                    await this._initMpv();
+
+                    // Start playback
+                    const mpvProcess = await Utils.execAsync([
+                        'mpv',
+                        '--no-video',
+                        '--no-terminal',
+                        '--force-window=no',
+                        '--ytdl=no',
+                        '--no-resume-playback',
+                        '--audio-display=no',
+                        '--input-ipc-server=/tmp/mpvsocket',
+                        '--pause=no', // Start playing immediately
+                        audioUrl
+                    ]);
+
+                    this._playing = true;
+                    this.notify('playing');
+
+                    // Preload next track if available
+                    if (this._playlist.length > 0) {
+                        const nextIndex = (this._currentIndex + 1) % this._playlist.length;
+                        const nextTrack = this._playlist[nextIndex];
+                        if (nextTrack) {
+                            this._preloadTrack(nextTrack.videoId);
+                        }
+                    }
+
+                    // Start position updates
+                    this._updatePlayingState();
+                } finally {
+                    this.loading = false;
                 }
             } else {
                 // Resume playback
-                await this._setMpvProperty('pause', false);
-                this._playing = true;
-                this.notify('playing');
+                const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
+                if (mpvRunning) {
+                    await this._sendMpvCommand(['set_property', 'pause', false]);
+                    this._playing = true;
+                    this.notify('playing');
+                } else {
+                    // MPV not running, restart playback
+                    await this.play(this._currentVideoId);
+                }
             }
         } catch (e) {
-            logError('Error playing track:', e);
-            this._playing = false;
-            this.notify('playing');
+            console.error('Error playing track:', e);
+            this._notifyError('Failed to play track');
+            this.loading = false;
         }
     }
 
@@ -328,10 +361,35 @@ class YouTubeMusicService extends Service {
     }
 
     async togglePlay() {
-        if (this._playing) {
-            await this.pause();
-        } else {
-            await this.play();
+        try {
+            if (!this._currentVideoId) return;
+
+            // Check if MPV is actually running
+            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
+            if (!mpvRunning) {
+                // MPV not running, restart playback
+                await this.play(this._currentVideoId);
+                return;
+            }
+
+            // Toggle pause state
+            if (this._playing) {
+                await this._sendMpvCommand(['set_property', 'pause', true]);
+                this._playing = false;
+            } else {
+                await this._sendMpvCommand(['set_property', 'pause', false]);
+                this._playing = true;
+            }
+            
+            this.notify('playing');
+        } catch (e) {
+            console.error('Error toggling play state:', e);
+            this._notifyError('Failed to toggle playback');
+            
+            // Reset state if something went wrong
+            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
+            this._playing = mpvRunning !== null;
+            this.notify('playing');
         }
     }
 
@@ -469,18 +527,27 @@ class YouTubeMusicService extends Service {
     }
 
     async _getMpvProperty(property) {
-        try {
-            const result = await Utils.execAsync(['sh', '-c', `echo '{ "command": ["get_property", "${property}"] }' | socat - /tmp/mpvsocket`]);
-            return JSON.parse(result).data;
-        } catch (e) {
-            return null;
+        const response = await this._sendMpvCommand(['get_property', property]);
+        if (response?.error === 'success' && response.data !== undefined) {
+            return response.data;
         }
+        return null;
     }
 
     async _sendMpvCommand(command) {
         try {
-            const cmdJson = JSON.stringify({ command });
-            await Utils.execAsync(['sh', '-c', `echo '${cmdJson}' | socat - /tmp/mpvsocket`]);
+            const cmdJson = JSON.stringify({
+                command: command,
+                request_id: Date.now()
+            });
+            
+            // Write command to socket
+            await Utils.execAsync([
+                'socat',
+                '-',
+                'UNIX-CONNECT:/tmp/mpvsocket'
+            ], cmdJson);
+
             return true;
         } catch (e) {
             console.error('Error sending MPV command:', e);
@@ -488,8 +555,58 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _updatePlayingState() {
+    async _initMpv() {
+        // Create MPV socket if it doesn't exist
+        const socketPath = '/tmp/mpvsocket';
+        if (!GLib.file_test(socketPath, GLib.FileTest.EXISTS)) {
+            try {
+                await Utils.execAsync(['touch', socketPath]);
+            } catch (e) {
+                console.error('Error creating MPV socket:', e);
+            }
+        }
+    }
+
+    async pause() {
         try {
+            if (!this._currentVideoId || !this._playing) return;
+            
+            await this._sendMpvCommand(['set_property', 'pause', true]);
+            this._playing = false;
+            this.notify('playing');
+        } catch (e) {
+            console.error('Error pausing:', e);
+            this._notifyError('Failed to pause');
+        }
+    }
+
+    async stop() {
+        try {
+            if (!this._currentVideoId) return;
+            
+            await this._sendMpvCommand(['stop']);
+            this._playing = false;
+            this._position = 0;
+            this.notify('playing');
+            this.notify('position');
+        } catch (e) {
+            console.error('Error stopping:', e);
+            this._notifyError('Failed to stop');
+        }
+    }
+
+    async _updatePlayingState() {
+        if (!this._currentVideoId) return;
+
+        try {
+            // Check if MPV is running first
+            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
+            if (!mpvRunning) {
+                this._playing = false;
+                this.notify('playing');
+                return;
+            }
+
             const [pause, position, duration, volume] = await Promise.all([
                 this._getMpvProperty('pause'),
                 this._getMpvProperty('time-pos'),
@@ -497,121 +614,40 @@ class YouTubeMusicService extends Service {
                 this._getMpvProperty('volume')
             ]);
 
-            // Update playing state based on MPV's pause property
-            if (pause !== null) {
+            // Update playing state
+            if (pause !== null && this._playing !== !pause) {
                 this._playing = !pause;
                 this.notify('playing');
             }
 
-            // Update position and duration
-            if (position !== null) {
+            // Update position
+            if (position !== null && Math.abs(this._position - position) > 0.5) {
                 this._position = position;
                 this.notify('position');
             }
-            if (duration !== null) {
+
+            // Update duration
+            if (duration !== null && Math.abs(this._duration - duration) > 0.5) {
                 this._duration = duration;
                 this.notify('duration');
             }
-            if (volume !== null) {
-                this._volume = volume;
+
+            // Update volume
+            if (volume !== null && Math.abs(this._volume - (volume / 100)) > 0.01) {
+                this._volume = volume / 100;
                 this.notify('volume');
             }
 
-            // Handle end of track
-            if (position !== null && duration !== null && position >= duration - 0.5) {
-                if (this._repeat) {
-                    await this.seek(0);
-                    if (!this._playing) {
-                        await this._setMpvProperty('pause', false);
-                    }
-                } else {
-                    await this.next();
-                }
-            }
-
-            return GLib.SOURCE_CONTINUE;
+            return true;
         } catch (e) {
-            logError('Error updating playing state:', e);
-            // If we get an error, assume MPV has closed
-            this._playing = false;
-            this.notify('playing');
-            if (this._updateInterval) {
-                GLib.source_remove(this._updateInterval);
-                this._updateInterval = null;
-            }
-            return GLib.SOURCE_REMOVE;
+            console.error('Error updating playing state:', e);
+            return false;
         }
     }
 
-    async _updateTrackFromMpris() {
-        if (!this._mprisPlayer) return;
-
-        try {
-            // Get metadata from MPRIS
-            const metadata = this._mprisPlayer.metadata;
-            if (!metadata) return;
-
-            // Extract track info
-            const title = metadata['xesam:title'] || '';
-            const artist = metadata['xesam:artist']?.[0] || '';
-            const artUrl = metadata['mpris:artUrl'] || '';
-            const trackid = metadata['mpris:trackid'] || '';
-            const videoId = trackid.split('/').pop() || this._currentVideoId;
-
-            // Try to get thumbnail from cache if not in MPRIS
-            let thumbnail = artUrl;
-            if (!thumbnail && videoId) {
-                const trackInfo = await this._getTrackInfo(videoId);
-                if (trackInfo?.thumbnail) {
-                    thumbnail = trackInfo.thumbnail;
-                }
-            }
-
-            // Update current track
-            const trackUpdate = {
-                title,
-                artists: [{ name: artist }],
-                thumbnail,
-                videoId,
-            };
-
-            // Always update thumbnail if it changes
-            const thumbnailChanged = !this._currentTrack?.thumbnail && thumbnail;
-            
-            // Check for other changes
-            const hasChanges = !this._currentTrack ||
-                this._currentTrack.title !== trackUpdate.title ||
-                this._currentTrack.artists[0].name !== trackUpdate.artists[0].name ||
-                thumbnailChanged;
-
-            if (hasChanges || thumbnailChanged) {
-                this._currentTrack = trackUpdate;
-                this.notify('current-track');
-
-                // Show notification for track change
-                if (hasChanges) {
-                    this._showNotification(
-                        'Now Playing',
-                        `${title} - ${artist}`
-                    );
-                }
-            }
-
-            // Update position and duration
-            const length = metadata['mpris:length'] || 0;
-            if (length > 0) {
-                this._duration = Math.floor(length / 1000000);
-                this.notify('duration');
-            }
-
-            const position = this._mprisPlayer.position || 0;
-            if (position > 0) {
-                this._position = Math.floor(position / 1000000);
-                this.notify('position');
-            }
-        } catch (e) {
-            logError('Error updating track from MPRIS:', e);
-        }
+    async _setMpvProperty(property, value) {
+        const response = await this._sendMpvCommand(['set_property', property, value]);
+        return response?.error === 'success';
     }
 
     // Property getters and setters
@@ -738,52 +774,179 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _updateDownloadedTracks() {
-        const cacheDir = this._getOption('cacheDir');
-        const files = await Utils.execAsync(['find', cacheDir, '-name', '*.opus']);
+    async _preloadTrack(videoId) {
+        if (!videoId || this._preloadQueue.has(videoId) || !this._getOption('preloadEnabled')) return;
         
-        if (!files) {
-            this._downloadedTracks = [];
-            return;
+        // Limit preload queue size
+        if (this._preloadQueue.size >= this._maxPreloadItems) return;
+        
+        this._preloadQueue.add(videoId);
+        
+        try {
+            // Preload track info and audio URL in parallel
+            await Promise.all([
+                this._getTrackInfo(videoId),
+                this._getAudioUrl(videoId)
+            ]);
+        } catch (e) {
+            console.error('Error preloading track:', e);
+        } finally {
+            this._preloadQueue.delete(videoId);
+        }
+    }
+
+    _updateAudioUrlCache(videoId, url) {
+        // Remove oldest entry if cache is full
+        if (this._audioUrlCache.size >= this._getOption('maxMemoryCacheSize')) {
+            const oldest = this._audioUrlCacheOrder.shift();
+            this._audioUrlCache.delete(oldest);
+        }
+        
+        // Add new entry
+        this._audioUrlCache.set(videoId, {
+            data: url,
+            timestamp: Date.now()
+        });
+        this._audioUrlCacheOrder.push(videoId);
+    }
+
+    async _getTrackInfo(videoId) {
+        // Check memory cache first
+        const cached = this._trackInfoCache.get(videoId);
+        if (cached && Date.now() - cached.timestamp < this._cacheTimeout) {
+            return cached.data;
         }
 
-        const tracks = [];
-        for (const file of files.split('\n').filter(Boolean)) {
-            const videoId = GLib.path_get_basename(file).replace('.opus', '');
-            const metadataFile = GLib.build_filenamev([cacheDir, `${videoId}.json`]);
+        const info = await YTMusicAPI.getTrackInfo(videoId);
+        if (info) {
+            // Update cache
+            if (this._trackInfoCache.size >= this._getOption('maxMemoryCacheSize')) {
+                const oldest = this._trackInfoCacheOrder.shift();
+                this._trackInfoCache.delete(oldest);
+            }
+            this._trackInfoCache.set(videoId, {
+                data: info,
+                timestamp: Date.now()
+            });
+            this._trackInfoCacheOrder.push(videoId);
+        }
+        return info;
+    }
+
+    async _getAudioUrl(videoId) {
+        try {
+            // Check if file is already cached
+            const cachedFile = GLib.build_filenamev([this._getOption('cacheDir'), `${videoId}.opus`]);
+            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+                return `file://${cachedFile}`;
+            }
+
+            // Check memory cache for URL
+            const cached = this._audioUrlCache.get(videoId);
+            if (cached) {
+                const { data, timestamp } = cached;
+                if (Date.now() - timestamp < this._cacheTimeout) {
+                    return data;
+                }
+                this._audioUrlCache.delete(videoId);
+                const index = this._audioUrlCacheOrder.indexOf(videoId);
+                if (index !== -1) this._audioUrlCacheOrder.splice(index, 1);
+            }
+
+            const url = `https://music.youtube.com/watch?v=${videoId}`;
             
-            try {
-                let trackInfo;
-                if (GLib.file_test(metadataFile, GLib.FileTest.EXISTS)) {
-                    // Read from cached metadata
-                    const [ok, contents] = GLib.file_get_contents(metadataFile);
-                    if (ok) {
-                        trackInfo = JSON.parse(new TextDecoder().decode(contents));
-                    }
-                } else {
-                    // Fetch and cache metadata
-                    trackInfo = await this._getTrackInfo(videoId);
-                    if (trackInfo) {
-                        GLib.file_set_contents(
-                            metadataFile,
-                            JSON.stringify(trackInfo, null, 2)
-                        );
-                    }
+            // Get audio format based on quality setting
+            const quality = this._getOption('audioQuality');
+            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
+            
+            if (this._getOption('aggressiveCaching')) {
+                // Update status and notify about caching start
+                this._updateCachingStatus(videoId, 'caching');
+                const trackInfo = await this._getTrackInfo(videoId);
+                if (trackInfo) {
+                    this._showNotification(
+                        'Caching Song',
+                        `Starting to cache: ${trackInfo.title}`
+                    );
                 }
                 
-                if (trackInfo) {
-                    tracks.push({
-                        ...trackInfo,
-                        isDownloaded: true,
-                    });
+                // Download the file to cache
+                try {
+                    // Download the file to cache with proper encoding
+                    const tempFile = `${cachedFile}.temp`;
+                    await Utils.execAsync([
+                        'yt-dlp',
+                        '--format', audioFormat,
+                        '--extract-audio',
+                        '--audio-format', 'opus',
+                        '--audio-quality', '0',
+                        '--output', tempFile,
+                        '--no-playlist',
+                        '--force-encoding', 'UTF-8',
+                        '--no-check-certificates',
+                        '--no-warnings',
+                        '--quiet',
+                        '--no-progress',
+                        url
+                    ]);
+                    
+                    if (GLib.file_test(tempFile, GLib.FileTest.EXISTS)) {
+                        await Utils.execAsync(['mv', tempFile, cachedFile]);
+                        this._updateCachingStatus(videoId, 'cached');
+                        if (trackInfo) {
+                            this._showNotification(
+                                'Caching Complete',
+                                `Successfully cached: ${trackInfo.title}`
+                            );
+                        }
+                        return `file://${cachedFile}`;
+                    }
+                } catch (e) {
+                    console.error('Caching error:', e);
+                    this._updateCachingStatus(videoId, 'error');
+                    // Clean up temp file if it exists
+                    const tempFile = `${cachedFile}.temp`;
+                    if (GLib.file_test(tempFile, GLib.FileTest.EXISTS)) {
+                        try {
+                            await Utils.execAsync(['rm', tempFile]);
+                        } catch (error) {
+                            console.error('Failed to cleanup temp file:', error);
+                        }
+                    }
                 }
-            } catch (error) {
-                logError(error);
             }
+            
+            // Get streaming URL as fallback
+            const result = await Utils.execAsync([
+                'yt-dlp',
+                '--format', audioFormat,
+                '--get-url',
+                '--no-playlist',
+                '--no-check-certificates',
+                '--no-warnings',
+                '--quiet',
+                '--no-progress',
+                url
+            ]);
+            
+            if (!result) {
+                throw new Error('Failed to get audio URL');
+            }
+            
+            const audioUrl = result.trim();
+            this._updateAudioUrlCache(videoId, audioUrl);
+            
+            return audioUrl;
+        } catch (error) {
+            console.error('Error getting audio URL:', error);
+            this._updateCachingStatus(videoId, 'error');
+            this._showNotification(
+                'Download Failed',
+                'Failed to get audio URL. Please try again.',
+                'critical'
+            );
+            return null;
         }
-
-        this._downloadedTracks = tracks;
-        this.notify('downloaded-tracks');
     }
 
     async cacheTrack(videoId) {
@@ -792,6 +955,7 @@ class YouTubeMusicService extends Service {
         const cacheDir = this._getOption('cacheDir');
         const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
         const metadataFile = GLib.build_filenamev([cacheDir, `${videoId}.json`]);
+        const tempFile = `${cachedFile}.temp`;
 
         // If already cached, do nothing
         if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
@@ -799,62 +963,86 @@ class YouTubeMusicService extends Service {
             return;
         }
 
+        // Set initial status
+        this._updateCachingStatus(videoId, 'caching');
+
         try {
             // Get track info first for notifications
             const trackInfo = await this._getTrackInfo(videoId);
+            if (!trackInfo) {
+                throw new Error('Failed to get track info');
+            }
+
             const url = `https://music.youtube.com/watch?v=${videoId}`;
             
-            // Update status and notify about caching start
-            this._updateCachingStatus(videoId, 'caching');
+            // Show caching start notification
             this._showNotification(
                 'Caching Song',
-                `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
+                `Starting to cache: ${trackInfo.title}`
             );
 
-            const quality = this._getOption('audioQuality');
-            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
+            // Clean up any existing temp file
+            if (GLib.file_test(tempFile, GLib.FileTest.EXISTS)) {
+                await Utils.execAsync(['rm', tempFile]);
+            }
             
             // Download the file to cache with proper encoding
             await Utils.execAsync([
                 'yt-dlp',
-                '--format', audioFormat,
+                '--format', 'bestaudio[acodec=opus]/bestaudio',
                 '--extract-audio',
                 '--audio-format', 'opus',
                 '--audio-quality', '0',
-                '--output', cachedFile,
+                '--output', tempFile,
                 '--no-playlist',
                 '--force-encoding', 'UTF-8',
+                '--no-check-certificates',
+                '--no-warnings',
                 url
             ]);
             
-            // Cache metadata separately
-            if (trackInfo) {
-                GLib.file_set_contents(
-                    metadataFile,
-                    JSON.stringify(trackInfo, null, 2)
-                );
-            }
-            
-            // Verify file was downloaded
-            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
+            // Verify temp file exists and move it to final location
+            if (GLib.file_test(tempFile, GLib.FileTest.EXISTS)) {
+                await Utils.execAsync(['mv', tempFile, cachedFile]);
+                
+                // Cache metadata separately
+                try {
+                    GLib.file_set_contents(
+                        metadataFile,
+                        JSON.stringify(trackInfo, null, 2)
+                    );
+                } catch (error) {
+                    console.error('Failed to save metadata:', error);
+                }
+                
                 this._updateCachingStatus(videoId, 'cached');
                 this._showNotification(
                     'Caching Complete',
-                    `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
+                    `Successfully cached: ${trackInfo.title}`
                 );
                 
                 // Update downloaded tracks list
                 await this._updateDownloadedTracks();
             } else {
-                throw new Error('File not found after download');
+                throw new Error('Downloaded file not found');
             }
-        } catch (e) {
+        } catch (error) {
+            console.error('Caching error:', error);
             this._updateCachingStatus(videoId, 'error');
             this._showNotification(
                 'Caching Failed',
-                `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
+                `Failed to cache song: ${error.message}`,
                 'critical'
             );
+            
+            // Cleanup any temporary files
+            if (GLib.file_test(tempFile, GLib.FileTest.EXISTS)) {
+                try {
+                    await Utils.execAsync(['rm', tempFile]);
+                } catch (e) {
+                    console.error('Failed to cleanup temp file:', e);
+                }
+            }
         }
     }
 
@@ -888,103 +1076,7 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _getAudioUrl(videoId) {
-        try {
-            if (!videoId) return null;
-
-            const cacheDir = this._getOption('cacheDir');
-            const cachedFile = GLib.build_filenamev([cacheDir, `${videoId}.opus`]);
-
-            // Check if file exists in cache
-            if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                this._updateCachingStatus(videoId, 'cached');
-                return `file://${cachedFile}`;
-            }
-
-            // Check memory cache for URL
-            const cached = this._audioUrlCache.get(videoId);
-            if (cached) {
-                const { data, timestamp } = cached;
-                if (Date.now() - timestamp < this._cacheTimeout) {
-                    return data;
-                }
-                this._audioUrlCache.delete(videoId);
-            }
-
-            const url = `https://music.youtube.com/watch?v=${videoId}`;
-            
-            // Get audio format based on quality setting
-            const quality = this._getOption('audioQuality');
-            const audioFormat = AUDIO_FORMATS[quality] || AUDIO_FORMATS['high'];
-            
-            // Update status and notify about caching start
-            this._updateCachingStatus(videoId, 'caching');
-            const trackInfo = await this._getTrackInfo(videoId);
-            this._showNotification(
-                'Caching Song',
-                `Starting to cache: ${trackInfo?.title || 'Unknown Song'}`
-            );
-            
-            // Download the file to cache
-            try {
-                await Utils.execAsync([
-                    'yt-dlp',
-                    '--format', audioFormat,
-                    '--extract-audio',
-                    '--audio-format', 'opus',
-                    '--audio-quality', '0',
-                    '--output', cachedFile,
-                    '--no-playlist',
-                    '--force-encoding', 'UTF-8',
-                    url
-                ]);
-                
-                // Verify file was downloaded
-                if (GLib.file_test(cachedFile, GLib.FileTest.EXISTS)) {
-                    this._updateCachingStatus(videoId, 'cached');
-                    this._showNotification(
-                        'Caching Complete',
-                        `Successfully cached: ${trackInfo?.title || 'Unknown Song'}`
-                    );
-                    return `file://${cachedFile}`;
-                }
-            } catch (e) {
-                this._updateCachingStatus(videoId, 'error');
-                this._showNotification(
-                    'Caching Failed',
-                    `Failed to cache: ${trackInfo?.title || 'Unknown Song'}`,
-                    'critical'
-                );
-            }
-            
-            // Fallback to streaming URL if download failed
-            const result = await Utils.execAsync([
-                'yt-dlp',
-                '--format', audioFormat,
-                '--get-url',
-                '--no-playlist',
-                url
-            ]);
-            
-            if (!result) return null;
-            
-            const audioUrl = result.trim();
-            
-            // Cache the URL
-            this._audioUrlCache.set(videoId, {
-                data: audioUrl,
-                timestamp: Date.now()
-            });
-            
-            return audioUrl;
-        } catch (error) {
-            logError(error);
-            this._updateCachingStatus(videoId, 'error');
-            return null;
-        }
-    }
-
-    _loadState() {
+    async _loadState() {
         try {
             if (GLib.file_test(this._stateFile, GLib.FileTest.EXISTS)) {
                 const [ok, contents] = GLib.file_get_contents(this._stateFile);
@@ -1067,45 +1159,7 @@ class YouTubeMusicService extends Service {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    async pause() {
-        try {
-            await this._setMpvProperty('pause', true);
-            this._playing = false;
-            this.notify('playing');
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
-    async previous() {
-        try {
-            await Utils.execAsync(['bash', '-c', 'echo \'{ "command": ["playlist-prev"] }\' | socat - /tmp/mpv-socket']);
-            await this._updatePlayingState();
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
-    async next() {
-        try {
-            await Utils.execAsync(['bash', '-c', 'echo \'{ "command": ["playlist-next"] }\' | socat - /tmp/mpv-socket']);
-            await this._updatePlayingState();
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
-    async setVolume(volume) {
-        try {
-            await this._setMpvProperty('volume', volume);
-            this._volume = volume;
-            this.notify('volume');
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
-    _updateTrackFromMpris() {
+    async _updateTrackFromMpris() {
         if (!this._mprisPlayer) return;
 
         try {
@@ -1114,25 +1168,49 @@ class YouTubeMusicService extends Service {
             if (!metadata) return;
 
             // Extract track info
-            const title = metadata['xesam:title'] || '';
+            const title = metadata['xesam:title']?.toString() || '';
             const artist = metadata['xesam:artist']?.[0] || '';
-            const artUrl = metadata['mpris:artUrl'] || '';
-            const trackid = metadata['mpris:trackid'] || '';
+            const artUrl = metadata['mpris:artUrl']?.toString() || '';
+            const trackid = metadata['mpris:trackid']?.toString() || '';
+            const videoId = trackid.split('/').pop() || this._currentVideoId;
+
+            // Try to get thumbnail from cache if not in MPRIS
+            let thumbnail = artUrl;
+            if (!thumbnail && videoId) {
+                const trackInfo = await this._getTrackInfo(videoId);
+                if (trackInfo?.thumbnail) {
+                    thumbnail = trackInfo.thumbnail;
+                }
+            }
 
             // Update current track
-            if (this._currentTrack) {
-                this._currentTrack.title = title;
-                this._currentTrack.artists = [{ name: artist }];
-                this._currentTrack.thumbnail = artUrl;
+            const trackUpdate = {
+                title,
+                artists: [{ name: artist }],
+                thumbnail,
+                videoId,
+            };
+
+            // Always update thumbnail if it changes
+            const thumbnailChanged = !this._currentTrack?.thumbnail && thumbnail;
+            
+            // Check for other changes
+            const hasChanges = !this._currentTrack ||
+                this._currentTrack.title !== trackUpdate.title ||
+                this._currentTrack.artists[0].name !== trackUpdate.artists[0].name ||
+                thumbnailChanged;
+
+            if (hasChanges || thumbnailChanged) {
+                this._currentTrack = trackUpdate;
                 this.notify('current-track');
-            } else {
-                this._currentTrack = {
-                    title,
-                    artists: [{ name: artist }],
-                    thumbnail: artUrl,
-                    videoId: trackid.split('/').pop()
-                };
-                this.notify('current-track');
+
+                // Show notification for track change
+                if (hasChanges) {
+                    this._showNotification(
+                        'Now Playing',
+                        `${title} - ${artist}`
+                    );
+                }
             }
 
             // Update position and duration
@@ -1152,47 +1230,28 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _getMpvProperty(property) {
+    async _showNotification(summary, body = '', urgency = 'normal') {
         try {
-            const result = await Utils.execAsync(['bash', '-c', `
-                echo '{ "command": ["get_property", "${property}"] }' | socat - /tmp/mpv-socket
-            `]);
-            return JSON.parse(result)?.data;
-        } catch (e) {
-            // Removed console logging
-            return null;
+            Utils.execAsync([
+                'notify-send',
+                '--app-name=YouTube Music',
+                '--urgency=' + urgency,
+                '--icon=music',
+                summary,
+                body || ''
+            ]).catch(error => {
+                console.error('Failed to show notification:', error);
+            });
+        } catch (error) {
+            console.error('Error showing notification:', error);
         }
-    }
-
-    async _setMpvProperty(property, value) {
-        try {
-            await Utils.execAsync(['bash', '-c', `
-                echo '{ "command": ["set_property", "${property}", ${JSON.stringify(value)}] }' | socat - /tmp/mpv-socket
-            `]);
-            return true;
-        } catch (e) {
-            // Removed console logging
-            return false;
-        }
-    }
-
-    // MPV control methods
-    _togglePlayPause() {
-        Utils.execAsync(['bash', '-c', 'echo "cycle pause" | socat - /tmp/mpv-socket']);
-    }
-
-    togglePlay() {
-        this._togglePlayPause();
-        this.playing = !this.playing;
-    }
-
-    _showNotification(summary, body = '', urgency = 'normal') {
-        Notifications.Notify('YTMusic', 0, 'music', summary, body, [], {}, 3000);
     }
 
     _updateCachingStatus(videoId, status) {
+        if (!videoId) return;
         this._cachingStatus.set(videoId, status);
         this.notify('caching-status');
+        this.emit('changed');
     }
 
     _initDownloadedTracks() {
@@ -1211,6 +1270,55 @@ class YouTubeMusicService extends Service {
                 }
             });
         });
+    }
+
+    async _updateDownloadedTracks() {
+        const cacheDir = this._getOption('cacheDir');
+        const files = await Utils.execAsync(['find', cacheDir, '-name', '*.opus']);
+        
+        if (!files) {
+            this._downloadedTracks = [];
+            return;
+        }
+
+        const tracks = [];
+        for (const file of files.split('\n').filter(Boolean)) {
+            const videoId = GLib.path_get_basename(file).replace('.opus', '');
+            const metadataFile = GLib.build_filenamev([cacheDir, `${videoId}.json`]);
+            
+            try {
+                let trackInfo;
+                if (GLib.file_test(metadataFile, GLib.FileTest.EXISTS)) {
+                    // Read from cached metadata
+                    const [ok, contents] = GLib.file_get_contents(metadataFile);
+                    if (ok) {
+                        trackInfo = JSON.parse(new TextDecoder().decode(contents));
+                    }
+                } else {
+                    // Fetch and cache metadata
+                    trackInfo = await this._getTrackInfo(videoId);
+                    if (trackInfo) {
+                        GLib.file_set_contents(
+                            metadataFile,
+                            JSON.stringify(trackInfo, null, 2)
+                        );
+                    }
+                }
+                
+                if (trackInfo) {
+                    tracks.push({
+                        ...trackInfo,
+                        isDownloaded: true,
+                    });
+                }
+            } catch (error) {
+                console.error('Error processing track:', error);
+            }
+        }
+
+        this._downloadedTracks = tracks;
+        this.emit('changed');
+        this.notify('downloaded-tracks');
     }
 
     _cleanupCache() {
@@ -1350,6 +1458,48 @@ class YouTubeMusicService extends Service {
             if (now - value.timestamp > this._cacheTimeout * 1000) {
                 this._cache.delete(key);
             }
+        }
+    }
+
+    async _killAllMpv() {
+        try {
+            // Kill all mpv instances
+            await Utils.execAsync(['pkill', '-9', 'mpv']).catch(() => {});
+            // Remove the socket file
+            await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
+            // Small delay to ensure cleanup
+            await new Promise(resolve => GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            }));
+        } catch (e) {
+            // Ignore errors if no mpv instances exist
+            console.debug('No MPV instances to kill');
+        }
+    }
+
+    async stopAllInstances() {
+        try {
+            // Kill all mpv instances
+            await Utils.execAsync(['pkill', '-9', 'mpv']).catch(() => {});
+            // Remove the socket file
+            await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
+            // Reset state
+            this._currentTrack = null;
+            this._currentVideoId = null;
+            this._playing = false;
+            this._position = 0;
+            this._duration = 0;
+            this._mprisPlayer = null;
+            // Notify changes
+            this.notify('current-track');
+            this.notify('playing');
+            this.notify('position');
+            this.notify('duration');
+            this._showNotification('YouTube Music', 'All instances stopped');
+        } catch (error) {
+            console.error('Error stopping instances:', error);
+            this._showNotification('Error', 'Failed to stop all instances', 'critical');
         }
     }
 }

@@ -9,7 +9,7 @@ import { TodoWidget } from "./todolist.js";
 import { TimerWidget } from "./timers.js";
 import { PrayerTimesWidget } from "./prayertimes.js";
 import { getCalendarLayout } from "./calendar_layout.js";
-import Media from "../media/media.js";
+import Media from "./media.js";
 
 // Кэшируем часто используемые значения
 let calendarJson = getCalendarLayout(undefined, true);
