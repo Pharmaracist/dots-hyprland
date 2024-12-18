@@ -72,7 +72,22 @@ export default () => Box({
     className: 'sideright-music',
     setup: self => {
         // Update cover and visibility
-        const updateCover = () => {
+        const updateCover = (box, coverPath) => {
+            if (!coverPath) {
+                box.css = 'background-image: none;';
+                return;
+            }
+
+            try {
+                box.css = `background-image: url("${coverPath}");`;
+            } catch (error) {
+                console.error('Error updating cover:', error);
+                box.css = 'background-image: none;';
+            }
+        };
+
+        // Use polling instead of hooks for more reliable updates
+        self.poll(1000, () => {
             const player = getPlayer();
             if (!player) {
                 self.visible = false;
@@ -83,23 +98,8 @@ export default () => Box({
 
             // Update cover art
             const coverPath = player.coverPath;
-            if (coverPath) {
-                const styleContext = self.get_style_context();
-                const currentCoverPath = styleContext.get_property('background-image', Gtk.StateFlags.NORMAL);
-                if (!currentCoverPath || !currentCoverPath.includes(coverPath)) {
-                    self.css = `
-                        background-image: url('${coverPath}');
-                        background-size: cover;
-                        background-position: center;
-                    `;
-                }
-            } else {
-                self.css = '';
-            }
-        };
-
-        // Use polling instead of hooks for more reliable updates
-        self.poll(1000, updateCover);
+            updateCover(self, coverPath);
+        });
     },
     vertical: false,
     child: Box({

@@ -80,11 +80,11 @@ const NotificationIcon = (notifObject) => {
     });
 };
 
-export default ({
-    notifObject,
-    isPopup = false,
-    props = {},
-} = {}) => {
+export default ({ notifObject, isPopup = false, props = {} } = {}) => {
+    if (!notifObject) {
+        console.error('Notification object is undefined');
+        return null;
+    }
     const popupTimeout = notifObject.timeout || (notifObject.urgency == 'critical' ? 8000 : 3000);
     const command = (isPopup ?
         () => notifObject.dismiss() :

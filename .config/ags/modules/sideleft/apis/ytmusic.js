@@ -12,6 +12,18 @@ import GLib from 'gi://GLib';
 import Audio from 'resource:///com/github/Aylur/ags/service/audio.js';
 
 const { Box, Button, Icon, Label, Revealer, Scrollable, Entry, Slider } = Widget;
+const { execAsync } = Utils;
+
+const CACHE_DIR = GLib.build_filenamev([GLib.get_user_cache_dir(), 'media-controls']);
+
+// Ensure cache directory exists
+if (!GLib.file_test(CACHE_DIR, GLib.FileTest.EXISTS)) {
+    GLib.mkdir_with_parents(CACHE_DIR, 0o755);
+}
+
+// Styles
+const buttonStyle = 'padding: 0.5em; margin: 0.3em;';
+const sliderStyle = 'margin: 0.5em;';
 
 // Volume Control with Audio Service
 const VolumeControl = () => Box({
@@ -335,6 +347,13 @@ export const MediaControls = () => Box({
     ],
 });
 
+const formatTime = (seconds) => {
+    if (isNaN(seconds)) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
 // Search Results
 const SearchResults = () => Box({
     className: 'ytm-results',
@@ -505,5 +524,66 @@ export const ytmusicTabIcon = Box({
 // Add styles
 
 App.connect('config-parsed', () => {
-    App.stylesheet += css;
+    App.stylesheet += `
+    .ytm-controls {
+        padding: 0.5em;
+    }
+    .ytm-controls-box {
+        padding: 0.5em;
+    }
+    .ytm-main-controls {
+        padding: 0.5em;
+    }
+    .ytm-playback-controls {
+        padding: 0.5em;
+    }
+    .ytm-toggle-view-button {
+        padding: 0.5em;
+    }
+    .ytm-volume-control {
+        padding: 0.5em;
+    }
+    .ytm-volume-icon {
+        padding: 0.5em;
+    }
+    .ytm-seek-slider {
+        padding: 0.5em;
+    }
+    .ytm-mode-controls {
+        padding: 0.5em;
+    }
+    .ytm-now-playing {
+        padding: 0.5em;
+    }
+    .ytm-now-playing-info {
+        padding: 0.5em;
+    }
+    .ytm-now-playing-title {
+        padding: 0.5em;
+    }
+    .ytm-now-playing-artist {
+        padding: 0.5em;
+    }
+    .ytm-results {
+        padding: 0.5em;
+    }
+    .track-item {
+        padding: 0.5em;
+    }
+    .track-content {
+        padding: 0.5em;
+    }
+    .track-item-thumb {
+        padding: 0.5em;
+    }
+    .track-item-info {
+        padding: 0.5em;
+    }
+    .track-item-title {
+        padding: 0.5em;
+    }
+    .track-item-artist {
+        padding: 0.5em;
+    }
+    `;
 });

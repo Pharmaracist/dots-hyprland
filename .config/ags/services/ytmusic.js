@@ -4,7 +4,6 @@ import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 import Gio from 'gi://Gio';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import App from 'resource:///com/github/Aylur/ags/app.js';
-import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
 import YTMusicAPI from './ytmusic_api.js';
 
 // Audio quality formats
@@ -17,40 +16,58 @@ const AUDIO_FORMATS = {
 
 // Default options
 const DEFAULT_OPTIONS = {
-    audioQuality: 'low',
+    audioQuality: 'medium',
     queueSize: 1,
-    cacheTimeout: 30,
+    cacheTimeout: 90,
     cacheDir: GLib.build_filenamev([GLib.get_user_cache_dir(), 'ytmusic']),
     maxCacheSize: 10240 * 10240 * 10240, // 1GB
 };
 
 class YouTubeMusicService extends Service {
     static {
-        Service.register(this, {}, {
-            'search-results': ['jsobject'],
+        Service.register(this, {
             'current-track': ['jsobject'],
             'playing': ['boolean'],
-            'volume': ['int'],
+            'position': ['float'],
+            'duration': ['float'],
+            'volume': ['float'],
             'repeat': ['boolean'],
             'shuffle': ['boolean'],
-            'position': ['double'],
-            'duration': ['double'],
+            'search-results': ['jsobject'],
             'loading': ['boolean'],
             'caching-status': ['jsobject'],
             'show-downloaded': ['boolean'],
             'downloaded-tracks': ['jsobject'],
+        }, {
+            'current-track': ['jsobject', 'rw'],
+            'playing': ['boolean', 'rw'],
+            'position': ['float', 'rw'],
+            'duration': ['float', 'rw'],
+            'volume': ['float', 'rw'],
+            'repeat': ['boolean', 'rw'],
+            'shuffle': ['boolean', 'rw'],
+            'search-results': ['jsobject', 'rw'],
+            'loading': ['boolean', 'rw'],
+            'caching-status': ['jsobject', 'rw'],
+            'show-downloaded': ['boolean', 'rw'],
+            'downloaded-tracks': ['jsobject', 'rw'],
         });
     }
 
     _searchResults = [];
     _currentTrack = null;
-    _volume = 100;
+    _volume = 1.0;
     _playing = false;
     _repeat = false;
     _shuffle = false;
     _position = 0;
     _duration = 0;
     _loading = false;
+    _cachingStatus = new Map();
+    _showDownloaded = false;
+    _downloadedTracks = [];
+    _mprisPlayer = null;
+    _options = { ...DEFAULT_OPTIONS };
     _audioUrlCache = new Map();
     _trackInfoCache = new Map();
     _cacheTimeout = 30 * 60 * 1000;
@@ -58,13 +75,7 @@ class YouTubeMusicService extends Service {
     _playlist = [];
     _currentIndex = -1;
     _stateFile = GLib.build_filenamev([App.configDir, 'state', 'ytmusic-state.json']);
-    _options = { ...DEFAULT_OPTIONS };
-    _cachingStatus = new Map();  // Track caching status for each song
-    _mpris = null;
-    _mprisPlayer = null;
     _updateInterval = null;
-    _showDownloaded = false;
-    _downloadedTracks = [];
     _lastOnlineResults = [];
     _currentSearchQuery = '';
     _lastDownloadedResults = [];
@@ -75,9 +86,8 @@ class YouTubeMusicService extends Service {
         super();
         
         // Initialize with default values
-        this._searchResults = [];
         this._currentTrack = null;
-        this._volume = 50;
+        this._volume = 1.0;
         this._playing = false;
         this._repeat = false;
         this._shuffle = false;
@@ -103,7 +113,6 @@ class YouTubeMusicService extends Service {
         this._initMpris();
         
         // Set up state change listeners
-        this.connect('notify::search-results', () => this._saveState());
         this.connect('notify::current-track', () => this._saveState());
         this.connect('notify::volume', () => this._saveState());
         this.connect('notify::playing', () => this._saveState());
@@ -159,6 +168,18 @@ class YouTubeMusicService extends Service {
     }
 
     // Property getters and setters
+    get searchResults() { return this._searchResults; }
+    set searchResults(value) {
+        this._searchResults = value;
+        this.notify('search-results');
+    }
+
+    get currentTrack() { return this._currentTrack; }
+    set currentTrack(value) {
+        this._currentTrack = value;
+        this.notify('current-track');
+    }
+
     get playing() { return this._playing; }
     set playing(value) {
         this._playing = value;
@@ -183,18 +204,6 @@ class YouTubeMusicService extends Service {
         this.notify('volume');
     }
 
-    get currentTrack() { return this._currentTrack; }
-    set currentTrack(value) {
-        this._currentTrack = value;
-        this.notify('current-track');
-    }
-
-    get searchResults() { return this._searchResults; }
-    set searchResults(value) {
-        this._searchResults = value;
-        this.notify('search-results');
-    }
-
     get position() { return this._position; }
     set position(value) {
         this._position = value;
@@ -213,18 +222,14 @@ class YouTubeMusicService extends Service {
         this.notify('loading');
     }
 
-    get cachingStatus() {
-        return Object.fromEntries(this._cachingStatus);
-    }
+    get cachingStatus() { return Object.fromEntries(this._cachingStatus); }
 
-    get showDownloaded() {
-        return this._showDownloaded;
-    }
+    get showDownloaded() { return this._showDownloaded; }
 
     get downloadedTracks() {
         return this._downloadedTracks.map(track => ({
             ...track,
-            isDownloaded: true, // Add a tag to show it's downloaded
+            isDownloaded: true,
         }));
     }
 
@@ -359,17 +364,31 @@ class YouTubeMusicService extends Service {
     }
 
     _initMpris() {
-        Mpris.connect('player-added', (mpris, bus) => {
-            if (bus.includes('mpv')) {
-                this._mprisPlayer = Mpris.getPlayer(bus);
-                this._setupMprisHandlers();
-            }
-        });
+        // Initial setup
+        const players = Mpris.players;
+        const ytPlayer = players.find(p => p.identity.toLowerCase().includes('youtube'));
+        if (ytPlayer) {
+            this._mprisPlayer = ytPlayer;
+            this._setupMprisHandlers();
+        }
 
-        Mpris.connect('player-closed', (mpris, bus) => {
-            if (bus.includes('mpv')) {
-                this._mprisPlayer = null;
-                this._cleanup();
+        // Watch for changes
+        Mpris.connect('changed', () => {
+            const players = Mpris.players;
+            const ytPlayer = players.find(p => p.identity.toLowerCase().includes('youtube'));
+            
+            if (ytPlayer !== this._mprisPlayer) {
+                this._mprisPlayer = ytPlayer;
+                if (ytPlayer) {
+                    this._setupMprisHandlers();
+                } else {
+                    this._currentTrack = null;
+                    this._playing = false;
+                    this._position = 0;
+                    this.notify('current-track');
+                    this.notify('playing');
+                    this.notify('position');
+                }
             }
         });
     }
@@ -377,62 +396,41 @@ class YouTubeMusicService extends Service {
     _setupMprisHandlers() {
         if (!this._mprisPlayer) return;
 
-        // Update position more frequently for smoother progress
-        if (this._updateInterval) {
-            GLib.source_remove(this._updateInterval);
-        }
+        this._mprisPlayer.connect('notify::metadata', () => {
+            const metadata = this._mprisPlayer.metadata;
+            if (!metadata) return;
 
-        this._updateInterval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
-            if (!this._mprisPlayer) return GLib.SOURCE_REMOVE;
-            
             try {
-                // Get position and duration
-                const position = this._mprisPlayer.position / 1000000; // Convert to seconds
-                const metadata = this._mprisPlayer.metadata || {};
-                const duration = (metadata['mpris:length'] || 0) / 1000000;
-
-                // Update only if values have changed
-                if (Math.abs(this._position - position) > 0.1) {
-                    this._position = position;
-                    this.notify('position');
+                const track = {
+                    title: metadata['xesam:title']?.toString() || '',
+                    artists: (metadata['xesam:artist'] || []).map(name => ({ name: name.toString() })),
+                    album: metadata['xesam:album']?.toString() || '',
+                    artUrl: metadata['mpris:artUrl']?.toString() || '',
+                    length: parseInt(metadata['mpris:length']?.toString() || '0', 10),
+                };
+                
+                if (JSON.stringify(this._currentTrack) !== JSON.stringify(track)) {
+                    this._currentTrack = track;
+                    this.notify('current-track');
                 }
-
-                if (Math.abs(this._duration - duration) > 0.1) {
-                    this._duration = duration;
-                    this.notify('duration');
-                }
-
             } catch (e) {
-                console.error('Error updating playback state:', e);
+                console.error('Error updating metadata:', e);
             }
-
-            return GLib.SOURCE_CONTINUE;
         });
 
-        // Handle playback status changes
-        this._mprisPlayer.connect('changed', () => {
-            const status = this._mprisPlayer.playBackStatus;
-            if (status) {
-                this._playing = status === 'Playing';
+        this._mprisPlayer.connect('notify::playback-status', () => {
+            const newStatus = this._mprisPlayer.playbackStatus === 'Playing';
+            if (this._playing !== newStatus) {
+                this._playing = newStatus;
                 this.notify('playing');
             }
+        });
 
-            // Update metadata
-            const metadata = this._mprisPlayer.metadata;
-            if (metadata) {
-                try {
-                    const track = {
-                        title: metadata['xesam:title'] || '',
-                        artists: metadata['xesam:artist']?.map(name => ({ name })) || [],
-                        album: metadata['xesam:album'] || '',
-                        artUrl: metadata['mpris:artUrl'] || '',
-                        length: metadata['mpris:length'] || 0,
-                    };
-                    this._currentTrack = track;
-                    this.emit('notify::current-track');
-                } catch (e) {
-                    console.error('Error updating metadata:', e);
-                }
+        this._mprisPlayer.connect('notify::position', () => {
+            const newPosition = this._mprisPlayer.position || 0;
+            if (Math.abs(this._position - newPosition) > 1.0) {
+                this._position = newPosition;
+                this.notify('position');
             }
         });
     }
@@ -851,7 +849,6 @@ class YouTubeMusicService extends Service {
                 throw new Error('File not found after download');
             }
         } catch (e) {
-            logError(e);
             this._updateCachingStatus(videoId, 'error');
             this._showNotification(
                 'Caching Failed',
