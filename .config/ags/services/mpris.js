@@ -27,18 +27,42 @@ class CustomMediaService extends Service {
             this.#interval = null;
         }
 
-        this.#player = Mpris.players[0] || null;
+        // Find a suitable player
+        this.#player = Mpris.players.find(p => 
+            !p.busName.startsWith('org.mpris.MediaPlayer2.playerctld') &&
+            !(p.busName.endsWith('.mpd') && !p.busName.endsWith('MediaPlayer2.mpd'))
+        ) || null;
         
         if (this.#player) {
             this.emit('player-changed', this.#player.identity || '');
             this.emit('track-changed', this.trackInfo);
 
+            // Track position changes
             this.#interval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-                if (!this.#player) return GLib.SOURCE_REMOVE;
-                this.#position = this.#player.position;
-                this.emit('position-changed', this.position);
+                if (!this.#player || !this.#player.busName) {
+                    this.#position = 0;
+                    return GLib.SOURCE_REMOVE;
+                }
+                
+                try {
+                    this.#position = this.#player.position || 0;
+                    this.emit('position-changed', this.position);
+                } catch (error) {
+                    console.error('Error updating position:', error);
+                    return GLib.SOURCE_REMOVE;
+                }
+                
                 return GLib.SOURCE_CONTINUE;
             });
+
+            // Listen for property changes
+            this.#player.connect('changed', () => {
+                this.emit('track-changed', this.trackInfo);
+            });
+        } else {
+            this.#position = 0;
+            this.emit('player-changed', '');
+            this.emit('track-changed', null);
         }
     }
 

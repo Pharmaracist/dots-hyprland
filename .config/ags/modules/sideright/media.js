@@ -31,6 +31,8 @@ const AudioFiles = ({ directory = GLib.get_home_dir() + '/Music' } = {}) => {
                             Widget.Label({
                                 label: filename,
                                 xalign: 0,
+                                justification: 'left',
+                                wrap: true,
                                 className: 'audio-files-label',
                             }),
                         ],

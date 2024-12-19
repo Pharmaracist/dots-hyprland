@@ -599,49 +599,66 @@ class YouTubeMusicService extends Service {
         if (!this._currentVideoId) return;
 
         try {
-            // Check if MPV is running first
-            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
-            if (!mpvRunning) {
-                this._playing = false;
-                this.notify('playing');
-                return;
-            }
-
-            const [pause, position, duration, volume] = await Promise.all([
-                this._getMpvProperty('pause'),
+            // Get current playback position and duration
+            const [position, duration] = await Promise.all([
                 this._getMpvProperty('time-pos'),
-                this._getMpvProperty('duration'),
-                this._getMpvProperty('volume')
+                this._getMpvProperty('duration')
             ]);
 
-            // Update playing state
-            if (pause !== null && this._playing !== !pause) {
-                this._playing = !pause;
-                this.notify('playing');
-            }
-
-            // Update position
-            if (position !== null && Math.abs(this._position - position) > 0.5) {
+            if (position !== null) {
                 this._position = position;
                 this.notify('position');
             }
 
-            // Update duration
-            if (duration !== null && Math.abs(this._duration - duration) > 0.5) {
+            if (duration !== null && duration !== this._duration) {
                 this._duration = duration;
                 this.notify('duration');
             }
 
-            // Update volume
-            if (volume !== null && Math.abs(this._volume - (volume / 100)) > 0.01) {
-                this._volume = volume / 100;
-                this.notify('volume');
+            // Check if track has ended
+            if (position !== null && duration !== null && position >= duration - 0.5) {
+                // Track has ended, play next track
+                await this._playNextTrack();
             }
-
-            return true;
         } catch (e) {
             console.error('Error updating playing state:', e);
-            return false;
+        }
+
+        return GLib.SOURCE_CONTINUE;
+    }
+
+    async _playNextTrack() {
+        if (!this._playlist || this._playlist.length === 0) return;
+
+        let nextIndex;
+        if (this._shuffle) {
+            // Get random index excluding current
+            const availableIndices = Array.from(
+                { length: this._playlist.length },
+                (_, i) => i
+            ).filter(i => i !== this._currentIndex);
+            
+            if (availableIndices.length > 0) {
+                nextIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+            } else {
+                nextIndex = 0;
+            }
+        } else {
+            nextIndex = (this._currentIndex + 1) % this._playlist.length;
+        }
+
+        // Handle repeat mode
+        if (!this._repeat && nextIndex <= this._currentIndex) {
+            // Stop playback if we've reached the end and repeat is off
+            await this.stop();
+            return;
+        }
+
+        // Play the next track
+        const nextTrack = this._playlist[nextIndex];
+        if (nextTrack) {
+            this._currentIndex = nextIndex;
+            await this.play(nextTrack.videoId);
         }
     }
 

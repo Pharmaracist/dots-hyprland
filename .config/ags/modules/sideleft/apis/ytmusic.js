@@ -4,7 +4,7 @@ import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import YTMusic from '../../../services/ytmusic.js';
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-import { MaterialIcon } from     '../../.commonwidgets/materialicon.js';
+import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 import { AnimatedCircProg } from '../../.commonwidgets/cairo_circularprogress.js';
 import { AnimatedSlider } from '../../.commonwidgets/cairo_slider.js';
@@ -161,7 +161,10 @@ export const MediaControls = () => Box({
         Box({
             className: 'media-controls-box',
             hpack: 'center',
-            css: 'padding: 4px; spacing: 8px;',
+            css: `
+                padding: 4px;
+                margin: 8px;
+            `,
             children: [
                 Button({
                     className: `control-button ${YTMusic.shuffle ? 'enabled' : ''}`,
@@ -174,14 +177,17 @@ export const MediaControls = () => Box({
                         border-radius: 14px;
                         padding: 4px;
                         background-color: ${YTMusic.shuffle ? 'alpha(@accent, 0.2)' : 'alpha(@theme_fg_color, 0.1)'};
-                        margin: 0 1px;
+                        margin: 1px;
                     `,
                     setup: setupCursorHover,
                 }),
                 Box({
                     className: 'main-playback-controls',
                     hpack: 'center',
-                    css: 'padding: 0 8px; spacing: 4px;',
+                    css: `
+                        padding: 0 8px;
+                        margin: 4px;
+                    `,
                     children: [
                         Button({
                             className: 'control-button',
@@ -386,7 +392,11 @@ const SearchResults = () => Box({
                                     className: 'track-item-info',
                                     vertical: true,
                                     hexpand: true,
-                                    css: 'padding: 4px; min-width: 200px; max-width: 300px;',
+                                    css: `
+                                        padding: 4px;
+                                        min-width: 200px;
+                                        width: 300px;
+                                    `,
                                     children: [
                                         Box({
                                             children: [
@@ -501,7 +511,7 @@ const SearchResults = () => Box({
                         }),
                     ],
                 }),
-            });
+        });
 
             itemCache.set(item.videoId, trackItem);
             return trackItem;
