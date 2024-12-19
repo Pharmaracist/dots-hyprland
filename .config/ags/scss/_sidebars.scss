@@ -1575,3 +1575,57 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     margin-left: 8px;
     color: $onSurface;
 }
+// Task Manager styles
+.task-manager-widget {
+    @include normal-rounding;
+    background-color: $surfaceContainerLow;
+    padding: 0.682rem;
+}
+
+.task-manager-header {
+    padding: 0.341rem;
+    margin-bottom: 0.682rem;
+}
+
+.task-manager-box {
+    padding: 0.341rem;
+}
+
+.task-manager-item {
+    @include normal-rounding;
+    padding: 0.682rem;
+    background-color: $surfaceContainerHigh;
+    // transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+    }
+}
+
+.task-manager-button {
+    @include full-rounding;
+    padding: 0.341rem;
+    background-color: transparent;
+    color: $error;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: mix($error, transparent, 10%);
+    }
+}
+
+.task-manager-refresh-button {
+    @include full-rounding;
+    padding: 0.341rem;
+    background-color: transparent;
+    color: $onSurface;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+    }
+}
+
+.task-manager-scrollable {
+    min-height: 20.455rem;
+}
