@@ -10,10 +10,10 @@ fallback() {
 }
 
 # Find a random image file with valid extensions
-imgpath=$(fd . $HOME/Pictures/Wallpapers/ -e jpg -e jpeg -e png -e gif | shuf -n 1)
+imgpath=$(fd . $HOME/Pictures/Wallpapers/ -e jpg -e jpeg -e png -e gif -E '**/thumbnails/**' | shuf -n 1)
 
 # If no valid image file is found, call the fallback function
-[ -z "$imgpath" ] && fallback
+[ -z "$imgpath" ]
 
 # Run the switchwall.sh script with the selected image
 $CONFIG_DIR/scripts/color_generation/switchwall.sh "$imgpath" add

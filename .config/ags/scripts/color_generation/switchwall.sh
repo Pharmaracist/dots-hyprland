@@ -23,9 +23,14 @@ switch() {
     [ -z "$imgpath" ] && exit 1
 
     # Set wallpaper with adjusted animation parameters
-    swww img "$imgpath" --transition-step 100 --transition-fps 120 \
-        --transition-type grow --transition-angle 30 --transition-duration 0.5 \
-        --transition-pos "$cursorposx,$cursorposy_inverted" >/dev/null 2>&1
+    swww img "$imgpath" \
+        --transition-fps 144 \
+        --transition-type grow \
+        --transition-duration 0.8 \
+        --transition-bezier .16,0,.84,.99 \
+        --transition-pos "$cursorposx,$cursorposy_inverted" \
+        --transition-step 255 \
+        >/dev/null 2>&1
 }
 
 # Function to generate and apply colors

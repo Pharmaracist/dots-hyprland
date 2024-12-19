@@ -1,25 +1,40 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
+import App from "resource:///com/github/Aylur/ags/app.js";
 const { Box, Button } = Widget;
 const { GLib } = imports.gi;
 
-const createUtilButton = ({ name, icon, onClicked }) =>
-  Button({
+const createUtilButton = ({ name, icon, onClicked, onSecondaryClick }) => {
+  const buttonProps = {
     vpack: "center",
     tooltipText: name,
     onClicked,
     className: "icon-material sec-txt txt-larger",
     label: icon, // No need for template literal here
-  });
+  };
+  
+  if (onSecondaryClick) {
+    buttonProps.onSecondaryClick = onSecondaryClick;
+  }
+  
+  return Button(buttonProps);
+};
 
-const createNerdButton = ({ name, icon, onClicked }) =>
-  Button({
+const createNerdButton = ({ name, icon, onClicked, onSecondaryClick }) => {
+  const buttonProps = {
     vpack: "center",
     tooltipText: name,
     onClicked,
     className: "icon-nerd sec-txt txt-title",
     label: icon, // No need for template literal here
-  });
+  };
+  
+  if (onSecondaryClick) {
+    buttonProps.onSecondaryClick = onSecondaryClick;
+  }
+  
+  return Button(buttonProps);
+};
 
 
 
@@ -29,38 +44,41 @@ const Shortcuts = () => {
   let showWallpaperButton = false;
 
   const changeWallpaperButton = createUtilButton({
-    name: getString("Change wallpaper"),
+    name: "Change wallpaper",
     icon: "image",
-    onClicked: () => App.toggleWindow("wallselect"),
+    onClicked: () => Utils.execAsync([
+      `${App.configDir}/scripts/color_generation/randomwall.sh`
+    ]),
+    onSecondaryClick: () => App.toggleWindow("wallselect"),
   });
 
   const unixporn = createUtilButton({
-    name: getString("Unix Porn"),
+    name: "Unix Porn",
     css:"font-size:1.8rem",
     icon: "\udb81\udfea",
     onClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
   });
 
   const chatGPTButton = createUtilButton({
-    name: getString("ChatGPT"),
+    name: "ChatGPT",
     icon: "smart_toy",
     onClicked: () => Utils.execAsync(`firefox --new-window chatgpt.com`),
   });
 
   const gitHubButton = createNerdButton({
-    name: getString("GitHub"),
+    name: "GitHub",
     icon: "\uea84",
     onClicked: () => Utils.execAsync(`firefox --new-window github.com/pharmaracist`),
   });
 
   const yt = createNerdButton({
-    name: getString("YT"),
+    name: "YT",
     icon: "\uf166",
     onClicked: () => Utils.execAsync(`firefox --new-window youtube.com`),
   });
 
   const agsTweaksButton = createUtilButton({
-    name: getString("Settings"),
+    name: "Settings",
     icon: "water_drop",
     onClicked: () => Utils.execAsync([
       "bash",
@@ -70,13 +88,13 @@ const Shortcuts = () => {
   });
 
   const screenSnipButton = createUtilButton({
-    name: getString("Screen snip"),
+    name: "Screen snip",
     icon: "screenshot_region",
     onClicked: () => Utils.execAsync(`${App.configDir}/scripts/grimblast.sh copy area`).catch(print),
   });
 
   const colorPickerButton = createUtilButton({
-    name: getString("Color picker"),
+    name: "Color picker",
     icon: "colorize",
     onClicked: () => Utils.execAsync(["hyprpicker", "-a"]).catch(print),
   });
