@@ -20,27 +20,24 @@ const AudioFiles = ({ directory = GLib.get_home_dir() + '/Music' } = {}) => {
                 const filename = fileInfo.get_name();
                 if (!filename.match(/\.(mp3|wav|ogg|m4a|flac|opus)$/i)) continue;
 
-                const button = Widget.Box({
-                    children: [
-                        Widget.Icon({
-                            icon: 'audio-x-generic-symbolic',
-                            size: 24,
-                            className: 'audio-files-icon',
-                        }),
-                        Widget.Label({
-                            label: filename,
-                            xalign: 0,
-                            className: 'audio-files-label',
-                        }),
-                    ],
+                const button = Widget.Button({
+                    child: Widget.Box({
+                        children: [
+                            Widget.Icon({
+                                icon: 'audio-x-generic-symbolic',
+                                size: 24,
+                                className: 'audio-files-icon',
+                            }),
+                            Widget.Label({
+                                label: filename,
+                                xalign: 0,
+                                className: 'audio-files-label',
+                            }),
+                        ],
+                        homogeneous: false,
+                        spacing: 8,
+                    }),
                     className: 'audio-files-button',
-                    homogeneous: false,
-                    spacing: 8,
-                });
-
-                const buttonWrapper = Widget.Button({
-                    child: button,
-                    className: 'audio-files-button-wrapper',
                     onClicked: () => {
                         const filepath = GLib.build_filenamev([directory, filename]);
                         const proc = Gio.Subprocess.new(
@@ -50,8 +47,8 @@ const AudioFiles = ({ directory = GLib.get_home_dir() + '/Music' } = {}) => {
                         proc.wait_async(null, () => {});
                     },
                 });
-                
-                fileList.add(buttonWrapper);
+
+                fileList.add(button);
             }
         } catch (error) {
             console.error('Error reading directory:', error);
