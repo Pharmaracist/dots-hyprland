@@ -21,13 +21,15 @@ class AudioVisualizerService extends Service {
         // Set default config
         this.#config = {
             bars: 15,
-            framerate: 60,
-            sensitivity: 150,
+            framerate: 75,
+            sensitivity: 100,
             mode: 'waves',
-            smoothing: 0.77,
-            barWidth: 1,
+            channels: 'mono',
+            smoothing: 0.85,
+            noise_reduction: 0.85,
+            barWidth: 1 ,
             monstercat: 1,
-            noise_reduction: 0.77
+            gravity: 1
         }
         
         this.#loadConfig()
@@ -93,7 +95,7 @@ ascii_max_range = 7
 
 [smoothing]
 monstercat = ${this.#config.monstercat}
-#noise_reduction = ${this.#config.noise_reduction}
+noise_reduction = ${this.#config.noise_reduction}
 
 [eq]
 1=1

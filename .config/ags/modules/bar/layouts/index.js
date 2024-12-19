@@ -42,6 +42,11 @@ export const BarLayouts = {
                 children: [
                     modules.InfoModules.clock(),
                 ],
+            }),Widget.Box({
+                className: 'bar-round-padding',
+                children: [
+                    modules.MediaModules.cava(),
+                ],
             }),],
             end: [
                 Widget.Box({
