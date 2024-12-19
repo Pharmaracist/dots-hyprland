@@ -21,6 +21,7 @@ import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
 // import ModuleBluetooth from "./centermodules/bluetooth.js";
 // import ModuleConfigure from "./centermodules/configure.js";
 import ModuleMusicControls from "./centermodules/musiccontrols.js";
+import ModuleTaskManager from "./centermodules/taskmanager.js";
 // import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import { ModuleCalendar } from "./calendar.js";
 import { getDistroIcon } from "../.miscutils/system.js";
@@ -44,6 +45,11 @@ const centerWidgets = [
     contentWidget: ModuleAudioControls,
   },
 
+  {
+    name: getString("Task Manager"),
+    materialIcon: "monitor_heart",
+    contentWidget: ModuleTaskManager,
+  },
   // {
   //   name: getString("Bluetooth"),
   //   materialIcon: "bluetooth",

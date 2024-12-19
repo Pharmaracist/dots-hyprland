@@ -13,9 +13,18 @@ function isRealPlayer(player) {
     );
 }
 
-export const getPlayer = () => Mpris.players[0] || null;
+export const getPlayer = () => {
+    const players = Mpris.players;
+    // Prioritize plasma-browser-integration if available
+    const plasmaPlayer = players.find(p => p.busName.includes('plasma-browser-integration'));
+    if (plasmaPlayer) return plasmaPlayer;
+    
+    // Otherwise return the first available player
+    return players[0] || null;
+};
 
 function formatTime(microseconds) {
+    if (!microseconds || microseconds <= 0) return '0:00';
     const seconds = Math.floor(microseconds / 1000000);
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -30,17 +39,7 @@ const TrackTitle = ({ player }) => Label({
     setup: self => self.hook(player, () => {
         if (!player) return;
         self.label = player.trackTitle || '';
-    }),
-});
-
-const TrackArtists = ({ player, ...rest }) => Label({
-    ...rest,
-    xalign: 0,
-    truncate: 'end',
-    className: 'sideright-music-artists',
-    setup: (self) => self.hook(player, (self) => {
-        if (!player) return;
-        self.label = player.trackArtists.join(', ') || '';
+        self.visible = !!player.trackTitle;
     }),
 });
 
@@ -54,7 +53,13 @@ const TrackTime = ({ player, ...rest }) => Label({
             if (!player) return;
             const pos = player.position;
             current = pos;
-            self.label = `${formatTime(pos)} / ${formatTime(player.length)}`;
+            const length = player.length;
+            if (length > 0) {
+                self.label = `${formatTime(pos)} / ${formatTime(length)}`;
+                self.visible = true;
+            } else {
+                self.visible = false;
+            }
         };
         self.hook(player, update);
         self.poll(1000, update);
@@ -70,37 +75,10 @@ const ControlButton = ({ icon, action, sensitive = true }) => Button({
 
 export default () => Box({
     className: 'sideright-music',
-    setup: self => {
-        // Update cover and visibility
-        const updateCover = (box, coverPath) => {
-            if (!coverPath) {
-                box.css = 'background-image: none;';
-                return;
-            }
-
-            try {
-                box.css = `background-image: url("${coverPath}");`;
-            } catch (error) {
-                console.error('Error updating cover:', error);
-                box.css = 'background-image: none;';
-            }
-        };
-
-        // Use polling instead of hooks for more reliable updates
-        self.poll(1000, () => {
-            const player = getPlayer();
-            if (!player) {
-                self.visible = false;
-                return;
-            }
-
-            self.visible = true;
-
-            // Update cover art
-            const coverPath = player.coverPath;
-            updateCover(self, coverPath);
-        });
-    },
+    setup: self => self.hook(Mpris, () => {
+        const player = getPlayer();
+        self.visible = !!player;
+    }),
     vertical: false,
     child: Box({
         className: 'sideright-music-box',
@@ -108,62 +86,49 @@ export default () => Box({
         children: [
             Box({
                 className: 'sideright-music-info',
-                vertical: true,
                 children: [
                     Box({
+                        vertical: true,
+                        hexpand: true,
                         children: [
-                            Box({
-                                vertical: true,
-                                children: [
-                                    TrackTitle({ player: getPlayer() }),
-                                    TrackTime({ player: getPlayer() }),
-                                    // TrackArtists({ player: getPlayer() }),
-                                ],
-                            }),
-                            Box({ hexpand: true }),
-                            Box({
-                                className: 'sideright-music-controls',
-                                vexpand: false,
-                                vpack: 'end',
-                                setup: self => self.hook(Mpris, () => {
-                                    const player = getPlayer();
-                                    self.children = [
-                                        ControlButton({
-                                            icon: 'skip_previous',
-                                            action: () => {
-                                                if (player?.canGoPrev) {
-                                                    player.previous();
-                                                }
-                                            },
-                                            sensitive: player?.canGoPrev || false,
-                                        }),
-                                        ControlButton({
-                                            icon: player?.playbackStatus === 'Playing' ? 'pause' : 'play_arrow',
-                                            action: () => {
-                                                if (player) {
-                                                    if (player.playbackStatus === 'Playing') {
-                                                        player.stop();
-                                                    } else {
-                                                        player.play();
-                                                    }
-                                                }
-                                            },
-                                            sensitive: player?.canPlay || false,
-                                        }),
-                                        ControlButton({
-                                            icon: 'skip_next',
-                                            action: () => {
-                                                if (player?.canGoNext) {
-                                                    player.next();
-                                                }
-                                            },
-                                            sensitive: player?.canGoNext || false,
-                                        }),
-                                    ];
-                                }),
-                            }),
-          
+                            TrackTitle({ player: getPlayer() }),
+                            TrackTime({ player: getPlayer() }),
                         ],
+                    }),
+                    Box({
+                        className: 'sideright-music-controls',
+                        hpack: 'end',
+                        setup: self => self.hook(Mpris, () => {
+                            const player = getPlayer();
+                            if (!player) {
+                                self.visible = false;
+                                return;
+                            }
+                            self.visible = true;
+                            self.children = [
+                                ControlButton({
+                                    icon: 'skip_previous',
+                                    action: () => player?.previous(),
+                                    sensitive: player?.canGoPrev || false,
+                                }),
+                                ControlButton({
+                                    icon: player?.playbackStatus === 'Playing' ? 'pause' : 'play_arrow',
+                                    action: () => {
+                                        if (player?.playbackStatus === 'Playing') {
+                                            player.pause();
+                                        } else {
+                                            player.play();
+                                        }
+                                    },
+                                    sensitive: player?.canPlay || false,
+                                }),
+                                ControlButton({
+                                    icon: 'skip_next',
+                                    action: () => player?.next(),
+                                    sensitive: player?.canGoNext || false,
+                                }),
+                            ];
+                        }),
                     }),
                 ],
             }),
