@@ -24,10 +24,8 @@
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
-    "fakeScreenRounding": 1 ,
-    "visualizer": {
-     
-    }
+    "fakeScreenRounding": 1,
+    "visualizer": {}
   },
   "apps": {
     "bluetooth": "blueberry",
@@ -40,8 +38,16 @@
   "battery": {
     "low": 20,
     "critical": 10,
-    "warnLevels": [20, 15, 5],
-    "warnTitles": ["Low battery", "Very low battery", "Critical Battery"],
+    "warnLevels": [
+      20,
+      15,
+      5
+    ],
+    "warnTitles": [
+      "Low battery",
+      "Very low battery",
+      "Critical Battery"
+    ],
     "warnMessages": [
       "Plug in the charger",
       "You there?",
@@ -87,7 +93,9 @@
   },
   "sidebar": {
     "ai": {
-      "__custom": ["extraGptModels"],
+      "__custom": [
+        "extraGptModels"
+      ],
       "extraGptModels": {
         "openrouter": {
           "name": "Llama 3 8B",
@@ -108,13 +116,24 @@
       "saveInFolderByTags": false
     },
     "pages": {
-      "order": ["apis", "tools", "github"],
+      "order": [
+        "apis",
+        "tools",
+        "github"
+      ],
       "apis": {
-        "order": ["gemini", "gpt", "translater","ytmusic"]
+        "order": [
+          "gemini",
+          "gpt",
+          "translater",
+          "ytmusic"
+        ]
       }
     },
     "translater": {
-      "__custom": ["languages"],
+      "__custom": [
+        "languages"
+      ],
       "from": "auto",
       "to": "ar",
       "languages": {
@@ -139,7 +158,9 @@
       "webSearch": true
     },
     "engineBaseUrl": "https://www.google.com/search?q=",
-    "excludedSites": ["quora.com"]
+    "excludedSites": [
+      "quora.com"
+    ]
   },
   "time": {
     "format": "%I:%M",
@@ -240,17 +261,21 @@
       "github-desktop",
       "visual-studio-code",
       "zeditor",
-      "firefox",
       "nwg-look",
       "Obisidian",
       "steam",
       "heroic-games-launcher",
-      "org.gnome.Nautilus"
+      "org.gnome.Nautilus",
+      null,
+      null
     ],
     "layer": "top",
     "monitorExclusivity": true,
     "searchPinnedAppIcons": false,
-    "trigger": ["client-added", "client-removed"],
+    "trigger": [
+      "client-added",
+      "client-removed"
+    ],
     "autoHide": [
       {
         "trigger": "client-added",
@@ -263,8 +288,13 @@
     ]
   },
   "icons": {
-    "__custom": ["substitutions", "regexSubstitutions"],
-    "searchPaths": [""],
+    "__custom": [
+      "substitutions",
+      "regexSubstitutions"
+    ],
+    "searchPaths": [
+      ""
+    ],
     "symbolicIconTheme": {
       "dark": "Adwaita",
       "light": "Adwaita"
@@ -318,19 +348,25 @@
     }
   },
   "bar": {
-    "mode":"mode1",
+    "mode": "mode1",
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   },
   "notifications": {
     "position": "top right",
-    "blacklist": ["Spotify"]
+    "blacklist": [
+      "Spotify"
+    ]
   },
   "ytmusic": {
     "audioQuality": {
       "type": "enum",
       "default": "low",
-      "enums": ["low", "medium", "high"],
+      "enums": [
+        "low",
+        "medium",
+        "high"
+      ],
       "descriptions": {
         "low": "Low quality (saves data)",
         "medium": "Medium quality (128kbps)",

@@ -13,7 +13,20 @@ import { getAllFiles, searchIcons } from './icons.js'
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { substitute } from '../.miscutils/icons.js';
 
-const icon_files = userOptions.asyncGet().icons.searchPaths.map(e => getAllFiles(e)).flat(1)
+const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
+const readConfig = () => JSON.parse(Utils.readFile(configPath));
+
+// Watch for config changes
+Utils.monitorFile(configPath, (_, event) => {
+    if (event === 'changed') {
+        // Reload pinned apps
+        const dockBox = App.getWindow('dock').get_children()[0];
+        const pinnedBox = dockBox.get_children()[0].get_children()[0].get_children()[2];
+        pinnedBox.children = PinnedApps().children;
+    }
+});
+
+const icon_files = readConfig().icons.searchPaths.map(e => getAllFiles(e)).flat(1)
 
 let isPinned = false
 let cachePath = new Map()
@@ -80,7 +93,7 @@ const AppButton = ({ icon, ...rest }) => Widget.Revealer({
     },
     revealChild: false,
     transition: 'slide_right',
-    transitionDuration: userOptions.asyncGet().animations.durationLarge,
+    transitionDuration: readConfig().animations.durationLarge,
     child: Widget.Button({
         ...rest,
         className: 'dock-app-btn dock-app-btn-animate',
@@ -177,7 +190,7 @@ const Taskbar = (monitor) => Widget.Box({
             if (!removedButton) return;
             removedButton.revealChild = false;
 
-            Utils.timeout(userOptions.asyncGet().animations.durationLarge, () => {
+            Utils.timeout(readConfig().animations.durationLarge, () => {
                 removedButton.destroy();
                 box.attribute.map.delete(address);
                 box.children = Array.from(box.attribute.map.values());
@@ -194,13 +207,13 @@ const Taskbar = (monitor) => Widget.Box({
 const PinnedApps = () => Widget.Box({
     class_name: 'dock-apps',
     homogeneous: true,
-    children: userOptions.asyncGet().dock.pinnedApps
+    children: readConfig().dock.pinnedApps
         .map(term => ({ app: Applications.query(term)?.[0], term }))
         .filter(({ app }) => app)
         .map(({ app, term = true }) => {
             const newButton = AppButton({
                 // different icon, emm...
-                icon: userOptions.asyncGet().dock.searchPinnedAppIcons ?
+                icon: readConfig().dock.searchPinnedAppIcons ?
                     searchIcons(app.name, icon_files) :
                     app.icon_name,
                 onClicked: () => {
@@ -244,7 +257,7 @@ export default (monitor = 0) => {
     const dockRevealer = Revealer({
         attribute: {
             'updateShow': self => { // I only use mouse to resize. I don't care about keyboard resize if that's a thing
-                if (userOptions.asyncGet().dock.monitorExclusivity)
+                if (readConfig().dock.monitorExclusivity)
                     self.revealChild = Hyprland.active.monitor.id === monitor;
                 else
                     self.revealChild = true;
@@ -254,16 +267,16 @@ export default (monitor = 0) => {
         },
         revealChild: false,
         transition: 'slide_up',
-        transitionDuration: userOptions.asyncGet().animations.durationLarge,
+        transitionDuration: readConfig().animations.durationLarge,
         child: dockContent,
         setup: (self) => {
             const callback = (self, trigger) => {
-                if (!userOptions.asyncGet().dock.trigger.includes(trigger)) return
+                if (!readConfig().dock.trigger.includes(trigger)) return
                 const flag = self.attribute.updateShow(self)
 
                 if (flag) clearTimes();
 
-                const hidden = userOptions.asyncGet().dock.autoHide.find(e => e["trigger"] === trigger)
+                const hidden = readConfig().dock.autoHide.find(e => e["trigger"] === trigger)
 
                 if (hidden) {
                     let id = Utils.timeout(hidden.interval, () => {
@@ -289,7 +302,7 @@ export default (monitor = 0) => {
         },
         child: Box({
             homogeneous: true,
-            css: `min-height: ${userOptions.asyncGet().dock.hiddenThickness}px;`,
+            css: `min-height: ${readConfig().dock.hiddenThickness}px;`,
             children: [dockRevealer],
         }),
         setup: self => self.on("leave-notify-event", () => {

@@ -119,10 +119,66 @@ if results:
             }).catch(print);
         },
         '>skip': () => {
-            execAsync(['bash', '-c', 'echo \'{"command": ["playlist-next"]}\' | socat - /tmp/mpvsocket']).catch(print);
+            execAsync(['playerctl', 'next']).catch(print);
+            execAsync(['bash', '-c', 'sleep 0.1 && playerctl position 0']).catch(print);
         },
         '>prev': () => {
-            execAsync(['bash', '-c', 'echo \'{"command": ["playlist-prev"]}\' | socat - /tmp/mpvsocket']).catch(print);
+            execAsync(['playerctl', 'previous']).catch(print);
+        },
+        '>pin': () => {
+            if (!args[0]) return;
+            const appName = args.join(' ').toLowerCase();
+            const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
+            
+            try {
+                const config = JSON.parse(Utils.readFile(configPath));
+                if (!config.dock) config.dock = {};
+                if (!config.dock.pinnedApps) config.dock.pinnedApps = [];
+                
+                if (!config.dock.pinnedApps.includes(appName)) {
+                    config.dock.pinnedApps.push(appName);
+                    Utils.writeFile(JSON.stringify(config, null, 2), configPath);
+                    execAsync(['bash', '-c', 'ags -q; ags']).catch(print);
+                }
+            } catch (error) {
+                print('Error pinning app:', error);
+            }
+        },
+        '>unpin': () => {
+            if (!args[0]) return;
+            const appName = args.join(' ').toLowerCase();
+            const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
+            
+            try {
+                const config = JSON.parse(Utils.readFile(configPath));
+                if (config.dock?.pinnedApps) {
+                    const index = config.dock.pinnedApps.indexOf(appName);
+                    if (index > -1) {
+                        config.dock.pinnedApps.splice(index, 1);
+                        Utils.writeFile(JSON.stringify(config, null, 2), configPath);
+                        execAsync(['bash', '-c', 'ags -q; ags']).catch(print);
+                    }
+                }
+            } catch (error) {
+                print('Error unpinning app:', error);
+            }
+        },
+        '>pins': () => {
+            const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
+            
+            // Read current config
+            try {
+                const contents = Utils.readFile(configPath);
+                const config = JSON.parse(contents);
+                const pinnedApps = config.dock?.pinnedApps || [];
+                if (pinnedApps.length > 0) {
+                    print('Pinned apps:', pinnedApps.join(', '));
+                } else {
+                    print('No apps are currently pinned');
+                }
+            } catch (error) {
+                print('Error reading config:', error);
+            }
         },
         '>tm': () => {
             if (!args[0]) return;

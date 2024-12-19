@@ -1,18 +1,28 @@
-const { Gtk } = imports.gi;
+const { Gtk, Gdk } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-const { execAsync, exec } = Utils;
+const { execAsync, exec, readFile, writeFile } = Utils;
 import { searchItem } from './searchitem.js';
 import { execAndClose, couldBeMath, launchCustomCommand, expandTilde } from './miscfunctions.js';
 import GeminiService from '../../services/gemini.js';
 import ChatGPTService from '../../services/gpt.js';
 
-// Кэшируем часто используемые опции
-const options = userOptions.asyncGet();
-const animations = options.animations;
-const searchConfig = options.search;
-const aiConfig = options.ai;
+// Read config directly
+const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
+const readConfig = () => {
+    try {
+        return JSON.parse(Utils.readFile(configPath));
+    } catch (error) {
+        print('Error reading config:', error);
+        return { animations: {}, search: {}, ai: {} };
+    }
+};
+
+const options = readConfig();
+const animations = options.animations || {};
+const searchConfig = options.search || {};
+const aiConfig = options.ai || {};
 
 export const NoResultButton = () => searchItem({
     materialIconName: 'Error',
@@ -25,7 +35,7 @@ export const DirectoryButton = ({ parentPath, name, type, icon }) => {
     const actionText = Widget.Revealer({
         revealChild: false,
         transition: "crossfade", 
-        transitionDuration: animations.durationLarge,
+        transitionDuration: animations.durationLarge || 300,
         child: Widget.Label({
             className: 'overview-search-results-txt txt txt-small txt-action',
             label: 'Open',
@@ -35,7 +45,7 @@ export const DirectoryButton = ({ parentPath, name, type, icon }) => {
     const actionTextRevealer = Widget.Revealer({
         revealChild: false,
         transition: "slide_left",
-        transitionDuration: animations.durationSmall,
+        transitionDuration: animations.durationSmall || 150,
         child: actionText,
     });
 
@@ -89,30 +99,69 @@ export const CalculationResultButton = ({ result, text }) => searchItem({
 });
 
 export const DesktopEntryButton = (app) => {
-    const actionText = Widget.Revealer({
-        revealChild: false,
-        transition: "crossfade",
-        transitionDuration: animations.durationLarge,
-        child: Widget.Label({
-            className: 'overview-search-results-txt txt txt-small txt-action',
-            label: 'Launch',
-        })
+    const actionText = Widget.Label({
+        className: 'overview-search-results-txt txt txt-small txt-action',
+        label: 'Launch (Enter)',
+    });
+
+    const getPinStatus = () => {
+        const config = readConfig();
+        const appName = app.name.toLowerCase();
+        return config.dock?.pinnedApps?.includes(appName) || false;
+    };
+
+    const pinText = Widget.Label({
+        className: 'overview-search-results-txt txt txt-small txt-action',
+        label: `${getPinStatus() ? 'Unpin' : 'Pin'} (Shift+Enter)`,
     });
 
     const actionTextRevealer = Widget.Revealer({
         revealChild: false,
         transition: "slide_left",
-        transitionDuration: animations.durationSmall,
-        child: actionText,
+        transitionDuration: animations.durationSmall || 150,
+        child: Widget.Box({
+            children: [
+                actionText,
+                Widget.Label({
+                    className: 'overview-search-results-txt txt txt-small txt-action',
+                    label: ' | ',
+                }),
+                pinText,
+            ],
+        }),
     });
+
     const isFile = app.iconName !== null && app.iconName.startsWith('~') || app.iconName.startsWith('.') || app.iconName.startsWith('/');
     const css = `background-size:cover;background-image:${isFile ? `url('${expandTilde(app.iconName)}')` : 'none'};`;
+
+    const togglePin = () => {
+        try {
+            const config = readConfig();
+            if (!config.dock) config.dock = {};
+            if (!config.dock.pinnedApps) config.dock.pinnedApps = [];
+            
+            const appName = app.name.toLowerCase();
+            const index = config.dock.pinnedApps.indexOf(appName);
+            
+            if (index > -1) {
+                // Unpin
+                config.dock.pinnedApps.splice(index, 1);
+                pinText.label = 'Pin (Shift+Enter)';
+            } else {
+                // Pin
+                config.dock.pinnedApps.push(appName);
+                pinText.label = 'Unpin (Shift+Enter)';
+            }
+            
+            Utils.writeFile(JSON.stringify(config, null, 2), configPath);
+            execAsync(['bash', '-c', 'ags -q; ags']).catch(print);
+        } catch (error) {
+            print('Error toggling pin:', error);
+        }
+    };
+
     return Widget.Button({
         className: 'overview-search-result-btn',
-        onClicked: () => {
-            App.closeWindow('overview');
-            app.launch();
-        },
         child: Widget.Box({
             children: [
                 Widget.Box({
@@ -138,15 +187,25 @@ export const DesktopEntryButton = (app) => {
         }),
         setup: (self) => self
             .on('focus-in-event', () => {
-                actionText.revealChild = true;
                 actionTextRevealer.revealChild = true;
             })
             .on('focus-out-event', () => {
-                actionText.revealChild = false;
                 actionTextRevealer.revealChild = false;
+            })
+            .on('key-press-event', (_, event) => {
+                if (event.get_state()[1] & Gdk.ModifierType.SHIFT_MASK) {
+                    togglePin();
+                    App.closeWindow('overview');
+                    return true;
+                }
+                return false;
+            })
+            .on('clicked', () => {
+                App.closeWindow('overview');
+                app.launch();
             }),
-    })
-}
+    });
+};
 
 export const ExecuteCommandButton = ({ command, terminal = false }) => searchItem({
     materialIconName: terminal ? 'terminal' : 'settings_b_roll',
