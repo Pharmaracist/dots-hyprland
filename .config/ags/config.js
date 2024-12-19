@@ -18,7 +18,7 @@ import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
 import Corner from "./modules/screencorners/main.js";
 // import Crosshair from './modules/crosshair/main.js';
-// import Indicator from "./modules/indicators/main.js";
+import Indicator from "./modules/indicators/main.js";
 // import Osk from './modules/onscreenkeyboard/main.js';
 import Overview from "./modules/overview/main.js";
 import Session from "./modules/session/main.js";
@@ -47,7 +47,7 @@ const Windows = () => [
   DesktopBackground(),
   // forMonitors(Crosshair),
   Overview(),
-  // forMonitors(Indicator),
+  forMonitors(Indicator),
   // forMonitors(Cheatsheet),
   SideLeft(),
   SideRight(),
