@@ -56,7 +56,8 @@ const Shortcuts = () => {
     name: "Unix Porn",
     css:"font-size:1.8rem",
     icon: "\udb81\udfea",
-    onClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
+    onClicked: () => Utils.execAsync(`windsurf ${App.configDir}`),
+    onSecondaryClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
   });
 
   const chatGPTButton = createUtilButton({
