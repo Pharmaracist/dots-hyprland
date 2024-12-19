@@ -3,6 +3,7 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
+import { RevealerState } from "./revealercontrol.js";
 
 const { Box, Button, Overlay, Label, Revealer } = Widget;
 
@@ -35,63 +36,58 @@ const BarResource = (
     className: `txt-smallie ${textClassName}`,
   });
 
-  // Create a Revealer to handle the sliding effect of the resource label
-  const detailRevealer = Revealer({
-    transitionDuration: 100,
-    css: "padding-left:5px", // Adjust this value for the speed of the slide
-    transition: "slide_right", // Slide to the right on reveal
-    revealChild: true,
-    child: resourceLabel, // The resource label is the child of the revealer
+  const detailRevealer = RevealerState.register(Revealer({
+    revealChild: false,
+    transition: "slide_right",
+    transitionDuration: 150,
+    child: resourceLabel,
+  }));
+
+  // Make the circular progress clickable
+  const circProgButton = Button({
+    className: "circular-progress-button",
+    child: resourceCircProg,
+    onClicked: () => {
+      detailRevealer.revealChild = !detailRevealer.revealChild;
+    },
   });
 
-  // Make the entire box clickable
   const widget = Box({
-    className: "clickable-resource-module", // Optional: Add a class for styling
+    className: `spacing-h-5 ${textClassName}`,
     children: [
-      Button({
-        child: Box({
-          className: `spacing-h-5 ${textClassName}`,
-          children: [
-            Box({
+      Box({
+        homogeneous: true,
+        children: [
+          Overlay({
+            child: Box({
+              vpack: "center",
+              className: `${iconClassName}`,
               homogeneous: true,
-              children: [
-                Overlay({
-                  child: Box({
-                    vpack: "center",
-                    className: `${iconClassName}`,
-                    homogeneous: true,
-                    children: [MaterialIcon(icon, "small")],
-                  }),
-                  overlays: [resourceCircProg],
-                }),
-              ],
+              children: [MaterialIcon(icon, "small")],
             }),
-          ],
-          setup: (self) =>
-            self.poll(5000, () => {
-              Utils.execAsync(["bash", "-c", command])
-                .then((output) => {
-                  const value = Math.round(Number(output));
-                  resourceCircProg.css = `font-size: ${value}px;`;
-                  resourceLabel.label = `${value}%`;
-                  widget.tooltipText = `${name}: ${value}%`;
-                })
-                .catch((error) => {
-                  console.error(`Error fetching ${name} data:`, error);
-                  resourceLabel.label = `Error fetching data`;
-                });
-            }),
-        }),
-        onClicked: () => {
-          // Toggle the reveal state of the resource label to trigger the sliding animation
-          detailRevealer.revealChild = !detailRevealer.revealChild;
-        },
+            overlays: [circProgButton],
+          }),
+        ],
       }),
-      detailRevealer, // Add the revealer that will slide the label
+      detailRevealer,
     ],
+    setup: (self) =>
+      self.poll(2000, () => {
+        Utils.execAsync(["bash", "-c", command])
+          .then((output) => {
+            const value = Math.round(Number(output));
+            resourceCircProg.css = `font-size: ${value}px;`;
+            resourceLabel.label = `${value}%`;
+            self.tooltipText = `${name}: ${value}%`;
+          })
+          .catch((error) => {
+            console.error(`Error fetching ${name} data:`, error);
+            resourceLabel.label = `Error`;
+          });
+      }),
   });
 
-  return widget; // Return the clickable widget with the revealer
+  return widget;
 };
 
 const SystemResources = () =>

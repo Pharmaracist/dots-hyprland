@@ -60,10 +60,10 @@ const Shortcuts = () => {
     onSecondaryClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
   });
 
-  const chatGPTButton = createUtilButton({
-    name: "ChatGPT",
-    icon: "smart_toy",
-    onClicked: () => Utils.execAsync(`firefox --new-window chatgpt.com`),
+  const collage = createUtilButton({
+    name: "LMS site",
+    icon: "ecg_heart",
+    onClicked: () => Utils.execAsync(`firefox --new-window http://lms.nv.edu.eg`),
   });
 
   const gitHubButton = createNerdButton({
@@ -108,7 +108,7 @@ const Shortcuts = () => {
       agsTweaksButton,
       gitHubButton,
       unixporn,
-      // chatGPTButton,
+      collage,
       screenSnipButton,
       colorPickerButton,
     ],

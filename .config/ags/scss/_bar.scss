@@ -623,29 +623,59 @@ $bar_ws_width_focus_active: 6.045rem;
 .cava-module {
     .cava-container {
         color: $primary;
-       
+        padding-bottom: 0.05rem;
     }
 
-    .cava-visualizer {
-        font-family: monospace;
+    .cava-visualizer,
+    .cava-visualizer-expanded {
+        @include techfont;
         font-weight: bold;
     }
 
+    .cava-visualizer-expanded {
+        margin-left: 8px;
+    }
+
     .cava-bar {
-        opacity: 0.8;
-        transition: all 150ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
-
-        &.cava-bar-low {
-            color: transparentize($layer0, 0.3);
-        }
-
-        &.cava-bar-med {
-            color: transparentize($secondary, 0.2);
-        }
-
+        transition: all 100ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        
         &.cava-bar-high {
             color: $primary;
-            opacity: 1;
+        }
+        
+        &.cava-bar-med {
+            color: mix($primary, $onSurface, 70%);
+        }
+        
+        &.cava-bar-low {
+            color: mix($primary, $onSurface, 40%);
         }
     }
+}
+
+.circular-progress-button {
+  padding: 0;
+  min-height: 24px;
+  min-width: 24px;
+  
+  &:hover {
+    background: none;
+  }
+}h
+
+.revealer-control-button {
+  padding: 0 8px;
+  margin: 0 2px;
+  border-radius: 16px;
+  transition: all 200ms ease;
+  
+  &:hover {
+    background-color: $surfaceContainer;
+  }
+}
+
+revealer {
+  min-width: 2.5em;
+  padding-left: 5px;
+  transition: all 150ms ease;
 }

@@ -116,6 +116,21 @@ export const keybindList = [[
             { "keys": [">badapple"], "action": "Apply black n' white colorscheme" },
             { "keys": [">color"], "action": "Pick acccent color" },
             { "keys": [">todo"], "action": "Type something after that to add a To-do item" },
+            { "keys": [">calc"], "action": "Quick calculator" },
+            { "keys": [">kill"], "action": "Kill a process by name" },
+            { "keys": [">disk"], "action": "Show disk usage for home directory" },
+            { "keys": [">update"], "action": "Check for system updates" },
+            { "keys": [">vpn"], "action": "Toggle Wireguard VPN connections" },
+            { "keys": [">clean"], "action": "System cleanup utility" },
+            { "keys": [">bt"], "action": "Bluetooth quick controls" },
+            { "keys": [">wall"], "action": "Set random wallpaper" },
+            { "keys": [">mic"], "action": "Microphone controls" },
+            { "keys": [">backup"], "action": "Quick backup utility" },
+            { "keys": [">theme"], "action": "Theme management" },
+            { "keys": [">power"], "action": "Advanced power management" },
+            { "keys": [">workspace"], "action": "Workspace layout management" },
+            { "keys": [">music"], "action": "Enhanced music controls" },
+            { "keys": [">focus"], "action": "Focus mode for productivity" }
         ],
         "id": 8
     }

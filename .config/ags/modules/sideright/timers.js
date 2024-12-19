@@ -30,7 +30,8 @@ const getEndTime = (remainingSeconds) => {
 
 const TimerItem = (timer) => {
     const timerBox = Box({
-        className: 'spacing-h-5',
+        css:"font-size:1.1rem",
+        className: 'spacing-h-5 sidebar-timer-item',
     });
 
     const notifyComplete = () => {
@@ -56,7 +57,7 @@ const TimerItem = (timer) => {
     };
 
     const timeLabel = Label({
-        className: 'txt-norm',
+        className: 'txt-small',
     });
 
     const endTimeLabel = Label({

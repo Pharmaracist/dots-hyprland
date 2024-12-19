@@ -1,10 +1,13 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
+import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
 const { Box, Label, EventBox, Stack } = Widget;
 const { execAsync } = Utils;
 const { GLib } = imports.gi;
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 import PrayerTimesService from '../../../services/prayertimes.js';
+import Media from '../../../services/media.js';
+import NotificationService from '../../../services/notifications.js';
 
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
@@ -61,11 +64,25 @@ const WWO_CODE = {
   '395': 'LightMist',
 };
 
+const MAX_TEXT_LENGTH = 30;
+
+const truncateText = (text, maxLength = MAX_TEXT_LENGTH) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+};
+
 const WeatherWidget = () => {
   const CACHE_DURATION = 15 * 60 * 1000000; // 15 minutes
+  const CYCLE_INTERVAL = 3000; // 3 seconds
+  const PRIORITY_DISPLAY_TIME = 1000; // 1 second for priority displays
   let lastUpdate = 0;
   let cachedData = null;
-  let showingPrayer = false;
+  let displayMode = 'weather';
+  let previousMode = 'weather';
+  let notificationTimeout = null;
+  let cycleTimeout = null;
+  let cachedTrackTitle = null;
+  let lastTitle = null;
 
   const getLocation = async () => {
     try {
@@ -170,32 +187,42 @@ const WeatherWidget = () => {
 
   const weatherIcon = MaterialIcon('device_thermostat', 'large weather-icon txt-norm sec-txt');
   const prayerIcon = MaterialIcon('mosque', 'large weather-icon txt-norm sec-txt');
+  const mediaIcon = MaterialIcon('music_note', 'large weather-icon txt-norm sec-txt');
+  const notificationIcon = MaterialIcon('notifications', 'large weather-icon txt-norm sec-txt');
 
   const tempLabel = Label({
-    className: "txt-norm txt-semibold sec-txt",
+    className: "txt-norm  sec-txt",
     label: "",
   });
 
   const feelsLikeTextLabel = Label({
-    className: "txt-norm txt-semibold sec-txt",
+    className: "txt-norm  sec-txt",
     label: " feels",
   });
 
   const feelsLikeLabel = Label({
-    className: "txt-norm txt-semibold sec-txt",
+    className: "txt-norm  sec-txt",
     label: "",
   });
 
   const prayerNameLabel = Label({
-    className: "txt-norm txt-semibold sec-txt",
+    className: "txt-norm  sec-txt",
     visible: false,
     label: "",
   });
 
   const prayerTimeLabel = Label({
-    className: "txt-norm txt-semibold sec-txt",
+    className: "txt-norm  sec-txt",
     visible: false,
     label: "",
+  });
+
+  const mediaTitleLabel = Label({
+    className: 'txt-norm sec-txt',
+  });
+
+  const notificationLabel = Label({
+    className: 'txt-norm sec-txt',
   });
 
   const weatherContent = Box({
@@ -232,12 +259,44 @@ const WeatherWidget = () => {
     ]
   });
 
+  const mediaContent = Box({
+    className: 'weather-content spacing-h-4',
+    hpack: 'center',
+    vpack: 'center',
+    children: [
+      mediaIcon,
+      Box({
+        className: 'spacing-h-2',
+        hpack: 'center',
+        vpack: 'center',
+        children: [mediaTitleLabel]
+      })
+    ]
+  });
+
+  const notificationContent = Box({
+    className: 'weather-content spacing-h-4',
+    hpack: 'center',
+    vpack: 'center',
+    children: [
+      notificationIcon,
+      Box({
+        className: 'spacing-h-2',
+        hpack: 'center',
+        vpack: 'center',
+        children: [notificationLabel]
+      })
+    ]
+  });
+
   const contentStack = Stack({
     transition: 'slide_up_down',
     transitionDuration: 400,
     children: {
       'weather': weatherContent,
       'prayer': prayerContent,
+      'media': mediaContent,
+      'notification': notificationContent,
     },
   });
 
@@ -276,15 +335,67 @@ const WeatherWidget = () => {
     }
   };
 
-  const toggleDisplay = () => {
-    showingPrayer = !showingPrayer;
-    const state = showingPrayer ? 'prayer' : 'weather';
+  const showPriorityContent = (mode, duration) => {
+    if (notificationTimeout) {
+      GLib.source_remove(notificationTimeout);
+      notificationTimeout = null;
+    }
+
+    previousMode = displayMode;
+    displayMode = mode;
+    contentStack.shown = mode;
+
+    // Return to previous mode after duration
+    notificationTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, duration, () => {
+      displayMode = previousMode;
+      contentStack.shown = previousMode;
+      notificationTimeout = null;
+      return GLib.SOURCE_REMOVE;
+    });
+  };
+
+  const updateMediaInfo = () => {
+    const title = Media.title;
+    const newTitle = title ? truncateText(title) : 'Nothing playing';
     
-    contentStack.shown = state;
+    // If title changed and it's not empty, show it briefly
+    if (newTitle !== lastTitle && title) {
+      mediaTitleLabel.label = newTitle;
+      showPriorityContent('media', PRIORITY_DISPLAY_TIME);
+    } else {
+      mediaTitleLabel.label = newTitle;
+    }
     
-    if (showingPrayer) {
+    lastTitle = newTitle;
+  };
+
+  const showNotification = (notification) => {
+    notificationLabel.label = truncateText(notification.summary) || 'New Notification';
+    showPriorityContent('notification', PRIORITY_DISPLAY_TIME);
+  };
+
+  const cycleModes = () => {
+    // Don't cycle if showing notification
+    if (displayMode === 'notification') return;
+
+    // Cycle through modes: weather -> prayer -> media -> weather
+    switch (displayMode) {
+      case 'weather':
+        displayMode = 'prayer';
+        break;
+      case 'prayer':
+        displayMode = 'media';
+        break;
+      case 'media':
+        displayMode = 'weather';
+        break;
+    }
+    
+    contentStack.shown = displayMode;
+    
+    if (displayMode === 'prayer') {
       const nextPrayer = PrayerTimesService.nextPrayerName;
-      const nextTime = PrayerTimesService.nextPrayerTime?.trim(); // Trim any whitespace
+      const nextTime = PrayerTimesService.nextPrayerTime?.trim();
       if (nextPrayer && nextTime) {
         prayerNameLabel.label = nextPrayer;
         prayerTimeLabel.label = nextTime;
@@ -293,24 +404,49 @@ const WeatherWidget = () => {
     }
   };
 
+  const toggleDisplay = () => {
+    // Clear any existing cycle timeout
+    if (cycleTimeout) {
+      GLib.source_remove(cycleTimeout);
+      cycleTimeout = null;
+    }
+    
+    // Manual cycle
+    cycleModes();
+    
+    // Restart auto-cycle after 3 seconds
+    cycleTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, CYCLE_INTERVAL, () => {
+      cycleModes();
+      return GLib.SOURCE_CONTINUE; // Keep cycling
+    });
+  };
+
   return Widget.EventBox({
     onPrimaryClick: toggleDisplay,
     child: weatherBox,
     setup: self => {
-      // Initial update
+      print('Setting up weather widget');
+      // Initial updates
       updateWidget();
+      updateMediaInfo();
 
-      // Update weather every CACHE_DURATION
-      self.poll(CACHE_DURATION, () => {
-        updateWidget();
+      // Start auto-cycle
+      cycleTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, CYCLE_INTERVAL, () => {
+        cycleModes();
+        return GLib.SOURCE_CONTINUE; // Keep cycling
       });
 
-      // Auto toggle every 5 seconds
-      self.poll(5000, () => {
-        toggleDisplay();
-        return true;
+      // Set up media monitoring
+      Media.connect('changed', updateMediaInfo);
+      
+      // Set up notification monitoring
+      NotificationService.connect('notification-added', () => {
+        showNotification({ summary: 'New Notification' });
       });
-    },
+      
+      // Regular weather updates
+      self.poll(CACHE_DURATION / 1000000, updateWidget);
+    }
   });
 };
 

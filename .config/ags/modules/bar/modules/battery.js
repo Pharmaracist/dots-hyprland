@@ -2,9 +2,10 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
-const { Box, Label, Overlay, Revealer, EventBox } = Widget;
+const { Box, Label, Overlay, Revealer, EventBox, Button } = Widget;
 const { execAsync, exec } = Utils;
 const { GLib } = imports.gi;
+import { RevealerState } from "./revealercontrol.js";
 
 // Common widgets
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
@@ -100,27 +101,32 @@ const BatteryContent = () => {
         ]
     });
 
-    const detailsRevealer = Revealer({
+    const detailsRevealer = RevealerState.register(Revealer({
         transitionDuration: userOptions.animations?.durationLarge || 150,
         transition: "slide_right",
         revealChild: true,
         child: percentageBox,
-    });
+    }));
 
-    const batteryIcon = Overlay({
-        child: Box({
-            vpack: "center",
-            className: "bar-bat",
-            homogeneous: true,
-            children: [],
-            setup: (self) =>
-                self.hook(Battery, (box) => {
-                    box.toggleClassName("bar-bat-low", Battery.percent <= (userOptions.battery?.low || 20));
-                    box.toggleClassName("bar-bat-full", Battery.charged);
-                    box.toggleClassName("bar-bat-charging", Battery.charging);
-                }),
+    const batteryIcon = Button({
+        child: Overlay({
+            child: Box({
+                vpack: "center",
+                className: "bar-bat",
+                homogeneous: true,
+                children: [],
+                setup: (self) =>
+                    self.hook(Battery, (box) => {
+                        box.toggleClassName("bar-bat-low", Battery.percent <= (userOptions.battery?.low || 20));
+                        box.toggleClassName("bar-bat-full", Battery.charged);
+                        box.toggleClassName("bar-bat-charging", Battery.charging);
+                    }),
+            }),
+            overlays: [BarBatteryProgress()],
         }),
-        overlays: [BarBatteryProgress()],
+        onClicked: () => {
+            detailsRevealer.revealChild = !detailsRevealer.revealChild;
+        },
     });
 
     const updateBatteryDetails = async () => {
@@ -149,32 +155,36 @@ const BatteryContent = () => {
     updateBatteryDetails();
 
     // Periodic updates
-    timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 5000, () => {
-        updateBatteryDetails();
-        return GLib.SOURCE_CONTINUE;
-    });
+    const startPeriodicUpdates = () => {
+        if (timeoutId) return;
+        timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10000, () => {
+            updateBatteryDetails();
+            return GLib.SOURCE_CONTINUE;
+        });
+    };
 
-    return Box({
-        className: "bar-battery-module spacing-h-10",
-        children: [
-            Box({
-                className: "bar-battery-content",
-                children: [batteryIcon]
-            }),
-            detailsRevealer
-        ],
-        setup: (self) => {
-            self.revealer = detailsRevealer;
+    startPeriodicUpdates();
+
+    return EventBox({
+        onPrimaryClick: () => {
+            detailsRevealer.revealChild = !detailsRevealer.revealChild;
         },
+        child: Box({
+            className: "battery-module spacing-h-5",
+            children: [
+                batteryIcon,
+                detailsRevealer,
+            ],
+        }),
     });
 };
 
 export default () => Widget.EventBox({
     onPrimaryClick: (self) => {
-        self.child.revealer.revealChild = !self.child.revealer.revealChild;
+        execAsync(["bash", "-c", userOptions.apps.power]).catch(print);
     },
     onSecondaryClick: () => {
-        Utils.execAsync(['xfce4-power-manager-settings']).catch(print);
+        execAsync(["bash", "-c", userOptions.apps.power]).catch(print);
     },
     onMiddleClick: () => {},
     child: BatteryContent(),

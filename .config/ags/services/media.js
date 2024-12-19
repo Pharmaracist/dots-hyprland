@@ -16,7 +16,7 @@ class LocalMediaService extends Service {
 
     #player = null;
     #lastPlayerName = '';
-    #positionBinding = null;
+    #lastTitle = '';
 
     constructor() {
         super();
@@ -25,40 +25,44 @@ class LocalMediaService extends Service {
     }
 
     _setupPlayerTracking() {
-        this.#player = Mpris.getPlayer();
-        if (this.#player) {
-            this.#lastPlayerName = this.#player.identity;
-            this.notify('changed');
-            this._setupPlayerBindings();
+        try {
+            this.#player = Mpris.getPlayer();
+            if (this.#player) {
+                this.#lastPlayerName = this.#player.identity;
+                this.#lastTitle = this.#player.trackTitle;
+                this.emit('changed');
+            }
+        } catch (error) {
+            console.error('Error setting up player tracking:', error);
         }
     }
 
     _onPlayerChanged() {
-        const newPlayer = Mpris.getPlayer();
-        if (newPlayer !== this.#player) {
-            this.#player = newPlayer;
-            this.notify('changed');
-            this._setupPlayerBindings();
+        try {
+            const newPlayer = Mpris.getPlayer();
+            const newTitle = newPlayer?.trackTitle;
+            
+            if (newPlayer !== this.#player || newTitle !== this.#lastTitle) {
+                this.#player = newPlayer;
+                this.#lastTitle = newTitle;
+                this.emit('changed');
+            }
+        } catch (error) {
+            console.error('Error handling player change:', error);
         }
     }
 
-    _setupPlayerBindings() {
-        if (this.#positionBinding) {
-            this.#positionBinding.unbind();
-            this.#positionBinding = null;
-        }
-
-        if (this.#player) {
-            this.#positionBinding = this.#player.bind('position', this, 'position');
-        }
+    get player() {
+        return this.#player;
     }
 
-    get player() { return this.#player; }
-    get playerName() { return this.#player?.identity || ''; }
-    get title() { return this.#player?.trackTitle || ''; }
-    get artist() { return this.#player?.trackArtists?.join(', ') || ''; }
-    get artUrl() { return this.#player?.trackCoverUrl || ''; }
-    get position() { return this.#player?.position || 0; }
+    get title() {
+        return this.#player?.trackTitle || '';
+    }
+
+    get artist() {
+        return this.#player?.trackArtists?.join(', ') || '';
+    }
 }
 
 export default new LocalMediaService();

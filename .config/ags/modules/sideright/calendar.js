@@ -139,7 +139,7 @@ const CalendarWidget = () => {
 const defaultShown = 'prayers';
 const contentStack = Widget.Stack({
     hexpand: true,
-    css: 'min-width: 15em; min-height: 30em;',
+    // css: 'min-width: 15em; min-height: 30em;',
     children: {
         'prayers': PrayerTimesWidget(),
         'calendar': CalendarWidget(),
@@ -177,13 +177,13 @@ const StackButton = (stackItemName, icon, name) => Widget.Button({
 
 export const ModuleCalendar = () => Box({
     className: 'sidebar-group spacing-h-5',
-    hexpand: false,
+    hexpand: true,
     setup: box => {
         box.pack_start(Box({
             vertical: true,
             vpack: 'center',
             className: 'sidebar-navrail',
-            css: 'min-height: 25rem; padding: 1rem 0.6rem; min-width: 4rem;',
+            css: 'min-height: 20rem; padding: 2rem 0.4rem; min-width: 1.7rem;',
             child: Widget.Scrollable({
                 vexpand: true,
                 hscroll: 'never',
@@ -192,7 +192,7 @@ export const ModuleCalendar = () => Box({
                     vertical: true,
                     vpack: 'center',
                     className: 'spacing-v-15',
-                    css: 'padding: 0.5rem 0;',
+                    // css: 'padding: 0.5rem 0;',
                     children: [
                         StackButton('prayers', 'mosque', getString('Prayers')),
                         StackButton('calendar', 'calendar_month', getString('Calendar')),

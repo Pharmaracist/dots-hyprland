@@ -92,11 +92,11 @@ export default () => Box({
                         hexpand: true,
                         children: [
                             TrackTitle({ player: getPlayer() }),
-                            TrackTime({ player: getPlayer() }),
+                            // TrackTime({ player: getPlayer() }),
                         ],
                     }),
                     Box({
-                        className: 'sideright-music-controls',
+                        className: 'sec-txt ',
                         hpack: 'end',
                         setup: self => self.hook(Mpris, () => {
                             const player = getPlayer();

@@ -4,8 +4,22 @@
   "volume": 100,
   "playing": false,
   "repeat": false,
-  "shuffle": false,
+  "shuffle": true,
   "searchResults": [
+    {
+      "videoId": "7mct7NrQq_A",
+      "title": "علشان خاطر العدرا يارب",
+      "artists": [
+        {
+          "name": "Aghapy choir"
+        },
+        {
+          "name": "2.4M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/Rk8h9iPbT2GVO_pA5aur-49j3vmWJza4GRNLrpcXIlXSgMl5thNQSnXzsNYZNPeRQoT82_Yp-ZeKnits=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
     {
       "videoId": "hwW9hbvWozM",
       "title": "ياما ليالي وانت مش معايا",
@@ -18,90 +32,6 @@
         }
       ],
       "thumbnail": "https://lh3.googleusercontent.com/uU0NNV4ia_naXCqFsRWQkEYp3kU0bHRI7BT6ocEkJFpFOgxi-Jn5Pu_QCWcER7zam74UPIjN9WbNv3k=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "rjhlqNlmVgU",
-      "title": "علمني انتظرك يارب",
-      "artists": [
-        {
-          "name": "Father Joseph John"
-        },
-        {
-          "name": "5.3M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/XNCd9Rd9Q_6HGjl4n8Y5Kwq_ytzdsLG6Lq1aOiPlRaYXShblqjnxn2tOfm7KwEKApK8Q6FZS1dfE6j7U=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "_MuRtKVA7w4",
-      "title": "ماتيجي اعدي عليكي",
-      "artists": [
-        {
-          "name": "TUL8TE"
-        },
-        {
-          "name": "5.8M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/76fLJ5CHZ6-p9CX5LJ6I9rz1DwgJjOzAdbmwJzyUs95DQBeLup_cKOsiJv9ctWgZQakrtwJ7JEWENaz7Lg=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "J9reOTF3qYw",
-      "title": "فرحه الدلوعه",
-      "artists": [
-        {
-          "name": "ميدو مزيكا"
-        },
-        {
-          "name": "8M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/3_TonJJhL6a7qXp-gfceOdPYJbF21QtbEcgWQcoHCkH2x5vUHFbJaRZyAq7eG-v6oSfFs6Bztfk3AZs=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "XqoanTj5pNY",
-      "title": "Someone Like You",
-      "artists": [
-        {
-          "name": "Adele"
-        },
-        {
-          "name": "2.9B plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/y6b4yT6dCKEVmzBvATUWodOFLYc81vwxuK0nTgE-scZ3BvyuY9639NL_UyGc6zc_ASoELG67fDUNta0=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "3AIj4sov72c",
-      "title": "بيكلموني",
-      "artists": [
-        {
-          "name": "Ramy Gamal"
-        },
-        {
-          "name": "36M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/sRGpajgFlpl-xWqFAqfNlKdYhmoC75mzzubRkkJARfsd6m30bCJhy87NuCNPAX8I8H-o0hFiPFFZHUTH=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "52KO_urIgEI",
-      "title": "Wein",
-      "artists": [
-        {
-          "name": "Al Shami"
-        },
-        {
-          "name": "165M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/Vz5AbJby_RKscwlZGKuzJt15cP8uPRua3WrGTCTB4hpxASHym6lNjmGuaOVWMMErD3dCJ9xpTQ0CtM2Z=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
@@ -119,17 +49,101 @@
       "isDownloaded": false
     },
     {
-      "videoId": "nWDTSAE5O0s",
-      "title": "ترنيمة أصليله",
+      "videoId": "gMrkWVQuxqA",
+      "title": "هو انت مين",
       "artists": [
         {
-          "name": "ترانيم مسيحية"
+          "name": "Angham"
         },
         {
-          "name": "20M plays"
+          "name": "19M plays"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/IZKG1TOysW9uTl-Esbnry_Rf1LsapT7D8b089kVe3WzTRVN-aymHdALZe6wa0O9X1ypGGxRDrGq4qM6D=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/elUOQSxZJJPaCj3jGNIeoomDiTqHrEreyUiJ5hwvLKZe4d9bOjyTMcMOqahz7kywzXIOgBZ_MPlonTDe=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "Wf7uWdpUPQ0",
+      "title": "Ana Meen",
+      "artists": [
+        {
+          "name": "زاد"
+        },
+        {
+          "name": "4M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/gRyepBE43xCjx1kVA4co4luGFf0pAXEBMPYG9S5OTdMMBjnOu4SVIAkVKzsLxCIUL-CV4Kc8AswGx6Q=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "52KO_urIgEI",
+      "title": "Wein",
+      "artists": [
+        {
+          "name": "Al Shami"
+        },
+        {
+          "name": "165M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/Vz5AbJby_RKscwlZGKuzJt15cP8uPRua3WrGTCTB4hpxASHym6lNjmGuaOVWMMErD3dCJ9xpTQ0CtM2Z=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "XqoanTj5pNY",
+      "title": "Someone Like You",
+      "artists": [
+        {
+          "name": "Adele"
+        },
+        {
+          "name": "2.9B plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/y6b4yT6dCKEVmzBvATUWodOFLYc81vwxuK0nTgE-scZ3BvyuY9639NL_UyGc6zc_ASoELG67fDUNta0=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "6r2nBhBUYHs",
+      "title": "Haygely Mawgow3",
+      "artists": [
+        {
+          "name": "Tamer Ashour"
+        },
+        {
+          "name": "206M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/f1Uz1r0LWOQY3Lrw6A-aigkEDeXakVyPfhOu1wlUpyLxoN7FTAGAOr4mX1GD8J0_nBjc4pgSsPCG1Oqy=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "tj9JhwT3_nw",
+      "title": "ادم وجميله",
+      "artists": [
+        {
+          "name": "ادم وجميله"
+        },
+        {
+          "name": "285K plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/D2yTqsm5DUR2WM-5uosbZATc3grx8pp6oMXVOnJr0gtDqbwtAC8tpYI0Qnud2fy1LLlv25Zt6Tq0q-5k-Q=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "J9reOTF3qYw",
+      "title": "فرحه الدلوعه",
+      "artists": [
+        {
+          "name": "ميدو مزيكا"
+        },
+        {
+          "name": "8M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/3_TonJJhL6a7qXp-gfceOdPYJbF21QtbEcgWQcoHCkH2x5vUHFbJaRZyAq7eG-v6oSfFs6Bztfk3AZs=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
@@ -150,17 +164,34 @@
       "isDownloaded": false
     },
     {
-      "videoId": "iMdZYRwZiK0",
-      "title": "KEBDA",
+      "videoId": "vAWI07-Fhzs",
+      "title": "زميلي كداب",
       "artists": [
         {
-          "name": "Afroto ft. ONUY"
+          "name": "Eslam Kabonga"
         },
         {
-          "name": "19M plays"
+          "name": "كلوشه"
+        },
+        {
+          "name": "2.6M plays"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/A3EscWr7KXBH2W-5aLUX945oz2oeHMvTJw1JG9PYEqTzk3Pi1mN8mz1VvZe5YK0-OnjZnylzuJJ2HQE=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/9OVSI4nxImpIjPNd6my4lPOgw0jfhMTBC0QIKwsoX-kOXEYh3Wpd6BXf-uJizvJHMZrVL-hT0-OEQ5Q=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "EfO7RRN9BEk",
+      "title": "ايدك فى ايدي",
+      "artists": [
+        {
+          "name": "Amr Gaber"
+        },
+        {
+          "name": "4.7M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/QUXKQsXh56xIDCV7PW4zRlET42dsiRyhpsqF3n9S0p2fy5W7R2yo77kEYliWUYY8Y5lkEuyFmHDu5hO6=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
@@ -178,101 +209,20 @@
       "isDownloaded": false
     },
     {
-      "videoId": "Rn6xaTMQ6iE",
-      "title": "Ana Hont Alik - انا هونت عليك ( وجالك قلب )",
+      "videoId": "RVDCeVG90Rg",
+      "title": "Die With A Smile",
       "artists": [
         {
-          "name": "Houda Bondok - حودة بندق"
+          "name": "Lady Gaga"
         },
         {
-          "name": "35M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/8FSc56gblxJK7xfEPXmCPL9m_jWi3EtPC9b3jyoVheg_9A74H037XPyhpJ53w_sf7C9HiCFMPNnRSh6J=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "bQZoUh3c12U",
-      "title": "الحب الحب سنيوريتا",
-      "artists": [
-        {
-          "name": "Fares Sokr"
+          "name": "Bruno Mars"
         },
         {
-          "name": "374K plays"
+          "name": "847M plays"
         }
       ],
-      "thumbnail": "https://lh3.googleusercontent.com/6rLahJ3NNlaz1E74X0f1Lkq8-TKdqPi0B0LdmNN7F2xnecGep0DGLfuYJV8UboV9s1LJ2U6o4vqgKlTZ=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "6r2nBhBUYHs",
-      "title": "Haygely Mawgow3",
-      "artists": [
-        {
-          "name": "Tamer Ashour"
-        },
-        {
-          "name": "205M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/f1Uz1r0LWOQY3Lrw6A-aigkEDeXakVyPfhOu1wlUpyLxoN7FTAGAOr4mX1GD8J0_nBjc4pgSsPCG1Oqy=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "tOL93WWFBc8",
-      "title": "El Bakht",
-      "artists": [
-        {
-          "name": "Wegz"
-        },
-        {
-          "name": "356M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/nZt2y7CdnniHs862SQkxakW36m7raUqf58hyb9vJvP032geUex3PeHCOxCzBxhD5yoeelVf9sAvSrrk=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "90SSeL82qh0",
-      "title": "Ahwak",
-      "artists": [
-        {
-          "name": "Abdel Halim Hafez"
-        },
-        {
-          "name": "46M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/S9UktTiv8uhcCbDv-rWtDBJ5T76k-WaLxQ_PhZF1il9ddhcKPhwDlYFzoR47j6MhTRnhTen6lLRcs3CdXw=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "S0wPviw4ZZI",
-      "title": "Awla beya - أولي بيا",
-      "artists": [
-        {
-          "name": "Amr Mostafa"
-        },
-        {
-          "name": "157K plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/-bPHLBlDM2hgY_SXFe0iAV-LbBY694pGoyR6QW5dXDOqzLYlhrSzzdKv8lxXA2gFzzfwLYqJOUnFClg=w120-h120-l90-rj",
-      "isDownloaded": false
-    },
-    {
-      "videoId": "Us3y7js9SO8",
-      "title": "Ana Mn Gherak",
-      "artists": [
-        {
-          "name": "Bahaa Sultan"
-        },
-        {
-          "name": "21M plays"
-        }
-      ],
-      "thumbnail": "https://lh3.googleusercontent.com/EDeOoXPsaXEJ4laCKWxoYGZkNjiDo3phavU16j6xhba6hTpwQWKhKa9nC2IVX4HL4rpLt7oM4-aixhtx=w120-h120-l90-rj",
+      "thumbnail": "https://lh3.googleusercontent.com/x5ST0wHIxD__IIxHF1UqUgXP4QW58ouj1EHROC9I5yHIb8cmoNr9rL54RfA-BnYay_eWmmOJfXNuFqmPEA=w120-h120-l90-rj",
       "isDownloaded": false
     },
     {
@@ -287,6 +237,65 @@
         }
       ],
       "thumbnail": "https://lh3.googleusercontent.com/vEjuJLw_oHpeXo9mj8BTS2hagRUUH9JFJOLxwQMjCWB2uNhvS8pVaNK1TPHAs48I-OGepy7vI2UVLCdsEA=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "3AIj4sov72c",
+      "title": "بيكلموني",
+      "artists": [
+        {
+          "name": "Ramy Gamal"
+        },
+        {
+          "name": "36M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/sRGpajgFlpl-xWqFAqfNlKdYhmoC75mzzubRkkJARfsd6m30bCJhy87NuCNPAX8I8H-o0hFiPFFZHUTH=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "MLgCidfXl4Y",
+      "title": "حبيبي ليه",
+      "artists": [
+        {
+          "name": "TUL8TE"
+        },
+        {
+          "name": "7.3M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/76fLJ5CHZ6-p9CX5LJ6I9rz1DwgJjOzAdbmwJzyUs95DQBeLup_cKOsiJv9ctWgZQakrtwJ7JEWENaz7Lg=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "58-AKkNMZNQ",
+      "title": "APT.",
+      "artists": [
+        {
+          "name": "ROSÉ"
+        },
+        {
+          "name": "Bruno Mars"
+        },
+        {
+          "name": "1.1B plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/notDXHngiDUGxcfGSLuD6TyQN3UnyBXJ1QfkhlckPs5Ji49ehTtZur5HS3Bea5NTRc6_cx3ij4pA9N_5GA=w120-h120-l90-rj",
+      "isDownloaded": false
+    },
+    {
+      "videoId": "Us3y7js9SO8",
+      "title": "Ana Mn Gherak",
+      "artists": [
+        {
+          "name": "Bahaa Sultan"
+        },
+        {
+          "name": "22M plays"
+        }
+      ],
+      "thumbnail": "https://lh3.googleusercontent.com/EDeOoXPsaXEJ4laCKWxoYGZkNjiDo3phavU16j6xhba6hTpwQWKhKa9nC2IVX4HL4rpLt7oM4-aixhtx=w120-h120-l90-rj",
       "isDownloaded": false
     }
   ],

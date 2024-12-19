@@ -2,6 +2,7 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 const { execAsync, exec } = Utils;
 const { Box, EventBox, Label } = Widget;
+import RevealerControl from "../bar/modules/revealercontrol.js";
 import {
   ToggleIconBluetooth,
   ToggleIconWifi,
@@ -70,6 +71,7 @@ const centerWidgets = [
 
 const timeRow = Box({
   className: "spacing-h-10 sidebar-group-invisible-morehorizpad",
+  css:'padding:1rem',
   children: [
     Widget.Icon({
       icon: getDistroIcon(),
@@ -129,21 +131,33 @@ const timeRow = Box({
     Widget.Box({ hexpand: true }),
     // ModuleReloadIcon({ hpack: "end" }),
     // ModuleSettingsIcon({ hpack: "end" }),
-    ModulePowerIcon({ hpack: "end" }),
+    // ModulePowerIcon({ hpack: "end" }),
   ],
 });
 
 const togglesBox = Widget.Box({
   hpack: "center",
-  className: "sidebar-togglesbox spacing-h-5",
   children: [
-    ToggleIconWifi(),
-    ToggleIconBluetooth(),
-    // await ModuleRawInput(),
+    Widget.Box({
+      vertical:true,
+      className: "spacing-v-15 ",
+    children: [
+      await  ToggleIconWifi(),
+      await ToggleIconBluetooth(),
+    ]
+   }),
+   Widget.Box({
+    className: "spacing-v-15 ",
+    vertical:true,
+    children: [
+      await ModuleNightLight(),
+      ModuleIdleInhibitor(),
+      RevealerControl(),
+      // await ModuleCloudflareWarp(),
+    ]
+   }), 
+   // await ModuleRawInput(),
     // await HyprToggleIcon('touchpad_mouse', 'No touchpad while typing', 'input:touchpad:disable_while_typing', {}),
-    await ModuleNightLight(),
-    ModuleIdleInhibitor(),
-    await ModuleCloudflareWarp(),
   ],
 });
 
@@ -173,12 +187,13 @@ export default () =>
       Box({
         vertical: true,
         vexpand: true,
-        className: "sidebar-right spacing-v-15",
+        className: "sidebar-right spacing-v-10",
         children: [
           Box({
             vertical: true,
-            className: "spacing-v-5",
-            children: [timeRow, togglesBox],
+            // className: "sidebar-group",
+
+            children: [ timeRow,togglesBox],
           }),
           Box({
             className: "sidebar-group",
@@ -189,6 +204,9 @@ export default () =>
             children: [ModuleCalendar()],
           }),
           ModuleMusicControls(),
+          // Box({
+          //   children: [timeRow],
+          // }),
         ],
       }),
     ],

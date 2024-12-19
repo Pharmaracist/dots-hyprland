@@ -9,7 +9,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include elevation-border;
     @include elevation2;
     border-radius: $rounding_large - $elevation_margin + 0.068rem;
-    min-width: 25.818rem;
+    min-width: 28.818rem;
     background-color: $background;
     padding: 1.023rem;
 }
@@ -19,7 +19,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include elevation-border;
     @include elevation2;
     border-radius: $rounding_large - $elevation_margin + 0.068rem;
-    min-width: 25.818rem;
+    min-width: 28.818rem;
     background-color: $background;
     padding: 1.023rem;
 }
@@ -48,13 +48,30 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include group-padding;
     background-color: $layer1;
 }
-
+.sidebar-toggles-label{
+    @include mainfont;
+    @include element_decel;
+    color:$onSurfaceVariant;
+    &-active{
+        color:$surfaceContainerLowest;
+    }
+}
 .sidebar-iconbutton {
     @include full-rounding;
     @include element_decel;
     color: $onSurface;
-    min-width: 2.727rem;
+    background-color: $hovercolor;
+    padding:0.8rem 1.5rem;
+    margin:0.3rem;
+    min-width: 10.727rem;
     min-height: 2.727rem;
+}
+
+.toggle-label{
+  @include titlefont;
+  @include element_decel;
+  color:$onSecondaryContainer;
+  font-weight:500;
 }
 
 .sidebar-iconbutton:hover,
@@ -88,11 +105,14 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
 
 .sidebar-navrail {
     padding: 0rem $rounding_medium;
+    color: $onSurface;
 }
 
 .sidebar-navrail-btn > box > label {
     @include full-rounding;
     @include menu_decel;
+    
+
 }
 
 .sidebar-navrail-btn:hover > box > label:first-child,
@@ -964,14 +984,13 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 }
 
 .sidebar-music-controls {
-    padding: 0.341rem;
-    margin: 0.341rem;
+   
 }
 
 .sidebar-music-btn {
     @include full-rounding;
     @include element_decel;
-    padding: 0.682rem;
+    // padding: 0.682rem;
     background-color: $layer2;
     color: $onSurface;
 }
@@ -1001,7 +1020,7 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-music-cover {
     @include normal-rounding;
     background-color: $layer2;
-    min-height: 200px;
+    // min-height: 200px;
     background-size: cover;
     background-position: center;
 }
@@ -1122,22 +1141,28 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-prayertime-top {
     @include normal-rounding;
     background-color: mix($primary, $layer1Active, 40%);
-    padding: 0.682rem;
-    margin-top:0.7rem;
+    padding: 0.82rem;
+    // margin-top:0.7rem;
     margin-bottom: 1rem;
-    border:0.2rem solid $outline;
+    color:$onSecondaryContainer;
+    // border:0.2rem solid $outline;
 }
 
 .sidebar-prayertime-next {
     margin: 1.682rem 0;
     margin-top: 0.341rem;
-    @include mainfont;
+    margin-right:1.5rem;
+    @include titlefont;
+    color:$onSecondaryContainer;
+
 
 }
 
 .sidebar-prayertime-item {
     @include small-rounding;
-    @include mainfont;
+    @include titlefont;
+    color:$onSecondaryContainer;
+
 
     @include element_decel;
     padding: 0.682rem;
@@ -1222,6 +1247,9 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 // Timer Module Styles
 .sidebar-timer {
     @include normal-rounding;
+    @include titlefont;
+    color: $onSurface;
+
     
     &-btn {
         @include normal-rounding;
@@ -1238,10 +1266,14 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
             }
         }
     }
-
+    &-item{
+        @include normal-rounding;
+        @include titlefont;
+        color: $onSurface;
+    }
     &-icon {
         @include icon-material;
-        font-size: 1.1em;
+        // font-size: 1.1em;
     }
 }
 
@@ -1628,4 +1660,18 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .task-manager-scrollable {
     min-height: 20.455rem;
+}
+
+.ytm-header {
+    padding: 8px;
+    margin: 4px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+
+    .ytm-view-indicator {
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0.9;
+        margin: 0 8px;
+    }
 }
