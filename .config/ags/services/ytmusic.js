@@ -1338,61 +1338,27 @@ class YouTubeMusicService extends Service {
         this.notify('downloaded-tracks');
     }
 
-    _cleanupCache() {
-        const now = Date.now();
-        const cacheDir = this._getOption('cacheDir');
-        const maxCacheSize = this._getOption('maxCacheSize');
-        
-        // Cleanup memory caches
-        for (const [key, { timestamp }] of this._audioUrlCache.entries()) {
-            if (now - timestamp > this._cacheTimeout) {
-                this._audioUrlCache.delete(key);
-            }
-        }
-        
-        for (const [key, { timestamp }] of this._trackInfoCache.entries()) {
-            if (now - timestamp > this._cacheTimeout) {
-                this._trackInfoCache.delete(key);
-            }
-        }
-
-        // Cleanup disk cache if it exceeds max size
+    _cleanupCache(cacheDir) {
         try {
-            let totalSize = 0;
-            const files = [];
-            
-            // Get all cached files and their info
-            if (GLib.file_test(cacheDir, GLib.FileTest.EXISTS)) {
-                const dir = Gio.File.new_for_path(cacheDir);
-                const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
-                
-                let fileInfo;
-                while ((fileInfo = enumerator.next_file(null)) !== null) {
-                    const path = GLib.build_filenamev([cacheDir, fileInfo.get_name()]);
-                    const size = fileInfo.get_size();
-                    const accessTime = fileInfo.get_access_time().tv_sec;
-                    files.push({ path, size, accessTime });
-                    totalSize += size;
-                }
-            }
+            const dir = Gio.File.new_for_path(cacheDir);
+            if (!dir.query_exists(null)) return;
 
-            // If cache exceeds max size, delete oldest files until under limit
-            if (totalSize > maxCacheSize) {
-                files.sort((a, b) => a.accessTime - b.accessTime);
+            const children = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+            let fileInfo;
+            const now = GLib.get_real_time() / 1000000; // Convert to seconds
+            const maxAge = 24 * 60 * 60; // 24 hours in seconds
+
+            while ((fileInfo = children.next_file(null)) !== null) {
+                const child = dir.get_child(fileInfo.get_name());
+                const info = child.query_info('time::modified', Gio.FileQueryInfoFlags.NONE, null);
+                const mtime = info.get_modification_time().tv_sec;
                 
-                for (const file of files) {
-                    if (totalSize <= maxCacheSize) break;
-                    
-                    try {
-                        GLib.unlink(file.path);
-                        totalSize -= file.size;
-                    } catch (e) {
-                        logError(e);
-                    }
+                if (now - mtime > maxAge) {
+                    child.delete(null);
                 }
             }
-        } catch (e) {
-            logError(e);
+        } catch (error) {
+            console.error('Error cleaning cache:', error);
         }
     }
 

@@ -60,7 +60,7 @@ const chooseDefaultApp = (mimeType, currentApp, title) => {
             const mimeTypes = content.match(/^MimeType=(.*)$/m)?.[1]?.split(';') || [];
             
             if (name && (mimeTypes.includes(mimeType) || app.includes(mimeType.split('/')[0]))) {
-                choices.push(`${name}:${app.split('/').pop()}`);
+                choices.push(`${name}:${app}`);
             }
         }
         return choices.sort();
@@ -72,22 +72,64 @@ const chooseDefaultApp = (mimeType, currentApp, title) => {
             .then(selected => {
                 if (selected) {
                     const desktopFile = selected.split(':')[1].trim();
-                    Utils.execAsync(['xdg-mime', 'default', desktopFile, mimeType])
+                    // Use gio to set the default application
+                    Utils.execAsync(['gio', 'mime', mimeType, desktopFile])
                         .then(() => {
                             if (!config.value.defaultApplications) config.value.defaultApplications = {};
                             config.value.defaultApplications[mimeType] = desktopFile;
                             config.write();
-                            // Force refresh the label
+                            
+                            // Update the display immediately
                             const currentLabel = document.querySelector(`[data-mime-type="${mimeType}"]`);
                             if (currentLabel) {
-                                currentLabel.label = Utils.exec(`xdg-mime query default ${mimeType}`).trim() || 'Not set';
+                                const defaultApp = Utils.exec(`gio mime ${mimeType}`).split('\n')
+                                    .find(line => line.includes('Default application'))?.split(': ')[1] || 'Not set';
+                                currentLabel.label = defaultApp;
                             }
+
+                            // Also update XDG associations
+                            Utils.execAsync(['xdg-mime', 'default', desktopFile.split('/').pop(), mimeType]);
+                            
+                            // Update mimeapps.list
+                            const mimeappsDir = `${GLib.get_user_config_dir()}/mimeapps.list`;
+                            const desktopEntry = desktopFile.split('/').pop();
+                            
+                            // Properly escape the sed pattern
+                            const escapedMimeType = mimeType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            
+                            Utils.execAsync(['bash', '-c', `
+                                if [ ! -f "${mimeappsDir}" ]; then
+                                    mkdir -p "$(dirname "${mimeappsDir}")"
+                                    echo "[Default Applications]" > "${mimeappsDir}"
+                                elif ! grep -q "\\[Default Applications\\]" "${mimeappsDir}"; then
+                                    echo "[Default Applications]" >> "${mimeappsDir}"
+                                fi
+                                sed -i "/^${escapedMimeType}=/d" "${mimeappsDir}"
+                                echo "${mimeType}=${desktopEntry}" >> "${mimeappsDir}"
+                            `]);
                         })
                         .catch(print);
                 }
             })
             .catch(print);
     }
+};
+
+// Helper function to get current default app
+const getCurrentDefault = (mimeType) => {
+    const gioDefault = Utils.exec(`gio mime ${mimeType}`).split('\n')
+        .find(line => line.includes('Default application'))?.split(': ')[1];
+    if (gioDefault) return gioDefault;
+
+    const xdgDefault = Utils.exec(`xdg-mime query default ${mimeType}`).trim();
+    if (xdgDefault) {
+        const desktopFile = `/usr/share/applications/${xdgDefault}`;
+        if (Utils.exec(`test -f "${desktopFile}" && echo "exists"`)) {
+            const name = Utils.exec(`grep -oP "(?<=^Name=).*" "${desktopFile}" | head -1`).trim();
+            return name || xdgDefault;
+        }
+    }
+    return 'Not set';
 };
 
 export default (props) => {
@@ -419,7 +461,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default x-scheme-handler/http').trim() || 'Not set',
+                                                label: getCurrentDefault('x-scheme-handler/http'),
                                                 attribute: { 'data-mime-type': 'x-scheme-handler/http' },
                                             }),
                                         ]
@@ -448,7 +490,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default inode/directory').trim() || 'Not set',
+                                                label: getCurrentDefault('inode/directory'),
                                                 attribute: { 'data-mime-type': 'inode/directory' },
                                             }),
                                         ]
@@ -477,7 +519,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default x-scheme-handler/terminal').trim() || 'Not set',
+                                                label: getCurrentDefault('x-scheme-handler/terminal'),
                                                 attribute: { 'data-mime-type': 'x-scheme-handler/terminal' },
                                             }),
                                         ]
@@ -506,7 +548,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default text/plain').trim() || 'Not set',
+                                                label: getCurrentDefault('text/plain'),
                                                 attribute: { 'data-mime-type': 'text/plain' },
                                             }),
                                         ]
@@ -535,7 +577,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default x-scheme-handler/calculator').trim() || 'Not set',
+                                                label: getCurrentDefault('x-scheme-handler/calculator'),
                                                 attribute: { 'data-mime-type': 'x-scheme-handler/calculator' },
                                             }),
                                         ]
@@ -564,7 +606,7 @@ export default (props) => {
                                             Label({
                                                 xalign: 0,
                                                 className: 'txt-small txt-subtext',
-                                                label: Utils.exec('xdg-mime query default image/png').trim() || 'Not set',
+                                                label: getCurrentDefault('image/png'),
                                                 attribute: { 'data-mime-type': 'image/png' },
                                             }),
                                         ]

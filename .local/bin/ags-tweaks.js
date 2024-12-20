@@ -82,6 +82,71 @@ function writeFileSync(path, contents) {
     }
 }
 
+function createProfilePhotoButton() {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        spacing: 8
+    });
+
+    const image = new Gtk.Image({
+        icon_name: 'camera-photo-symbolic'
+    });
+
+    const label = new Gtk.Label({
+        label: 'Choose Photo'
+    });
+
+    const button = new Gtk.Button();
+    box.append(image);
+    box.append(label);
+    button.set_child(box);
+
+    button.connect('clicked', () => {
+        const dialog = new Gtk.FileChooserDialog({
+            title: 'Select Profile Photo',
+            action: Gtk.FileChooserAction.OPEN,
+            modal: true
+        });
+
+        dialog.add_button('Cancel', Gtk.ResponseType.CANCEL);
+        dialog.add_button('Select', Gtk.ResponseType.ACCEPT);
+
+        const filter = new Gtk.FileFilter();
+        filter.add_mime_type('image/jpeg');
+        filter.add_mime_type('image/png');
+        dialog.set_filter(filter);
+
+        dialog.connect('response', (dialog, response) => {
+            if (response === Gtk.ResponseType.ACCEPT) {
+                const file = dialog.get_file();
+                const path = file.get_path();
+                if (!config.appearance) config.appearance = {};
+                config.appearance.profilePhoto = path;
+                writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+                
+                // Copy the image to the config directory
+                try {
+                    const destPath = GLib.build_filenamev([GLib.get_home_dir(), '.config', 'ags', 'assets', 'profile.png']);
+                    const destDir = GLib.path_get_dirname(destPath);
+                    GLib.mkdir_with_parents(destDir, 0o755);
+                    
+                    const srcFile = Gio.File.new_for_path(path);
+                    const destFile = Gio.File.new_for_path(destPath);
+                    
+                    srcFile.copy(destFile, Gio.FileCopyFlags.OVERWRITE, null, null);
+                } catch (err) {
+                    console.error('Error copying profile photo:', err);
+                }
+            }
+            dialog.destroy();
+        });
+
+        dialog.show();
+    });
+
+    return button;
+}
+
 function createAppearancePage() {
     const box = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
@@ -91,6 +156,16 @@ function createAppearancePage() {
         margin_top: 12
     });
 
+    // Profile Section
+    const profileGroup = new Adw.PreferencesGroup({ title: 'Profile' });
+    const profileRow = new Adw.ActionRow({
+        title: 'Profile Photo',
+        subtitle: 'Choose your profile picture'
+    });
+    profileRow.add_suffix(createProfilePhotoButton());
+    profileGroup.add(profileRow);
+
+    // Theme Section
     const themeGroup = new Adw.PreferencesGroup({ title: 'Theme' });
     
     const themeRow = new Adw.ActionRow({
@@ -100,30 +175,183 @@ function createAppearancePage() {
     const themeCombo = createComboBox();
     themeCombo.append('dark', 'Dark');
     themeCombo.append('light', 'Light');
-    themeCombo.set_active_id(config.theme ?? 'dark');
+    themeCombo.set_active_id(config.theme?.name || 'dark');
     themeCombo.connect('changed', () => {
-        config.theme = themeCombo.get_active_id();
+        if (!config.theme) config.theme = {};
+        config.theme.name = themeCombo.get_active_id();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
     });
     themeRow.add_suffix(themeCombo);
     themeGroup.add(themeRow);
 
-    const colorRow = new Adw.ActionRow({
-        title: 'Accent Color',
-        subtitle: 'Select accent color'
+    // Auto Dark Mode
+    const autoDarkRow = new Adw.ActionRow({
+        title: 'Auto Dark Mode',
+        subtitle: 'Automatically switch between light and dark themes'
     });
-    const colorCombo = createComboBox();
-    const colors = ['blue', 'green', 'yellow', 'orange', 'red', 'purple', 'brown'];
-    colors.forEach(color => {
-        colorCombo.append(color, color.charAt(0).toUpperCase() + color.slice(1));
+    const autoDarkSwitch = new Gtk.Switch({
+        active: config.appearance?.autoDarkMode?.enabled ?? false,
+        valign: Gtk.Align.CENTER
     });
-    colorCombo.set_active_id(config.color ?? 'blue');
-    colorCombo.connect('changed', () => {
-        config.color = colorCombo.get_active_id();
+    autoDarkSwitch.connect('notify::active', () => {
+        if (!config.appearance) config.appearance = {};
+        if (!config.appearance.autoDarkMode) config.appearance.autoDarkMode = {};
+        config.appearance.autoDarkMode.enabled = autoDarkSwitch.active;
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
     });
-    colorRow.add_suffix(colorCombo);
-    themeGroup.add(colorRow);
+    autoDarkRow.add_suffix(autoDarkSwitch);
+    themeGroup.add(autoDarkRow);
 
+    // Time settings for auto dark mode
+    const darkFromRow = new Adw.ActionRow({
+        title: 'Dark Mode From',
+        subtitle: 'When to enable dark mode'
+    });
+    const darkFromEntry = createEntry(config.appearance?.autoDarkMode?.from ?? '18:00');
+    darkFromEntry.connect('changed', () => {
+        if (!config.appearance) config.appearance = {};
+        if (!config.appearance.autoDarkMode) config.appearance.autoDarkMode = {};
+        config.appearance.autoDarkMode.from = darkFromEntry.text;
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    darkFromRow.add_suffix(darkFromEntry);
+    themeGroup.add(darkFromRow);
+
+    const darkToRow = new Adw.ActionRow({
+        title: 'Dark Mode To',
+        subtitle: 'When to disable dark mode'
+    });
+    const darkToEntry = createEntry(config.appearance?.autoDarkMode?.to ?? '06:00');
+    darkToEntry.connect('changed', () => {
+        if (!config.appearance) config.appearance = {};
+        if (!config.appearance.autoDarkMode) config.appearance.autoDarkMode = {};
+        config.appearance.autoDarkMode.to = darkToEntry.text;
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    darkToRow.add_suffix(darkToEntry);
+    themeGroup.add(darkToRow);
+
+    box.append(profileGroup);
     box.append(themeGroup);
+    return box;
+}
+
+function createDefaultAppsPage() {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 12,
+        margin_start: 12,
+        margin_end: 12,
+        margin_top: 12
+    });
+
+    // Preferred Applications
+    const preferredGroup = new Adw.PreferencesGroup({ title: 'Preferred Applications' });
+    
+    const appTypes = [
+        ['terminal', 'Terminal Emulator', 'system-run-symbolic'],
+        ['browser', 'Web Browser', 'web-browser-symbolic'],
+        ['fileManager', 'File Manager', 'folder-symbolic'],
+        ['textEditor', 'Text Editor', 'text-editor-symbolic'],
+        ['imageViewer', 'Image Viewer', 'image-viewer-symbolic'],
+        ['audioPlayer', 'Audio Player', 'audio-player-symbolic'],
+        ['videoPlayer', 'Video Player', 'video-player-symbolic'],
+        ['archiveManager', 'Archive Manager', 'package-symbolic'],
+        ['calculator', 'Calculator', 'accessories-calculator-symbolic'],
+        ['settings', 'Settings', 'preferences-system-symbolic'],
+        ['taskManager', 'Task Manager', 'system-monitor-symbolic'],
+        ['screenshot', 'Screenshot', 'camera-photo-symbolic'],
+        ['colorPicker', 'Color Picker', 'color-select-symbolic']
+    ];
+
+    appTypes.forEach(([id, title, icon]) => {
+        const row = new Adw.ActionRow({
+            title: title,
+            subtitle: `Select default ${title.toLowerCase()}`
+        });
+        
+        const appButton = new Gtk.Button({
+            icon_name: icon,
+            valign: Gtk.Align.CENTER
+        });
+        
+        const appChooser = new Gtk.AppChooserButton({
+            show_dialog_item: true,
+            valign: Gtk.Align.CENTER
+        });
+        
+        // Set current value
+        const currentApp = config.apps?.preferred?.[id];
+        if (currentApp) {
+            appChooser.set_active_custom_item(currentApp);
+        }
+        
+        appChooser.connect('changed', () => {
+            if (!config.apps) config.apps = {};
+            if (!config.apps.preferred) config.apps.preferred = {};
+            config.apps.preferred[id] = appChooser.get_app_info()?.get_id() || '';
+            writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+        });
+
+        row.add_suffix(appChooser);
+        row.add_suffix(appButton);
+        preferredGroup.add(row);
+    });
+
+    // MIME Type Associations
+    const mimeGroup = new Adw.PreferencesGroup({ 
+        title: 'File Type Associations',
+        description: 'Set default applications for different file types'
+    });
+
+    const mimeTypes = [
+        ['text/plain', 'Plain Text Files'],
+        ['text/html', 'HTML Files'],
+        ['application/pdf', 'PDF Documents'],
+        ['image/*', 'Image Files'],
+        ['video/*', 'Video Files'],
+        ['audio/*', 'Audio Files'],
+        ['application/x-compressed-tar', 'Tar Archives'],
+        ['application/zip', 'ZIP Archives'],
+        ['x-scheme-handler/http', 'Web Links'],
+        ['x-scheme-handler/https', 'Secure Web Links'],
+        ['x-scheme-handler/mailto', 'Email Links'],
+        ['x-scheme-handler/matrix', 'Matrix Links'],
+        ['x-scheme-handler/tg', 'Telegram Links']
+    ];
+
+    mimeTypes.forEach(([mimeType, title]) => {
+        const row = new Adw.ActionRow({
+            title: title,
+            subtitle: mimeType
+        });
+
+        const appChooser = new Gtk.AppChooserButton({
+            content_type: mimeType,
+            show_dialog_item: true,
+            valign: Gtk.Align.CENTER
+        });
+
+        // Set current value
+        const currentApp = config.apps?.associations?.[mimeType];
+        if (currentApp) {
+            appChooser.set_active_custom_item(currentApp);
+        }
+
+        appChooser.connect('changed', () => {
+            if (!config.apps) config.apps = {};
+            if (!config.apps.associations) config.apps.associations = {};
+            config.apps.associations[mimeType] = appChooser.get_app_info()?.get_id() || '';
+            writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+        });
+
+        row.add_suffix(appChooser);
+        mimeGroup.add(row);
+    });
+
+    box.append(preferredGroup);
+    box.append(mimeGroup);
+
     return box;
 }
 
@@ -506,6 +734,214 @@ function createSystemPage() {
     return box;
 }
 
+function createSidebarPage() {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 12,
+        margin_start: 12,
+        margin_end: 12,
+        margin_top: 12
+    });
+
+    const leftGroup = new Adw.PreferencesGroup({ title: 'Left Sidebar' });
+    
+    const widthRow = new Adw.ActionRow({
+        title: 'Width',
+        subtitle: 'Width of the left sidebar'
+    });
+    const widthSpin = createSpinButton(config.sideleft?.width ?? 500, 300, 800);
+    widthSpin.connect('value-changed', () => {
+        if (!config.sideleft) config.sideleft = {};
+        config.sideleft.width = widthSpin.get_value();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    widthRow.add_suffix(widthSpin);
+    leftGroup.add(widthRow);
+
+    const rightGroup = new Adw.PreferencesGroup({ title: 'Right Sidebar' });
+    
+    const rightWidthRow = new Adw.ActionRow({
+        title: 'Width',
+        subtitle: 'Width of the right sidebar'
+    });
+    const rightWidthSpin = createSpinButton(config.sideright?.width ?? 500, 300, 800);
+    rightWidthSpin.connect('value-changed', () => {
+        if (!config.sideright) config.sideright = {};
+        config.sideright.width = rightWidthSpin.get_value();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    rightWidthRow.add_suffix(rightWidthSpin);
+    rightGroup.add(rightWidthRow);
+
+    box.append(leftGroup);
+    box.append(rightGroup);
+    return box;
+}
+
+function createNotificationsPage() {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 12,
+        margin_start: 12,
+        margin_end: 12,
+        margin_top: 12
+    });
+
+    const notifGroup = new Adw.PreferencesGroup({ title: 'Notifications' });
+    
+    const positionRow = new Adw.ActionRow({
+        title: 'Position',
+        subtitle: 'Position of notifications on screen'
+    });
+    const positionCombo = createComboBox();
+    const positions = ['top-right', 'top-left', 'bottom-right', 'bottom-left'];
+    positions.forEach(pos => {
+        positionCombo.append(pos, pos.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' '));
+    });
+    positionCombo.set_active_id(config.notifications?.position ?? 'top-right');
+    positionCombo.connect('changed', () => {
+        if (!config.notifications) config.notifications = {};
+        config.notifications.position = positionCombo.get_active_id();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    positionRow.add_suffix(positionCombo);
+    notifGroup.add(positionRow);
+
+    const timeoutRow = new Adw.ActionRow({
+        title: 'Timeout',
+        subtitle: 'How long notifications stay visible (in seconds)'
+    });
+    const timeoutSpin = createSpinButton(config.notifications?.timeout ?? 5, 1, 30);
+    timeoutSpin.connect('value-changed', () => {
+        if (!config.notifications) config.notifications = {};
+        config.notifications.timeout = timeoutSpin.get_value();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    timeoutRow.add_suffix(timeoutSpin);
+    notifGroup.add(timeoutRow);
+
+    box.append(notifGroup);
+    return box;
+}
+
+function createWorkspacePage() {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 12,
+        margin_start: 12,
+        margin_end: 12,
+        margin_top: 12
+    });
+
+    // General Settings
+    const generalGroup = new Adw.PreferencesGroup({ title: 'General Settings' });
+    
+    const shownRow = new Adw.ActionRow({
+        title: 'Shown Workspaces',
+        subtitle: 'Number of workspaces to show'
+    });
+    const shownSpin = createSpinButton(config.workspaces?.shown ?? 9, 1, 20);
+    shownSpin.connect('value-changed', () => {
+        if (!config.workspaces) config.workspaces = {};
+        config.workspaces.shown = shownSpin.get_value();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    shownRow.add_suffix(shownSpin);
+    generalGroup.add(shownRow);
+
+    // Style Settings
+    const styleGroup = new Adw.PreferencesGroup({ title: 'Style Settings' });
+    
+    const styleRow = new Adw.ActionRow({
+        title: 'Workspace Style',
+        subtitle: 'Style for workspace indicators'
+    });
+    const styleCombo = createComboBox();
+    const styles = [
+        ['numeric', 'Numbers (1, 2, 3)'],
+        ['roman', 'Roman (I, II, III)'],
+        ['arabic', 'Arabic (١, ٢, ٣)'],
+        ['chinese', 'Chinese (一, 二, 三)'],
+        ['circled', 'Circled (①, ②, ③)'],
+        ['fullwidth', 'Full Width (１, ２, ３)'],
+        ['superscript', 'Superscript (¹, ², ³)'],
+        ['subscript', 'Subscript (₁, ₂, ₃)'],
+        ['dot', 'Dots (•)'],
+        ['square', 'Squares (■)'],
+        ['diamond', 'Diamonds (◆)'],
+        ['triangle', 'Triangles (▲)'],
+        ['custom', 'Custom Labels']
+    ];
+    styles.forEach(([id, label]) => {
+        styleCombo.append(id, label);
+    });
+    styleCombo.set_active_id(config.workspaces?.style ?? 'numeric');
+    styleCombo.connect('changed', () => {
+        if (!config.workspaces) config.workspaces = {};
+        config.workspaces.style = styleCombo.get_active_id();
+        writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+    });
+    styleRow.add_suffix(styleCombo);
+    styleGroup.add(styleRow);
+
+    // Labels
+    const labelsGroup = new Adw.PreferencesGroup({ 
+        title: 'Custom Workspace Labels',
+        description: 'Set custom labels for each workspace. Only used when style is set to "Custom Labels".'
+    });
+    
+    // Create a scrolled window for the labels
+    const scrolled = new Gtk.ScrolledWindow({
+        vexpand: true,
+        height_request: 200
+    });
+    
+    const labelsBox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 6,
+        margin_start: 12,
+        margin_end: 12,
+        margin_top: 6,
+        margin_bottom: 6
+    });
+
+    // Add label entries for each workspace
+    for (let i = 1; i <= 20; i++) {
+        const labelBox = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 12
+        });
+
+        const label = new Gtk.Label({
+            label: `Workspace ${i}:`,
+            xalign: 0,
+            width_request: 100
+        });
+
+        const entry = createEntry(config.workspaces?.labels?.[i] ?? String(i));
+        entry.connect('changed', () => {
+            if (!config.workspaces) config.workspaces = {};
+            if (!config.workspaces.labels) config.workspaces.labels = {};
+            config.workspaces.labels[i] = entry.text;
+            writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+        });
+
+        labelBox.append(label);
+        labelBox.append(entry);
+        labelsBox.append(labelBox);
+    }
+
+    scrolled.set_child(labelsBox);
+    labelsGroup.add(scrolled);
+
+    // Add all groups
+    box.append(generalGroup);
+    box.append(styleGroup);
+    box.append(labelsGroup);
+
+    return box;
+}
+
 function createMainView(window) {
     const outerBox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
@@ -572,22 +1008,18 @@ function createMainView(window) {
         hexpand: true
     });
 
-    // Функция для поиска текста в дочерних виджетах
     function findTextInWidget(widget, searchText) {
         if (!widget) return false;
         
-        // Проверяем текст в Gtk.Label
         if (widget instanceof Gtk.Label) {
             return widget.label.toLowerCase().includes(searchText);
         }
         
-        // Проверяем текст в Adw.ActionRow
         if (widget.constructor.name === 'AdwActionRow') {
             return widget.title.toLowerCase().includes(searchText) || 
                    widget.subtitle?.toLowerCase().includes(searchText);
         }
 
-        // Рекурсивно проверяем дочерние элементы
         if (widget.get_first_child) {
             let child = widget.get_first_child();
             while (child) {
@@ -603,11 +1035,9 @@ function createMainView(window) {
         if (!searchEntry.text) return true;
         const searchText = searchEntry.text.toLowerCase();
         
-        // Проверяем заголовок страницы
         const pageTitle = row.get_child().get_last_child().label.toLowerCase();
         if (pageTitle.includes(searchText)) return true;
 
-        // Получаем контент страницы и ищем в нем
         const pageId = row.name;
         const pageContent = contentStack.get_child_by_name(pageId);
         return findTextInWidget(pageContent, searchText);
@@ -616,7 +1046,6 @@ function createMainView(window) {
     searchEntry.connect('search-changed', () => {
         listBox.invalidate_filter();
         
-        // Если есть результаты поиска, выбираем первый найденный элемент
         if (searchEntry.text) {
             let foundRow = null;
             let child = listBox.get_first_child();
@@ -712,7 +1141,7 @@ function createMainView(window) {
 
     listBox.connect('row-selected', (box, row) => {
         if (row) {
-            const pageTitle = row.get_child().get_last_child().get_label();
+            const pageTitle = row.get_child().get_last_child().label.toLowerCase();
             headerTitle.set_label(pageTitle);
             contentStack.set_visible_child_name(row.name);
         }
@@ -853,10 +1282,34 @@ const pages = [
         content: createAppearancePage()
     },
     {
+        id: 'workspaces',
+        title: 'Workspaces',
+        icon: 'preferences-desktop-workspace-symbolic',
+        content: createWorkspacePage()
+    },
+    {
+        id: 'default-apps',
+        title: 'Default Apps',
+        icon: 'applications-system-symbolic',
+        content: createDefaultAppsPage()
+    },
+    {
         id: 'bar',
         title: 'Bar',
         icon: 'view-grid-symbolic',
         content: createBarPage()
+    },
+    {
+        id: 'sidebar',
+        title: 'Sidebars',
+        icon: 'view-dual-symbolic',
+        content: createSidebarPage()
+    },
+    {
+        id: 'notifications',
+        title: 'Notifications',
+        icon: 'preferences-system-notifications-symbolic',
+        content: createNotificationsPage()
     },
     {
         id: 'animations',
@@ -914,4 +1367,4 @@ app.connect('activate', () => {
     win.present();
 });
 
-app.run([]); 
+app.run([]);

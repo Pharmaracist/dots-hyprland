@@ -10,9 +10,147 @@
     "proxyUrl": ""
   },
   "animations": {
-    "choreographyDelay": 25,
-    "durationSmall": 110,
-    "durationLarge": 180
+    "choreographyDelay": {
+      "name": "",
+      "width-request": -1,
+      "height-request": -1,
+      "visible": false,
+      "sensitive": true,
+      "app-paintable": false,
+      "can-focus": true,
+      "has-focus": false,
+      "is-focus": false,
+      "focus-on-click": true,
+      "can-default": false,
+      "has-default": false,
+      "receives-default": false,
+      "composite-child": false,
+      "style": {
+        "context": {
+          "screen": {
+            "resolution": 86.3994140625
+          },
+          "direction": 1,
+          "paint-clock": null
+        }
+      },
+      "events": 2109440,
+      "no-show-all": false,
+      "has-tooltip": false,
+      "tooltip-markup": null,
+      "tooltip-text": null,
+      "opacity": 1,
+      "double-buffered": true,
+      "halign": 0,
+      "valign": 0,
+      "margin-left": 0,
+      "margin-right": 0,
+      "margin-start": 0,
+      "margin-end": 0,
+      "margin-top": 0,
+      "margin-bottom": 0,
+      "margin": 0,
+      "hexpand": false,
+      "vexpand": false,
+      "hexpand-set": false,
+      "vexpand-set": false,
+      "expand": false,
+      "scale-factor": 1
+    },
+    "durationSmall": {
+      "name": "",
+      "width-request": -1,
+      "height-request": -1,
+      "visible": false,
+      "sensitive": true,
+      "app-paintable": false,
+      "can-focus": true,
+      "has-focus": false,
+      "is-focus": false,
+      "focus-on-click": true,
+      "can-default": false,
+      "has-default": false,
+      "receives-default": false,
+      "composite-child": false,
+      "style": {
+        "context": {
+          "screen": {
+            "resolution": 86.3994140625
+          },
+          "direction": 1,
+          "paint-clock": null
+        }
+      },
+      "events": 2109440,
+      "no-show-all": false,
+      "has-tooltip": false,
+      "tooltip-markup": null,
+      "tooltip-text": null,
+      "opacity": 1,
+      "double-buffered": true,
+      "halign": 0,
+      "valign": 0,
+      "margin-left": 0,
+      "margin-right": 0,
+      "margin-start": 0,
+      "margin-end": 0,
+      "margin-top": 0,
+      "margin-bottom": 0,
+      "margin": 0,
+      "hexpand": false,
+      "vexpand": false,
+      "hexpand-set": false,
+      "vexpand-set": false,
+      "expand": false,
+      "scale-factor": 1
+    },
+    "durationLarge": {
+      "name": "",
+      "width-request": -1,
+      "height-request": -1,
+      "visible": false,
+      "sensitive": true,
+      "app-paintable": false,
+      "can-focus": true,
+      "has-focus": false,
+      "is-focus": false,
+      "focus-on-click": true,
+      "can-default": false,
+      "has-default": false,
+      "receives-default": false,
+      "composite-child": false,
+      "style": {
+        "context": {
+          "screen": {
+            "resolution": 86.3994140625
+          },
+          "direction": 1,
+          "paint-clock": null
+        }
+      },
+      "events": 2109440,
+      "no-show-all": false,
+      "has-tooltip": false,
+      "tooltip-markup": null,
+      "tooltip-text": null,
+      "opacity": 1,
+      "double-buffered": true,
+      "halign": 0,
+      "valign": 0,
+      "margin-left": 0,
+      "margin-right": 0,
+      "margin-start": 0,
+      "margin-end": 0,
+      "margin-top": 0,
+      "margin-bottom": 0,
+      "margin": 0,
+      "hexpand": false,
+      "vexpand": false,
+      "hexpand-set": false,
+      "vexpand-set": false,
+      "expand": false,
+      "scale-factor": 1
+    }
   },
   "appearance": {
     "profilePhoto": "/home/pharmaracist/Downloads/IMG20241102142938.jpg",
