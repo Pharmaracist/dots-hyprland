@@ -79,10 +79,10 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
     @include element_decel;
     color: $onSurface;
     background-color: $hovercolor;
-    padding:0.8rem 1.5rem;
+    padding:0.8rem 1.1rem;
     margin:0.3rem;
     min-width: 1.527rem;
-    min-height: 1.727rem;
+    min-height: 1.527rem;
 }
 
 .toggle-label{
@@ -865,23 +865,50 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-volmixer-stream-slider {
     trough {
-        border-radius: $rounding_verysmall;
+        border-radius: $rounding_small;
         min-height: 1.364rem;
         min-width: 1.364rem;
-        background-color: $secondaryContainer;
+        background-color: $surfaceContainerHigh;
+        transition: all 200ms ease;
     }
 
     highlight {
-        border-radius: $rounding_verysmall;
+        border-radius: $rounding_small;
         min-height: 1.364rem;
         min-width: 1.364rem;
-        background-color: $primary;
+        background: linear-gradient(270deg, 
+            $primary 0%,
+            lighten($surfaceContainerHighest, 30%) 100%
+        );
+        transition: all 200ms ease;
     }
 
     slider {
-        border-radius: $rounding_verysmall;
-        min-height: 1.364rem;
-        min-width: 1.364rem;
+        background: transparent;
+        border: none;
+        min-width: 0;
+        min-height: 0;
+        opacity: 0;
+    }
+
+    &:hover {
+        trough {
+            box-shadow: inset 0 0 0 1px rgba($primary, 0.2);
+        }
+
+        highlight {
+            box-shadow: 0 0 12px rgba($primary, 0.4);
+        }
+    }
+
+    &:active {
+        highlight {
+            box-shadow: 0 0 16px rgba($primary, 0.5);
+            background: linear-gradient(90deg, 
+                lighten($primary, 5%) 0%,
+                lighten($surfaceContainerHigh, 15%) 100%
+            );
+        }
     }
 }
 

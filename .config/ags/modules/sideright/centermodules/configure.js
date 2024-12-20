@@ -179,7 +179,13 @@ export default (props) => {
                         ConfigGap({}),
                         HyprlandToggle({
                             icon: 'animation', name: getString('Animations'), desc: getString('[Hyprland] [GTK]\nEnable animations'), option: "animations:enabled",
-                            extraOnChange: (self, newValue) => execAsync(['gsettings', 'set', 'org.gnome.desktop.interface', 'enable-animations', `${newValue}`])
+                            extraOnChange: (self, newValue) => {
+                                const config = userOptions.asyncGet();
+                                if (!config.animations) config.animations = {};
+                                config.animations.enabled = newValue;
+                                userOptions.set(config);
+                                execAsync(['gsettings', 'set', 'org.gnome.desktop.interface', 'enable-animations', `${newValue}`]);
+                            }
                         }),
                         Subcategory([
                             ConfigSpinButton({

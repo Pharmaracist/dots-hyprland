@@ -2,7 +2,7 @@ import App from "resource:///com/github/Aylur/ags/app.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 const { execAsync, exec } = Utils;
-const { Box, EventBox, Label, Button, Overlay, Revealer, Window } = Widget;
+const { Box, EventBox, Label, Button, Overlay, Revealer, Window, Scrollable } = Widget;
 import {
   MinimalPreset,
   GamingPreset,
@@ -15,6 +15,8 @@ import {
   SecondaryTogglesButton,
   SecondaryTogglesRevealerState,
 } from "./quicktoggles.js";
+import { VolumeSlider } from "./volumeslider.js";
+import { BrightnessSlider } from "./brightnessslider.js";
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
@@ -164,6 +166,7 @@ const timeRow = Widget.Box({
         Widget.Box({
           hpack: "end",
           hexpand: true,
+          vexpand:false,
           children: [SecondaryTogglesButton()],
         }),
       ],
@@ -184,6 +187,14 @@ const togglesBox = Widget.Box({
         await ToggleIconBluetooth(),
       ]
     }),
+    Widget.Box({
+      vertical: true,
+      className: " spacing-v-5 spacing-v-5",
+      children: [
+        VolumeSlider(),
+        BrightnessSlider(),
+      ],
+    }),
 
     // Secondary toggles
     Widget.Box({
@@ -194,21 +205,32 @@ const togglesBox = Widget.Box({
           transitionDuration: 150,
           setup: (self) => SecondaryTogglesRevealerState.register(self),
           child: Widget.Box({
-            // className: "spacing-v-10",
             vertical: true,
             children: [
-              Widget.Box({
-                className: "spacing-h-5",
-                hpack: "center",
-                children: [
-                  NightLightButton(),
-                  IdleInhibitorButton(),
-                  MinimalPreset(),
-                  GamingPreset(),
-                  FullPreset(),
-                ]
+              Widget.Scrollable({
+                // className: 'sidebar-scrollable',
+                hscroll: 'always',
+                vscroll: 'never',
+                // hexpand: true,
+                child: Widget.Box({
+                  className: "spacing-h-5",
+                  hpack: "center",
+                  children: [
+                    NightLightButton(),
+                    IdleInhibitorButton(),
+                    MinimalPreset(),
+                    GamingPreset(),
+                    FullPreset(),
+                    CloudflareWarpButton(),
+                    NightLightButton(),
+                    IdleInhibitorButton(),
+                    MinimalPreset(),
+                    GamingPreset(),
+                    FullPreset(),
+                    CloudflareWarpButton(),
+                  ]
+                }),
               }),
-              //second row
               Widget.Box({
                 className: "spacing-h-5",
                 hpack: "center",
@@ -274,20 +296,17 @@ export default () =>
           Widget.Box({
             vertical: true,
             // className: "sidebar-toplabel",
-            children: [timeRow, togglesBox],
+            children: [timeRow, togglesBox,],
           }),
           Widget.Box({
             className: "sidebar-group",
             children: [sidebarOptionsStack],
           }),
           Widget.Box({
-            vexpand: false,
-            children: [ModuleCalendar()],
+            vertical: true,
+            hexpand: true,
+            children: [ModuleCalendar(),ModuleMusicControls()],
           }),
-          ModuleMusicControls(),
-          // Box({
-          //   children: [timeRow],
-          // }),
         ],
       }),
     ],

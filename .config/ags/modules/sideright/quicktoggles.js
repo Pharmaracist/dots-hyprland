@@ -374,10 +374,10 @@ export const ModuleSettingsIcon = ({ hpack = "center" } = {}) =>
   });
 
 export const SecondaryButton = ({ icon, label, tooltip, onClicked }) => Widget.Button({
-    className: "txt-large sidebar-squareiconbutton",
+    className: " sidebar-squareiconbutton",
     tooltipText: getString(tooltip),
     onClicked: onClicked,
-    child: MaterialIcon(icon, "large"),
+    child: MaterialIcon(icon, "larger"),
     setup: setupCursorHover,
 });
 

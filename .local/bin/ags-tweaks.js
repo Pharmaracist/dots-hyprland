@@ -245,113 +245,77 @@ function createDefaultAppsPage() {
         margin_top: 12
     });
 
-    // Preferred Applications
-    const preferredGroup = new Adw.PreferencesGroup({ title: 'Preferred Applications' });
+    const appsGroup = new Adw.PreferencesGroup({ title: 'Default Applications' });
     
-    const appTypes = [
-        ['terminal', 'Terminal Emulator', 'system-run-symbolic'],
-        ['browser', 'Web Browser', 'web-browser-symbolic'],
-        ['fileManager', 'File Manager', 'folder-symbolic'],
-        ['textEditor', 'Text Editor', 'text-editor-symbolic'],
-        ['imageViewer', 'Image Viewer', 'image-viewer-symbolic'],
-        ['audioPlayer', 'Audio Player', 'audio-player-symbolic'],
-        ['videoPlayer', 'Video Player', 'video-player-symbolic'],
-        ['archiveManager', 'Archive Manager', 'package-symbolic'],
-        ['calculator', 'Calculator', 'accessories-calculator-symbolic'],
-        ['settings', 'Settings', 'preferences-system-symbolic'],
-        ['taskManager', 'Task Manager', 'system-monitor-symbolic'],
-        ['screenshot', 'Screenshot', 'camera-photo-symbolic'],
-        ['colorPicker', 'Color Picker', 'color-select-symbolic']
+    const appConfigs = [
+        { key: 'terminal', title: 'Terminal', subtitle: 'Default terminal emulator', icon: 'utilities-terminal-symbolic' },
+        { key: 'browser', title: 'Web Browser', subtitle: 'Default web browser', icon: 'web-browser-symbolic' },
+        { key: 'fileManager', title: 'File Manager', subtitle: 'Default file manager', icon: 'system-file-manager-symbolic' },
+        { key: 'imageViewer', title: 'Image Viewer', subtitle: 'Default image viewer', icon: 'image-viewer-symbolic' },
+        { key: 'textEditor', title: 'Text Editor', subtitle: 'Default text editor', icon: 'text-editor-symbolic' },
+        { key: 'settings', title: 'Settings', subtitle: 'Settings application', icon: 'preferences-system-symbolic' },
+        { key: 'bluetooth', title: 'Bluetooth', subtitle: 'Bluetooth settings application', icon: 'bluetooth-symbolic' },
+        { key: 'network', title: 'Network', subtitle: 'Network settings application', icon: 'network-wireless-symbolic' },
+        { key: 'taskManager', title: 'Task Manager', subtitle: 'System monitor application', icon: 'utilities-system-monitor-symbolic' }
     ];
 
-    appTypes.forEach(([id, title, icon]) => {
+    appConfigs.forEach(({ key, title, subtitle, icon }) => {
         const row = new Adw.ActionRow({
             title: title,
-            subtitle: `Select default ${title.toLowerCase()}`
+            subtitle: subtitle,
+            icon_name: icon
         });
-        
-        const appButton = new Gtk.Button({
-            icon_name: icon,
-            valign: Gtk.Align.CENTER
-        });
-        
-        const appChooser = new Gtk.AppChooserButton({
-            show_dialog_item: true,
-            valign: Gtk.Align.CENTER
-        });
-        
-        // Set current value
-        const currentApp = config.apps?.preferred?.[id];
-        if (currentApp) {
-            appChooser.set_active_custom_item(currentApp);
-        }
-        
-        appChooser.connect('changed', () => {
+
+        const entry = createEntry(config.apps?.[key] ?? '');
+        entry.connect('changed', () => {
             if (!config.apps) config.apps = {};
-            if (!config.apps.preferred) config.apps.preferred = {};
-            config.apps.preferred[id] = appChooser.get_app_info()?.get_id() || '';
+            config.apps[key] = entry.text;
             writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
         });
 
-        row.add_suffix(appChooser);
-        row.add_suffix(appButton);
-        preferredGroup.add(row);
-    });
-
-    // MIME Type Associations
-    const mimeGroup = new Adw.PreferencesGroup({ 
-        title: 'File Type Associations',
-        description: 'Set default applications for different file types'
-    });
-
-    const mimeTypes = [
-        ['text/plain', 'Plain Text Files'],
-        ['text/html', 'HTML Files'],
-        ['application/pdf', 'PDF Documents'],
-        ['image/*', 'Image Files'],
-        ['video/*', 'Video Files'],
-        ['audio/*', 'Audio Files'],
-        ['application/x-compressed-tar', 'Tar Archives'],
-        ['application/zip', 'ZIP Archives'],
-        ['x-scheme-handler/http', 'Web Links'],
-        ['x-scheme-handler/https', 'Secure Web Links'],
-        ['x-scheme-handler/mailto', 'Email Links'],
-        ['x-scheme-handler/matrix', 'Matrix Links'],
-        ['x-scheme-handler/tg', 'Telegram Links']
-    ];
-
-    mimeTypes.forEach(([mimeType, title]) => {
-        const row = new Adw.ActionRow({
-            title: title,
-            subtitle: mimeType
-        });
-
-        const appChooser = new Gtk.AppChooserButton({
-            content_type: mimeType,
-            show_dialog_item: true,
+        const chooseButton = new Gtk.Button({
+            icon_name: 'document-open-symbolic',
             valign: Gtk.Align.CENTER
         });
 
-        // Set current value
-        const currentApp = config.apps?.associations?.[mimeType];
-        if (currentApp) {
-            appChooser.set_active_custom_item(currentApp);
-        }
+        chooseButton.connect('clicked', () => {
+            const dialog = new Gtk.FileChooserDialog({
+                title: `Choose ${title}`,
+                action: Gtk.FileChooserAction.OPEN,
+                modal: true
+            });
 
-        appChooser.connect('changed', () => {
-            if (!config.apps) config.apps = {};
-            if (!config.apps.associations) config.apps.associations = {};
-            config.apps.associations[mimeType] = appChooser.get_app_info()?.get_id() || '';
-            writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+            dialog.add_button('Cancel', Gtk.ResponseType.CANCEL);
+            dialog.add_button('Select', Gtk.ResponseType.ACCEPT);
+
+            dialog.set_current_folder(Gio.File.new_for_path('/usr/bin'));
+
+            dialog.connect('response', (dialog, response) => {
+                if (response === Gtk.ResponseType.ACCEPT) {
+                    const file = dialog.get_file();
+                    const path = file.get_path();
+                    entry.set_text(path);
+                    if (!config.apps) config.apps = {};
+                    config.apps[key] = path;
+                    writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+                }
+                dialog.destroy();
+            });
+
+            dialog.show();
         });
 
-        row.add_suffix(appChooser);
-        mimeGroup.add(row);
+        const box = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 8
+        });
+        box.append(entry);
+        box.append(chooseButton);
+        row.add_suffix(box);
+        appsGroup.add(row);
     });
 
-    box.append(preferredGroup);
-    box.append(mimeGroup);
-
+    box.append(appsGroup);
     return box;
 }
 
