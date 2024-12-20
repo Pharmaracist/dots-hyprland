@@ -2,6 +2,7 @@ const { GLib } = imports.gi;
 import App from "resource:///com/github/Aylur/ags/app.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
+const { Box, Button } = Widget;
 
 import Bluetooth from "resource:///com/github/Aylur/ags/service/bluetooth.js";
 import Network from "resource:///com/github/Aylur/ags/service/network.js";
@@ -371,6 +372,118 @@ export const ModuleSettingsIcon = ({ hpack = "center" } = {}) =>
       ]);
     },
   });
+
+export const SecondaryButton = ({ icon, label, tooltip, onClicked }) => Widget.Button({
+    className: "txt-large sidebar-squareiconbutton",
+    tooltipText: getString(tooltip),
+    onClicked: onClicked,
+    child: MaterialIcon(icon, "large"),
+    setup: setupCursorHover,
+});
+
+export const MinimalPreset = () => SecondaryButton({
+    icon: "filter_1",
+    tooltip: "Minimal preset - Only essential modules",
+    onClicked: () => globalThis.applyPreset("minimal"),
+});
+
+export const GamingPreset = () => SecondaryButton({
+    icon: "sports_esports",
+    tooltip: "Gaming preset - Optimized for gaming",
+    onClicked: () => globalThis.applyPreset("gaming"),
+});
+
+export const FullPreset = () => SecondaryButton({
+    icon: "view_module",
+    tooltip: "Full preset - All modules enabled",
+    onClicked: () => globalThis.applyPreset("full"),
+});
+
+export const NightLightButton = () => SecondaryButton({
+    icon: "nightlight",
+    tooltip: "Toggle Night Light",
+    onClicked: () => execAsync(['wlsunset', '-t', '4500']).catch(print),
+});
+
+export const IdleInhibitorButton = () => SecondaryButton({
+    icon: "coffee",
+    tooltip: "Keep system awake",
+    onClicked: () => execAsync(['systemctl', 'suspend']).catch(print),
+});
+
+export const CloudflareWarpButton = () => SecondaryButton({
+    icon: "vpn_lock",
+    tooltip: "Toggle Cloudflare WARP",
+    onClicked: () => execAsync(['warp-cli', 'connect']).catch(print),
+});
+
+export const SecondaryTogglesRevealerState = {
+    _isRevealed: false,
+    _subscribers: new Set(),
+
+    get isRevealed() {
+        return this._isRevealed;
+    },
+
+    set isRevealed(value) {
+        this._isRevealed = value;
+        this._subscribers.forEach(cb => cb());
+    },
+
+    subscribe(callback) {
+        this._subscribers.add(callback);
+        return () => this._subscribers.delete(callback);
+    },
+
+    register(revealer) {
+        this.revealers.add(revealer);
+        return revealer;
+    },
+
+    revealers: new Set(),
+
+    toggleAll() {
+        this.isRevealed = !this.isRevealed;
+        this.revealers.forEach(revealer => {
+            revealer.revealChild = this.isRevealed;
+        });
+    }
+};
+
+export const SecondaryTogglesButton = () => {
+    const icon = Widget.Label({
+        className: "txt-larger",
+        setup: self => {
+            self.hook(SecondaryTogglesRevealerState, () => {
+                self.label = SecondaryTogglesRevealerState.isRevealed ? '' : '';
+            });
+        },
+    });
+
+    const button = Widget.Button({
+        className: "toggle-label",
+        tooltipText: getString("Toggle secondary controls"),
+        onClicked: () => {
+            SecondaryTogglesRevealerState.toggleAll();
+        },
+        child: Widget.Box({
+            children: [MaterialIcon('keyboard_arrow_down', 'norm')],
+            setup: self => {
+                const updateIcon = () => {
+                    self.children = [MaterialIcon(
+                        SecondaryTogglesRevealerState.isRevealed ? 'keyboard_arrow_up' : 'keyboard_arrow_down',
+                        'norm'
+                    )];
+                };
+                SecondaryTogglesRevealerState.subscribe(updateIcon);
+                updateIcon();
+            },
+        }),
+        setup: setupCursorHover,
+    });
+
+    return button;
+};
 
 const hyprctl = (cmd) => execAsync(["hyprctl", ...cmd.split(" ")]).catch(print);
 const getHyprOption = async (opt) =>

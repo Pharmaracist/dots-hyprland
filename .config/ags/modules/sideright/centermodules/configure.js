@@ -84,7 +84,7 @@ export default (props) => {
                         ]),
                         ConfigGap({}),
                         HyprlandToggle({
-                            icon: 'animation', name: getString('Animations'), desc: getString('[Hyprland] [GTK]\nEnable animations'), option: 'animations:enabled',
+                            icon: 'animation', name: getString('Animations'), desc: getString('[Hyprland] [GTK]\nEnable animations'), option: "animations:enabled",
                             extraOnChange: (self, newValue) => execAsync(['gsettings', 'set', 'org.gnome.desktop.interface', 'enable-animations', `${newValue}`])
                         }),
                         Subcategory([
@@ -201,6 +201,23 @@ export default (props) => {
                             label: getString('Visual Elements'),
                         }),
                         Subcategory([
+                            Button({
+                                onClicked: () => Utils.execAsync([`${App.configDir}/scripts/set_profile_photo.sh`])
+                                    .catch(print),
+                                child: Box({
+                                    tooltipText: getString('Change your profile photo'),
+                                    className: 'txt spacing-h-5 configtoggle-box',
+                                    children: [
+                                        MaterialIcon('account_circle', 'small'),
+                                        Label({
+                                            className: 'txt txt-small',
+                                            label: getString('Profile Photo'),
+                                        }),
+                                        Box({ hexpand: true }),
+                                        MaterialIcon('add', 'small'),
+                                    ]
+                                }),
+                            }),
                             ConfigToggle({
                                 icon: 'rounded_corner',
                                 name: getString('Screen Corners'),

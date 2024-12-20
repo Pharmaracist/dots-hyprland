@@ -199,6 +199,32 @@ globalThis["closeEverything"] = () => {
   App.closeWindow("overview");
 };
 
+// Function to apply a preset
+globalThis["applyPreset"] = (presetName) => {
+    if (!config.value.presets || !(presetName in config.value.presets)) {
+        execAsync(['notify-send', 'Error', `Preset "${presetName}" not found`])
+            .catch(print);
+        return;
+    }
+    
+    const preset = config.value.presets[presetName];
+    config.value = {
+        ...config.value,
+        modules: {
+            ...config.value.modules,
+            ...preset
+        }
+    };
+    
+    execAsync(['notify-send', `Preset: ${presetName}`, 
+        `Applying ${presetName} preset...`])
+        .catch(print);
+    
+    // Save and reload
+    saveConfig();
+    App.resetWidgets();
+};
+
 // Module presets
 const PRESETS = {
     'minimal': {
@@ -258,31 +284,6 @@ const PRESETS = {
             crosshair: true,
         },
     },
-};
-
-// Function to apply a preset
-globalThis["applyPreset"] = (presetName) => {
-    if (!(presetName in PRESETS)) {
-        execAsync(['notify-send', 'Error', `Preset "${presetName}" not found`])
-            .catch(print);
-        return;
-    }
-
-    const preset = PRESETS[presetName];
-    config.value = {
-        ...config.value,
-        modules: {
-            ...config.value.modules,
-            ...preset.modules,
-        },
-    };
-
-    execAsync(['notify-send', 
-        `Applied Preset: ${preset.name}`, 
-        `${preset.description}\nReloading widgets...`])
-        .catch(print);
-    
-    saveConfig();
 };
 
 // Function to list available presets

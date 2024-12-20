@@ -25,7 +25,8 @@
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
     "fakeScreenRounding": 1,
-    "visualizer": {}
+    "visualizer": {},
+    "profilePhoto": ""
   },
   "apps": {
     "bluetooth": "blueberry",

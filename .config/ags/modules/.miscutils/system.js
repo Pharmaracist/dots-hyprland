@@ -62,3 +62,15 @@ export const getDistroName = () => {
     if(distroID == 'kali') return 'Kali Linux';
     return 'Linux';
 }
+
+export function getProfilePhoto() {
+    try {
+        const userConfig = Utils.readFile(GLib.get_home_dir() + '/.ags/config.json');
+        const config = JSON.parse(userConfig);
+        console.log('Profile photo path:', config?.appearance?.profilePhoto);
+        return config?.appearance?.profilePhoto || '';
+    } catch (error) {
+        console.error('Error getting profile photo:', error);
+        return '';
+    }
+}

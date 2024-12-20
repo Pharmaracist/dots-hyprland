@@ -1,19 +1,19 @@
+import App from "resource:///com/github/Aylur/ags/app.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 const { execAsync, exec } = Utils;
-const { Box, EventBox, Label } = Widget;
-import RevealerControl from "../bar/modules/revealercontrol.js";
+const { Box, EventBox, Label, Button, Overlay, Revealer, Window } = Widget;
 import {
+  MinimalPreset,
+  GamingPreset,
+  FullPreset,
   ToggleIconBluetooth,
   ToggleIconWifi,
-  // HyprToggleIcon,
-  ModuleNightLight,
-  ModuleIdleInhibitor,
-  // ModuleReloadIcon,
-  // ModuleSettingsIcon,
-  ModulePowerIcon,
-  // ModuleRawInput,
-  ModuleCloudflareWarp,
+  NightLightButton,
+  IdleInhibitorButton,
+  CloudflareWarpButton,
+  SecondaryTogglesButton,
+  SecondaryTogglesRevealerState,
 } from "./quicktoggles.js";
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
@@ -25,7 +25,7 @@ import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import ModuleTaskManager from "./centermodules/taskmanager.js";
 // import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import { ModuleCalendar } from "./calendar.js";
-import { getDistroIcon } from "../.miscutils/system.js";
+import { getDistroIcon, getProfilePhoto } from "../.miscutils/system.js";
 // import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 import { ExpandingIconTabContainer } from "../.commonwidgets/tabcontainer.js";
 import { checkKeybind } from "../.widgetutils/keybind.js";
@@ -69,98 +69,180 @@ const centerWidgets = [
   },
 ];
 
-const timeRow = Box({
-  className: "spacing-h-10 sidebar-group-invisible-morehorizpad",
-  css:'padding:1rem',
+const timeRow = Widget.Box({
+  className: "spacing-h-10 sidebar-toplabel",
   children: [
-    Widget.Icon({
-      icon: getDistroIcon(),
-      className: "txt txt-larger",
-    }),
-    Widget.Label({
-      hpack: "center",
-      className: "txt-small txt",
-      setup: (self) => {
-        const getUptime = async () => {
-          try {
-            await execAsync(["bash", "-c", "uptime -p"]);
-            return execAsync([
-              "bash",
-              "-c",
-              `uptime -p | sed -e 's/...//;s/ day\\| days/d/;s/ hour\\| hours/h/;s/ minute\\| minutes/m/;s/,[^,]*//2'`,
-            ]);
-          } catch {
-            return execAsync(["bash", "-c", "uptime"]).then((output) => {
-              const uptimeRegex = /up\s+((\d+)\s+days?,\s+)?((\d+):(\d+)),/;
-              const matches = uptimeRegex.exec(output);
-
-              if (matches) {
-                const days = matches[2] ? parseInt(matches[2]) : 0;
-                const hours = matches[4] ? parseInt(matches[4]) : 0;
-                const minutes = matches[5] ? parseInt(matches[5]) : 0;
-
-                let formattedUptime = "";
-
-                if (days > 0) {
-                  formattedUptime += `${days} d `;
+    Widget.Box({
+      vertical: false,
+      children: [
+        Widget.Box({
+          hpack: "start",
+          className: "spacing-h-10",
+          children: [
+            Widget.Box({
+              className: "avatar-box",
+              setup: self => self.hook(App, () => {
+                const profilePhoto = getProfilePhoto();
+                console.log('Setting profile photo:', profilePhoto);
+                if (profilePhoto && profilePhoto !== '') {
+                  self.children = [
+                    Widget.Box({
+                      className: "avatar-image",
+                      css: `
+                        background-image: url('${profilePhoto}');
+                        background-size: cover;
+                        background-position: center;
+                        min-width: 36px;
+                        min-height: 36px;
+                        border-radius: 999px;
+                      `,
+                    }),
+                  ];
+                } else {
+                  self.children = [
+                    Widget.Icon({
+                      icon: getDistroIcon(),
+                      className: "txt txt-larger txt-mainfont",
+                    }),
+                  ];
                 }
-                if (hours > 0) {
-                  formattedUptime += `${hours} h `;
-                }
-                formattedUptime += `${minutes} m`;
+              }),
+            }),
+            Widget.Label({
+              hpack: "center",
+              className: "txt-small txt",
+              setup: (self) => {
+                const getUptime = async () => {
+                  try {
+                    await execAsync(["bash", "-c", "uptime -p"]);
+                    return execAsync([
+                      "bash",
+                      "-c",
+                      `uptime -p | sed -e 's/...//;s/ day\\| days/d/;s/ hour\\| hours/h/;s/ minute\\| minutes/m/;s/,[^,]*//2'`,
+                    ]);
+                  } catch {
+                    return execAsync(["bash", "-c", "uptime"]).then((output) => {
+                      const uptimeRegex = /up\s+((\d+)\s+days?,\s+)?((\d+):(\d+)),/;
+                      const matches = uptimeRegex.exec(output);
 
-                return formattedUptime;
-              } else {
-                throw new Error("Failed to parse uptime output");
-              }
-            });
-          }
-        };
+                      if (matches) {
+                        const days = matches[2] ? parseInt(matches[2]) : 0;
+                        const hours = matches[4] ? parseInt(matches[4]) : 0;
+                        const minutes = matches[5] ? parseInt(matches[5]) : 0;
 
-        self.poll(5000, (label) => {
-          getUptime()
-            .then((upTimeString) => {
-              label.label = `${getString("Uptime:")} ${upTimeString}`;
-            })
-            .catch((err) => {
-              console.error(`Failed to fetch uptime: ${err}`);
-            });
-        });
-      },
+                        let formattedUptime = "";
+
+                        if (days > 0) {
+                          formattedUptime += `${days} d `;
+                        }
+                        if (hours > 0) {
+                          formattedUptime += `${hours} h `;
+                        }
+                        formattedUptime += `${minutes} m`;
+
+                        return formattedUptime;
+                      } else {
+                        throw new Error("Failed to parse uptime output");
+                      }
+                    });
+                  }
+                };
+
+                self.poll(5000, (label) => {
+                  getUptime()
+                    .then((upTimeString) => {
+                      label.label = `${getString("Uptime:")} ${upTimeString}`;
+                    })
+                    .catch((err) => {
+                      console.error(`Failed to fetch uptime: ${err}`);
+                    });
+                });
+              },
+            }),
+          ],
+        }),
+        Widget.Box({
+          hpack: "end",
+          hexpand: true,
+          children: [SecondaryTogglesButton()],
+        }),
+      ],
     }),
-    Widget.Box({ hexpand: true }),
-    // ModuleReloadIcon({ hpack: "end" }),
-    // ModuleSettingsIcon({ hpack: "end" }),
-    // ModulePowerIcon({ hpack: "end" }),
   ],
 });
 
 const togglesBox = Widget.Box({
-  hpack: "center",
+  className: "spacing-v-10",
+  vertical: true,
   children: [
+    // Main toggles row
     Widget.Box({
-      vertical:true,
-      className: "spacing-v-15 ",
-    children: [
-      await  ToggleIconWifi(),
-      await ToggleIconBluetooth(),
-    ]
-   }),
-   Widget.Box({
-    className: "spacing-v-15 ",
-    vertical:true,
-    children: [
-      await ModuleNightLight(),
-      ModuleIdleInhibitor(),
-      RevealerControl(),
-      // await ModuleCloudflareWarp(),
-    ]
-   }), 
-   // await ModuleRawInput(),
-    // await HyprToggleIcon('touchpad_mouse', 'No touchpad while typing', 'input:touchpad:disable_while_typing', {}),
+      className: "spacing-h-5",
+      hpack: "center",
+      children: [
+        await ToggleIconWifi(),
+        await ToggleIconBluetooth(),
+      ]
+    }),
+
+    // Secondary toggles
+    Widget.Box({
+      vertical: true,
+      children: [
+        Widget.Revealer({
+          transition: 'slide_down',
+          transitionDuration: 150,
+          setup: (self) => SecondaryTogglesRevealerState.register(self),
+          child: Widget.Box({
+            // className: "spacing-v-10",
+            vertical: true,
+            children: [
+              Widget.Box({
+                className: "spacing-h-5",
+                hpack: "center",
+                children: [
+                  NightLightButton(),
+                  IdleInhibitorButton(),
+                  MinimalPreset(),
+                  GamingPreset(),
+                  FullPreset(),
+                ]
+              }),
+              //second row
+              Widget.Box({
+                className: "spacing-h-5",
+                hpack: "center",
+                children: [
+                ]
+              }),
+            ],
+          }),
+        }),
+      ],
+    }),
   ],
 });
 
+const presets = Widget.Box({
+  hpack: "center",
+  children: [
+    Widget.Box({
+      vertical: false,
+      css: 'margin-top:0.75rem',
+      children: [
+        Widget.Box({
+          className: "spacing-h-5",
+          hpack: "center",
+          children: [
+            MinimalPreset(),
+            GamingPreset(),
+            FullPreset(),
+          ]
+        }),
+      ]
+    }),
+  ],
+});
 export const sidebarOptionsStack = ExpandingIconTabContainer({
   tabsHpack: "center",
   tabSwitcherClassName: "sidebar-icontabswitcher",
@@ -174,32 +256,31 @@ export const sidebarOptionsStack = ExpandingIconTabContainer({
 });
 
 export default () =>
-  Box({
-    vexpand: true,
+  Widget.Box({
+    // vexpand: true,
     hexpand: true,
     css: "min-width: 2px;",
     children: [
-      EventBox({
+      Widget.EventBox({
         onPrimaryClick: () => App.closeWindow("sideright"),
         onSecondaryClick: () => App.closeWindow("sideright"),
         onMiddleClick: () => App.closeWindow("sideright"),
       }),
-      Box({
+      Widget.Box({
         vertical: true,
-        vexpand: true,
-        className: "sidebar-right spacing-v-10",
+        // vexpand: true,
+        className: "sidebar-right spacing-v-15",
         children: [
-          Box({
+          Widget.Box({
             vertical: true,
-            // className: "sidebar-group",
-
-            children: [ timeRow,togglesBox],
+            // className: "sidebar-toplabel",
+            children: [timeRow, togglesBox],
           }),
-          Box({
+          Widget.Box({
             className: "sidebar-group",
             children: [sidebarOptionsStack],
           }),
-          Box({
+          Widget.Box({
             vexpand: false,
             children: [ModuleCalendar()],
           }),

@@ -66,6 +66,21 @@ const TrackTime = ({ player, ...rest }) => Label({
     },
 });
 
+const PlayPauseButton = ({ player }) => Widget.Button({
+    className: 'sideright-music-pill',
+    onClicked: () => player.playPause(),
+    child: Widget.Label({
+        className: 'icon-material txt-hugeass',
+        justification: 'center',
+        hpack: 'fill',
+        vpack: 'center',
+        setup: (self) => self.hook(player, (label) => {
+            label.label = `${player.playBackStatus == 'Playing' ? 'pause' : 'play_arrow'}`;
+        }, 'notify::play-back-status'),
+    }),
+    sensitive: player?.canPlay || false,
+});
+
 const ControlButton = ({ icon, action, sensitive = true }) => Button({
     className: 'sideright-music-pill',
     onClicked: action,
@@ -92,11 +107,10 @@ export default () => Box({
                         hexpand: true,
                         children: [
                             TrackTitle({ player: getPlayer() }),
-                            // TrackTime({ player: getPlayer() }),
                         ],
                     }),
                     Box({
-                        className: 'sec-txt ',
+                        className: 'sec-txt',
                         hpack: 'end',
                         setup: self => self.hook(Mpris, () => {
                             const player = getPlayer();
@@ -108,23 +122,13 @@ export default () => Box({
                             self.children = [
                                 ControlButton({
                                     icon: 'skip_previous',
-                                    action: () => player?.previous(),
+                                    action: () => player.previous(),
                                     sensitive: player?.canGoPrev || false,
                                 }),
-                                ControlButton({
-                                    icon: player?.playbackStatus === 'Playing' ? 'pause' : 'play_arrow',
-                                    action: () => {
-                                        if (player?.playbackStatus === 'Playing') {
-                                            player.pause();
-                                        } else {
-                                            player.play();
-                                        }
-                                    },
-                                    sensitive: player?.canPlay || false,
-                                }),
+                                PlayPauseButton({ player }),
                                 ControlButton({
                                     icon: 'skip_next',
-                                    action: () => player?.next(),
+                                    action: () => player.next(),
                                     sensitive: player?.canGoNext || false,
                                 }),
                             ];
