@@ -790,6 +790,40 @@ if results:
                 fi
             `]).catch(print);
         },
+        '>module': () => {
+            // Module management
+            if (!args[0]) {
+                globalThis.listModules();
+                execAsync(['notify-send', 'Module Manager', 'Usage:\n>module list\n>module enable <name>\n>module disable <name>\n>module toggle <name>']).catch(print);
+                return;
+            }
+            const cmd = args[0].toLowerCase();
+            const module = args[1];
+            
+            if (cmd === 'list') {
+                globalThis.listModules();
+            }
+            else if (cmd === 'enable' && module) {
+                if (!globalThis.config.value.modules?.[module]) {
+                    globalThis.toggleModule(module);
+                } else {
+                    execAsync(['notify-send', 'Module Manager', `${module} is already enabled`]).catch(print);
+                }
+            }
+            else if (cmd === 'disable' && module) {
+                if (globalThis.config.value.modules?.[module]) {
+                    globalThis.toggleModule(module);
+                } else {
+                    execAsync(['notify-send', 'Module Manager', `${module} is already disabled`]).catch(print);
+                }
+            }
+            else if (cmd === 'toggle' && module) {
+                globalThis.toggleModule(module);
+            }
+            else {
+                execAsync(['notify-send', 'Module Manager', 'Usage:\n>module list\n>module enable <name>\n>module disable <name>\n>module toggle <name>']).catch(print);
+            }
+        },
     };
 
     commands[cmd]?.();

@@ -5,6 +5,7 @@ import App from "resource:///com/github/Aylur/ags/app.js";
 import Wallselect from "./modules/wallselect/main.js";
 // Stuff
 import userOptions from "./modules/.configuration/user_options.js";
+import { config } from "./variables.js";
 import {
   firstRunWelcome,
   startBatteryWarningService,
@@ -17,9 +18,9 @@ import Cheatsheet from "./modules/cheatsheet/main.js";
 import DesktopBackground from "./modules/desktopbackground/main.js";
 import Dock from "./modules/dock/main.js";
 import Corner from "./modules/screencorners/main.js";
-// import Crosshair from './modules/crosshair/main.js';
+import Crosshair from './modules/crosshair/main.js';
 import Indicator from "./modules/indicators/main.js";
-// import Osk from './modules/onscreenkeyboard/main.js';
+import Osk from './modules/onscreenkeyboard/main.js';
 import Overview from "./modules/overview/main.js";
 import Session from "./modules/session/main.js";
 import SideLeft from "./modules/sideleft/main.js";
@@ -43,30 +44,30 @@ handleStyles(true);
 //ssfirstRunWelcome().catch(print);
 startBatteryWarningService().catch(print);
 
-const Windows = () => [
-  DesktopBackground(),
-  // forMonitors(Crosshair),
-  Overview(),
-  forMonitors(Indicator),
-  forMonitors(Cheatsheet),
-  SideLeft(),
-  SideRight(),
-  // forMonitors(Osk),
-  forMonitors(Session),
-  ...(userOptions.asyncGet().dock.enabled ? [forMonitors(Dock)] : []),
-  ...(userOptions.asyncGet().appearance.fakeScreenRounding !== 0
-    ? [
-        forMonitors((id) => Corner(id, "top left", true)),
-        forMonitors((id) => Corner(id, "top right", true)),
-        forMonitors((id) => Corner(id, "bottom left", true)),
-        forMonitors((id) => Corner(id, "bottom right", true)),
-      ]
-    : []),
-  // ...(userOptions.asyncGet().appearance.barRoundCorners
-  //   ? [forMonitors(BarCornerTopleft), forMonitors(BarCornerTopright)]
-  //   : []),
-  Wallselect(),
-];
+const Windows = () => {
+  const modules = config.value.modules || {};
+  return [
+    ...(modules.desktopbackground !== false ? [DesktopBackground()] : []),
+    ...(modules.crosshair === true ? [forMonitors(Crosshair)] : []), // Only enable if explicitly true
+    ...(modules.overview !== false ? [Overview()] : []),
+    ...(modules.indicators !== false ? [forMonitors(Indicator)] : []),
+    ...(modules.cheatsheet !== false ? [forMonitors(Cheatsheet)] : []),
+    ...(modules.sideleft !== false ? [SideLeft()] : []),
+    ...(modules.sideright !== false ? [SideRight()] : []),
+    ...(modules.onscreenkeyboard === true ? [forMonitors(Osk)] : []), // Only enable if explicitly true
+    ...(modules.session !== false ? [forMonitors(Session)] : []),
+    ...(modules.dock !== false ? [forMonitors(Dock)] : []),
+    ...(modules.screencorners !== false && userOptions.asyncGet().appearance.fakeScreenRounding !== 0
+      ? [
+          forMonitors((id) => Corner(id, "top left", true)),
+          forMonitors((id) => Corner(id, "top right", true)),
+          forMonitors((id) => Corner(id, "bottom left", true)),
+          forMonitors((id) => Corner(id, "bottom right", true)),
+        ]
+      : []),
+    ...(modules.wallselect !== false ? [Wallselect()] : []),
+  ];
+};
 
 const CLOSE_ANIM_TIME = 0; // Longer than actual anim time to make sure widgets animate fully
 const closeWindowDelays = {}; // For animations
@@ -76,11 +77,13 @@ for (let i = 0; i < (Gdk.Display.get_default()?.get_n_monitors() || 1); i++) {
 
 App.config({
   css: `${COMPILED_STYLE_DIR}/style.css`,
-  stackTraceOnError: false,
+  stackTraceOnError: true, // Enable stack trace for debugging
   closeWindowDelay: closeWindowDelays,
   windows: Windows().flat(1),
 });
 
-// Stuff that don't need to be toggled. And they're async so ugh...
-forMonitorsAsync(Bar);
-// Bar().catch(print); // Use this to debug the bar. Single monitor only.
+// Initialize bar only if enabled
+const modules = config.value.modules || {};
+if (modules.bar !== false) {
+    forMonitorsAsync(Bar);
+}

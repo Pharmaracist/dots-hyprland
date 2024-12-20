@@ -130,7 +130,11 @@ export const keybindList = [[
             { "keys": [">power"], "action": "Advanced power management" },
             { "keys": [">workspace"], "action": "Workspace layout management" },
             { "keys": [">music"], "action": "Enhanced music controls" },
-            { "keys": [">focus"], "action": "Focus mode for productivity" }
+            { "keys": [">focus"], "action": "Focus mode for productivity" },
+            { "keys": [">module list"], "action": "List all modules and their states" },
+            { "keys": [">module enable <name>"], "action": "Enable a specific module" },
+            { "keys": [">module disable <name>"], "action": "Disable a specific module" },
+            { "keys": [">module toggle <name>"], "action": "Toggle a specific module" }
         ],
         "id": 8
     }

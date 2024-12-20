@@ -2,7 +2,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import cava from "../../../services/cava.js"
 
-const TRANSITION_DURATION = 90
+const TRANSITION_DURATION = 50
 
 export default () => {
     // Create the visualization widget

@@ -395,7 +395,7 @@ const SearchResults = () => Box({
                                     css: `
                                         padding: 4px;
                                         min-width: 200px;
-                                        width: 300px;
+                                        min-height: 50px;
                                     `,
                                     children: [
                                         Box({

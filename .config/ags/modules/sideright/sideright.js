@@ -20,7 +20,7 @@ import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
 // import ModulePowerProfiles from "./centermodules/powerprofiles.js";
 // import ModuleBluetooth from "./centermodules/bluetooth.js";
-// import ModuleConfigure from "./centermodules/configure.js";
+import ModuleConfigure from "./centermodules/configure.js";
 import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import ModuleTaskManager from "./centermodules/taskmanager.js";
 // import ModuleMusicControls from "./centermodules/musiccontrols.js";
@@ -62,11 +62,11 @@ const centerWidgets = [
   //   contentWidget: ModuleWifiNetworks,
   //   onFocus: () => execAsync("nmcli dev wifi list").catch(print),
   // },
-  // {
-  //   name: getString("Live config"),
-  //   materialIcon: "tune",
-  //   contentWidget: ModuleConfigure,
-  // },
+  {
+    name: getString("Live config"),
+    materialIcon: "tune",
+    contentWidget: ModuleConfigure,
+  },
 ];
 
 const timeRow = Box({

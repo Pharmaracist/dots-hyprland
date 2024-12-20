@@ -1,4 +1,4 @@
-const { GLib } = imports.gi;
+import GLib from 'gi://GLib';
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
@@ -7,6 +7,8 @@ const { execAsync, exec } = Utils;
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 import { ConfigGap, ConfigSpinButton, ConfigToggle } from '../../.commonwidgets/configwidgets.js';
+import { config } from '../../../variables.js';
+import { getString } from '../../../i18n/i18n.js';
 
 const HyprlandToggle = ({ icon, name, desc = null, option, enableValue = 1, disableValue = 0, extraOnChange = () => { } }) => ConfigToggle({
     icon: icon,
@@ -90,14 +92,171 @@ export default (props) => {
                                 icon: 'clear_all',
                                 name: getString('Choreography delay'),
                                 desc: getString('In milliseconds, the delay between animations of a series'),
-                                initValue: userOptions.asyncGet().animations.choreographyDelay,
+                                initValue: config.value.animations.choreographyDelay,
                                 step: 10, minValue: 0, maxValue: 1000,
                                 onChange: (self, newValue) => {
-                                    userOptions.asyncGet().animations.choreographyDelay = newValue
+                                    config.value.animations.choreographyDelay = newValue
                                 },
                             })
                         ]),
                     ]
+                }),
+                ConfigSection({
+                    name: getString('Modules'),
+                    children: [
+                        // Core UI
+                        Label({
+                            hpack: 'start',
+                            className: 'txt txt-bold margin-left-10',
+                            label: getString('Core UI'),
+                        }),
+                        Subcategory([
+                            ConfigToggle({
+                                icon: 'horizontal_distribute',
+                                name: getString('Bar'),
+                                desc: getString('Enable/disable the top bar module'),
+                                initValue: config.value.modules?.bar !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('bar');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'dock_to_bottom',
+                                name: getString('Dock'),
+                                desc: getString('Enable/disable the dock module'),
+                                initValue: config.value.modules?.dock !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('dock');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'chevron_left',
+                                name: getString('Left Sidebar'),
+                                desc: getString('Enable/disable the left sidebar module'),
+                                initValue: config.value.modules?.sideleft !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('sideleft');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'chevron_right',
+                                name: getString('Right Sidebar'),
+                                desc: getString('Enable/disable the right sidebar module'),
+                                initValue: config.value.modules?.sideright !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('sideright');
+                                },
+                            }),
+                        ]),
+                        
+                        // Overlays and Utilities
+                        Label({
+                            hpack: 'start',
+                            className: 'txt txt-bold margin-left-10 margin-top-10',
+                            label: getString('Overlays and Utilities'),
+                        }),
+                        Subcategory([
+                            ConfigToggle({
+                                icon: 'grid_view',
+                                name: getString('Overview'),
+                                desc: getString('Enable/disable the overview module'),
+                                initValue: config.value.modules?.overview !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('overview');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'help',
+                                name: getString('Cheatsheet'),
+                                desc: getString('Enable/disable the cheatsheet module'),
+                                initValue: config.value.modules?.cheatsheet !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('cheatsheet');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'info',
+                                name: getString('Indicators'),
+                                desc: getString('Enable/disable the indicators module'),
+                                initValue: config.value.modules?.indicators !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('indicators');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'account_circle',
+                                name: getString('Session'),
+                                desc: getString('Enable/disable the session module'),
+                                initValue: config.value.modules?.session !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('session');
+                                },
+                            }),
+                        ]),
+                        
+                        // Visual Elements
+                        Label({
+                            hpack: 'start',
+                            className: 'txt txt-bold margin-left-10 margin-top-10',
+                            label: getString('Visual Elements'),
+                        }),
+                        Subcategory([
+                            ConfigToggle({
+                                icon: 'rounded_corner',
+                                name: getString('Screen Corners'),
+                                desc: getString('Enable/disable the screen corners module'),
+                                initValue: config.value.modules?.screencorners !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('screencorners');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'image',
+                                name: getString('Desktop Background'),
+                                desc: getString('Enable/disable the desktop background module'),
+                                initValue: config.value.modules?.desktopbackground !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('desktopbackground');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'wallpaper',
+                                name: getString('Wallpaper Selector'),
+                                desc: getString('Enable/disable the wallpaper selector module'),
+                                initValue: config.value.modules?.wallselect !== false,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('wallselect');
+                                },
+                            }),
+                        ]),
+                        
+                        // Additional Features
+                        Label({
+                            hpack: 'start',
+                            className: 'txt txt-bold margin-left-10 margin-top-10',
+                            label: getString('Additional Features'),
+                        }),
+                        Subcategory([
+                            ConfigToggle({
+                                icon: 'keyboard',
+                                name: getString('On-Screen Keyboard'),
+                                desc: getString('Enable/disable the on-screen keyboard module'),
+                                initValue: config.value.modules?.onscreenkeyboard === true,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('onscreenkeyboard');
+                                },
+                            }),
+                            ConfigToggle({
+                                icon: 'gps_fixed',
+                                name: getString('Crosshair'),
+                                desc: getString('Enable/disable the crosshair overlay module'),
+                                initValue: config.value.modules?.crosshair === true,
+                                onChange: (self, newValue) => {
+                                    globalThis.toggleModule('crosshair');
+                                },
+                            }),
+                        ]),
+                    ],
                 }),
                 ConfigSection({
                     name: getString('Developer'), children: [
@@ -119,21 +278,13 @@ export default (props) => {
             ]
         })
     });
-    const footNote = Box({
-        homogeneous: true,
-        children: [Label({
-            hpack: 'center',
-            className: 'txt txt-italic txt-subtext margin-5',
-            label: getString('Not all changes are saved'),
-        })]
-    })
+   
     return Box({
         ...props,
         className: 'spacing-v-5',
         vertical: true,
         children: [
             mainContent,
-            footNote,
         ]
     });
 }

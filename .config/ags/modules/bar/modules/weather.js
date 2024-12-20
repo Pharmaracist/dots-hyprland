@@ -356,7 +356,7 @@ const WeatherWidget = () => {
 
   const updateMediaInfo = () => {
     const title = Media.title;
-    const newTitle = title ? truncateText(title) : 'Nothing playing';
+    const newTitle = title ? truncateText(title) : 'Scilent Mode';
     
     // If title changed and it's not empty, show it briefly
     if (newTitle !== lastTitle && title) {
