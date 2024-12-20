@@ -1,0 +1,467 @@
+{
+  "ai": {
+    "defaultGPTProvider": "openrouter",
+    "onSearch": "gemini",
+    "defaultTemperature": 0.9,
+    "enhancements": true,
+    "useHistory": true,
+    "safety": true,
+    "writingCursor": " ...",
+    "proxyUrl": ""
+  },
+  "animations": {
+    "choreographyDelay": 25,
+    "durationSmall": 110,
+    "durationLarge": 180
+  },
+  "appearance": {
+    "profilePhoto": "/home/pharmaracist/Downloads/IMG20241102142938.jpg",
+    "autoDarkMode": {
+      "enabled": false,
+      "from": "18:10",
+      "to": "6:10"
+    },
+    "keyboardUseFlag": false,
+    "layerSmoke": false,
+    "layerSmokeStrength": 0.2,
+    "barRoundCorners": 0,
+    "fakeScreenRounding": 1,
+    "visualizer": {}
+  },
+  "apps": {
+    "bluetooth": "blueberry",
+    "imageViewer": "loupe",
+    "network": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi",
+    "settings": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center",
+    "taskManager": "foot -e btop",
+    "terminal": "foot",
+    "fileManager": "nautilus",
+    "browser": "firefox",
+    "calculator": "gnome-calculator",
+    "textEditor": "code"
+  },
+  "battery": {
+    "low": 20,
+    "critical": 10,
+    "warnLevels": [
+      20,
+      15,
+      5
+    ],
+    "warnTitles": [
+      "Low battery",
+      "Very low battery",
+      "Critical Battery"
+    ],
+    "warnMessages": [
+      "Plug in the charger",
+      "You there?",
+      "PLUG THE CHARGER ALREADY"
+    ],
+    "suspendThreshold": 3
+  },
+  "brightness": {
+    "controllers": {
+      "default": "auto"
+    }
+  },
+  "cheatsheet": {
+    "keybinds": {
+      "configPath": ""
+    }
+  },
+  "gaming": {
+    "crosshair": {
+      "size": 20,
+      "color": "rgba(113,227,32,0.9)"
+    }
+  },
+  "i18n": {
+    "langCode": "",
+    "extraLogs": false
+  },
+  "monitors": {
+    "scaleMethod": "division"
+  },
+  "music": {
+    "preferredPlayer": "plasma-browser-integration"
+  },
+  "onScreenKeyboard": {
+    "layout": "qwerty_full"
+  },
+  "overview": {
+    "scale": 0.18,
+    "numOfRows": 2,
+    "numOfCols": 5,
+    "wsNumScale": 0.09,
+    "wsNumMarginScale": 0.07
+  },
+  "sidebar": {
+    "ai": {
+      "__custom": [
+        "extraGptModels"
+      ],
+      "extraGptModels": {
+        "openrouter": {
+          "name": "Llama 3 8B",
+          "logo_name": "openrouter-symbolic",
+          "description": "A unified interface for LLMs",
+          "base_url": "https://openrouter.ai/api/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "openrouter_key.txt",
+          "model": "meta-llama/llama-3-8b-instruct:free"
+        }
+      },
+      "initMessages": []
+    },
+    "image": {
+      "columns": 2,
+      "batchCount": 20,
+      "allowNsfw": false,
+      "saveInFolderByTags": false
+    },
+    "pages": {
+      "order": [
+        "apis",
+        "tools",
+        "github"
+      ],
+      "apis": {
+        "order": [
+          "gemini",
+          "gpt",
+          "translater",
+          "ytmusic"
+        ]
+      }
+    },
+    "translater": {
+      "__custom": [
+        "languages"
+      ],
+      "from": "auto",
+      "to": "ar",
+      "languages": {
+        "auto": "Auto",
+        "en": "English",
+        "ar": "Arabic"
+      }
+    }
+  },
+  "search": {
+    "watchers": [
+      "/usr/share/applications",
+      "~/.local/share/applications",
+      "/var/lib/flatpak/exports/share"
+    ],
+    "enableFeatures": {
+      "actions": true,
+      "commands": true,
+      "mathResults": true,
+      "directorySearch": true,
+      "aiSearch": true,
+      "webSearch": true
+    },
+    "engineBaseUrl": "https://www.google.com/search?q=",
+    "excludedSites": [
+      "quora.com"
+    ]
+  },
+  "time": {
+    "format": "%I:%M",
+    "interval": 1000,
+    "dateFormatLong": "%A, %d/%m",
+    "dateInterval": 500000,
+    "dateFormat": "%d/%m"
+  },
+  "timers": {
+    "presets": [
+      {
+        "name": "Pomodoro",
+        "duration": 1500,
+        "icon": "timer"
+      },
+      {
+        "name": "Short Break",
+        "duration": 300,
+        "icon": "coffee"
+      },
+      {
+        "name": "Long Break",
+        "duration": 900,
+        "icon": "self_improvement"
+      },
+      {
+        "name": "Quick Timer",
+        "duration": 60,
+        "icon": "bolt"
+      },
+      {
+        "name": "Tea",
+        "duration": 180,
+        "icon": "local_cafe"
+      },
+      {
+        "name": "Workout",
+        "duration": 2700,
+        "icon": "fitness_center"
+      },
+      {
+        "name": "Reading",
+        "duration": 1800,
+        "icon": "menu_book"
+      },
+      {
+        "name": "Meditation",
+        "duration": 600,
+        "icon": "spa"
+      },
+      {
+        "name": "test",
+        "duration": 2,
+        "icon": "「」"
+      },
+      {
+        "name": "Power Nap",
+        "duration": 1200,
+        "icon": "bedtime"
+      },
+      {
+        "name": "Cooking",
+        "duration": 1200,
+        "icon": "restaurant"
+      }
+    ]
+  },
+  "weather": {
+    "city": "Cairo",
+    "preferredUnit": "C"
+  },
+  "workspaces": {
+    "shown": 9,
+    "style": "unicode",
+    "labels": {
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "七",
+      "8": "八",
+      "9": "九",
+      "10": "十"
+    },
+    "numeric_style": "numeric",
+    "defaultLabel": "•",
+    "activeWorkspaceStyle": "normal",
+    "focus": 6
+  },
+  "dock": {
+    "enabled": true,
+    "hiddenThickness": 5,
+    "pinnedApps": [
+      "zen-browser",
+      "spotube",
+      "github-desktop",
+      "visual-studio-code",
+      "zeditor",
+      "nwg-look",
+      "Obisidian",
+      "steam",
+      "heroic-games-launcher",
+      "org.gnome.Nautilus",
+      null,
+      null,
+      "github desktop"
+    ],
+    "layer": "top",
+    "monitorExclusivity": true,
+    "searchPinnedAppIcons": false,
+    "trigger": [
+      "client-added",
+      "client-removed"
+    ],
+    "autoHide": [
+      {
+        "trigger": "client-added",
+        "interval": 500
+      },
+      {
+        "trigger": "client-removed",
+        "interval": 500
+      }
+    ]
+  },
+  "icons": {
+    "__custom": [
+      "substitutions",
+      "regexSubstitutions"
+    ],
+    "searchPaths": [
+      ""
+    ],
+    "symbolicIconTheme": {
+      "dark": "Adwaita",
+      "light": "Adwaita"
+    },
+    "substitutions": {
+      "code-url-handler": "code",
+      "Code": "code",
+      "GitHub Desktop": "github-desktop",
+      "Minecraft* 1.20.1": "minecraft",
+      "gnome-tweaks": "org.gnome.tweaks",
+      "pavucontrol-qt": "pavucontrol",
+      "wps": "wps-office2019-kprometheus",
+      "wpsoffice": "wps-office2019-kprometheus",
+      "": "image-missing"
+    },
+    "regexSubstitutions": [
+      {
+        "regex": {},
+        "replace": "steam_icon_$1"
+      }
+    ]
+  },
+  "keybinds": {
+    "overview": {
+      "altMoveLeft": "Ctrl+b",
+      "altMoveRight": "Ctrl+f",
+      "deleteToEnd": "Ctrl+k"
+    },
+    "sidebar": {
+      "apis": {
+        "nextTab": "Page_Down",
+        "prevTab": "Page_Up"
+      },
+      "options": {
+        "nextTab": "Page_Down",
+        "prevTab": "Page_Up"
+      },
+      "pin": "Ctrl+p",
+      "cycleTab": "Ctrl+Tab",
+      "nextTab": "Ctrl+Page_Down",
+      "prevTab": "Ctrl+Page_Up"
+    },
+    "cheatsheet": {
+      "keybinds": {
+        "nextTab": "Page_Down",
+        "prevTab": "Page_Up"
+      },
+      "nextTab": "Ctrl+Page_Down",
+      "prevTab": "Ctrl+Page_Up",
+      "cycleTab": "Ctrl+Tab"
+    }
+  },
+  "bar": {
+    "mode": "mode1",
+    "wallpaper_folder": "~/Pictures/Wallpapers",
+    "position": "top"
+  },
+  "notifications": {
+    "position": "top right",
+    "blacklist": [
+      "Spotify"
+    ]
+  },
+  "ytmusic": {
+    "audioQuality": {
+      "type": "enum",
+      "default": "high",
+      "enums": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "descriptions": {
+        "low": "Low quality (saves data)",
+        "medium": "Medium quality (128kbps)",
+        "high": "High quality (best opus/audio)"
+      }
+    },
+    "autoQueue": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically queue similar tracks"
+    },
+    "queueSize": {
+      "type": "number",
+      "default": 5,
+      "description": "Number of tracks to auto-queue"
+    },
+    "cacheTimeout": {
+      "type": "number",
+      "default": 30,
+      "description": "Cache timeout in minutes"
+    }
+  },
+  "modules": {
+    "bar": true,
+    "notifications": true,
+    "dock": true,
+    "overview": true,
+    "powermenu": true,
+    "settings": false,
+    "cheatsheet": true,
+    "osd": true,
+    "colorscheme": false,
+    "sideleft": true,
+    "sideright": true,
+    "onscreenkeyboard": true,
+    "crosshair": true,
+    "desktopbackground": true,
+    "screencorners": true,
+    "session": true,
+    "system": false,
+    "keyboard": false,
+    "volume": false,
+    "network": false,
+    "indicators": true,
+    "wallselect": true,
+    "dashboard": true,
+    "quicksettings": true,
+    "music": true
+  },
+  "presets": {
+    "minimal": {
+      "bar": true,
+      "dock": false,
+      "sideleft": false,
+      "sideright": true,
+      "notifications": true,
+      "indicators": false,
+      "dashboard": false,
+      "quicksettings": true,
+      "music": false,
+      "wallselect": false
+    },
+    "gaming": {
+      "bar": true,
+      "dock": false,
+      "sideleft": false,
+      "sideright": false,
+      "notifications": false,
+      "indicators": false,
+      "dashboard": false,
+      "quicksettings": false,
+      "music": false,
+      "wallselect": false
+    },
+    "full": {
+      "bar": true,
+      "dock": true,
+      "sideleft": true,
+      "sideright": true,
+      "notifications": true,
+      "indicators": true,
+      "dashboard": true,
+      "quicksettings": true,
+      "music": true,
+      "wallselect": true
+    },
+    "default": {
+      "name": "Default",
+      "description": "Default preset"
+    }
+  }
+}
