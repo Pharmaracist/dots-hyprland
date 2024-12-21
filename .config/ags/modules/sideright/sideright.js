@@ -12,8 +12,12 @@ import {
   NightLightButton,
   IdleInhibitorButton,
   CloudflareWarpButton,
-  SecondaryTogglesButton,
-  SecondaryTogglesRevealerState,
+  RevealerState,
+  RevealerButton,
+  ModuleNightLight,
+  ModuleRawInput,
+  ModuleSettingsIcon,
+  ModuleIdleInhibitor,
 } from "./quicktoggles.js";
 import { VolumeSlider } from "./volumeslider.js";
 import { BrightnessSlider } from "./brightnessslider.js";
@@ -109,6 +113,7 @@ const timeRow = Widget.Box({
                   ];
                 }
               }),
+
             }),
             Widget.Label({
               hpack: "center",
@@ -163,14 +168,11 @@ const timeRow = Widget.Box({
             }),
           ],
         }),
-        Widget.Box({
-          hpack: "end",
-          hexpand: true,
-          vexpand:false,
-          children: [SecondaryTogglesButton()],
-        }),
+        
       ],
     }),
+    Widget.Box({ hexpand: true }),
+    RevealerButton({ hpack: "start"}),
   ],
 });
 
@@ -189,8 +191,9 @@ const togglesBox = Widget.Box({
     }),
     Widget.Box({
       vertical: true,
-      className: " spacing-v-5 spacing-v-5",
-      children: [
+      className: "spacing-v-5",
+      css:"margin-bottom:1rem",
+	    children: [
         VolumeSlider(),
         BrightnessSlider(),
       ],
@@ -202,8 +205,8 @@ const togglesBox = Widget.Box({
       children: [
         Widget.Revealer({
           transition: 'slide_down',
-          transitionDuration: 150,
-          setup: (self) => SecondaryTogglesRevealerState.register(self),
+          transitionDuration: 180,
+          setup: (self) => RevealerState.register(self, 'secondary'),
           child: Widget.Box({
             vertical: true,
             children: [
@@ -214,16 +217,13 @@ const togglesBox = Widget.Box({
                 // hexpand: true,
                 child: Widget.Box({
                   className: "spacing-h-5",
-                  hpack: "center",
+                  css:"margin-bottom:1rem",
+			hpack: "center",
                   children: [
-                    NightLightButton(),
-                    IdleInhibitorButton(),
-                    MinimalPreset(),
-                    GamingPreset(),
-                    FullPreset(),
-                    CloudflareWarpButton(),
-                    NightLightButton(),
-                    IdleInhibitorButton(),
+                    ModuleNightLight(),
+                    ModuleRawInput(),
+                    ModuleSettingsIcon(),
+                    ModuleIdleInhibitor(),
                     MinimalPreset(),
                     GamingPreset(),
                     FullPreset(),
@@ -295,17 +295,59 @@ export default () =>
         children: [
           Widget.Box({
             vertical: true,
-            // className: "sidebar-toplabel",
-            children: [timeRow, togglesBox,],
-          }),
-          Widget.Box({
-            className: "sidebar-group",
-            children: [sidebarOptionsStack],
-          }),
-          Widget.Box({
-            vertical: true,
-            hexpand: true,
-            children: [ModuleCalendar(),ModuleMusicControls()],
+            children: [
+              Widget.Box({  // Always visible timeRow with revealer button
+                vertical: true,
+                children: [
+                  Widget.Box({
+                    children: [timeRow, ],
+                  }),
+                ],
+              }),
+              Widget.Revealer({
+                revealChild: true,  // Primary buttons visible by default
+                transition: "slide_down",
+                transitionDuration: 300,
+                setup: (self) => {
+                  RevealerState.register(self, 'primary');
+                  self.hook(RevealerState, () => {
+                    self.revealChild = RevealerState.isPrimaryRevealed;
+                  });
+                },
+                child: Widget.Box({
+                  vertical: true,
+                  children: [togglesBox],
+                }),
+              }),
+              Widget.Box({
+                vertical: true,
+                className: "spacing-v-10",
+                children: [
+                  Widget.Box({
+                    className: "sidebar-group",
+                    children: [sidebarOptionsStack],
+                  }),
+                  Widget.Box({
+			  vexpand:false,
+                    vertical: true,
+                    children: [ModuleCalendar()],
+                  }),
+
+                ],
+              }),
+             
+              Widget.Revealer({
+                revealChild: false,  // Secondary buttons hidden by default
+                transition: "slide_down",
+                transitionDuration: 400,
+                setup: (self) => {
+                  RevealerState.register(self, 'secondary');
+                  self.hook(RevealerState, () => {
+                    self.revealChild = RevealerState.isSecondaryRevealed;
+                  });
+                },
+              }),
+            ],
           }),
         ],
       }),

@@ -2,11 +2,12 @@ const { GLib } = imports.gi;
 import App from "resource:///com/github/Aylur/ags/app.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
+import Hyprland from "resource:///com/github/Aylur/ags/service/hyprland.js";
 const { Box, Button } = Widget;
+const { execAsync, exec } = Utils;
 
 import Bluetooth from "resource:///com/github/Aylur/ags/service/bluetooth.js";
 import Network from "resource:///com/github/Aylur/ags/service/network.js";
-const { execAsync, exec } = Utils;
 import {
   BluetoothIndicator,
   NetworkIndicator,
@@ -109,115 +110,127 @@ export const ToggleIconBluetooth = (props = {}) => {
   return button;
 };
 
-export const ModuleNightLight = async (props = {}) => {
+export const ModuleNightLight = (props = {}) => {
   if (!exec(`bash -c 'command -v gammastep'`)) return null;
 
-  const nightLightLabel = Widget.Label({
-    label: "Night Light",
-    className: "toggle-label",
-    hpack: "start",
-    hexpand: true,
-  });
-
   const button = Widget.Button({
-    attribute: { enabled: false },
-    className: "txt-small sidebar-iconbutton",
+    ...props,
+    className: "txt-norm icon-material sidebar-squareiconbutton",
     tooltipText: getString("Night Light"),
-    onClicked: async (self) => {
-      self.attribute.enabled = !self.attribute.enabled;
-      self.toggleClassName("sidebar-button-active", self.attribute.enabled);
-      nightLightLabel.toggleClassName("toggle-label-active", self.attribute.enabled);
-
-      if (self.attribute.enabled) {
-        await execAsync("gammastep").catch(print);
-      } else {
-        self.sensitive = false;
-        await execAsync("pkill gammastep").catch(print);
-        const checkInterval = setInterval(() => {
-          execAsync("pkill -0 gammastep").catch(() => {
-            self.sensitive = true;
-            clearInterval(checkInterval);
-          });
-        }, 500);
-      }
+    onClicked: () => {
+      execAsync(['pidof', 'gammastep'])
+        .then(() => {
+          execAsync(['pkill', 'gammastep']).catch(print);
+          button.toggleClassName("sidebar-button-active", false);
+        })
+        .catch(() => {
+          execAsync(['gammastep']).catch(print);
+          button.toggleClassName("sidebar-button-active", true);
+        });
     },
-    child: Widget.Box({
-      spacing: 8,
-      hexpand: true,
-      children: [
-        MaterialIcon("nightlight", "norm"),
-        nightLightLabel,
-      ],
+    child: Widget.Label({
+      className: "icon-material",
+      label: "nightlight",
     }),
     setup: (self) => {
       setupCursorHover(self);
-      self.attribute.enabled = !!exec("pidof gammastep");
-      self.toggleClassName("sidebar-button-active", self.attribute.enabled);
-      nightLightLabel.toggleClassName("toggle-label-active", self.attribute.enabled);
+      execAsync(['pidof', 'gammastep'])
+        .then(() => self.toggleClassName("sidebar-button-active", true))
+        .catch(() => self.toggleClassName("sidebar-button-active", false));
     },
-    ...props,
   });
   return button;
 };
 
 export const ModuleIdleInhibitor = (props = {}) => {
-  const scriptPath = `${configDir}/scripts/wayland-idle-inhibitor.py`;
-
-  const idleLabel = Widget.Label({
-    label: "Keep Awake",
-    className: "toggle-label",
-    hpack: "start",
-    hexpand: true,
-  });
-
-  return Widget.Button({
-    attribute: { enabled: false },
-    className: "txt-small sidebar-iconbutton",
+  const button = Widget.Button({
+    ...props,
+    className: "txt-norm icon-material sidebar-squareiconbutton",
     tooltipText: getString("Keep system awake"),
-    onClicked: async (self) => {
-      self.attribute.enabled = !self.attribute.enabled;
-      self.toggleClassName("sidebar-button-active", self.attribute.enabled);
-      idleLabel.toggleClassName("toggle-label-active", self.attribute.enabled);
-
-      if (self.attribute.enabled) {
-        await execAsync([
-          "bash",
-          "-c",
-          `pidof wayland-idle-inhibitor.py || ${scriptPath}`,
-        ]).catch(print);
-      } else {
-        await execAsync("pkill -f wayland-idle-inhibitor.py").catch(print);
-      }
+    onClicked: () => {
+      execAsync(['pidof', 'caffeine'])
+        .then(() => {
+          execAsync(['pkill', 'caffeine']).catch(print);
+          button.toggleClassName("sidebar-button-active", false);
+        })
+        .catch(() => {
+          execAsync(['caffeine']).catch(print);
+          button.toggleClassName("sidebar-button-active", true);
+        });
     },
-    child: Widget.Box({
-      spacing: 8,
-      hexpand: true,
-      children: [
-        MaterialIcon("coffee", "norm"),
-        idleLabel,
-      ],
+    child: Widget.Label({
+      className: "icon-material",
+      label: "coffee",
     }),
     setup: (self) => {
       setupCursorHover(self);
-      self.attribute.enabled = !!exec("pidof wayland-idle-inhibitor.py");
-      self.toggleClassName("sidebar-button-active", self.attribute.enabled);
-      idleLabel.toggleClassName("toggle-label-active", self.attribute.enabled);
+      execAsync(['pidof', 'caffeine'])
+        .then(() => self.toggleClassName("sidebar-button-active", true))
+        .catch(() => self.toggleClassName("sidebar-button-active", false));
     },
-    ...props,
   });
+  return button;
 };
+
+export const ModuleRawInput = (props = {}) => {
+  const button = Widget.Button({
+    ...props,
+    className: "txt-norm icon-material sidebar-squareiconbutton",
+    tooltipText: getString("Raw input"),
+    onClicked: () => {
+      execAsync(['hyprctl', 'getoption', 'input:force_no_accel'])
+        .then(output => {
+          const parsed = JSON.parse(output);
+          const newValue = parsed.int !== 1;
+          execAsync(['hyprctl', 'keyword', 'input:force_no_accel', newValue ? '1' : '0'])
+            .catch(print);
+          button.toggleClassName("sidebar-button-active", newValue);
+        })
+        .catch(print);
+    },
+    child: Widget.Label({
+      className: "icon-material",
+      label: "mouse",
+    }),
+    setup: (self) => {
+      setupCursorHover(self);
+      execAsync(['hyprctl', 'getoption', 'input:force_no_accel'])
+        .then(output => {
+          const parsed = JSON.parse(output);
+          self.toggleClassName("sidebar-button-active", parsed.int === 1);
+        })
+        .catch(print);
+    },
+  });
+  return button;
+};
+
+export const ModuleSettingsIcon = (props = {}) => Widget.Button({
+  ...props,
+  className: "txt-norm icon-material sidebar-squareiconbutton",
+  tooltipText: getString("AGS Settings"),
+  child: Widget.Label({
+    className: "icon-material",
+    label: "settings",
+  }),
+  onClicked: () => {
+    App.openWindow("settings-dialog");
+    App.closeWindow("sideright");
+  },
+  setup: setupCursorHover,
+});
 
 export const ModuleReloadIcon = (props = {}) => {
   const reloadLabel = Widget.Label({
     label: "Reload",
-    className: "toggle-label",
+    className: "txt-norm icon-material sidebar-squareiconbutton",
     hpack: "start",
     hexpand: true,
   });
 
   return Widget.Button({
     ...props,
-    className: "txt-small sidebar-iconbutton",
+    className: "txt-norm icon-material sidebar-squareiconbutton",
     tooltipText: getString("Reload Environment config"),
     onClicked: async () => {
       reloadLabel.toggleClassName("toggle-label-active", true);
@@ -247,7 +260,7 @@ export const ModulePowerIcon = (props = {}) => {
 
   return Widget.Button({
     ...props,
-    className: "txt-small sidebar-iconbutton",
+    className: "txt-norm icon-material sidebar-iconbutton",
     tooltipText: getString("Session"),
     onClicked: () => {
       powerLabel.toggleClassName("toggle-label-active", true);
@@ -269,58 +282,12 @@ export const ModulePowerIcon = (props = {}) => {
   });
 };
 
-export const ModuleRawInput = async (props = {}) => {
-  try {
-    const Hyprland = (
-      await import("resource:///com/github/Aylur/ags/service/hyprland.js")
-    ).default;
-
-    return Widget.Button({
-      className: "txt-small sidebar-iconbutton",
-      tooltipText: "Raw input",
-      onClicked: async (button) => {
-        const output = await Hyprland.messageAsync(
-          "j/getoption input:accel_profile",
-        );
-        const value = JSON.parse(output)["str"].trim();
-        const newValue =
-          value != "[[EMPTY]]" && value != "" ? "[[EMPTY]]" : "flat";
-
-        await Hyprland.messageAsync(
-          `j/keyword input:accel_profile ${newValue}`,
-        ).catch(print);
-        button.toggleClassName(
-          "sidebar-button-active",
-          newValue !== "[[EMPTY]]",
-        );
-      },
-      child: Widget.Box({
-        spacing: 8,
-        hexpand: true,
-        children: [
-          MaterialIcon("mouse", "norm"),
-          Widget.Label({
-            label: "Raw Input",
-            className: "toggle-label",
-            hpack: "start",
-            hexpand: true,
-          }),
-        ],
-      }),
-      setup: setupCursorHover,
-      ...props,
-    });
-  } catch {
-    return null;
-  }
-};
-
 export const ModuleCloudflareWarp = async (props = {}) => {
   if (!exec(`bash -c 'command -v warp-cli'`)) return null;
 
   const button = Widget.Button({
     attribute: { enabled: false },
-    className: "txt-small sidebar-iconbutton",
+    className: "txt-norm icon-material sidebar-squareiconbutton",
     tooltipText: getString("Cloudflare WARP"),
     onClicked: async (self) => {
       self.attribute.enabled = !self.attribute.enabled;
@@ -356,22 +323,6 @@ export const ModuleCloudflareWarp = async (props = {}) => {
   });
   return button;
 };
-
-export const ModuleSettingsIcon = ({ hpack = "center" } = {}) =>
-  Widget.Button({
-    hpack: hpack,
-    className: "txt-norm icon-material sidebar-iconbutton",
-    tooltipText: "AGS Settings",
-    label: "settings",
-    onClicked: () => {
-      App.closeWindow("sideright");
-      Utils.execAsync([
-        "bash",
-        "-c",
-        `${GLib.get_home_dir()}/.local/bin/ags-tweaks`,
-      ]);
-    },
-  });
 
 export const SecondaryButton = ({ icon, label, tooltip, onClicked }) => Widget.Button({
     className: " sidebar-squareiconbutton",
@@ -417,16 +368,30 @@ export const CloudflareWarpButton = () => SecondaryButton({
     onClicked: () => execAsync(['warp-cli', 'connect']).catch(print),
 });
 
-export const SecondaryTogglesRevealerState = {
-    _isRevealed: false,
+export const RevealerState = {
+    _isSecondaryRevealed: false,
+    _isPrimaryRevealed: true,  // Primary visible by default
     _subscribers: new Set(),
 
-    get isRevealed() {
-        return this._isRevealed;
+    get isSecondaryRevealed() {
+        return this._isSecondaryRevealed;
     },
 
-    set isRevealed(value) {
-        this._isRevealed = value;
+    get isPrimaryRevealed() {
+        return this._isPrimaryRevealed;
+    },
+
+    set isSecondaryRevealed(value) {
+        this._isSecondaryRevealed = value;
+        this._notifySubscribers();
+    },
+
+    set isPrimaryRevealed(value) {
+        this._isPrimaryRevealed = value;
+        this._notifySubscribers();
+    },
+
+    _notifySubscribers() {
         this._subscribers.forEach(cb => cb());
     },
 
@@ -435,55 +400,62 @@ export const SecondaryTogglesRevealerState = {
         return () => this._subscribers.delete(callback);
     },
 
-    register(revealer) {
-        this.revealers.add(revealer);
+    register(revealer, type) {
+        if (type === 'primary') this.primaryRevealers.add(revealer);
+        else if (type === 'secondary') this.secondaryRevealers.add(revealer);
         return revealer;
     },
 
-    revealers: new Set(),
+    primaryRevealers: new Set(),
+    secondaryRevealers: new Set(),
 
-    toggleAll() {
-        this.isRevealed = !this.isRevealed;
-        this.revealers.forEach(revealer => {
-            revealer.revealChild = this.isRevealed;
+    toggleSecondary() {
+        if (!this.isPrimaryRevealed) return; // Only toggle secondary if primary is visible
+        this.isSecondaryRevealed = !this.isSecondaryRevealed;
+        this.secondaryRevealers.forEach(revealer => {
+            revealer.revealChild = this.isSecondaryRevealed;
+        });
+    },
+
+    togglePrimary() {
+        this.isPrimaryRevealed = !this.isPrimaryRevealed;
+        if (!this.isPrimaryRevealed) {
+            // Hide secondary when primary is hidden
+            this.isSecondaryRevealed = false;
+            this.secondaryRevealers.forEach(revealer => {
+                revealer.revealChild = false;
+            });
+        }
+        this.primaryRevealers.forEach(revealer => {
+            revealer.revealChild = this.isPrimaryRevealed;
         });
     }
 };
 
-export const SecondaryTogglesButton = () => {
-    const icon = Widget.Label({
-        className: "txt-larger",
-        setup: self => {
-            self.hook(SecondaryTogglesRevealerState, () => {
-                self.label = SecondaryTogglesRevealerState.isRevealed ? '' : '';
-            });
-        },
-    });
-
-    const button = Widget.Button({
-        className: "toggle-label",
-        tooltipText: getString("Toggle secondary controls"),
-        onClicked: () => {
-            SecondaryTogglesRevealerState.toggleAll();
-        },
-        child: Widget.Box({
-            children: [MaterialIcon('keyboard_arrow_down', 'norm')],
-            setup: self => {
-                const updateIcon = () => {
-                    self.children = [MaterialIcon(
-                        SecondaryTogglesRevealerState.isRevealed ? 'keyboard_arrow_up' : 'keyboard_arrow_down',
-                        'norm'
-                    )];
-                };
-                SecondaryTogglesRevealerState.subscribe(updateIcon);
-                updateIcon();
-            },
-        }),
-        setup: setupCursorHover,
-    });
-
-    return button;
-};
+export const RevealerButton = () => Widget.Button({
+    className: 'txt-larger sec-txt',
+    onClicked: () => RevealerState.toggleSecondary(),  // Left click for secondary
+    onSecondaryClick: () => RevealerState.togglePrimary(),  // Right click for primary
+    child: Widget.Box({
+        children: [
+            Widget.Label({
+              hpack: "end",
+                className: 'icon-material revealer-icon',
+                label: 'expand_more',
+                setup: (self) => self
+                    .hook(RevealerState, () => {
+                        if (!RevealerState.isPrimaryRevealed) {
+                            self.label = 'unfold_less';
+                        } else if (RevealerState.isSecondaryRevealed) {
+                            self.label = 'expand_less';
+                        } else {
+                            self.label = 'expand_more';
+                        }
+                    }),
+            }),
+        ],
+    }),
+});
 
 const hyprctl = (cmd) => execAsync(["hyprctl", ...cmd.split(" ")]).catch(print);
 const getHyprOption = async (opt) =>
