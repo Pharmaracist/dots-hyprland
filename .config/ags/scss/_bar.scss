@@ -48,11 +48,11 @@ $bar_ws_width_focus_active: 6.045rem;
     @include small-rounding;
 }
 .bar-floating {
+    @include normal-rounding;
     background-color: $layer0;
     @include elevation2;
     @include large-rounding;
-    margin: 8px 10px;
-    border-radius: 1.37rem;
+    margin: 3px 10px;
     padding: 3px;
     -gtk-outline-radius: 10rem;
 }
@@ -570,9 +570,9 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-round-padding{
-    padding:0.3rem 1rem ;
+    padding:0.3rem 1.2rem ;
     background-color: $layer0;
-    @include large-rounding;
+    @include full-rounding;
     @include elevation2 
 }
 

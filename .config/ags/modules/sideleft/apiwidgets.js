@@ -16,15 +16,26 @@ const TextView = Widget.subclass(Gtk.TextView, "AgsTextView");
 import GPTService from '../../services/gpt.js';
 import Gemini from '../../services/gemini.js';
 import YTMusic from '../../services/ytmusic.js';
+import QuranService from '../../services/quran.js';
 import { geminiView, geminiCommands, sendMessage as geminiSendMessage, geminiTabIcon } from './apis/gemini.js';
 import { chatGPTView, chatGPTCommands, sendMessage as chatGPTSendMessage, chatGPTTabIcon } from './apis/chatgpt.js';
 import { TranslaterView, translaterCommands, sendMessage as translaterSendMessage, translaterIcon } from './apis/translater.js';
 import { ytmusicView, ytmusicCommands, sendMessage as ytmusicSendMessage, ytmusicTabIcon, MediaControls } from './apis/ytmusic.js';
+import { quranView, quranCommands, sendMessage as quranSendMessage, quranTabIcon } from './apis/quran.js';
 
 // Create a custom icon for YouTube Music
 
 const EXPAND_INPUT_THRESHOLD = 30;
 const APILIST = {
+    'quran': {
+        name: 'Quran',
+        sendCommand: quranSendMessage,
+        contentWidget: quranView,
+        commandBar: quranCommands,
+        tabIcon: quranTabIcon,
+    
+        placeholderText: 'وَقُل رَّبِّ زِدْنِي عِلْمًا'
+    },
     'gemini': {
         name: 'Assistant (Gemini Pro)',
         sendCommand: geminiSendMessage,

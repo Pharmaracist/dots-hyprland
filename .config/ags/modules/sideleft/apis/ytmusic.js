@@ -597,72 +597,8 @@ export const ytmusicCommands = Box({
 });
 
 // Export the icon
-export const ytmusicTabIcon = Box({
-    className: 'txt-norm',
+export const ytmusicTabIcon = Icon({
     hpack: 'center',
-    child: MaterialIcon('headphones', 'large'),
-});
-
-// Add styles
-
-App.connect('config-parsed', () => {
-    App.stylesheet += `
-    .ytm-controls {
-        padding: 0.5em;
-    }
-    .ytm-controls-box {
-        padding: 0.5em;
-    }
-    .ytm-main-controls {
-        padding: 0.5em;
-    }
-    .ytm-playback-controls {
-        padding: 0.5em;
-    }
-    .ytm-toggle-view-button {
-        padding: 0.5em;
-    }
-    .ytm-volume-control {
-        padding: 0.5em;
-    }
-    .ytm-volume-icon {
-        padding: 0.5em;
-    }
-    .ytm-seek-slider {
-        padding: 0.5em;
-    }
-    .ytm-mode-controls {
-        padding: 0.5em;
-    }
-    .ytm-now-playing {
-        padding: 0.5em;
-    }
-    .ytm-now-playing-info {
-        padding: 0.5em;
-    }
-    .ytm-now-playing-title {
-        padding: 0.5em;
-    }
-    .ytm-now-playing-artist {
-        padding: 0.5em;
-    }
-    .ytm-results {
-        padding: 0.5em;
-    }
-    .track-item {
-        padding: 0.5em;
-    }
-    .track-content {
-        padding: 0.5em;
-    }
-    .track-item-info {
-        padding: 0.5em;
-    }
-    .track-item-title {
-        padding: 0.5em;
-    }
-    .track-item-artist {
-        padding: 0.5em;
-    }
-    `;
+    size: '22',
+    icon: `youtube-music-symbolic`,
 });

@@ -1723,3 +1723,56 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         margin: 0 8px;
     }
 }
+.quran-surah-name {
+    font-family: "TE HAFS2 Tharwat Emara", "Noto Naskh Arabic", "Noto Sans Arabic", serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: $primary;
+    margin: 1rem 0;
+}
+.quran-loading {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.welcome-message {
+    padding: 2rem;
+    
+    .welcome-title {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: $onSurface;
+    }
+    
+    .welcome-subtitle {
+        opacity: 0.8;
+        color: $onSurfaceVariant;
+    }
+    
+    .welcome-examples {
+        margin: 1rem 0;
+        min-width: 300px;
+        
+        .welcome-example-btn {
+            // padding: 0.7 5rem 1rem;
+            border-radius: $rounding_large;
+            background-color: $surfaceContainerLow;
+            border: 1px solid $surfaceContainerHighest;
+            transition: all 0.2s ease;
+            min-width: 300px;
+            color: $onSurface;
+            
+            &:hover {
+                background-color: $surfaceContainerHigh;
+                border-color: $primary;
+            }
+        }
+    }
+    
+    .capability-item {
+        opacity: 0.8;
+        color: $onSurfaceVariant;
+        margin: 0.25rem 0;
+    }
+}

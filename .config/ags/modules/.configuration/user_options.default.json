@@ -29,7 +29,10 @@
     "battery": true,
     "network": true,
     "volume": true,
-    "keyboard": true
+    "keyboard": true,
+    "quran": {
+      "verseNumberStyle": "circle"
+    }
   },
   "ai": {
     "defaultGPTProvider": "openrouter",
