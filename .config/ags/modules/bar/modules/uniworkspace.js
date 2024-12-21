@@ -63,10 +63,43 @@ const numberStyles = {
         const ones = num % 10;
         return chineseNums[tens] + chineseNums[10] + (ones > 0 ? chineseNums[ones] : '');
     },
+    japanese: (num) => {
+        const japaneseNums = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+        if (num <= 10) return japaneseNums[num];
+        if (num < 20) return japaneseNums[10] + (num > 10 ? japaneseNums[num - 10] : '');
+        const tens = Math.floor(num / 10);
+        const ones = num % 10;
+        return japaneseNums[tens] + japaneseNums[10] + (ones > 0 ? japaneseNums[ones] : '');
+    },
+    korean: (num) => {
+        const koreanNums = ['영', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구', '십'];
+        if (num <= 10) return koreanNums[num];
+        if (num < 20) return koreanNums[10] + (num > 10 ? koreanNums[num - 10] : '');
+        const tens = Math.floor(num / 10);
+        const ones = num % 10;
+        return koreanNums[tens] + koreanNums[10] + (ones > 0 ? koreanNums[ones] : '');
+    },
+    thai: (num) => {
+        const thaiNums = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+        return num.toString().split('').map(n => thaiNums[parseInt(n)]).join('');
+    },
+    devanagari: (num) => {
+        const devanagariNums = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+        return num.toString().split('').map(n => devanagariNums[parseInt(n)]).join('');
+    },
+    bengali: (num) => {
+        const bengaliNums = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+        return num.toString().split('').map(n => bengaliNums[parseInt(n)]).join('');
+    },
     circled: (num) => {
         const circledNums = ['⓪', '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩',
                             '⑪', '⑫', '⑬', '⑭', '⑮', '⑯', '⑰', '⑱', '⑲', '⑳'];
         return num <= 20 ? circledNums[num] : num.toString();
+    },
+    negative_circled: (num) => {
+        const negCircledNums = ['⓿', '❶', '❷', '❸', '❹', '❺', '❻', '❼', '❽', '❾', '❿',
+                               '⓫', '⓬', '⓭', '⓮', '⓯', '⓰', '⓱', '⓲', '⓳', '⓴'];
+        return num <= 20 ? negCircledNums[num] : num.toString();
     },
     fullwidth: (num) => {
         const fullwidthNums = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
@@ -79,6 +112,14 @@ const numberStyles = {
     subscript: (num) => {
         const subNums = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
         return num.toString().split('').map(n => subNums[parseInt(n)]).join('');
+    },
+    dice: (num) => {
+        const diceNums = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        return num <= 6 ? diceNums[num - 1] : num.toString();
+    },
+    braille: (num) => {
+        const brailleNums = ['⠚', '⠁', '⠃', '⠉', '⠙', '⠑', '⠋', '⠛', '⠓', '⠊'];
+        return num.toString().split('').map(n => brailleNums[parseInt(n)]).join('');
     },
     numeric: (num) => num.toString(),
     dot: () => '•',
@@ -199,7 +240,7 @@ const WorkspaceContents = (count = 10) => {
 
         // Font
         const layout = PangoCairo.create_layout(cr);
-        const fontDesc = Pango.font_description_from_string(`${workspaceFontFamily[0]}, Noto Sans CJK JP, Noto Color Emoji ${getFontWeightName(workspaceFontWeight)} ${workspaceFontSize}`);
+        const fontDesc = Pango.font_description_from_string(`${workspaceFontFamily[0]}, Noto Sans CJK JP ${getFontWeightName(workspaceFontWeight)} ${workspaceFontSize}`);
         layout.set_font_description(fontDesc);
         cr.setAntialias(Cairo.Antialias.BEST);
         // Get kinda min radius for number indicators

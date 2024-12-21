@@ -599,7 +599,8 @@ export const ytmusicCommands = Box({
 // Export the icon
 export const ytmusicTabIcon = Box({
     className: 'txt-norm',
-    child: MaterialIcon('music_note', 'large'),
+    hpack: 'center',
+    child: MaterialIcon('headphones', 'large'),
 });
 
 // Add styles

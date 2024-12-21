@@ -1,54 +1,55 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import GLib from "gi://GLib";
-import LocalMedia from "../../../services/media.js";
-import YTMusic from "../../../services/ytmusic.js";
 import Mpris from "../../../services/mpris.js";
 
-const CYCLE_INTERVAL = 5000; // 5 seconds
-const MODES = ['TITLE', 'ARTIST', 'SOURCE'];
+const MediaIndicator = () => Widget.Box({
+    className: 'bar-media-indicator',
+    setup: self => {
+        const icon = Widget.Icon({
+            icon: 'audio-x-generic-symbolic',
+            size: 16,
+        });
 
-const MediaIndicator = () => {
-    const widget = Widget.Box({
-        className: 'bar-media-indicator',
-        children: [
-            Widget.Icon({
-                icon: 'audio-x-generic-symbolic',
-                size: 16,
-            }),
-            Widget.Label({
-                className: 'bar-media-title',
-            }),
-        ],
-    });
+        const label = Widget.Label({
+            className: 'bar-media-title',
+        });
 
-    const updateWidget = () => {
-        const player = Mpris.getPlayer();
-        if (!player) {
-            widget.visible = false;
-            return;
-        }
+        self.children = [icon, label];
 
-        widget.visible = true;
-        const title = player.trackTitle || '';
-        const artist = player.trackArtists?.join(', ') || '';
-        widget.children[1].label = artist ? `${title} - ${artist}` : title;
-    };
+        const updateWidget = () => {
+            const player = Mpris.getPlayer();
+            const trackInfo = Mpris.trackInfo;
+            
+            if (!player || !trackInfo) {
+                self.visible = false;
+                return;
+            }
 
-    Mpris.connect('player-added', updateWidget);
-    Mpris.connect('player-removed', updateWidget);
-    Mpris.connect('player-changed', updateWidget);
+            self.visible = true;
+            const { title, artist } = trackInfo;
+            label.label = artist ? `${title} - ${artist}` : title;
+        };
 
-    updateWidget();
-    return widget;
-};
+        // Connect to property changes
+        const handlers = [
+            Mpris.connect('notify::player', updateWidget),
+            Mpris.connect('notify::track', updateWidget),
+        ];
+
+        self.connect('destroy', () => {
+            handlers.forEach(handler => {
+                try {
+                    Mpris.disconnect(handler);
+                } catch (error) {
+                    console.error('Error disconnecting handler:', error);
+                }
+            });
+        });
+
+        updateWidget();
+    },
+});
 
 export default () => Widget.Button({
     className: "media-button",
-    onClicked: () => {
-        const widget = Widget.getWidget("media-indicator");
-        if (widget) {
-            // Removed cycleMode call as it's not defined in the new MediaIndicator
-        }
-    },
     child: MediaIndicator(),
 });

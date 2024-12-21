@@ -206,7 +206,10 @@ const togglesBox = Widget.Box({
         Widget.Revealer({
           transition: 'slide_down',
           transitionDuration: 180,
-          setup: (self) => RevealerState.register(self, 'secondary'),
+          setup: (self) => {
+            RevealerState.register(self, 'secondary');
+            return self;
+          },
           child: Widget.Box({
             vertical: true,
             children: [

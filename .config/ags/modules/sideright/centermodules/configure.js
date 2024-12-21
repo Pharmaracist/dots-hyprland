@@ -7,8 +7,11 @@ const { execAsync, exec } = Utils;
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 import { ConfigGap, ConfigSpinButton, ConfigToggle, ConfigSegmentedSelection } from '../../.commonwidgets/configwidgets.js';
+import userOptions from '../../.configuration/user_options.js';
 import { config } from '../../../variables.js';
 import { getString } from '../../../i18n/i18n.js';
+
+const options = userOptions.asyncGet();
 
 const HyprlandToggle = ({ icon, name, desc = null, option, enableValue = 1, disableValue = 0, extraOnChange = () => { } }) => ConfigToggle({
     icon: icon,
@@ -132,6 +135,22 @@ const getCurrentDefault = (mimeType) => {
     return 'Not set';
 };
 
+// Helper function to update config
+function updateConfig(path, value) {
+    const configData = userOptions.asyncGet() || {};
+    const parts = path.split('.');
+    const last = parts.pop();
+    
+    let current = configData;
+    for (const part of parts) {
+        if (!current[part]) current[part] = {};
+        current = current[part];
+    }
+    
+    current[last] = value;
+    userOptions.set(configData);
+}
+
 export default (props) => {
     const ConfigSection = ({ name, children }) => Box({
         vertical: true,
@@ -195,7 +214,7 @@ export default (props) => {
                                 initValue: config.value.animations.choreographyDelay,
                                 step: 10, minValue: 0, maxValue: 1000,
                                 onChange: (self, newValue) => {
-                                    config.value.animations.choreographyDelay = newValue
+                                    updateConfig('animations.choreographyDelay', newValue);
                                 },
                             })
                         ]),
@@ -363,8 +382,7 @@ export default (props) => {
                                 desc: getString('Automatically switch between light and dark theme'),
                                 initValue: config.value.appearance?.autoDarkMode?.enabled !== false,
                                 onChange: (self, newValue) => {
-                                    config.value.appearance.autoDarkMode.enabled = newValue;
-                                    config.write();
+                                    updateConfig('appearance.autoDarkMode.enabled', newValue);
                                 },
                             }),
                             Box({
@@ -396,8 +414,7 @@ export default (props) => {
                                                 '--entry-text=' + (config.value.appearance?.autoDarkMode?.from || '18:00')])
                                                 .then(time => {
                                                     if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time.trim())) {
-                                                        config.value.appearance.autoDarkMode.from = time.trim();
-                                                        config.write();
+                                                        updateConfig('appearance.autoDarkMode.from', time.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -434,8 +451,7 @@ export default (props) => {
                                                 '--entry-text=' + (config.value.appearance?.autoDarkMode?.to || '06:00')])
                                                 .then(time => {
                                                     if (time && /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time.trim())) {
-                                                        config.value.appearance.autoDarkMode.to = time.trim();
-                                                        config.write();
+                                                        updateConfig('appearance.autoDarkMode.to', time.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -641,9 +657,8 @@ export default (props) => {
                                 initValue: config.value.animations?.durationSmall || 110,
                                 minValue: 0,
                                 maxValue: 500,
-                                onChange: (value) => {
-                                    config.value.animations.durationSmall = value;
-                                    config.write();
+                                onChange: (self, newValue) => {
+                                    updateConfig('animations.durationSmall', newValue);
                                 },
                             }),
                             ConfigSpinButton({
@@ -653,9 +668,8 @@ export default (props) => {
                                 initValue: config.value.animations?.durationLarge || 180,
                                 minValue: 0,
                                 maxValue: 1000,
-                                onChange: (value) => {
-                                    config.value.animations.durationLarge = value;
-                                    config.write();
+                                onChange: (self, newValue) => {
+                                    updateConfig('animations.durationLarge', newValue);
                                 },
                             }),
                             ConfigSpinButton({
@@ -665,9 +679,8 @@ export default (props) => {
                                 initValue: config.value.animations?.choreographyDelay || 25,
                                 minValue: 0,
                                 maxValue: 200,
-                                onChange: (value) => {
-                                    config.value.animations.choreographyDelay = value;
-                                    config.write();
+                                onChange: (self, newValue) => {
+                                    updateConfig('animations.choreographyDelay', newValue);
                                 },
                             }),
                         ]),
@@ -725,8 +738,7 @@ export default (props) => {
                                             Utils.execAsync(['bash', '-c', `echo "${providers.join('\n')}" | wofi --show dmenu -p "Choose GPT provider"`])
                                                 .then(provider => {
                                                     if (provider) {
-                                                        config.value.ai.defaultGPTProvider = provider.trim();
-                                                        config.write();
+                                                        updateConfig('ai.defaultGPTProvider', provider.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -740,8 +752,7 @@ export default (props) => {
                                 desc: getString('Enable chat history'),
                                 initValue: config.value.ai?.useHistory !== false,
                                 onChange: (self, newValue) => {
-                                    config.value.ai.useHistory = newValue;
-                                    config.write();
+                                    updateConfig('ai.useHistory', newValue);
                                 },
                             }),
                             ConfigToggle({
@@ -750,8 +761,7 @@ export default (props) => {
                                 desc: getString('Enable AI safety features'),
                                 initValue: config.value.ai?.safety !== false,
                                 onChange: (self, newValue) => {
-                                    config.value.ai.safety = newValue;
-                                    config.write();
+                                    updateConfig('ai.safety', newValue);
                                 },
                             }),
                         ]),
@@ -794,8 +804,7 @@ export default (props) => {
                                                 '--value=' + (config.value.battery?.low || 20)])
                                                 .then(value => {
                                                     if (value) {
-                                                        config.value.battery.low = parseInt(value);
-                                                        config.write();
+                                                        updateConfig('battery.low', parseInt(value));
                                                     }
                                                 })
                                                 .catch(print);
@@ -834,8 +843,7 @@ export default (props) => {
                                                 '--value=' + (config.value.battery?.critical || 10)])
                                                 .then(value => {
                                                     if (value) {
-                                                        config.value.battery.critical = parseInt(value);
-                                                        config.write();
+                                                        updateConfig('battery.critical', parseInt(value));
                                                     }
                                                 })
                                                 .catch(print);
@@ -874,8 +882,7 @@ export default (props) => {
                                                 '--value=' + (config.value.battery?.suspendThreshold || 3)])
                                                 .then(value => {
                                                     if (value) {
-                                                        config.value.battery.suspendThreshold = parseInt(value);
-                                                        config.write();
+                                                        updateConfig('battery.suspendThreshold', parseInt(value));
                                                     }
                                                 })
                                                 .catch(print);
@@ -925,8 +932,7 @@ export default (props) => {
                                                     if (value) {
                                                         if (!config.value.gaming) config.value.gaming = {};
                                                         if (!config.value.gaming.crosshair) config.value.gaming.crosshair = {};
-                                                        config.value.gaming.crosshair.size = parseInt(value);
-                                                        config.write();
+                                                        updateConfig('gaming.crosshair.size', parseInt(value));
                                                     }
                                                 })
                                                 .catch(print);
@@ -964,8 +970,7 @@ export default (props) => {
                                                     if (color) {
                                                         if (!config.value.gaming) config.value.gaming = {};
                                                         if (!config.value.gaming.crosshair) config.value.gaming.crosshair = {};
-                                                        config.value.gaming.crosshair.color = color.trim();
-                                                        config.write();
+                                                        updateConfig('gaming.crosshair.color', color.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1014,9 +1019,8 @@ export default (props) => {
                                                     if (result) {
                                                         const [rows, cols] = result.split('|');
                                                         if (rows && cols) {
-                                                            config.value.overview.numOfRows = parseInt(rows);
-                                                            config.value.overview.numOfCols = parseInt(cols);
-                                                            config.write();
+                                                            updateConfig('overview.numOfRows', parseInt(rows));
+                                                            updateConfig('overview.numOfCols', parseInt(cols));
                                                         }
                                                     }
                                                 })
@@ -1056,8 +1060,7 @@ export default (props) => {
                                                 '--value=' + Math.round((config.value.overview?.scale || 0.18) * 100)])
                                                 .then(value => {
                                                     if (value) {
-                                                        config.value.overview.scale = parseInt(value) / 100;
-                                                        config.write();
+                                                        updateConfig('overview.scale', parseInt(value) / 100);
                                                     }
                                                 })
                                                 .catch(print);
@@ -1100,8 +1103,7 @@ export default (props) => {
                                             Utils.execAsync(['bash', '-c', `echo "${formats.join('\n')}" | wofi --show dmenu -p "Choose time format"`])
                                                 .then(format => {
                                                     if (format) {
-                                                        config.value.time.format = format.trim();
-                                                        config.write();
+                                                        updateConfig('time.format', format.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1136,8 +1138,7 @@ export default (props) => {
                                             Utils.execAsync(['bash', '-c', `echo "${formats.join('\n')}" | wofi --show dmenu -p "Choose date format"`])
                                                 .then(format => {
                                                     if (format) {
-                                                        config.value.time.dateFormat = format.trim();
-                                                        config.write();
+                                                        updateConfig('time.dateFormat', format.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1160,8 +1161,7 @@ export default (props) => {
                                 initValue: config.value.search?.enableFeatures?.aiSearch !== false,
                                 onChange: (self, newValue) => {
                                     if (!config.value.search.enableFeatures) config.value.search.enableFeatures = {};
-                                    config.value.search.enableFeatures.aiSearch = newValue;
-                                    config.write();
+                                    updateConfig('search.enableFeatures.aiSearch', newValue);
                                 },
                             }),
                             ConfigToggle({
@@ -1171,8 +1171,7 @@ export default (props) => {
                                 initValue: config.value.search?.enableFeatures?.mathResults !== false,
                                 onChange: (self, newValue) => {
                                     if (!config.value.search.enableFeatures) config.value.search.enableFeatures = {};
-                                    config.value.search.enableFeatures.mathResults = newValue;
-                                    config.write();
+                                    updateConfig('search.enableFeatures.mathResults', newValue);
                                 },
                             }),
                             Box({
@@ -1204,8 +1203,7 @@ export default (props) => {
                                                 '--entry-text=' + (config.value.search?.excludedSites?.join(', ') || '')])
                                                 .then(sites => {
                                                     if (sites) {
-                                                        config.value.search.excludedSites = sites.split(',').map(s => s.trim());
-                                                        config.write();
+                                                        updateConfig('search.excludedSites', sites.split(',').map(s => s.trim()));
                                                     }
                                                 })
                                                 .catch(print);
@@ -1384,8 +1382,7 @@ export default (props) => {
                                                 .then(lang => {
                                                     if (lang) {
                                                         if (!config.value.sidebar.translater) config.value.sidebar.translater = {};
-                                                        config.value.sidebar.translater.to = lang.trim();
-                                                        config.write();
+                                                        updateConfig('sidebar.translater.to', lang.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1433,8 +1430,7 @@ export default (props) => {
                                                 .then(layout => {
                                                     if (layout) {
                                                         if (!config.value.onScreenKeyboard) config.value.onScreenKeyboard = {};
-                                                        config.value.onScreenKeyboard.layout = layout.trim();
-                                                        config.write();
+                                                        updateConfig('onScreenKeyboard.layout', layout.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1482,8 +1478,7 @@ export default (props) => {
                                                 .then(method => {
                                                     if (method) {
                                                         if (!config.value.monitors) config.value.monitors = {};
-                                                        config.value.monitors.scaleMethod = method.trim();
-                                                        config.write();
+                                                        updateConfig('monitors.scaleMethod', method.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1530,8 +1525,7 @@ export default (props) => {
                                                 .then(player => {
                                                     if (player) {
                                                         if (!config.value.music) config.value.music = {};
-                                                        config.value.music.preferredPlayer = player.trim();
-                                                        config.write();
+                                                        updateConfig('music.preferredPlayer', player.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1579,8 +1573,7 @@ export default (props) => {
                                                     if (controller) {
                                                         if (!config.value.brightness) config.value.brightness = {};
                                                         if (!config.value.brightness.controllers) config.value.brightness.controllers = {};
-                                                        config.value.brightness.controllers.default = controller.trim();
-                                                        config.write();
+                                                        updateConfig('brightness.controllers.default', controller.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1627,8 +1620,7 @@ export default (props) => {
                                                 .then(code => {
                                                     if (code) {
                                                         if (!config.value.i18n) config.value.i18n = {};
-                                                        config.value.i18n.langCode = code.trim();
-                                                        config.write();
+                                                        updateConfig('i18n.langCode', code.trim());
                                                     }
                                                 })
                                                 .catch(print);
@@ -1643,8 +1635,7 @@ export default (props) => {
                                 initValue: config.value.i18n?.extraLogs || false,
                                 onChange: (self, newValue) => {
                                     if (!config.value.i18n) config.value.i18n = {};
-                                    config.value.i18n.extraLogs = newValue;
-                                    config.write();
+                                    updateConfig('i18n.extraLogs', newValue);
                                 },
                             }),
                         ]),

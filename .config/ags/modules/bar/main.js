@@ -47,6 +47,15 @@ const createBar = async (monitor = 0) => {
         children: contents,
     });
 
+    // Cleanup function to remove widgets
+    const cleanup = () => {
+        Object.values(contents).forEach(content => {
+            if (content && content.parent) {
+                content.parent.remove(content);
+            }
+        });
+    };
+
     const bar = Widget.Window({
         name: `bar-${monitor}`,
         anchor: [await userOptions.asyncGet().bar.position, 'left', 'right'],
@@ -56,7 +65,10 @@ const createBar = async (monitor = 0) => {
             css: 'min-height: 3rem;',
             children: [stack],
         }),
+        monitor,
     });
+
+    bar.connect('destroy', cleanup);
 
     // Set up mode switching
     currentShellMode.connect('changed', async () => {

@@ -13,8 +13,10 @@ import {
   NetworkIndicator,
 } from "../.commonwidgets/statusicons.js";
 import { setupCursorHover } from "../.widgetutils/cursorhover.js";
-import { MaterialIcon } from "../.commonwidgets/materialicon.js";
+import { MaterialIcon } from "../.commonwidgets/materialicon.js"; 
 import { sidebarOptionsStack } from "./sideright.js";
+import Variable from "resource:///com/github/Aylur/ags/variable.js";
+import Service from "resource:///com/github/Aylur/ags/service.js";
 
 // Кэшируем часто используемые значения
 const userOpts = userOptions.asyncGet();
@@ -325,7 +327,7 @@ export const ModuleCloudflareWarp = async (props = {}) => {
 };
 
 export const SecondaryButton = ({ icon, label, tooltip, onClicked }) => Widget.Button({
-    className: " sidebar-squareiconbutton",
+    className: ' sidebar-squareiconbutton',
     tooltipText: getString(tooltip),
     onClicked: onClicked,
     child: MaterialIcon(icon, "larger"),
@@ -368,93 +370,92 @@ export const CloudflareWarpButton = () => SecondaryButton({
     onClicked: () => execAsync(['warp-cli', 'connect']).catch(print),
 });
 
-export const RevealerState = {
-    _isSecondaryRevealed: false,
-    _isPrimaryRevealed: true,  // Primary visible by default
-    _subscribers: new Set(),
+class RevealerService extends Service {
+    static {
+        Service.register(this, {
+            'state-changed': ['boolean'],
+        });
+    }
 
-    get isSecondaryRevealed() {
-        return this._isSecondaryRevealed;
-    },
+    constructor() {
+        super();
+        this._state = Variable({
+            primaryRevealed: true,
+            secondaryRevealed: false
+        });
+        this._primaryRevealers = new Set();
+        this._secondaryRevealers = new Set();
+    }
 
-    get isPrimaryRevealed() {
-        return this._isPrimaryRevealed;
-    },
-
-    set isSecondaryRevealed(value) {
-        this._isSecondaryRevealed = value;
-        this._notifySubscribers();
-    },
-
-    set isPrimaryRevealed(value) {
-        this._isPrimaryRevealed = value;
-        this._notifySubscribers();
-    },
-
-    _notifySubscribers() {
-        this._subscribers.forEach(cb => cb());
-    },
-
-    subscribe(callback) {
-        this._subscribers.add(callback);
-        return () => this._subscribers.delete(callback);
-    },
-
-    register(revealer, type) {
-        if (type === 'primary') this.primaryRevealers.add(revealer);
-        else if (type === 'secondary') this.secondaryRevealers.add(revealer);
-        return revealer;
-    },
-
-    primaryRevealers: new Set(),
-    secondaryRevealers: new Set(),
+    get state() { return this._state; }
+    get isSecondaryRevealed() { return this._state.value.secondaryRevealed; }
+    get isPrimaryRevealed() { return this._state.value.primaryRevealed; }
 
     toggleSecondary() {
-        if (!this.isPrimaryRevealed) return; // Only toggle secondary if primary is visible
-        this.isSecondaryRevealed = !this.isSecondaryRevealed;
-        this.secondaryRevealers.forEach(revealer => {
-            revealer.revealChild = this.isSecondaryRevealed;
+        if (!this.isPrimaryRevealed) return;
+        
+        const newState = { ...this._state.value };
+        newState.secondaryRevealed = !newState.secondaryRevealed;
+        this._state.value = newState;
+        
+        this._secondaryRevealers.forEach(revealer => {
+            revealer.revealChild = newState.secondaryRevealed;
         });
-    },
+        this.emit('state-changed', newState.secondaryRevealed);
+    }
 
     togglePrimary() {
-        this.isPrimaryRevealed = !this.isPrimaryRevealed;
-        if (!this.isPrimaryRevealed) {
-            // Hide secondary when primary is hidden
-            this.isSecondaryRevealed = false;
-            this.secondaryRevealers.forEach(revealer => {
+        const newState = { ...this._state.value };
+        newState.primaryRevealed = !newState.primaryRevealed;
+        
+        if (!newState.primaryRevealed) {
+            newState.secondaryRevealed = false;
+            this._secondaryRevealers.forEach(revealer => {
                 revealer.revealChild = false;
             });
         }
-        this.primaryRevealers.forEach(revealer => {
-            revealer.revealChild = this.isPrimaryRevealed;
+        
+        this._state.value = newState;
+        this._primaryRevealers.forEach(revealer => {
+            revealer.revealChild = newState.primaryRevealed;
         });
+        this.emit('state-changed', newState.primaryRevealed);
     }
-};
+
+    register(revealer, type) {
+        if (type === 'primary') this._primaryRevealers.add(revealer);
+        else if (type === 'secondary') this._secondaryRevealers.add(revealer);
+        return revealer;
+    }
+}
+
+export const RevealerState = new RevealerService();
 
 export const RevealerButton = () => Widget.Button({
     className: 'txt-larger sec-txt',
-    onClicked: () => RevealerState.toggleSecondary(),  // Left click for secondary
-    onSecondaryClick: () => RevealerState.togglePrimary(),  // Right click for primary
+    onClicked: () => RevealerState.toggleSecondary(),
+    onSecondaryClick: () => RevealerState.togglePrimary(),
     child: Widget.Box({
         children: [
             Widget.Label({
-              hpack: "end",
+                hpack: "end",
                 className: 'icon-material revealer-icon',
                 label: 'expand_more',
-                setup: (self) => self
-                    .hook(RevealerState, () => {
-                        if (!RevealerState.isPrimaryRevealed) {
+                setup: (self) => {
+                    self.hook(RevealerState.state, state => {
+                        if (!state.primaryRevealed) {
                             self.label = 'unfold_less';
-                        } else if (RevealerState.isSecondaryRevealed) {
+                        } else if (state.secondaryRevealed) {
                             self.label = 'expand_less';
                         } else {
                             self.label = 'expand_more';
                         }
-                    }),
-            }),
-        ],
-    }),
+                    });
+                    return self;
+                }
+            })
+        ]
+    })
 });
 
 const hyprctl = (cmd) => execAsync(["hyprctl", ...cmd.split(" ")]).catch(print);

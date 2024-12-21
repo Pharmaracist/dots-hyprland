@@ -203,28 +203,111 @@ export const createBarContent = async (layout, modules, monitor) => {
     try {
         const config = await layout.layout(modules, monitor);
         
+        // Helper function to safely create a widget
+        const createWidget = (factory) => {
+            try {
+                if (typeof factory === 'function') {
+                    return factory();
+                }
+                return factory;
+            } catch (error) {
+                console.error('Error creating widget:', error);
+                return null;
+            }
+        };
+
+        // Helper function to safely add widgets to a container
+        const addWidgets = (container, widgets = []) => {
+            const children = [];
+            widgets.filter(Boolean).forEach(widget => {
+                const newWidget = createWidget(widget);
+                if (newWidget) {
+                    // If widget has a parent, create a new instance instead
+                    if (newWidget.parent) {
+                        try {
+                            const clone = newWidget.constructor();
+                            if (clone.setup) {
+                                clone.setup(clone);
+                            }
+                            children.push(clone);
+                        } catch (error) {
+                            console.error('Error cloning widget:', error);
+                        }
+                    } else {
+                        children.push(newWidget);
+                    }
+                }
+            });
+
+            // Remove existing children first
+            container.children = [];
+
+            // Then add new children
+            container.children = children;
+            return children;
+        };
+
         // Create boxes for each section
         const startBox = Widget.Box({
             className: 'bar-start spacing-h-5',
             hpack: 'start',
+            setup: self => {
+                self.connect('destroy', () => {
+                    (self.children || []).forEach(child => {
+                        if (child?.destroy) {
+                            try {
+                                child.destroy();
+                            } catch (error) {
+                                console.error('Error destroying child:', error);
+                            }
+                        }
+                    });
+                });
+            },
         });
 
         const centerBox = Widget.Box({
             className: 'bar-center spacing-h-5',
             hpack: 'center',
+            setup: self => {
+                self.connect('destroy', () => {
+                    (self.children || []).forEach(child => {
+                        if (child?.destroy) {
+                            try {
+                                child.destroy();
+                            } catch (error) {
+                                console.error('Error destroying child:', error);
+                            }
+                        }
+                    });
+                });
+            },
         });
 
         const endBox = Widget.Box({
             className: 'bar-end spacing-h-5',
             hpack: 'end',
+            setup: self => {
+                self.connect('destroy', () => {
+                    (self.children || []).forEach(child => {
+                        if (child?.destroy) {
+                            try {
+                                child.destroy();
+                            } catch (error) {
+                                console.error('Error destroying child:', error);
+                            }
+                        }
+                    });
+                });
+            },
         });
 
-        // Set children after box creation to avoid widget reuse issues
-        startBox.children = config.start?.filter(Boolean) || [];
-        centerBox.children = config.center?.filter(Boolean) || [];
-        endBox.children = config.end?.filter(Boolean) || [];
+        // Add widgets to each section
+        const startWidgets = [];
+        const centerWidgets = [];
+        const endWidgets = [];
 
-        // Dynamically handle corner rendering
+        // Add corner modules if needed
         const corners = layout.corners || {
             topLeft: false,
             topRight: false,
@@ -232,13 +315,25 @@ export const createBarContent = async (layout, modules, monitor) => {
             bottomRight: false,
         };
 
-        // Add corner modules dynamically if they exist and are enabled
         if (corners.topLeft && modules.CornerModules?.topleft) {
-            startBox.children.unshift(modules.CornerModules.topleft());
+            const corner = createWidget(modules.CornerModules.topleft);
+            if (corner) startWidgets.push(corner);
         }
+
+        // Add regular widgets
+        if (config.start) startWidgets.push(...config.start);
+        if (config.center) centerWidgets.push(...config.center);
+        if (config.end) endWidgets.push(...config.end);
+
         if (corners.topRight && modules.CornerModules?.topright) {
-            endBox.children.push(modules.CornerModules.topright());
+            const corner = createWidget(modules.CornerModules.topright);
+            if (corner) endWidgets.push(corner);
         }
+
+        // Add widgets to containers
+        const addedStart = addWidgets(startBox, startWidgets);
+        const addedCenter = addWidgets(centerBox, centerWidgets);
+        const addedEnd = addWidgets(endBox, endWidgets);
 
         const content = Widget.Box({
             className: layout.className || '',
@@ -249,12 +344,25 @@ export const createBarContent = async (layout, modules, monitor) => {
                 centerWidget: centerBox,
                 endWidget: endBox,
             }),
+            setup: self => {
+                self.connect('destroy', () => {
+                    // Clean up all widgets
+                    [...addedStart, ...addedCenter, ...addedEnd].forEach(widget => {
+                        if (widget?.destroy) {
+                            try {
+                                widget.destroy();
+                            } catch (error) {
+                                console.error('Error destroying widget:', error);
+                            }
+                        }
+                    });
+                });
+            },
         });
 
         return content;
     } catch (error) {
         console.error('Error creating bar content:', error);
-        return Widget.Box(); // Return an empty box in case of error
+        return null;
     }
 };
- 

@@ -1185,7 +1185,10 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 // Prayer Times Module Styles
 .sidebar-prayertime-top {
     @include normal-rounding;
-    background-color: mix($primary, $layer1Active, 40%);
+    background: linear-gradient(270deg, 
+    $primary 0%,
+    lighten($surfaceContainerHighest, 30%) 100%
+);
     padding: 0.82rem;
     // margin-top:0.7rem;
     margin-bottom: 1rem;

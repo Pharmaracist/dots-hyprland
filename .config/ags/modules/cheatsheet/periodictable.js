@@ -23,10 +23,7 @@ export default () => {
                         })
                     ]
                 }),
-                element.icon ? Icon({
-                    icon: element.icon,
-                    className: "txt-hugerass txt-bold",
-                }) : Label({
+                Label({
                     label: `${element.symbol}`,
                     className: "cheatsheet-periodictable-elementsymbol",
                 }),

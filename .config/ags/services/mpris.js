@@ -4,70 +4,28 @@ import GLib from 'gi://GLib';
 
 class CustomMediaService extends Service {
     static {
-        Service.register(this, {
-            'player-changed': ['string'],
-            'position-changed': ['float'],
-            'track-changed': ['jsobject'],
+        Service.register(this, {}, {
+            'player': ['string'],
+            'track': ['jsobject'],
+            'position': ['float'],
         });
     }
 
     #player = null;
     #interval = null;
     #position = 0;
+    #playerChangedHandler = null;
 
     constructor() {
         super();
         this.#setupPlayer();
-        Mpris.connect('changed', () => this.#setupPlayer());
+        this.#playerChangedHandler = Mpris.connect('changed', () => this.#setupPlayer());
     }
 
-    #setupPlayer() {
-        if (this.#interval) {
-            GLib.source_remove(this.#interval);
-            this.#interval = null;
-        }
-
-        // Find a suitable player
-        this.#player = Mpris.players.find(p => 
-            !p.busName.startsWith('org.mpris.MediaPlayer2.playerctld') &&
-            !(p.busName.endsWith('.mpd') && !p.busName.endsWith('MediaPlayer2.mpd'))
-        ) || null;
-        
-        if (this.#player) {
-            this.emit('player-changed', this.#player.identity || '');
-            this.emit('track-changed', this.trackInfo);
-
-            // Track position changes
-            this.#interval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-                if (!this.#player || !this.#player.busName) {
-                    this.#position = 0;
-                    return GLib.SOURCE_REMOVE;
-                }
-                
-                try {
-                    this.#position = this.#player.position || 0;
-                    this.emit('position-changed', this.position);
-                } catch (error) {
-                    console.error('Error updating position:', error);
-                    return GLib.SOURCE_REMOVE;
-                }
-                
-                return GLib.SOURCE_CONTINUE;
-            });
-
-            // Listen for property changes
-            this.#player.connect('changed', () => {
-                this.emit('track-changed', this.trackInfo);
-            });
-        } else {
-            this.#position = 0;
-            this.emit('player-changed', '');
-            this.emit('track-changed', null);
-        }
+    getPlayer() {
+        return this.#player;
     }
 
-    get player() { return this.#player; }
-    get position() { return this.#position; }
     get trackInfo() {
         if (!this.#player) return null;
         return {
@@ -78,6 +36,77 @@ class CustomMediaService extends Service {
             length: this.#player.length || 0,
         };
     }
+
+    get position() {
+        return this.#position;
+    }
+
+    #setupPlayer() {
+        if (this.#interval) {
+            GLib.source_remove(this.#interval);
+            this.#interval = null;
+        }
+
+        if (this.#player) {
+            this.#player.disconnect('changed');
+        }
+
+        // Find a suitable player
+        this.#player = Mpris.players.find(p => 
+            !p.busName.startsWith('org.mpris.MediaPlayer2.playerctld') &&
+            !(p.busName.endsWith('.mpd') && !p.busName.endsWith('MediaPlayer2.mpd'))
+        ) || null;
+        
+        if (this.#player) {
+            this.notify('player');
+            this.notify('track');
+
+            // Track position changes
+            this.#interval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+                if (!this.#player || !this.#player.busName) {
+                    this.#position = 0;
+                    return GLib.SOURCE_REMOVE;
+                }
+                
+                try {
+                    this.#position = this.#player.position || 0;
+                    this.notify('position');
+                } catch (error) {
+                    console.error('Error updating position:', error);
+                    return GLib.SOURCE_REMOVE;
+                }
+                
+                return GLib.SOURCE_CONTINUE;
+            });
+
+            // Listen for property changes
+            this.#player.connect('changed', () => {
+                this.notify('track');
+            });
+        } else {
+            this.#position = 0;
+            this.notify('player');
+            this.notify('track');
+        }
+    }
+
+    destroy() {
+        if (this.#interval) {
+            GLib.source_remove(this.#interval);
+            this.#interval = null;
+        }
+
+        if (this.#player) {
+            this.#player.disconnect('changed');
+        }
+
+        if (this.#playerChangedHandler) {
+            Mpris.disconnect(this.#playerChangedHandler);
+        }
+
+        super.destroy();
+    }
 }
 
-export default new CustomMediaService();
+const service = new CustomMediaService();
+export default service;
