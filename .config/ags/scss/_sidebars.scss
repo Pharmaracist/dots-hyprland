@@ -878,7 +878,7 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         min-width: 1.364rem;
         background: linear-gradient(270deg, 
             $primary 0%,
-            lighten($surfaceContainerHighest, 30%) 100%
+            lighten(rgba($primary, 0), 30%) 100%
         );
         transition: all 200ms ease;
     }
@@ -905,7 +905,7 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         highlight {
             box-shadow: 0 0 16px rgba($primary, 0.5);
             background: linear-gradient(90deg, 
-                lighten($primary, 5%) 0%,
+                lighten(rgba($primary,0), 5%) 0%,
                 lighten($surfaceContainerHigh, 15%) 100%
             );
         }

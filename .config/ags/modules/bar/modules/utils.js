@@ -36,21 +36,20 @@ const createNerdButton = ({ name, icon, onClicked, onSecondaryClick }) => {
   return Button(buttonProps);
 };
 
+let wallpaperFolder = "";
 
+const changeWallpaperButton = () => createUtilButton({
+  name: "Change wallpaper",
+  icon: "image",
+  onClicked: () => Utils.execAsync([
+    `${App.configDir}/scripts/color_generation/randomwall.sh`
+  ]),
+  onSecondaryClick: () => App.toggleWindow("wallselect"),
+});
 
 const Shortcuts = () => {
   let unsubscriber = () => {};
-  let wallpaperFolder = "";
   let showWallpaperButton = false;
-
-  const changeWallpaperButton = createUtilButton({
-    name: "Change wallpaper",
-    icon: "image",
-    onClicked: () => Utils.execAsync([
-      `${App.configDir}/scripts/color_generation/randomwall.sh`
-    ]),
-    onSecondaryClick: () => App.toggleWindow("wallselect"),
-  });
 
   const unixporn = createUtilButton({
     name: "Unix Porn",
@@ -121,9 +120,9 @@ const Shortcuts = () => {
     if (shouldShow !== showWallpaperButton) {
       showWallpaperButton = shouldShow;
       if (shouldShow) {
-        box.add(changeWallpaperButton);
+        box.add(changeWallpaperButton());
       } else {
-        box.remove(changeWallpaperButton);
+        box.remove(changeWallpaperButton());
       }
     }
   });
@@ -133,4 +132,5 @@ const Shortcuts = () => {
   return box;
 };
 
-export default Shortcuts; // Directly export the function
+export default Shortcuts;
+export { changeWallpaperButton, wallpaperFolder };

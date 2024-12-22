@@ -6,8 +6,8 @@ const NotificationIndicator = () => Widget.Box({
     class_name: 'notification-indicator',
     children: [
         Widget.Icon({
-            icon: 'notification-symbolic',
-            size: 16,
+            icon: 'notification-symbolic txt-larger',
+            size: 36,
         }),
         Widget.Label({
             connections: [[Notifications, label => {
@@ -53,7 +53,7 @@ const NotificationPopup = () => Widget.Window({
                         children: [
                             Widget.Icon({
                                 icon: n.app_icon || 'dialog-information-symbolic',
-                                size: 32,
+                                size: 36,
                             }),
                             Widget.Box({
                                 vertical: true,

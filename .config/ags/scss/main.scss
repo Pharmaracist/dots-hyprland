@@ -7,8 +7,11 @@
 @import "material";
 @import "./colors";
 @import "./lib_mixins";
+@import './lib_mixins';
+@import './lib_classes';
+@import './colors';
+@import './colorscheme';
 @import "lib_mixins_overrides";
-@import "./lib_classes";
 @import "./common";
 
 // Components

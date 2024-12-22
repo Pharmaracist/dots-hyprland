@@ -49,8 +49,8 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .bar-knocks{
     @include large-rounding;
-    @include elevation2;
-    border: 0.25px solid $outline;
+    // @include elevation2;
+    // border: 0.25px solid $outline;
     background-color: $layer0
 }
 .bar-floating {
@@ -252,7 +252,9 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $onSurfaceVariant;
 }
 
+
 .bar-bat {
+    padding:0 3px;
     @include full-rounding;
     @include element_decel;
     min-height: 1.99rem;
@@ -443,10 +445,6 @@ $bar_ws_width_focus_active: 6.045rem;
     -gtk-icon-shadow: none;
 }
 
-.txt-small {
-    font-size: 0.8em;
-    opacity: 0.8;
-}
 
 .bar-corner-spacing {
     min-width: 0.882rem;
@@ -794,4 +792,56 @@ revealer {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 5px;
     }
+}
+
+// Resource module styles
+.resourcebar-box {
+    padding: 0.05rem;
+    margin: 0.05rem;
+}
+
+.bar-resources {
+    padding: 0;
+    margin: 0;
+    
+    .icon-material {
+        color: $onSurface;
+        margin-right: 0.35rem;
+        font-size: 1.1rem;
+        margin-top: 0.15rem; 
+    }
+    
+    progressbar {
+        @include element_decel;
+        min-height: 0.45rem;
+        margin-top: 0.15rem;
+        
+        trough {
+            min-height: 0.45rem;
+            min-width: 6rem;
+            background-color: $surfaceVariant;
+            border-radius: 0.175rem;
+        }
+        
+        progress {
+            min-height: 0.45rem;
+            background-color: $primary;
+            border-radius: 0.175rem;
+        }
+    }
+    
+    &:first-child progressbar {
+        progress { background-color: $primary; }
+    }
+    
+    &:nth-child(2) progressbar {
+        progress { background-color: mix($primary, $onSurface, 80%); }
+    }
+    
+    &:last-child progressbar {
+        progress { background-color: mix($primary, $onSurface, 60%); }
+    }
+}
+.onSurfaceVariant{
+    color: $onSurfaceVariant;
 }

@@ -1,0 +1,22 @@
+// Resource module styles
+.bar-resources {
+    @include element_decel;
+    padding: 0.1rem;
+    margin: 0.1rem;
+
+    .resource-icon {
+        color: $onLayer1;
+        margin-right: 0.2rem;
+        font-size: 0.8rem;
+    }
+
+    .resource-progress {
+        min-width: 5rem;
+        min-height: 0.3rem;
+        border-radius: 0.15rem;
+        background-color: alpha($onLayer1, 0.1);
+        background-image: linear-gradient(to right, $primary, $primary);
+        background-repeat: no-repeat;
+        transition: background-size 200ms ease;
+    }
+}

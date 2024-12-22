@@ -1,0 +1,54 @@
+// Colorscheme module styling
+.bar-colorscheme-module {
+    background-color: transparent;
+    padding: 0px 12px;
+    min-height: 24px;
+}
+
+.colorscheme-box {
+    background-color: transparent;
+    margin: 17px 4px;
+    font-family: 'Ubuntu Nerd Font';
+
+    label {
+        padding:0px 9px;
+        border-radius: 9999px;
+        color: rgba($onLayer0, 0.8);
+        font-size: 15px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+}
+
+// Color scheme colors using GTK variables
+.color-1 label { 
+    background-color: $primary;
+}
+.color-2 label { 
+    background-color: $secondary;
+}
+.color-3 label { 
+    background-color: $tertiary;
+}
+.color-4 label { 
+    background-color: $primaryContainer;
+}
+.color-5 label { 
+    background-color: $secondaryContainer;
+}
+.color-6 label { 
+    background-color: $tertiaryContainer;
+}
+.color-surface label { 
+    background-color: $surface;
+}
+.color-surface-dim label { 
+    background-color: $surfaceDim;
+}
+.color-bg label { 
+    background-color: $background;
+}
+.color-primary label { 
+    background-color: $primary;
+    margin-left: 2px;
+}

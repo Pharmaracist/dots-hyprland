@@ -5,7 +5,7 @@ import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 import { RevealerState } from "./revealercontrol.js";
 
-const { Box, Button, Overlay, Label, Revealer } = Widget;
+const { Box, Button, Overlay, Label, Revealer, ProgressBar } = Widget;
 
 const BarGroup = ({ child }) =>
   Box({
@@ -17,6 +17,25 @@ const BarGroup = ({ child }) =>
       }),
     ],
   });
+
+const LinearResource = (name, icon, command) => {
+    const resourceProgress = ProgressBar({
+        className: 'resource-progress',
+        vpack: 'center',
+    });
+
+    const resourceIcon = MaterialIcon(icon, 'norm', {
+        className: 'resource-icon'
+    });
+
+    return Box({
+        className: 'resource-bar',
+        children: [
+            resourceIcon,
+            resourceProgress,
+        ],
+    });
+};
 
 const BarResource = (
   name,
@@ -65,7 +84,7 @@ const BarResource = (
               homogeneous: true,
               children: [MaterialIcon(icon, "small")],
             }),
-            overlays: [circProgButton],
+            overlays: [resourceProgress],
           }),
         ],
       }),
@@ -95,13 +114,10 @@ const SystemResources = () =>
     child: Box({
       className: "spacing-h-10 margin-rl-5",
       children: [
-        BarResource(
+        LinearResource(
           "RAM Usage",
           "memory",
           `LANG=C free | awk '/^Mem/ {printf("%.2f\\n", ($3/$2) * 100)}'`,
-          "bar-ram-circprog",
-          "bar-ram-txt",
-          "bar-ram-icon",
         ),
         BarResource(
           "CPU Usage",

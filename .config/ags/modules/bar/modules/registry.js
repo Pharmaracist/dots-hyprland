@@ -2,6 +2,7 @@
 import Battery from "./battery.js";
 import PowerDraw from "./powerdraw.js";
 import SystemResources from "./resources.js";
+import ResourcesBar from "./resourcesbar.js";
 import System from "./system.js";
 import BarToggles from "./bar_toggles.js";
 import { BarButton } from "./simple_button.js";
@@ -20,6 +21,8 @@ import { Systray } from "../../systray/systray.js";
 import MediaIndicator from "./media.js";
 import Quote from "./quote.js";
 import WaveIcon from './wave.js';
+import ColorScheme from '../colorscheme.js';
+import { changeWallpaperButton } from "./utils.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -102,6 +105,7 @@ export const StatusModules = {
     battery() { return Battery(); },
     powerDraw() { return PowerDraw(); },
     systemResources() { return SystemResources(); },
+    resourcesBar() { return ResourcesBar(); },
     system() { return System(); },
     tray()  {return Systray();}
 };
@@ -111,6 +115,7 @@ export const ControlModules = {
     button() { return BarButton(); },
     shortcuts() { return Shortcuts(); },
     keyboard() { return KbLayout(); },
+    wallpaper: changeWallpaperButton,
 };
 
 export const InfoModules = {
@@ -119,10 +124,10 @@ export const InfoModules = {
     windowTitle: wrapAsyncModule(asyncModules.windowTitle),
     indicators() { return Indicators(); },
     title: wrapAsyncModule(asyncModules.title),
-    statusIndicators() { return System(); },
+    statusIndicators() { return Systray(); },
     weather() { return WeatherWidget(); },
     logo(){return WaveIcon();},
-
+    colorscheme() { return ColorScheme(); },
     quote() { 
         try {
             return Quote();

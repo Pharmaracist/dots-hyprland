@@ -23,7 +23,7 @@ const createKeyboardWidget = () => {
         const label = lang ? lang.layout.toUpperCase() : layout.toUpperCase();
         acc[layout] = Widget.Label({ 
             label,
-            className: 'txt-small txt-bold',
+            className: 'txt-small sec-txt txt-bold',
             hpack: 'center',
             vpack: 'center',
             justify: 'center'
@@ -32,7 +32,7 @@ const createKeyboardWidget = () => {
     }, { 
         "unknown": Widget.Label({ 
             label: "?",
-            className: 'txt-small txt-bold',
+            className: 'txt-small sec-txt txt-bold',
             hpack: 'center',
             vpack: 'center',
             justify: 'center'

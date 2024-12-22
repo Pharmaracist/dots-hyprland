@@ -57,15 +57,15 @@ layerrule = noanim, indicator.*
 layerrule = noanim, osk
 layerrule = noanim, hyprpicker
 layerrule = blur, shell:*
-layerrule = ignorealpha 0.16, shell:*
+layerrule = ignorealpha 0.6, shell:*
 
 layerrule = noanim, noanim
 layerrule = blur, gtk-layer-shell
 layerrule = ignorezero, gtk-layer-shell
 layerrule = blur, launcher
-layerrule = ignorealpha 0.15, launcher
+layerrule = ignorealpha 0.5, launcher
 layerrule = blur, notifications
-layerrule = ignorealpha 0.169, notifications
+layerrule = ignorealpha 0.69, notifications
 
 # ags
 layerrule = animation slide bottom, desktopbackground.*
@@ -85,23 +85,23 @@ layerrule = ignorealpha 0.1, bar.*
 layerrule = blur, musicplayer
 layerrule = ignorealpha 0.1, musicplayer
 layerrule = blur, corner.*
-layerrule = ignorealpha 0.1, corbarner.*
+layerrule = ignorealpha 0.4, corbarner.*
 layerrule = blur, dock
-layerrule = ignorealpha 0.1, dock
+layerrule = ignorealpha 0.4, dock
 layerrule = blur, indicator.*
-layerrule = ignorealpha 0.1, indicator.*
+layerrule = ignorealpha 0.4, indicator.*
 layerrule = blur, overview
-layerrule = ignorealpha 0.1, overview
+layerrule = ignorealpha 0.4, overview
 layerrule = blur, cheatsheet
-layerrule = ignorealpha 0.1, cheatsheet
+layerrule = ignorealpha 0.1ss, cheatsheet
 layerrule = blur, sideright
 layerrule = ignorealpha 0.1, sideright
 layerrule = blur, sideleft
 layerrule = ignorealpha 0.1, sideleft
 layerrule = blur, indicator*
-layerrule = ignorealpha 0.1, indicator*
+layerrule = ignorealpha 0.4, indicator*
 layerrule = blur, osk
-layerrule = ignorealpha 0.1, osk
+layerrule = ignorealpha 0.4, osk
 
 # ######## Workspace rules ########
 
@@ -113,5 +113,4 @@ layerrule = ignorealpha 0.1, osk
 # workspace = f[1], gapsout:0, gapsin:0
 # windowrulev2 = bordersize 0, floating:0, onworkspace:w[tv1]
 # windowrulev2 = rounding 0, floating:0, onworkspace:w[tv1]
-# windowrulev2 = bordersize 0, floating:0, onworkspace:f[1]
-# windowrulev2 = rounding 0, floating:0, onworkspace:f[1]
+# windowrulev2 = bordersize 0, floating:0, onworkspace:f[1

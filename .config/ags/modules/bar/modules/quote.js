@@ -14,10 +14,10 @@ const QuoteWidget = () => {
         justification: 'left',
         wrap: true,
         wrapMode: 'word',  // Wrap at word boundaries
-        widthChars: 60,    // Force width to roughly 10rem
-        maxWidthChars: 60, // Maximum width in characters
+        widthChars: 40,    // Force width to roughly 10rem
+        maxWidthChars: 40, // Maximum width in characters
         xalign: 0,   
-        css: 'min-height: 2.4em;',
+        css: 'min-height: 2em;',
     });
 
     // Create the main widget

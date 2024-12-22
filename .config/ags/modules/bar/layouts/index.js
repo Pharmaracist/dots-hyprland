@@ -48,14 +48,29 @@ export const BarLayouts = {
                     name: 'media',
                     sets: [
                         [Widget.Box({
-                            css:`min-width:35rem;`,
+                            css:`min-width:30rem;`,
                             className: 'spacing-h-15 bar-knocks padding-rl-15',
                             children: [modules.MediaModules.musicStuff()],
                         })],
                         [Widget.Box({
-                            css:`min-width:35rem;`,
+                            css:`min-width:30rem;`,
                             className: 'bar-knocks spacing-h-15 padding-rl-15',
                             children: [modules.InfoModules.logo(), modules.InfoModules.quote()],
+                        })],
+                        [Widget.Box({
+                            css:`min-width:30rem;`,
+                            className: 'bar-knocks spacing-h-15',
+                            children: [
+                                Widget.Box({
+                                    hexpand: true,
+                                    hpack: 'center',
+                                    className: 'spacing-h-5',
+                                    children: [
+                                        modules.ControlModules.wallpaper(),
+                                        modules.InfoModules.colorscheme()
+                                    ]
+                                })
+                            ],
                         })],
                     ],
                 }),
@@ -69,18 +84,20 @@ export const BarLayouts = {
                     name: 'system',
                     sets: [
                         [Widget.Box({
-                            css:`min-width:25rem;`,
+                            css:`min-width:30rem;`,
                             className: 'spacing-h-15 bar-knocks padding-rl-15',
                             children: [
                                 modules.InfoModules.simpleClock(),
                                 modules.ControlModules.keyboard(),
-                                modules.StatusModules.battery(),
+                                modules.InfoModules.indicators(),
+                                modules.StatusModules.resourcesBar(),
+                                Widget.Box({ className: 'padding-rl-10',child: modules.StatusModules.battery() }),
                             ]
                         })],
                         [Widget.Box({
-                            css:`min-width:25rem;`,
+                            css:`min-width:30rem; padding-right: 2rem;`,
                             className: 'bar-knocks spacing-h-15',
-                            children: [modules.InfoModules.weather()],
+                            children: [Widget.Box({hexpand: true,hpack: 'center',children:[ modules.InfoModules.colorscheme() ]}), modules.ControlModules.wallpaper()],
                         })],
                     ],
                 }),

@@ -224,7 +224,7 @@ export default () =>
           className: 'spacing-h-5',
           children: [
             Button({
-              className: 'txt-norm txt-norm bar-music-button',
+              className: 'txt-norm txt-norm sec-txt bar-music-button',
               label: '󰒮',
               onClicked: () => {
                 const player = findPlayer();
@@ -232,7 +232,7 @@ export default () =>
               },
             }),
             Button({
-              className: 'txt-norm txt-norm bar-music-button',
+              className: 'txt-norm txt-norm sec-txt bar-music-button',
               setup: (self) => {
                 const update = () => {
                   const player = findPlayer();
@@ -247,7 +247,7 @@ export default () =>
               },
             }),
             Button({
-              className: 'txt-norm txt-norm bar-music-button',
+              className: 'txt-norm txt-norm sec-txt bar-music-button',
               label: '󰒭',
               onClicked: () => {
                 const player = findPlayer();

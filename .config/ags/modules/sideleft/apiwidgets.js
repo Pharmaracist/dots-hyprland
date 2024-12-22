@@ -17,16 +17,26 @@ import GPTService from '../../services/gpt.js';
 import Gemini from '../../services/gemini.js';
 import YTMusic from '../../services/ytmusic.js';
 import QuranService from '../../services/quran.js';
+import WallpaperService from '../../services/wallpapers.js';
 import { geminiView, geminiCommands, sendMessage as geminiSendMessage, geminiTabIcon } from './apis/gemini.js';
 import { chatGPTView, chatGPTCommands, sendMessage as chatGPTSendMessage, chatGPTTabIcon } from './apis/chatgpt.js';
 import { TranslaterView, translaterCommands, sendMessage as translaterSendMessage, translaterIcon } from './apis/translater.js';
 import { ytmusicView, ytmusicCommands, sendMessage as ytmusicSendMessage, ytmusicTabIcon, MediaControls } from './apis/ytmusic.js';
 import { quranView, quranCommands, sendMessage as quranSendMessage, quranTabIcon } from './apis/quran.js';
+import { wallpaperView, wallpaperCommands, sendMessage as wallpaperSendMessage, wallpaperTabIcon } from './apis/wallpapers.js';
 
 // Create a custom icon for YouTube Music
 
 const EXPAND_INPUT_THRESHOLD = 30;
 const APILIST = {
+    'wallpapers': {
+        name: 'Wallpapers',
+        sendCommand: wallpaperSendMessage,
+        contentWidget: wallpaperView,
+        commandBar: wallpaperCommands,
+        tabIcon: wallpaperTabIcon,
+        placeholderText: 'Describe your dream wallpaper...',
+    },
     'quran': {
         name: 'Quran',
         sendCommand: quranSendMessage,
@@ -88,11 +98,10 @@ function apiSendMessage(textView) {
     // Only send if the current API has a sendCommand function
     const currentApi = APIS.asyncGet()[currentApiId];
     if (currentApi && currentApi.sendCommand) {
-        currentApi.sendCommand(text);
+        currentApi.sendCommand(textView);
     }
     
-    // Reset
-    buffer.set_text("", -1);
+    // Don't reset the buffer here - let the API handle it
     chatEntryWrapper.toggleClassName('sidebar-chat-wrapper-extended', false);
     chatEntry.set_valign(Gtk.Align.CENTER);
 }
@@ -181,7 +190,7 @@ const chatSendButton = Button({
     label: 'arrow_upward',
     setup: setupCursorHover,
     onClicked: (self) => {
-        APIS.asyncGet()[currentApiId].sendCommand(chatEntry.get_buffer().text);
+        APIS.asyncGet()[currentApiId].sendCommand(chatEntry);
         chatEntry.get_buffer().set_text("", -1);
     },
 });
