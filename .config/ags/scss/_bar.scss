@@ -796,8 +796,9 @@ revealer {
 
 // Resource module styles
 .resourcebar-box {
-    padding: 0.05rem;
-    margin: 0.05rem;
+    // padding: 0.05rem;
+    // margin: 0.05rem;
+    margin-bottom: -2rem;
 }
 
 .bar-resources {
@@ -808,23 +809,21 @@ revealer {
         color: $onSurface;
         margin-right: 0.35rem;
         font-size: 1.1rem;
-        margin-top: 0.15rem; 
     }
     
     progressbar {
         @include element_decel;
-        min-height: 0.45rem;
-        margin-top: 0.15rem;
+        min-height: 0.475rem;
         
         trough {
-            min-height: 0.45rem;
+            min-height: 0.475rem;
             min-width: 6rem;
             background-color: $surfaceVariant;
             border-radius: 0.175rem;
         }
         
         progress {
-            min-height: 0.45rem;
+            min-height: 0.475rem;
             background-color: $primary;
             border-radius: 0.175rem;
         }

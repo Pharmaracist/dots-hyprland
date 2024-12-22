@@ -85,10 +85,10 @@ export default async () => {
         return Widget.EventBox({
             onScrollUp: () => handleScroll(1),
             onScrollDown: () => handleScroll(-1),
-            onPrimaryClick: () => App.toggleWindow('overview'),
+            onPrimaryClick: () => App.toggleWindow('sideleft'),
             child: Widget.Box({
                 homogeneous: false,
-                className: 'bar-space-button',
+                // className: 'bar-space-button',
                 spacing: 8,
                 children: [
                     Widget.Box({ className: 'bar-corner-spacing' }),

@@ -165,7 +165,7 @@ globalThis["cycleMode"] = () => {
   const currentMode = currentShellMode.value[monitor];
   
   // Cycle through modes 1-6
-  const nextMode = (currentMode % 6) + 1;
+  const nextMode = (currentMode % 9) + 1;
   updateMonitorShellMode(currentShellMode, monitor, nextMode);
 };
 
@@ -226,69 +226,10 @@ globalThis["applyPreset"] = (presetName) => {
 };
 
 // Module presets
-const PRESETS = {
-    'minimal': {
-        name: 'Minimal',
-        description: 'Only essential modules',
-        modules: {
-            bar: true,
-            sideleft: false,
-            sideright: false,
-            dock: false,
-            overview: true,
-            indicators: true,
-            cheatsheet: false,
-            session: true,
-            screencorners: false,
-            desktopbackground: true,
-            wallselect: false,
-            onscreenkeyboard: false,
-            crosshair: false,
-        },
-    },
-    'gaming': {
-        name: 'Gaming',
-        description: 'Optimized for gaming sessions',
-        modules: {
-            bar: true,
-            sideleft: false,
-            sideright: false,
-            dock: false,
-            overview: false,
-            indicators: true,
-            cheatsheet: false,
-            session: true,
-            screencorners: false,
-            desktopbackground: true,
-            wallselect: false,
-            onscreenkeyboard: false,
-            crosshair: true,
-        },
-    },
-    'full': {
-        name: 'Full',
-        description: 'All modules enabled',
-        modules: {
-            bar: true,
-            sideleft: true,
-            sideright: true,
-            dock: true,
-            overview: true,
-            indicators: true,
-            cheatsheet: true,
-            session: true,
-            screencorners: true,
-            desktopbackground: true,
-            wallselect: true,
-            onscreenkeyboard: true,
-            crosshair: true,
-        },
-    },
-};
 
 // Function to list available presets
 globalThis["listPresets"] = () => {
-    const presetList = Object.entries(PRESETS)
+    const presetList = Object.entries(config.value.presets)
         .map(([key, preset]) => `${preset.name} (${key})\n${preset.description}`)
         .join('\n\n');
     execAsync(['notify-send', 'Available Presets', presetList])

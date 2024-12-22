@@ -72,7 +72,7 @@ export default () =>
       return true; // Stop event propagation
     },
     child: Box({
-      css: `padding: 0.5rem;`,
+      css: `margin-left:-1rem;padding: 0.8rem;`,
       hexpand: true,
       className: 'spacing-h-15',
       children: [
@@ -112,7 +112,7 @@ export default () =>
                   min-width: 2.8rem;
                   min-height: 2.8rem;
                   margin: 0;
-                  padding: 0;
+                  padding: 0 0.74rem;
                   background-image: -gtk-icontheme('audio-x-generic-symbolic');
                   background-size: 1.8rem;
                   background-position: center;
@@ -128,15 +128,14 @@ export default () =>
                         const tmpPath = `/tmp/ags-music-cover-${Date.now()}.png`;
                         Utils.writeFile(arr, tmpPath);
                         self.css = `
-                          min-width: 3.2rem;
-                          min-height: 2.8rem;
-                          margin: 0;
+                          min-width: 3rem;
+                          min-height: 2.5rem;
+                          margin: 0 0.5rem 0 -1.5rem;
                           padding: 0;
-                          margin-right: 0.75rem;
                           background-image: url("file://${tmpPath}");
                           background-size: cover;
                           background-position: center;
-                          border-radius: 19px;
+                          border-radius: 20px;
                         `;
                         // Cleanup old cover files
                         Utils.execAsync(['sh', '-c', 'rm -f /tmp/ags-music-cover-*.png']);
@@ -146,13 +145,13 @@ export default () =>
                       });
                   } else {
                     self.css = `
-                      min-width: 3.2rem;
-                      min-height: 2.8rem;
+                      min-width: 3rem;
+                      min-height: 2.5rem;
                       padding: 0;
                       background-image: url("file://${coverPath}");
                       background-size: cover;
                       background-position: center;
-                      border-radius: 17px;
+                      border-radius: 20px;
                     `;
                   }
                 } else {

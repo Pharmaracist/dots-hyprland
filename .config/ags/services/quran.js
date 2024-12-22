@@ -47,7 +47,7 @@ class QuranService extends Service {
                 this._scrollPositions = JSON.parse(Utils.readFile(path));
             }
         } catch (error) {
-            console.error('Error loading scroll positions:', error);
+            this._scrollPositions = {};
         }
     }
 
@@ -153,19 +153,16 @@ class QuranService extends Service {
 
     async _loadAllVerses() {
         if (this._verses) {
-            console.log('Verses already loaded, count:', this._verses.length);
             return;
         }
 
         try {
             // Create cache directory if it doesn't exist
             const cacheDir = `${Utils.CACHE_DIR}/quran`;
-            console.log('Creating cache directory:', cacheDir);
             Utils.mkdirSync(cacheDir);
 
             // Get complete Quran in one request
             const url = `${this._baseUrl}/quran/ar.asad`;
-            console.log('Loading Quran from:', url);
             const cmd = ['curl', '-s', url];
             const result = await Utils.execAsync(cmd);
             
@@ -173,46 +170,33 @@ class QuranService extends Service {
                 throw new Error('Could not connect to Quran API');
             }
 
-            console.log('Got response, length:', result.length);
             const data = JSON.parse(result);
-            console.log('Parsed response:', data?.code, data?.status);
-
             if (!data?.data?.surahs) {
-                console.error('Invalid API response:', data);
                 throw new Error('Invalid API response format');
             }
 
-            // Convert to verses array
+            // Extract all verses from all surahs
             const allVerses = [];
-            data.data.surahs.forEach(surah => {
-                const chapterNum = surah.number;
-                surah.ayahs.forEach(ayah => {
+            for (const surah of data.data.surahs) {
+                for (const verse of surah.ayahs) {
                     allVerses.push({
-                        chapter_number: chapterNum,
-                        verse_number: ayah.numberInSurah,
-                        verse_key: `${chapterNum}:${ayah.numberInSurah}`,
-                        text_uthmani: ayah.text
+                        verse_key: `${surah.number}:${verse.numberInSurah}`,
+                        text_uthmani: verse.text,
+                        surah_name: surah.name,
+                        translation: verse.translation,
                     });
-                });
-            });
-
-            if (allVerses.length === 0) {
-                throw new Error('No verses were loaded');
+                }
             }
 
             this._verses = allVerses;
-            console.log('Successfully loaded all verses:', this._verses.length);
             
             // Cache the verses to a file
             const cachePath = `${Utils.CACHE_DIR}/quran/verses.json`;
-            console.log('Writing cache to:', cachePath);
-            await Utils.writeFile(JSON.stringify(allVerses), cachePath);
-            console.log('Cache written successfully');
+            Utils.writeFile(JSON.stringify(allVerses), cachePath);
 
             return true;
         } catch (error) {
-            console.error('Error loading all verses:', error);
-            this.emit('error', 'Failed to load Quran data: ' + error.message);
+            this._verses = null;
             return false;
         }
     }
@@ -220,89 +204,40 @@ class QuranService extends Service {
     async _loadVersesFromCache() {
         try {
             const cachePath = `${Utils.CACHE_DIR}/quran/verses.json`;
-            console.log('Checking cache at:', cachePath);
-            const cacheExists = await Utils.fileExists(cachePath);
-            console.log('Cache exists:', cacheExists);
+            const cacheContent = await Utils.readFile(cachePath);
             
-            if (cacheExists) {
-                console.log('Loading verses from cache');
-                const cacheContent = await Utils.readFile(cachePath);
-                console.log('Cache content length:', cacheContent.length);
-                
-                if (!cacheContent) {
-                    console.error('Empty cache file');
-                    return false;
-                }
-
-                try {
-                    this._verses = JSON.parse(cacheContent);
-                    if (!Array.isArray(this._verses) || this._verses.length === 0) {
-                        console.error('Invalid cache content');
-                        return false;
-                    }
-                    console.log('Loaded', this._verses.length, 'verses from cache');
-                    return true;
-                } catch (error) {
-                    console.error('Failed to parse cache:', error);
-                    return false;
-                }
+            if (cacheContent) {
+                this._verses = JSON.parse(cacheContent);
+                return true;
             }
+            return false;
         } catch (error) {
-            console.error('Error loading verses from cache:', error);
+            return false;
         }
-        
-        console.log('Cache not found or error, loading from API');
-        return this._loadAllVerses();
     }
 
     async searchQuran(query) {
-        console.log('Searching for:', query);
-        
+        if (!query) {
+            this.emit('search-results', []);
+            return;
+        }
+
         if (!this._verses) {
-            console.log('Verses not loaded, loading now...');
             const loaded = await this._loadVersesFromCache();
             if (!loaded) {
-                console.error('Failed to load verses');
-                this.emit('error', 'Failed to load Quran data for search');
+                this.emit('error', 'Failed to load verses');
                 return;
             }
         }
 
-        if (!this._verses || !Array.isArray(this._verses)) {
-            console.error('Invalid verses data:', this._verses);
-            this.emit('error', 'Invalid Quran data');
-            return;
-        }
-
-        console.log('Searching through', this._verses.length, 'verses');
-        
-        // For Arabic text, we'll do a direct comparison without normalization
         const results = this._verses.filter(verse => {
             try {
-                if (!verse?.text_uthmani) {
-                    console.log('Invalid verse:', verse);
-                    return false;
-                }
-
-                // For Arabic text, do direct comparison
-                const matches = verse.text_uthmani.includes(query);
-                if (matches) {
-                    console.log('Found match in verse:', verse.verse_key, verse.text_uthmani);
-                }
-                return matches;
+                if (!verse?.text_uthmani) return false;
+                return verse.text_uthmani.includes(query);
             } catch (error) {
-                console.error('Error matching verse:', error, verse);
                 return false;
             }
         }).slice(0, 10);
-
-        console.log('Found', results.length, 'results');
-        
-        if (results.length > 0) {
-            console.log('First result:', results[0]);
-        } else {
-            console.log('Sample verses:', this._verses.slice(0, 2));
-        }
 
         this.emit('search-results', results);
     }
@@ -332,7 +267,6 @@ class QuranService extends Service {
             const data = JSON.parse(result);
             
             if (!data?.data?.ayahs) {
-                console.error('Invalid response:', data);
                 this.emit('error', 'Invalid response format from server');
                 return;
             }
@@ -368,7 +302,6 @@ class QuranService extends Service {
             
             this.emit('surah-received', fullText);
         } catch (error) {
-            console.error('Fetch error:', error);
             this.emit('error', 'Failed to fetch surah. Please try again.');
         } finally {
             if (this._currentRequest === surahNumber) {

@@ -16,8 +16,12 @@ class QuotesService extends Service {
 
     constructor() {
         super();
-        console.log('QuotesService: Starting...');
-        this.fetch().catch(console.error);
+        this.fetch().catch(error => {
+            this.#content = 'Error fetching quote';
+            this.#author = '';
+            this.#loading = false;
+            this.emit('changed');
+        });
     }
 
     get content() { return this.#content; }
@@ -26,7 +30,6 @@ class QuotesService extends Service {
 
     async fetch() {
         try {
-            console.log('QuotesService: Fetching quote...');
             this.#loading = true;
             this.emit('changed');
 
@@ -34,7 +37,7 @@ class QuotesService extends Service {
                 'curl',
                 '--silent',
                 '--location',
-                '--insecure', // Skip SSL verification
+                '--insecure',
                 '--fail',
                 '--show-error',
                 '--max-time', '10',
@@ -42,16 +45,13 @@ class QuotesService extends Service {
                 'https://api.quotable.io/random'
             ];
             
-            console.log('QuotesService: Running command:', cmd.join(' '));
             const result = await Utils.execAsync(cmd);
-            console.log('QuotesService: Raw result:', result);
 
             if (!result) {
                 throw new Error('Empty response from API');
             }
 
             const quote = JSON.parse(result);
-            console.log('QuotesService: Parsed quote:', quote);
 
             if (!quote.content || !quote.author) {
                 throw new Error('Invalid quote format');
@@ -59,9 +59,7 @@ class QuotesService extends Service {
 
             this.#content = quote.content;
             this.#author = quote.author;
-            console.log('QuotesService: Updated quote:', this.#content, 'by', this.#author);
         } catch (error) {
-            console.error('QuotesService: Failed to fetch quote:', error);
             this.#content = '';
             this.#author = '';
         } finally {

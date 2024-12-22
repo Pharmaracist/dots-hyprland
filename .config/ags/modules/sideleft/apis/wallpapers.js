@@ -22,7 +22,6 @@ const getCustomPrompts = () => {
             { icon: 'animation', style: 'anime style', tooltip: 'Anime' },
         ];
     } catch (error) {
-        console.error('Error reading custom prompts:', error);
         return [
             { icon: 'landscape', style: 'realistic landscape photography', tooltip: 'Realistic' },
             { icon: 'brush', style: 'oil painting', tooltip: 'Oil Painting' },
@@ -136,7 +135,6 @@ const PreviewBox = (tempFile) => {
                                     Utils.timeout(1000, () => {
                                         button.toggleClassName('error', false);
                                     });
-                                    console.error('Error saving wallpaper:', error);
                                 });
                         },
                     }),
@@ -160,7 +158,6 @@ const PreviewBox = (tempFile) => {
                                     Utils.timeout(1000, () => {
                                         button.toggleClassName('error', false);
                                     });
-                                    console.error('Error setting wallpaper:', error);
                                 });
                         },
                     }),
@@ -184,7 +181,6 @@ const PreviewBox = (tempFile) => {
                                     Utils.timeout(1000, () => {
                                         button.toggleClassName('error', false);
                                     });
-                                    console.error('Error setting profile photo:', error);
                                 });
                         },
                     }),

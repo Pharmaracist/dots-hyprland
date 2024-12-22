@@ -14,7 +14,7 @@ export default () => PopupWindow({
         homogeneous: false,
         children: [
             Box({
-                css: 'min-width: 350px; max-width: 350px;',
+                css: 'min-width: 350px',
                 child: SidebarLeft(),
             }),
             clickCloseRegion({ name: 'sideleft', multimonitor: false, fillMonitor: 'horizontal' }),

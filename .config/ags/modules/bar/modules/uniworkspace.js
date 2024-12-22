@@ -1,13 +1,15 @@
-const { GLib, Gdk, Gtk } = imports.gi;
-const Lang = imports.lang;
-const Cairo = imports.cairo;
-const Pango = imports.gi.Pango;
-const PangoCairo = imports.gi.PangoCairo;
+import GLib from 'gi://GLib';
+import Gdk from 'gi://Gdk';
+import Gtk from 'gi://Gtk';
+import Cairo from 'gi://Cairo';
+import Pango from 'gi://Pango';
+import PangoCairo from 'gi://PangoCairo';
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 const { Box, DrawingArea, EventBox } = Widget;
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
+import { userOptions } from '../../.configuration/user_options.js';
 
 const dummyWs = Box({ className: 'bar-ws' }); // Not shown. Only for getting size props
 const dummyActiveWs = Box({ className: 'bar-ws bar-ws-active' }); // Not shown. Only for getting size props
@@ -202,116 +204,88 @@ const WorkspaceContents = (count = 10) => {
                 }
             }
         });
-        area.attribute.disconnectHooks = [];
     });
 
-    area.connect('unrealize', () => {
-        area._destroyed = true;
-    });
-
-    area.on('draw', Lang.bind(area, (area, cr) => {
+    area.connect('draw', (widget, cr) => {
         const offset = Math.floor((Hyprland.active.workspace.id - 1) / count) * userOptions.asyncGet().workspaces.shown;
+        const allocation = widget.get_allocation();
+        const width = allocation.width;
+        const height = allocation.height;
 
-        const allocation = area.get_allocation();
-        const { width, height } = allocation;
+        // Get colors from CSS
+        const styleContext = widget.get_style_context();
+        const wsbg = styleContext.get_property('background-color', Gtk.StateFlags.NORMAL);
+        const wsfg = styleContext.get_property('color', Gtk.StateFlags.NORMAL);
+        const activebg = styleContext.get_property('background-color', Gtk.StateFlags.CHECKED);
+        const activefg = styleContext.get_property('color', Gtk.StateFlags.CHECKED);
+        const occupiedbg = styleContext.get_property('background-color', Gtk.StateFlags.ACTIVE);
+        const occupiedfg = styleContext.get_property('color', Gtk.StateFlags.ACTIVE);
 
-        const workspaceStyleContext = dummyWs.get_style_context();
-        const workspaceDiameter = workspaceStyleContext.get_property('min-width', Gtk.StateFlags.NORMAL);
-        const workspaceRadius = workspaceDiameter / 2;
-        const workspaceFontSize = workspaceStyleContext.get_property('font-size', Gtk.StateFlags.NORMAL) * 0.8;
-        const workspaceFontFamily = workspaceStyleContext.get_property('font-family', Gtk.StateFlags.NORMAL);
-        const workspaceFontWeight = workspaceStyleContext.get_property('font-weight', Gtk.StateFlags.NORMAL);
-        const wsbg = workspaceStyleContext.get_property('background-color', Gtk.StateFlags.NORMAL);
-        const wsfg = workspaceStyleContext.get_property('color', Gtk.StateFlags.NORMAL);
-
-        const occupiedWorkspaceStyleContext = dummyOccupiedWs.get_style_context();
-        const occupiedbg = occupiedWorkspaceStyleContext.get_property('background-color', Gtk.StateFlags.NORMAL);
-        const occupiedfg = occupiedWorkspaceStyleContext.get_property('color', Gtk.StateFlags.NORMAL);
-
-        const activeWorkspaceStyleContext = dummyActiveWs.get_style_context();
-        const activebg = activeWorkspaceStyleContext.get_property('background-color', Gtk.StateFlags.NORMAL);
-        const activefg = activeWorkspaceStyleContext.get_property('color', Gtk.StateFlags.NORMAL);
-        area.set_size_request(workspaceDiameter * count, -1);
-        const widgetStyleContext = area.get_style_context();
-        const activeWs = widgetStyleContext.get_property('font-size', Gtk.StateFlags.NORMAL);
-
-        const activeWsCenterX = -(workspaceDiameter / 2) + (workspaceDiameter * activeWs);
-        const activeWsCenterY = height / 2;
-
-        // Font
-        const layout = PangoCairo.create_layout(cr);
-        const fontDesc = Pango.font_description_from_string(`${workspaceFontFamily[0]}, Noto Sans CJK JP ${getFontWeightName(workspaceFontWeight)} ${workspaceFontSize}`);
-        layout.set_font_description(fontDesc);
-        cr.setAntialias(Cairo.Antialias.BEST);
-        // Get kinda min radius for number indicators
-        layout.set_text("0".repeat(count.toString().length), -1);
-        const [layoutWidth, layoutHeight] = layout.get_pixel_size();
-        const indicatorRadius = Math.max(layoutWidth, layoutHeight) / 2 * 1.15; // smaller than sqrt(2)*radius
-        const indicatorGap = workspaceRadius - indicatorRadius;
-
-        for (let i = 1; i <= count; i++) {
-            if (area.attribute.workspaceMask & (1 << i)) {
-                // Draw bg highlight
-                cr.setSourceRGBA(occupiedbg.red, occupiedbg.green, occupiedbg.blue, occupiedbg.alpha);
-                const wsCenterX = -(workspaceRadius) + (workspaceDiameter * i);
-                const wsCenterY = height / 2;
-                if (!(area.attribute.workspaceMask & (1 << (i - 1)))) { // Left
-                    cr.arc(wsCenterX, wsCenterY, workspaceRadius, 0.5 * Math.PI, 1.5 * Math.PI);
-                    cr.fill();
-                }
-                else {
-                    cr.rectangle(wsCenterX - workspaceRadius, wsCenterY - workspaceRadius, workspaceRadius, workspaceRadius * 2)
-                    cr.fill();
-                }
-                if (!(area.attribute.workspaceMask & (1 << (i + 1)))) { // Right
-                    cr.arc(wsCenterX, wsCenterY, workspaceRadius, -0.5 * Math.PI, 0.5 * Math.PI);
-                    cr.fill();
-                }
-                else {
-                    cr.rectangle(wsCenterX, wsCenterY - workspaceRadius, workspaceRadius, workspaceRadius * 2)
-                    cr.fill();
-                }
-            }
-        }
-
-        // Draw active ws
-        cr.setSourceRGBA(activebg.red, activebg.green, activebg.blue, activebg.alpha);
-        cr.arc(activeWsCenterX, activeWsCenterY, indicatorRadius, 0, 2 * Math.PI);
-        cr.fill();
+        // Calculate dimensions
+        const workspaceWidth = width / count;
+        const workspaceRadius = Math.min(workspaceWidth, height) * 0.4;
+        const indicatorRadius = workspaceRadius * 0.8;
 
         // Draw workspace numbers
-        for (let i = 1; i <= count; i++) {
-            const inactivecolors = area.attribute.workspaceMask & (1 << i) ? occupiedfg : wsfg;
-            if (i == activeWs) {
-                cr.setSourceRGBA(activefg.red, activefg.green, activefg.blue, activefg.alpha);
-            }
-            // Moving to
-            else if ((i == Math.floor(activeWs) && Hyprland.active.workspace.id < activeWs) || (i == Math.ceil(activeWs) && Hyprland.active.workspace.id > activeWs)) {
-                cr.setSourceRGBA(mix(activefg.red, inactivecolors.red, 1 - Math.abs(activeWs - i)), mix(activefg.green, inactivecolors.green, 1 - Math.abs(activeWs - i)), mix(activefg.blue, inactivecolors.blue, 1 - Math.abs(activeWs - i)), activefg.alpha);
-            }
-            // Moving from
-            else if ((i == Math.floor(activeWs) && Hyprland.active.workspace.id > activeWs) || (i == Math.ceil(activeWs) && Hyprland.active.workspace.id < activeWs)) {
-                cr.setSourceRGBA(mix(activefg.red, inactivecolors.red, 1 - Math.abs(activeWs - i)), mix(activefg.green, inactivecolors.green, 1 - Math.abs(activeWs - i)), mix(activefg.blue, inactivecolors.blue, 1 - Math.abs(activeWs - i)), activefg.alpha);
-            }
-            // Inactive
-            else
-                cr.setSourceRGBA(inactivecolors.red, inactivecolors.green, inactivecolors.blue, inactivecolors.alpha);
+        const layout = widget.create_pango_layout('');
+        const fontDesc = Pango.FontDescription.from_string('Noto Sans Arabic');
+        fontDesc.set_size(Pango.SCALE * 12);
+        layout.set_font_description(fontDesc);
 
-            // Get workspace label based on style
-            const wsOptions = userOptions.asyncGet().workspaces;
-            const wsId = i + offset;
-            const style = wsOptions.style || 'numeric';
-            const label = getWorkspaceLabel(wsId, style, wsOptions.labels);
+        // Draw workspace backgrounds
+        for (let i = 0; i < count; i++) {
+            const wsCenterX = workspaceWidth * (i + 0.5);
+            const wsCenterY = height / 2;
 
-            layout.set_text(label, -1);
-            const [layoutWidth, layoutHeight] = layout.get_pixel_size();
-            const x = -workspaceRadius + (workspaceDiameter * i) - (layoutWidth / 2);
-            const y = (height - layoutHeight) / 2;
-            cr.moveTo(x, y);
-            PangoCairo.show_layout(cr, layout);
-            cr.stroke();
+            // Draw background
+            if (widget.attribute.workspaceMask & (1 << (i + 1))) {
+                cr.setSourceRGBA(occupiedbg.red, occupiedbg.green, occupiedbg.blue, occupiedbg.alpha);
+            } else {
+                cr.setSourceRGBA(wsbg.red, wsbg.green, wsbg.blue, wsbg.alpha);
+            }
+
+            cr.arc(wsCenterX, wsCenterY, workspaceRadius, 0, 2 * Math.PI);
+            cr.fill();
         }
-    }));
+
+        // Draw active workspace indicator
+        const activeWs = Hyprland.active.workspace.id - offset;
+        if (activeWs > 0 && activeWs <= count) {
+            const activeWsCenterX = workspaceWidth * (activeWs - 0.5);
+            const activeWsCenterY = height / 2;
+            cr.setSourceRGBA(activebg.red, activebg.green, activebg.blue, activebg.alpha);
+            cr.arc(activeWsCenterX, activeWsCenterY, indicatorRadius, 0, 2 * Math.PI);
+            cr.fill();
+        }
+
+        // Draw workspace numbers
+        for (let i = 0; i < count; i++) {
+            const wsId = i + 1 + offset;
+            const wsOptions = userOptions.asyncGet().workspaces;
+            const style = wsOptions.numeric_style || 'numeric';
+            const label = getWorkspaceLabel(wsId, style);
+            layout.set_text(label, -1);
+
+            const [layoutWidth, layoutHeight] = layout.get_pixel_size();
+            const wsCenterX = workspaceWidth * (i + 0.5);
+            const wsCenterY = height / 2;
+
+            // Set text color
+            if (i + 1 === activeWs) {
+                cr.setSourceRGBA(activefg.red, activefg.green, activefg.blue, activefg.alpha);
+            } else if (widget.attribute.workspaceMask & (1 << (i + 1))) {
+                cr.setSourceRGBA(occupiedfg.red, occupiedfg.green, occupiedfg.blue, occupiedfg.alpha);
+            } else {
+                cr.setSourceRGBA(wsfg.red, wsfg.green, wsfg.blue, wsfg.alpha);
+            }
+
+            // Draw text
+            cr.save();
+            cr.translate(wsCenterX - layoutWidth / 2, wsCenterY - layoutHeight / 2);
+            PangoCairo.show_layout(cr, layout);
+            cr.restore();
+        }
+    });
 
     return area;
 }

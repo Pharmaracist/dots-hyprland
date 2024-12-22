@@ -13,39 +13,73 @@ export const Dent = () => Widget.Box({});
 
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    10: { // Pads
+    1: {
         name: 'Pads',
         css: 'min-height:4rem',
         layout: (modules, monitor) => ({
             start: [
                 Widget.Box({
-                    className: 'bar-group-pad bar-group-standalone',
-                    children: [modules.workspaces.normal()],
+                    className: 'bar-round-padding spacing-h-15',
+                    children: [modules.StatusModules.battery(), modules.workspaces.normal()],
                 }),
+                Widget.Box({ 
+                    className: 'bar-round-padding', 
+                    children: [modules.ControlModules.shortcuts()], 
+                })
             ],
             center: [
-                Widget.Box({
-                    className: 'bar-group-pad',
-                    children: [modules.InfoModules.title()],
+               Widget.Box({
+                children:[
+                ScrollableContainer({
+                    name: 'shortchuts',
+                    sets: [
+                        Widget.Box({
+                            css: 'min-width:7.5rem;',
+                            className: 'bar-round-padding spacing-h-15',
+                            children: [
+                                Widget.Box({ 
+                                    className: 'bar-round-padding spacing-h-15',
+                                    children: [modules.ControlModules.shortcuts()],
+                                }),
+                            ]
+                        }),
+                        Widget.Box({
+                            css: 'min-width:7.5rem;',
+                            className: 'bar-round-padding spacing-h-15',
+                            children: [
+                                Widget.Box({
+                                    hexpand: true,
+                                    hpack: 'center',
+                                    children: [modules.ControlModules.shortcuts()],
+                                })
+                            ],
+                        }),
+                    ],
                 }),
+            ]}),
             ],
             end: [
-                Widget.Box({
-                    className: 'bar-group-pad bar-group-standalone',
-                    children: [modules.MediaModules.musicStuff()],
-                }),
-            ],
+                Widget.Box({ className: 'bar-round-padding', children: [modules.StatusModules.tray(),], }),
+                Widget.Box({className: 'bar-round-padding spacing-h-15', children: [modules.InfoModules.weather()] }),
+                Widget.Box({className: 'bar-round-padding', children: [modules.InfoModules.indicators()] })
+                ,modules.ControlModules.button()],
         }),
     },
-    1: { // Knocks with scrollable modules
+    2: { 
         name: 'Knocks',
         layout: (modules) => ({
             start: [
+                Widget.Box({
+                    className: 'start-widget',
+                    homogeneous: true,
+                    css: 'margin-right: 0.5rem;',
+                    children: [modules.InfoModules.windowTitle()],
+                }),
                
             ],
             center: [
                 ScrollableContainer({
-                    name: 'media',
+                    name: 'system',
                     sets: [
                         [Widget.Box({
                             css:`min-width:30rem;`,
@@ -62,9 +96,7 @@ export const BarLayouts = {
                             className: 'bar-knocks spacing-h-15',
                             children: [
                                 Widget.Box({
-                                    hexpand: true,
-                                    hpack: 'center',
-                                    className: 'spacing-h-5',
+                                    className: 'spacing-h-5 padding-rl-15',
                                     children: [
                                         modules.ControlModules.wallpaper(),
                                         modules.InfoModules.colorscheme()
@@ -77,9 +109,7 @@ export const BarLayouts = {
                 Widget.Box({
                     className: 'bar-knocks padding-rl-15',
                     children: [modules.workspaces.normal()],
-                }),
-                // First scrollable for system info
-                
+                }),                
                 ScrollableContainer({
                     name: 'system',
                     sets: [
@@ -101,113 +131,74 @@ export const BarLayouts = {
                         })],
                     ],
                 }),
-                        
-               
-
-                // Second scrollable for media
              
             ],
             end: [
             ],
         }),
     },
-    7: { // Pads
-        name: 'Pads',
-        className: 'bar-nothing',
-        corners: {
-            topLeft: true,
-            topRight: true,
-            bottomLeft: false,
-            bottomRight: false,
-        },
-        layout: (modules, monitor) => ({
+    3: { 
+        name: 'Minimal',
+        className: 'bar-bg',
+        layout: (modules) => ({
             start: [
+                modules.CornerModules.topleft(),
                 Widget.Box({
-                    className: 'bar-round-padding',
+                    className: 'spacing-h-15 start-widget',
+                    css:`margin-right: 1rem;`,
                     children: [
                         modules.StatusModules.battery(),
-                        modules.workspaces.normal(),
                     ],
                 }),
-                Widget.Box({
-                    className: 'bar-round-padding',
-                    children: [
-                        modules.ControlModules.shortcuts(),
-                    ],
-                })
+                modules.workspaces.normal(),
             ],
-            center: [Widget.Box({
-                className: 'bar-round-padding',
-                children: [
+            center: [
                     modules.InfoModules.clock(),
-                ],
-            })],
+            
+            ],
             end: [
-                Widget.Box({
-                    className: 'bar-round-padding',
-                    children: [
-                        modules.InfoModules.weather(),
-                    ],
-                }),
                 Widget.Box({
                     children: [
                         modules.StatusModules.tray(),
                     ],
                 }),
-                Widget.Box({
-                    className: 'bar-round-padding',
-                    children: [
-                        modules.StatusModules.systemResources(),
-                    ],
-                }),
-                Widget.Box({
-                    className: 'bar-round-padding',
-                    children: [
-                        modules.InfoModules.indicators(),
-                    ],
-                }),
+                modules.InfoModules.indicators(),
                 modules.ControlModules.button(),
-            ],
-        }),
-    },
-    4: { // Floating
-        name: 'Floating',
-        className: 'bar-floating spacing-h-15',
-        css: "min-height:3.2rem",
-      
-        layout: (modules) => ({
-            start: [
-                modules.CornerModules.topleft(),
-                modules.StatusModules.battery(),
-                modules.workspaces.normal(),
-                modules.MediaModules.mediaIndicator(),
-            ],
-            center: [
-                modules.InfoModules.title(),
-            ],
-            end: [
-                modules.ControlModules.toggles(),
-                modules.InfoModules.clock(),
                 modules.CornerModules.topright(),
             ],
         }),
     },
-    2: { // Short
+    4: {
+        name: 'Floating',
+        className: 'bar-floating spacing-h-15',
+        css: "min-height:2.65rem margin-top: 0.5rem;",
+        layout: (modules) => ({
+            start: [
+                modules.StatusModules.battery(),
+                modules.workspaces.normal(),
+            ],
+            center: [
+                modules.MediaModules.mediaIndicator(),],
+            end: [
+                Widget.Box({
+                    children: [
+                        modules.InfoModules.indicators(),
+                    ],
+                }),
+            ],
+        }),
+    },
+    5: {
         name: 'Short',
         className: 'bar-floating-short',
-        css: "min-height:3.2rem",
-        corners: {
-            topLeft: false,
-            topRight: false,
-            bottomLeft: false,
-            bottomRight: false,
-        },
+        css: "min-height:2.8rem",
         layout: (modules) => ({
             start: [
-                modules.workspaces.focus(),
+                modules.InfoModules.simpleClock(),
+                modules.workspaces.normal(),
             ],
             center: [
-                modules.InfoModules.clock(),
+                modules.InfoModules.weather(),
             ],
             end: [
                 modules.InfoModules.indicators(),
@@ -215,34 +206,40 @@ export const BarLayouts = {
             ],
         }),
     },
-    3: { // Shorter
+    6: { 
         name: 'Shorter',
-        className: 'bar-floating-shorter',
-        css: "min-height:3.2rem",
-        corners: {
-            topLeft: false,
-            topRight: false,
-            bottomLeft: false,
-            bottomRight: false,
-        },
         layout: (modules) => ({
             start: [
-                modules.StatusModules.battery(),
-                Separator(),
-                modules.ControlModules.shortcuts(),
+                Widget.Box({
+                    className: 'start-widget',
+                    children: [
+                        modules.StatusModules.battery(),
+                    ],
+                }),
             ],
             center: [
-                modules.workspaces.focus(),
+                Widget.Box({
+                    className: 'bar-notch spacing-h-15',
+                    css: "min-height:3rem;padding: 0.4rem 1.2rem;",
+                    hpack: 'center',
+                    hexpand: true,
+                    children: [
+                        modules.workspaces.normal(),
+                    ],
+                }),
             ],
             end: [
-                modules.InfoModules.indicators(),
-                modules.InfoModules.simpleClock({className:"icon-nerd sec-txt",}),
+                Widget.Box({
+                    className: 'end-widget',
+                    children: [
+                        modules.InfoModules.indicators(),
+                    ],
+                }),
             ],
         }),
     },
-    5: { // Normal
+    7: { // Normal
         name: 'Normal',
-        number: 1,
         className: 'bar-bg',
         corners: {
             topLeft: true,
@@ -252,7 +249,6 @@ export const BarLayouts = {
         },
         layout: (modules) => ({
             start: [
-                modules.CornerModules.topleft(),
                 modules.InfoModules.windowTitle(),
             ],
             center: [
@@ -261,11 +257,10 @@ export const BarLayouts = {
             end: [
                 modules.StatusModules.battery(),
                 modules.StatusModules.system(),
-                modules.CornerModules.topright(),
             ],
         }),
     },
-    6: { // floatnorm
+    8: { // floatnorm
         name: 'Minimal',
         className: 'bar-floating-short',
         css:"min-height:2.8rem",
@@ -289,33 +284,33 @@ export const BarLayouts = {
             ],
         }),
     },
-    8: { // Scrollable
-        name: 'Scrollable',
-        className: 'bar-scrollable',
-        layout: (modules) => {
-            const ModuleSet1 = [
-                modules.InfoModules.simpleClock(),
-                modules.ControlModules.keyboard(),
-                modules.InfoModules.indicators(),
-                modules.StatusModules.battery(),
-            ];
+    // 9: { // Scrollable
+    //     name: 'Scrollable',
+    //     className: 'bar-scrollable',
+    //     layout: (modules) => {
+    //         const ModuleSet1 = [
+    //             modules.InfoModules.simpleClock(),
+    //             modules.ControlModules.keyboard(),
+    //             modules.InfoModules.indicators(),
+    //             modules.StatusModules.battery(),
+    //         ];
 
-            const ModuleSet2 = [
-                modules.InfoModules.quote(),
+    //         const ModuleSet2 = [
+    //             modules.InfoModules.quote(),
 
-            ];
+    //         ];
 
-            return {
-                start: [],
-                center: [
-                    ScrollableContainer({
-                        sets: [ModuleSet1, ModuleSet2],
-                    }),
-                ],
-                end: [],
-            };
-        },
-    },
+    //         return {
+    //             start: [],
+    //             center: [
+    //                 ScrollableContainer({
+    //                     sets: [ModuleSet1, ModuleSet2],
+    //                 }),
+    //             ],
+    //             end: [],
+    //         };
+    //     },
+    // },
 };
 
 // Create bar content with proper layout and error handling

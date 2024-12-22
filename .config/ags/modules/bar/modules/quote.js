@@ -14,16 +14,15 @@ const QuoteWidget = () => {
         justification: 'left',
         wrap: true,
         wrapMode: 'word',  // Wrap at word boundaries
-        widthChars: 40,    // Force width to roughly 10rem
-        maxWidthChars: 40, // Maximum width in characters
+        widthChars: 50,    // Force width to roughly 10rem
+        maxWidthChars: 50, // Maximum width in characters
         xalign: 0,   
-        css: 'min-height: 2em;',
+        // css: 'min-height: 2em;',
     });
 
     // Create the main widget
     const widget = EventBox({
         onPrimaryClick: () => {
-            console.log('Quote widget clicked, fetching new quote...');
             label.label = 'Loading...';
             Quotes.fetch();
         },
@@ -38,13 +37,6 @@ const QuoteWidget = () => {
 
     // Update label when service changes
     const updateLabel = () => {
-        console.log('Quote widget: Updating label...');
-        console.log('Service state:', {
-            loading: Quotes.loading,
-            content: Quotes.content,
-            author: Quotes.author,
-        });
-
         if (Quotes.loading) {
             label.label = 'Loading...';
             return;
@@ -63,7 +55,6 @@ const QuoteWidget = () => {
 
     // Set up polling
     widget.poll(UPDATE_INTERVAL, () => {
-        console.log('Quote widget: Poll triggered...');
         Quotes.fetch();
     });
 
@@ -71,7 +62,4 @@ const QuoteWidget = () => {
 };
 
 // Export a function that returns the widget
-export default () => {
-    console.log('Creating quote widget...');
-    return QuoteWidget();
-};
+export default () => QuoteWidget();

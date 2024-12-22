@@ -23,6 +23,7 @@ import Quote from "./quote.js";
 import WaveIcon from './wave.js';
 import ColorScheme from '../colorscheme.js';
 import { changeWallpaperButton } from "./utils.js";
+import { BarModule } from "../../.commonwidgets/materialicon.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
