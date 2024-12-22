@@ -47,6 +47,12 @@ $bar_ws_width_focus_active: 6.045rem;
 @mixin bar-group-rounding {
     @include small-rounding;
 }
+.bar-knocks{
+    @include large-rounding;
+    @include elevation2;
+    border: 0.25px solid $outline;
+    background-color: $layer0
+}
 .bar-floating {
     @include normal-rounding;
     background-color: $layer0;
@@ -207,7 +213,7 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-ws-occupied {
-    background-color: $layer2;
+    // background-color: $layer2;
     color: $workspaceOnLayer2;
 }
 
@@ -233,7 +239,6 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-time {
     @include titlefont;
-    font-size: 1.3727rem;
     color: $timeOnLayer1;
 }
 
@@ -244,21 +249,21 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-date {
-    color: $dateOnLayer1;
+    color: $onSurfaceVariant;
 }
 
 .bar-bat {
     @include full-rounding;
     @include element_decel;
     min-height: 1.99rem;
-    min-width: 1.99rem;
+    min-width: 2.3rem;
     border-radius: 10rem;
     color: $battOnLayer2;
 }
 .bar-bat-circprog {
     @include fluent_decel_long;
-    min-width: 0.2rem; // line width
-    min-height: 1.97rem;
+    min-width: 0.23rem; // line width
+    min-height: 2.1rem;
     padding: 0rem;
     background-color: $battLayer2;
     color: $battOnLayer2;
@@ -398,14 +403,17 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-music-txt {
+    @include titlefont;
     color: $musicOnLayer1;
 }
 
-.bar-music-cover {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 100% auto;
-    min-width: 11.932rem;
+.bar-music-art {
+    margin: 4px;
+    border: 1px solid $surfaceContainerHighest;
+    background-color: $surfaceContainerHighest;
+    border-radius: 8px;
+    min-width: 40px;
+    min-height: 40px;
 }
 
 .bar-music-extended-bg {
@@ -423,6 +431,21 @@ $bar_ws_width_focus_active: 6.045rem;
     @include menu_accel;
     transition-duration: 100ms;
     opacity: 0;
+}
+
+.bar-music-art {
+    margin: 4px;
+    border: 1px solid $surfaceContainerHighest;
+    background-color: $surfaceContainerHighest;
+    border-radius: 8px;
+    padding: 4px;
+    -gtk-icon-style: regular;
+    -gtk-icon-shadow: none;
+}
+
+.txt-small {
+    font-size: 0.8em;
+    opacity: 0.8;
 }
 
 .bar-corner-spacing {
@@ -661,7 +684,7 @@ $bar_ws_width_focus_active: 6.045rem;
   &:hover {
     background: none;
   }
-}h
+}
 
 .revealer-control-button {
   padding: 0 8px;
@@ -678,4 +701,97 @@ revealer {
   min-width: 2.5em;
   padding-left: 5px;
   transition: all 150ms ease;
+}
+
+// Knoks workspace styling
+.knoks-ws-container {
+    transition: 700ms cubic-bezier(0.1, 1, 0, 1);
+    min-width: 18.341rem;
+}
+
+.knoks-ws {
+    @include element_decel;
+    @include full-rounding;
+    min-width: $bar_ws_width;
+    min-height: 1.77rem;
+    padding: 0rem 0.273rem;
+    background-color: $surfaceContainerLowest;
+    color: $onSurfaceVariant;
+}
+
+.knoks-ws-active {
+    background-color: $surfaceContainerHighest;
+    color: $onSurface;
+    min-width: $bar_ws_width_focus_active;
+}
+
+.knoks-ws-occupied {
+    background-color: $surfaceContainerLow;
+    color: $onSurfaceVariant;
+    min-width: $bar_ws_width_focus;
+}
+
+.knoks-group-margin {
+    padding: 0.273rem 0rem;
+}
+
+.knoks-group {
+    background-color: $layer1;
+}
+
+.knoks-group-pad {
+    padding: 0.205rem;
+}
+
+.knoks-group-standalone {
+    @include bar-group-rounding;
+    -gtk-outline-radius: 1.364rem;
+}
+
+.keyboard-icon {
+    color: $onSurfaceVariant;
+}
+
+.bar-quote {
+    background-color: $surfaceVariant;
+    border-radius: 8px;
+    padding: 0 8px;
+    margin: 4px 8px;
+    
+    .bar-quote-txt {
+        font-style: italic;
+        opacity: 0.9;
+        color: $onSurfaceVariant;
+    }
+}
+
+.bar-scrollable {
+    transition: all 200ms ease;
+    
+    revealer {
+        transition: all 200ms ease;
+    }
+}
+.icon-module {
+    color: $onSurface;
+    
+    image {
+        color: inherit;
+        -gtk-icon-palette: default;
+        -gtk-icon-effect: none;
+    }
+}
+
+.bar-music-button {
+    padding: 0 3px;
+    border: none;
+    box-shadow: none;
+    background: none;
+    min-width: 16px;
+    min-height: 16px;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+    }
 }

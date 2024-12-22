@@ -18,6 +18,8 @@ import ClassWindow from "../modules/window_title.js";
 import WeatherWidget from "./weather.js";
 import { Systray } from "../../systray/systray.js";
 import MediaIndicator from "./media.js";
+import Quote from "./quote.js";
+import WaveIcon from './wave.js';
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -66,9 +68,11 @@ const loadWorkspaces = async () => {
     try {
         const hyprland = await import("./uniworkspace.js");
         const hyprlandFocus = await import("./workspaces_hyprland_focus.js");
+        const knoksWs = await import("./knoksws.js");
         return {
             normal: () => hyprland.default(),
             focus: () => hyprlandFocus.default(),
+            knoks: () => knoksWs.default(),
         };
     } catch {
         try {
@@ -76,11 +80,13 @@ const loadWorkspaces = async () => {
             return {
                 normal: () => sway.default(),
                 focus: () => sway.default(),
+                knoks: () => Widget.Box({}),
             };
         } catch {
             return {
                 normal: () => Widget.Box({}),
                 focus: () => Widget.Box({}),
+                knoks: () => Widget.Box({}),
             };
         }
     }
@@ -115,6 +121,16 @@ export const InfoModules = {
     title: wrapAsyncModule(asyncModules.title),
     statusIndicators() { return System(); },
     weather() { return WeatherWidget(); },
+    logo(){return WaveIcon();},
+
+    quote() { 
+        try {
+            return Quote();
+        } catch (error) {
+            console.error('Failed to create quote widget:', error);
+            return null;
+        }
+    },
 };
 
 export const MediaModules = {
@@ -142,4 +158,13 @@ export const initializeModules = async () => {
         InfoModules,
         MediaModules,
     };
+};
+
+export default {
+    workspaces: () => loadWorkspaces(),
+    CornerModules,
+    StatusModules,
+    ControlModules,
+    InfoModules,
+    MediaModules,
 };

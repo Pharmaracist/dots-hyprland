@@ -476,7 +476,8 @@
       "steam",
       "heroic-games-launcher",
       "org.gnome.Nautilus",
-      "chromium"
+      "chromium",
+      "visual studio code"
     ],
     "layer": "top",
     "monitorExclusivity": true,

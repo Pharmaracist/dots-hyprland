@@ -15,11 +15,38 @@ class YTMusicAPI {
         };
     }
 
+    async _makeRequest(endpoint, params = {}) {
+        try {
+            const url = `${BASE_URL}${endpoint}`;
+            const response = await Utils.fetch(url, {
+                method: 'POST',
+                headers: this.headers,
+                body: JSON.stringify({
+                    ...params,
+                    client: CLIENT,
+                    context: {
+                        client: CLIENT,
+                    },
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`API request failed (${endpoint}):`, error);
+            throw error;
+        }
+    }
+
     async getTrackInfo(videoId) {
         try {
             const response = await this._makeRequest('/next', {
                 videoId,
                 isAudioOnly: true,
+                params: 'wAEB', // Minimal data parameter
             });
 
             if (!response?.contents?.singleColumnMusicWatchNextResultsRenderer)
@@ -32,6 +59,11 @@ class YTMusicAPI {
                 ?.playlistPanelVideoRenderer;
 
             if (!track) throw new Error('Track not found');
+            if (!track.title?.runs?.[0]?.text) throw new Error('Invalid track title');
+            if (!track.thumbnail?.thumbnails?.length) throw new Error('Invalid track thumbnail');
+
+            const thumbnails = track.thumbnail.thumbnails;
+            const highestQualityThumbnail = thumbnails[thumbnails.length - 1].url;
 
             return {
                 videoId,
@@ -39,7 +71,8 @@ class YTMusicAPI {
                 artists: track.longBylineText.runs
                     .filter((run, i) => i % 2 === 0)
                     .map(artist => ({ name: artist.text })),
-                thumbnail: track.thumbnail.thumbnails.slice(-1)[0].url,
+                thumbnail: highestQualityThumbnail,
+                duration: track.lengthText?.runs?.[0]?.text || '0:00',
             };
         } catch (error) {
             console.error('Error fetching track info:', error);
@@ -132,25 +165,6 @@ class YTMusicAPI {
             console.error('Error getting radio:', error);
             return { error: error.message };
         }
-    }
-
-    async _makeRequest(endpoint, data) {
-        const url = `${BASE_URL}${endpoint}?key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30`;
-        const response = await Utils.fetch(url, {
-            method: 'POST',
-            headers: this.headers,
-            body: JSON.stringify({
-                ...data,
-                context: {
-                    client: CLIENT,
-                },
-            }),
-        });
-
-        if (!response.ok)
-            throw new Error(`Request failed with status ${response.status}`);
-
-        return await response.json();
     }
 }
 

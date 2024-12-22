@@ -9,7 +9,7 @@ export default () => {
     const visualizer = Widget.Box({
         class_name: 'cava-visualizer',
         spacing: 2,
-        css: 'min-width: 105px;'
+        css: 'min-width: 20rem;'
     })
 
     // Update the widget with the latest cava output

@@ -244,12 +244,12 @@ export const NetworkIndicator = () =>
 export const StatusIcons = (props = {}, monitor = 0) =>
   Widget.Box({
     ...props,
-    className: 'statusicons spacing-h-5',
-    css:"padding:0 8px; ",
+    className: "statusicons spacing-h-15",
+    css: "padding:0 10px; ",
     children: [
       NotificationIndicator(),
       Widget.Box({
-        className: 'statusicons-network',
+        className: "statusicons-network",
         children: [NetworkIndicator()],
       }),
       Widget.Box({

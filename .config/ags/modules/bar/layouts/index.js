@@ -1,5 +1,6 @@
 // Layout definitions for different bar modes
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
+import ScrollableContainer from '../modules/scrollable.js';
 
 // Utility component for visual separation
 export const Separator = () => Widget.Box({
@@ -12,7 +13,88 @@ export const Dent = () => Widget.Box({});
 
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    1: { // Pads
+    10: { // Pads
+        name: 'Pads',
+        css: 'min-height:4rem',
+        layout: (modules, monitor) => ({
+            start: [
+                Widget.Box({
+                    className: 'bar-group-pad bar-group-standalone',
+                    children: [modules.workspaces.normal()],
+                }),
+            ],
+            center: [
+                Widget.Box({
+                    className: 'bar-group-pad',
+                    children: [modules.InfoModules.title()],
+                }),
+            ],
+            end: [
+                Widget.Box({
+                    className: 'bar-group-pad bar-group-standalone',
+                    children: [modules.MediaModules.musicStuff()],
+                }),
+            ],
+        }),
+    },
+    1: { // Knocks with scrollable modules
+        name: 'Knocks',
+        layout: (modules) => ({
+            start: [
+               
+            ],
+            center: [
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            css:`min-width:35rem;`,
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [modules.MediaModules.musicStuff()],
+                        })],
+                        [Widget.Box({
+                            css:`min-width:35rem;`,
+                            className: 'bar-knocks spacing-h-15 padding-rl-15',
+                            children: [modules.InfoModules.logo(), modules.InfoModules.quote()],
+                        })],
+                    ],
+                }),
+                Widget.Box({
+                    className: 'bar-knocks padding-rl-15',
+                    children: [modules.workspaces.normal()],
+                }),
+                // First scrollable for system info
+                
+                ScrollableContainer({
+                    name: 'system',
+                    sets: [
+                        [Widget.Box({
+                            css:`min-width:25rem;`,
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [
+                                modules.InfoModules.simpleClock(),
+                                modules.ControlModules.keyboard(),
+                                modules.StatusModules.battery(),
+                            ]
+                        })],
+                        [Widget.Box({
+                            css:`min-width:25rem;`,
+                            className: 'bar-knocks spacing-h-15',
+                            children: [modules.InfoModules.weather()],
+                        })],
+                    ],
+                }),
+                        
+               
+
+                // Second scrollable for media
+             
+            ],
+            end: [
+            ],
+        }),
+    },
+    7: { // Pads
         name: 'Pads',
         className: 'bar-nothing',
         corners: {
@@ -75,12 +157,7 @@ export const BarLayouts = {
         name: 'Floating',
         className: 'bar-floating spacing-h-15',
         css: "min-height:3.2rem",
-        corners: {
-            topLeft: true,
-            topRight: true,
-            bottomLeft: false,
-            bottomRight: false,
-        },
+      
         layout: (modules) => ({
             start: [
                 modules.CornerModules.topleft(),
@@ -162,12 +239,11 @@ export const BarLayouts = {
                 modules.InfoModules.windowTitle(),
             ],
             center: [
-                modules.MediaModules.music(),
-                modules.workspaces.normal(),
-                modules.StatusModules.system(),
+                modules.InfoModules.clock(),
             ],
             end: [
-                modules.InfoModules.indicators(),
+                modules.StatusModules.battery(),
+                modules.StatusModules.system(),
                 modules.CornerModules.topright(),
             ],
         }),
@@ -195,6 +271,33 @@ export const BarLayouts = {
                 modules.InfoModules.indicators(),
             ],
         }),
+    },
+    8: { // Scrollable
+        name: 'Scrollable',
+        className: 'bar-scrollable',
+        layout: (modules) => {
+            const ModuleSet1 = [
+                modules.InfoModules.simpleClock(),
+                modules.ControlModules.keyboard(),
+                modules.InfoModules.indicators(),
+                modules.StatusModules.battery(),
+            ];
+
+            const ModuleSet2 = [
+                modules.InfoModules.quote(),
+
+            ];
+
+            return {
+                start: [],
+                center: [
+                    ScrollableContainer({
+                        sets: [ModuleSet1, ModuleSet2],
+                    }),
+                ],
+                end: [],
+            };
+        },
     },
 };
 

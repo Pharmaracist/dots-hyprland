@@ -93,8 +93,7 @@ const BatteryContent = () => {
     });
 
     const percentageBox = Box({
-        className: "margin-rl-5",
-        css:"margin-right:20px",
+        vpack: "center",
         children: [
             percentageLabel,
             detailsBox,
@@ -104,6 +103,7 @@ const BatteryContent = () => {
     const detailsRevealer = RevealerState.register(Revealer({
         transitionDuration: userOptions.animations?.durationLarge || 150,
         transition: "slide_right",
+        vpack: "center",
         revealChild: true,
         child: percentageBox,
     }));

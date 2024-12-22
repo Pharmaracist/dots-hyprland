@@ -1463,22 +1463,6 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
                 background-repeat: no-repeat;
             }
             
-            .track-info {
-                margin-left: $elevation_margin;
-                
-                .title {
-                    @include titlefont;
-                    color: $onSurface;
-                    margin-bottom: 0.273rem;
-                    font-size: 1.1em;
-                }
-
-                .artist {
-                    @include mainfont;
-                    color: $onSurfaceVariant;
-                    font-size: 0.9em;
-                }
-            }
         }
 
         .controls {
@@ -1540,31 +1524,44 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         }
     }
 }
-
-.music-item {
-    @include normal-rounding;
+.track-item {
+    @include full-rounding;
     @include element_decel;
     background-color: $surfaceContainerLow;
-    padding: $elevation_margin;
-    margin-bottom: $elevation_margin;
+    margin: 0.25rem 0;
+    padding: 0.5rem;
+    transition: background-color 0.2s ease;
 
     &:hover {
         background-color: $hovercolor;
     }
 
-    .music-title {
-        @include titlefont;
-        color: $onSurface;
+    .track-thumbnail {
+        // margin-right: 0.75rem;
+        
     }
-
-    .music-artist {
-        @include mainfont;
-        color: $onSurfaceVariant;
+    .thumbnail-box {
+        @include normal-rounding;
+        min-width: 48px;
+        min-height: 48px;
+        background-color: $layer3;
     }
 }
 
+.track-item-artist {
+    @include mainfont;
+    color: $onSurfaceVariant;
+    padding: 0 0.682rem;
+
+}
+.track-item-title {
+    @include mainfont;
+    padding: 0 0.682rem;
+    color: $onSurface;
+}
+
 .now-playing {
-    @include normal-rounding;
+    @include large-rounding;
     @include titlefont;
     background-color: $surfaceContainerLow;
     color:$onSurfaceVariant;
@@ -1594,30 +1591,15 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     @include small-rounding;
     @include icon-material;
     color:$secondary;
-    // padding: $spacing_small;
     margin: 0 0.25rem;
-    
-    // &:hover {
-    //     background-color: $hovercolor;
-    // }
-    
-    // &:active {
-    //     background-color: $activecolor;
-    // }
 }
 
-.search-results {
-    @include titlefont;
+.ytm-results {
+    @include mainfont;
     opacity:1;
     font-size:1rem;
      margin-top: 1.5rem;
     color:$secondary;
-    .search-header {
-        @include titlefont;
-        opacity: 0;
-        // color: $onSurface;
-        // margin-bottom: $spacing_small;
-    }
 }
 // Audio Files Widget Styling
 .audio-files-widget {
@@ -1710,12 +1692,62 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     min-height: 20.455rem;
 }
 
+
+
+
+
+
+
+.main-playback-controls{
+    @include large-rounding;
+    padding:0.8rem;
+    background-color: $surfaceContainerLow ;
+}
+.control-button{
+    @include full-rounding;
+   
+    color: $secondaryContainer;
+    margin: 0 0.3rem;
+    
+}   
+
+.button-play{
+    @include full-rounding;
+    color: $onSurfaceVariant;
+    padding: 4px;
+    margin: 0 3px;
+    
+}   
+
+
+
+
+.ytm-controls{
+    @include large-rounding;
+    border: 0.5px solid $outline;
+    min-width: 56px;
+    margin: 0 0.7rem;
+    padding: 0.8rem 2rem;
+    margin-bottom: 0.3rem;
+    background-color: transparentize($surfaceContainerHigh, 0.5);
+}
+.ytm-now-playing-title{
+    @include titlefont;
+    color: $onSurface;
+    opacity: 0.9;
+    margin: 1 0px;
+}
+.ytm-now-playing {
+    @include mainfont;
+    color: $onSurfaceVariant;
+    opacity: 0.7;
+    margin: 1 0px;
+}
 .ytm-header {
     padding: 8px;
     margin: 4px;
     background-color: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
-
     .ytm-view-indicator {
         font-size: 14px;
         font-weight: bold;
@@ -1776,3 +1808,4 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         margin: 0.25rem 0;
     }
 }
+      

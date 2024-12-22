@@ -15,12 +15,22 @@ const date = new Variable("", {
 const simpleClock = () =>
   Widget.Box({
     vpack: "center",
-    className: "spacing-h-4 bar-clock-box",
+    vertical: true,
+    className: "txt-large bar-clock-box",
     children: [
       Widget.Label({
         className: "bar-time",
         label: time.bind(),
         tooltipText: date.bind(),
+        xalign: 0, // Left align the time
+        hpack: "start"
+      }),
+      Widget.Label({
+        className: "bar-date ",
+        css:`font-size:1rem `,
+        label: date.bind(),
+        xalign: 0, // Right align the date
+        hpack: "end"
       }),
     ],
   });

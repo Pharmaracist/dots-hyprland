@@ -494,7 +494,13 @@
   "bar": {
     "mode": "mode1",
     "wallpaper_folder": "~/Pictures/Wallpapers",
-    "position": "top"
+    "position": "top",
+    "animations": {
+      "scroll": {
+        "duration": 500,
+        "debounce": 1000
+      }
+    }
   },
   "notifications": {
     "position": "top right",

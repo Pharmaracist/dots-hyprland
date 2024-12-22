@@ -49,12 +49,12 @@ const BarClock = () =>
     }),
   });
 
-const musicRevealer = RevealerState.register(Revealer({
-  transitionDuration: options.animations.durationLarge,
-  transition: "slide_right",
-  revealChild: false,
-  child: MusicStuff(),
-}));
+// const musicRevealer = RevealerState.register(Revealer({
+//   transitionDuration: options.animations.durationLarge,
+//   transition: "slide_right",
+//   revealChild: false,
+//   child: MusicStuff(),
+// }));
 
 export default () =>
   Widget.EventBox({
@@ -63,6 +63,6 @@ export default () =>
       Utils.execAsync(["hyprpicker", "-a"]).catch(print);
     },
     child: Widget.Box({
-      children: [BarClock(), musicRevealer],
+      children: [BarClock(), ],
     }),
   });

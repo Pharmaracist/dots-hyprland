@@ -20,10 +20,10 @@ class AudioVisualizerService extends Service {
         
         // Set default config
         this.#config = {
-            bars: 15,
-            framerate: 75,
+            bars: 30,
+            framerate: 30,
             sensitivity: 100,
-            mode: 'waves',
+            mode: 'scientific',
             channels: 'mono',
             smoothing: 0.85,
             noise_reduction: 0.85,

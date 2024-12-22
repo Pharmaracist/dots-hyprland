@@ -1,155 +1,101 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import { languages } from "../../.commonwidgets/statusicons_languages.js";
+import Hyprland from "resource:///com/github/Aylur/ags/service/hyprland.js";
 const { GLib } = imports.gi;
 
-/**
- * Checks if a word matches a given abbreviation using a loose matching algorithm.
- */
-function isLanguageMatch(abbreviation, word) {
-  const lowerAbbreviation = abbreviation.toLowerCase();
-  const lowerWord = word.toLowerCase();
-  let j = 0;
-  for (let i = 0; i < lowerWord.length; i++) {
-    if (lowerWord[i] === lowerAbbreviation[j]) {
-      j++;
-    }
-    if (j === lowerAbbreviation.length) {
-      return true;
-    }
-  }
-  return false;
-}
+const ANIMATION_DURATION = 200; // Default animation duration
 
 /**
- * Generates a keyboard layout widget using Hyprland's keyboard layout information.
+ * Creates a keyboard layout widget using Hyprland's keyboard layout information.
  */
-const HyprlandXkbKeyboardLayout = async ({ useFlag } = {}) => {
-  try {
-    const Hyprland = (
-      await import("resource:///com/github/Aylur/ags/service/hyprland.js")
-    ).default;
+const createKeyboardWidget = () => {
+    // Get current keyboard layouts
+    const deviceData = JSON.parse(Utils.exec("hyprctl -j devices"));
+    const layouts = deviceData.keyboards
+        .find(kb => kb.main)?.layout
+        .split(",")
+        .map(l => l.trim()) || ["us"];
 
-    let languageStackArray = [];
-
-    const updateCurrentKeyboards = () => {
-      const deviceData = JSON.parse(Utils.exec("hyprctl -j devices"));
-      const uniqueLayouts = [
-        ...new Set(
-          deviceData.keyboards.flatMap((keyboard) =>
-            keyboard.layout.split(",").map((lang) => lang.trim()),
-          ),
-        ),
-      ];
-
-      languageStackArray = uniqueLayouts.map((layout) => {
-        const lang = languages.find((lang) => lang.layout === layout);
-        if (!lang) {
-          return {
-            [layout]: Widget.Label({ label: layout.toUpperCase() }),
-          };
-        }
-        return {
-          [lang.layout]: Widget.Label({
-            label: useFlag ? lang.flag : lang.layout.toUpperCase(),
-          }),
-        };
-      });
-    };
-
-    updateCurrentKeyboards();
-
-    const widgetRevealer = Widget.Revealer({
-      transition: "slide_left",
-      transitionDuration: userOptions.asyncGet().animations.durationSmall,
-      revealChild: languageStackArray.length > 1,
+    // Create stack for layout labels
+    const layoutLabels = layouts.reduce((acc, layout) => {
+        const lang = languages.find(l => l.layout === layout);
+        const label = lang ? lang.layout.toUpperCase() : layout.toUpperCase();
+        acc[layout] = Widget.Label({ 
+            label,
+            className: 'txt-small txt-bold',
+            hpack: 'center',
+            vpack: 'center',
+            justify: 'center'
+        });
+        return acc;
+    }, { 
+        "unknown": Widget.Label({ 
+            label: "?",
+            className: 'txt-small txt-bold',
+            hpack: 'center',
+            vpack: 'center',
+            justify: 'center'
+        })
     });
 
-    const widgetChildren = languageStackArray.reduce(
-      (acc, lang) => ({ ...acc, ...lang }),
-      { undef: Widget.Label({ label: "?" }) },
-    );
-
-    const widgetContent = Widget.Stack({
-      transition: "slide_up_down",
-      transitionDuration: userOptions.asyncGet().animations.durationSmall,
-      children: widgetChildren,
-      setup: (self) =>
-        self.hook(
-          Hyprland,
-          (stack, kbName, layoutName) => {
-            if (!kbName || !layoutName) {
-              stack.shown = "undef";
-              return;
+    const labelStack = Widget.Stack({
+        transition: "slide_up_down",
+        transitionDuration: ANIMATION_DURATION,
+        vpack: 'center',
+        children: layoutLabels,
+        setup: self => self.hook(Hyprland, (stack, kbName, layoutName) => {
+            try {
+                const deviceData = JSON.parse(Utils.exec("hyprctl -j devices"));
+                const mainKeyboard = deviceData.keyboards.find(kb => kb.main);
+                const currentLayout = mainKeyboard?.active_keymap || "unknown";
+                
+                // Find the matching layout
+                const layout = Object.keys(layoutLabels).find(l => 
+                    currentLayout.toLowerCase().includes(l.toLowerCase())
+                ) || "unknown";
+                
+                stack.shown = layout;
+                print('Keyboard layout changed to:', layout);
+            } catch (error) {
+                console.error('Error updating keyboard layout:', error);
+                stack.shown = "unknown";
             }
-
-            const matchedLang =
-              languages.find((lang) => layoutName.includes(lang.name)) ||
-              languageStackArray.find((lang) =>
-                isLanguageMatch(Object.keys(lang)[0], layoutName),
-              );
-
-            stack.shown = matchedLang ? Object.keys(matchedLang)[0] : "undef";
-          },
-          "keyboard-layout",
-        ),
+        }, "keyboard-layout"),
     });
 
-    widgetRevealer.child = widgetContent;
-    return widgetRevealer;
-  } catch (error) {
-    console.error("Error creating keyboard layout widget:", error);
-    return null;
-  }
-};
-
-/**
- * Creates an optional keyboard layout widget instance.
- */
-const OptionalKeyboardLayout = async () => {
-  try {
-    return await HyprlandXkbKeyboardLayout({
-      useFlag: userOptions.asyncGet().appearance.keyboardUseFlag,
+    // Create the final widget with constant icon
+    return Widget.Box({
+        vertical: true,
+        vpack: 'center',
+        className: 'keyboard-layout-box',
+        homogeneous: false,
+        spacing: 4,
+        children: [
+            Widget.Box({
+                hpack: 'center',
+                vpack: 'center',
+                child: Widget.Icon({
+                    icon: 'keyboard',
+                    className: 'txt-norm material-icon',
+                    size: 20,
+                    vpack: 'center'
+                })
+            }),
+            Widget.Box({
+                hpack: 'center',
+                vpack: 'center',
+                child: labelStack
+            })
+        ]
     });
-  } catch (error) {
-    console.error("Error creating optional keyboard layout:", error);
-    return null;
-  }
 };
-
-/**
- * Creates multiple keyboard layout widget instances for each monitor.
- */
-const createKeyboardLayoutInstances = async () => {
-  try {
-    const Hyprland = (
-      await import("resource:///com/github/Aylur/ags/service/hyprland.js")
-    ).default;
-    const monitorsCount = Hyprland.monitors.length;
-
-    const instances = await Promise.all(
-      Array.from({ length: monitorsCount }, () => OptionalKeyboardLayout()),
-    );
-
-    return instances.filter(Boolean); // Filter out any null instances
-  } catch (error) {
-    console.error("Error creating keyboard layout instances:", error);
-    return [];
-  }
-};
-
-const optionalKeyboardLayoutInstances = await createKeyboardLayoutInstances();
 
 /**
  * Main widget export.
  */
-export default () =>
-  Widget.Box({
+export default () => Widget.Box({
     className: "spacing-h-10",
-    children: optionalKeyboardLayoutInstances.map((instance) =>
-      Widget.Box({
-        className: "spacing-h-10",
-        children: [instance],
-      }),
-    ),
-  });
+    vpack: 'center',
+    children: [createKeyboardWidget()],
+});
