@@ -18,54 +18,19 @@ import {
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
-// import ModulePowerProfiles from "./centermodules/powerprofiles.js";
-// import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleConfigure from "./centermodules/configure.js";
 import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import ModuleTaskManager from "./centermodules/taskmanager.js";
-// import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import { ModuleCalendar } from "./calendar.js";
 import { getDistroIcon } from "../.miscutils/system.js";
-// import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 import { ExpandingIconTabContainer } from "../.commonwidgets/tabcontainer.js";
 import { checkKeybind } from "../.widgetutils/keybind.js";
-// import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
-// import GLib from "gi://GLib";
-// import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
 
 const centerWidgets = [
   {
     name: getString("Notifications"),
     materialIcon: "notifications",
     contentWidget: ModuleNotificationList,
-  },
-  
-  {
-    name: getString("Audio controls"),
-    materialIcon: "volume_up",
-    contentWidget: ModuleAudioControls,
-  },
-
-  {
-    name: getString("Task Manager"),
-    materialIcon: "monitor_heart",
-    contentWidget: ModuleTaskManager,
-  },
-  // {
-  //   name: getString("Bluetooth"),
-  //   materialIcon: "bluetooth",
-  //   contentWidget: ModuleBluetooth,
-  // },
-  // {
-  //   name: getString("Wifi networks"),
-  //   materialIcon: "wifi",
-  //   contentWidget: ModuleWifiNetworks,
-  //   onFocus: () => execAsync("nmcli dev wifi list").catch(print),
-  // },
-  {
-    name: getString("Live config"),
-    materialIcon: "tune",
-    contentWidget: ModuleConfigure,
   },
 ];
 

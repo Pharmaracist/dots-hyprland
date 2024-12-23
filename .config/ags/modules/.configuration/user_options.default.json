@@ -1,7 +1,7 @@
 {
   "ai": {
     "defaultGPTProvider": "openrouter",
-    "onSearch": "gemini",
+    "onSearch": "openrouter",
     "defaultTemperature": 0.9,
     "enhancements": true,
     "useHistory": true,
@@ -15,16 +15,11 @@
     "durationLarge": 180
   },
   "appearance": {
-    "autoDarkMode": {
-      "enabled": false,
-      "from": "18:10",
-      "to": "6:10"
-    },
     "keyboardUseFlag": false,
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
-    "fakeScreenRounding": 1,
+    "fakeScreenRounding": 0,
     "visualizer": {}
   },
   "apps": {
@@ -109,21 +104,13 @@
       },
       "initMessages": []
     },
-    "image": {
-      "columns": 2,
-      "batchCount": 20,
-      "allowNsfw": false,
-      "saveInFolderByTags": false
-    },
     "pages": {
       "order": [
         "apis",
-        "tools",
-        "github"
+        "tools"
       ],
       "apis": {
         "order": [
-          "gemini",
           "gpt",
           "translater",
           "ytmusic"
@@ -361,7 +348,7 @@
   "ytmusic": {
     "audioQuality": {
       "type": "enum",
-      "default": "low",
+      "default": "high",
       "enums": [
         "low",
         "medium",

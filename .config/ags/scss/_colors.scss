@@ -26,8 +26,8 @@ $transparency: 0.8;
 // Others
 $subtext: $outline;
 $actiontext: mix($onBackground, $background, 85%);
-$black: black;
-$white: white;
+$black: #000;
+$white: #fff;
 /// Color mappings for more chaotic, dynamic colors like the average rice ///
 // General
 $layer0: $background;
