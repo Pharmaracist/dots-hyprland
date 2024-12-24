@@ -27,7 +27,7 @@ const findPlayer = () => {
 };
 
 let lastScrollTime = 0;
-const SCROLL_DELAY = 500; // 500ms delay between scroll actions
+const SCROLL_DELAY = 900; // 500ms delay between scroll actions
 
 // Volume indicator timeout
 let volumeTimeout = null;
@@ -53,24 +53,7 @@ export default () =>
     onPrimaryClick: () => {
       showMusicControls.setValue(!showMusicControls.value);
     },
-    onScrollUp: (self, event) => {
-      const currentTime = GLib.get_monotonic_time() / 1000;
-      if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
-      
-      const player = findPlayer();
-      if (player) player.next();
-      lastScrollTime = currentTime;
-      return true; // Stop event propagation
-    },
-    onScrollDown: (self, event) => {
-      const currentTime = GLib.get_monotonic_time() / 1000;
-      if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
-      
-      const player = findPlayer();
-      if (player) player.previous();
-      lastScrollTime = currentTime;
-      return true; // Stop event propagation
-    },
+   
     child: Box({
       css: `padding: 0.5rem;`,
       hexpand: true,
@@ -78,26 +61,25 @@ export default () =>
       children: [
         EventBox({
           onScrollUp: (self, event) => {
+            const currentTime = GLib.get_monotonic_time() / 1000;
+            if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
+            
             const player = findPlayer();
-            if (player) {
-              const newVolume = Math.min(1, player.volume + 0.05);
-              player.volume = newVolume;
-              showVolumeIndicator(newVolume);
-            }
+            if (player) player.next();
+            lastScrollTime = currentTime;
             return true; // Stop event propagation
           },
           onScrollDown: (self, event) => {
+            const currentTime = GLib.get_monotonic_time() / 1000;
+            if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
+            
             const player = findPlayer();
-            if (player) {
-              const newVolume = Math.max(0, player.volume - 0.05);
-              player.volume = newVolume;
-              showVolumeIndicator(newVolume);
-            }
+            if (player) player.previous();
+            lastScrollTime = currentTime;
             return true; // Stop event propagation
           },
           child: Box({
             className: 'bar-music-art',
-            css: 'margin-right: 0.75rem;',
             setup: (self) => {
               let lastCoverPath = '';
               
@@ -107,12 +89,10 @@ export default () =>
 
                 const coverPath = mpris?.coverPath;
                 lastCoverPath = coverPath;
-
                 const defaultCSS = `
                   min-width: 2.8rem;
-                  min-height: 2.8rem;
                   margin: 0;
-                  padding: 0;
+                  padding: 0 0.23rem;
                   background-image: -gtk-icontheme('audio-x-generic-symbolic');
                   background-size: 1.8rem;
                   background-position: center;
@@ -128,10 +108,7 @@ export default () =>
                         const tmpPath = `/tmp/ags-music-cover-${Date.now()}.png`;
                         Utils.writeFile(arr, tmpPath);
                         self.css = `
-                          min-width: 3.2rem;
-                          min-height: 2.8rem;
-                          margin: 0;
-                          padding: 0;
+                          min-width: 2.8rem;
                           margin-right: 0.75rem;
                           background-image: url("file://${tmpPath}");
                           background-size: cover;
@@ -146,14 +123,16 @@ export default () =>
                       });
                   } else {
                     self.css = `
-                      min-width: 3.2rem;
-                      min-height: 2.8rem;
-                      padding: 0;
-                      background-image: url("file://${coverPath}");
-                      background-size: cover;
-                      background-position: center;
-                      border-radius: 17px;
-                    `;
+                  min-width: 2.5rem;
+                  margin: 0;
+                  background-image: url("file://${coverPath}");
+                  background-size: 1.8rem;
+                  background-position: center;
+                  background-repeat: no-repeat;
+                  background-size: cover;
+                  border-radius: 18px;
+                  margin-right: 0.75rem;
+                `;
                   }
                 } else {
                   self.css = defaultCSS;
@@ -180,11 +159,11 @@ export default () =>
           children: [
             Box({
               vertical: true,
-              css: 'padding: 0.25rem 0;',
-              className: 'spacing-v-5',
+              // css: 'padding: 0.25rem 0;',
+              // className: 'spacing-v-5',
               children: [
                 Label({
-                  className: "bar-music-title txt-norm",
+                  className: "onSurfaceVariant txt-large",
                   truncate: "end",
                   xalign: 0,
                   justification: "left",
@@ -199,7 +178,7 @@ export default () =>
                   },
                 }),
                 Label({
-                  className: "bar-music-txt txt-small",
+                  className: "bar-music-txt txt-smallie",
                   truncate: "end",
                   xalign: 0,
                   justification: "left",
@@ -220,7 +199,7 @@ export default () =>
         Box({
           hexpand: true,
           hpack: 'end',
-          vpack: 'center',
+          // vpack: 'center',
           className: 'spacing-h-5',
           children: [
             Button({

@@ -498,7 +498,7 @@
     "animations": {
       "scroll": {
         "duration": 500,
-        "debounce": 1000
+        "debounce": 600
       }
     }
   },

@@ -22,6 +22,7 @@ import MediaIndicator from "./media.js";
 import Quote from "./quote.js";
 import WaveIcon from './wave.js';
 import ColorScheme from '../colorscheme.js';
+import ColorPicker from "./color_picker.js";
 import { changeWallpaperButton } from "./utils.js";
 // Cache for initialized modules
 const moduleCache = new Map();
@@ -128,9 +129,13 @@ export const InfoModules = {
     weather() { return WeatherWidget(); },
     logo(){return WaveIcon();},
     colorscheme() { return ColorScheme(); },
+    colorPicker() { return ColorPicker(); },
     quote() { 
         try {
-            return Quote();
+            return Widget.Box({
+                className: "bar-group-margin",
+                children: [Quote()],
+            });
         } catch (error) {
             console.error('Failed to create quote widget:', error);
             return null;

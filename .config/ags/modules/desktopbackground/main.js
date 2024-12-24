@@ -11,7 +11,7 @@ export default (monitor) =>
     // anchor: ['top', 'bottom', 'left', 'right'],
     layer: "background",
     exclusivity: "ignore",
-    visible: true,
+    visible: false,
     child: Widget.Overlay({
       child: WallpaperImage(monitor),
       // child: Widget.Box({}),

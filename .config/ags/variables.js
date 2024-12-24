@@ -143,9 +143,16 @@ globalThis["getString"] = getString;
 // load monitor shell modes from userOptions
 const initialMonitorShellModes = () => {
   const numberOfMonitors = Gdk.Display.get_default()?.get_n_monitors() || 1;
+  let defaultMode = 1;
+  try {
+    const config = JSON.parse(Utils.readFile(GLib.get_home_dir() + '/.ags/config.json'));
+    defaultMode = config.defaultBarMode || 1;
+  } catch (e) {
+    console.log('Failed to read default bar mode:', e);
+  }
   const monitorBarConfigs = [];
   for (let i = 0; i < numberOfMonitors; i++) {
-    monitorBarConfigs.push(1); // Start with mode1 (floating)
+    monitorBarConfigs.push(defaultMode); // Use the default mode from config
   }
   return monitorBarConfigs;
 };
@@ -165,7 +172,7 @@ globalThis["cycleMode"] = () => {
   const currentMode = currentShellMode.value[monitor];
   
   // Cycle through modes 1-6
-  const nextMode = (currentMode % 6) + 1;
+  const nextMode = (currentMode % 4) + 1;
   updateMonitorShellMode(currentShellMode, monitor, nextMode);
 };
 

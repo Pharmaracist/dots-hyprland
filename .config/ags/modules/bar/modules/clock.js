@@ -31,7 +31,7 @@ const BarClock = () =>
     },
     child: Widget.Box({
       vpack: "center",
-      className: "spacing-h-4 bar-clock-box",
+      className: "spacing-h-4 bar-clock-box txt-norm",
       children: [
         Widget.Label({
           className: "bar-time",

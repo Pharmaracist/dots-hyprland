@@ -30,9 +30,9 @@ export const NotificationIndicator = (notifCenterName = "sideright") => {
         }),
     child: Widget.Box({
       children: [
-        MaterialIcon("notifications", "larger"),
+        MaterialIcon("notifications", "large"),
         Widget.Label({
-          className: "txt-small titlefont",
+          className: "txt-small onSurfaceVariant titlefont",
           attribute: {
             unreadCount: 0,
             update: (self) => (self.label = `${self.attribute.unreadCount}`),
@@ -68,8 +68,8 @@ export const BluetoothIndicator = () =>
     className: "onSurfaceVariant",
     transitionDuration: userOptions.asyncGet().animations.durationSmall,
     children: {
-      false: MaterialIcon("bluetooth_disabled", "larger"),
-      true: MaterialIcon("bluetooth", "larger"),
+      false: MaterialIcon("bluetooth_disabled", "large"),
+      true: MaterialIcon("bluetooth", "large"),
     },
     setup: (self) =>
       self.hook(Bluetooth, (stack) => {
@@ -125,19 +125,19 @@ const NetworkWiredIndicator = () =>
     children: {
       fallback: SimpleNetworkIndicator(),
       unknown: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "wifi_off",
       }),
       disconnected: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "signal_wifi_off",
       }),
       connected: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "lan",
       }),
       connecting: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "settings_ethernet",
       }),
     },
@@ -169,35 +169,35 @@ const NetworkWifiIndicator = () =>
     transitionDuration: userOptions.asyncGet().animations.durationSmall,
     children: {
       disabled: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "wifi_off",
       }),
       disconnected: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "signal_wifi_off",
       }),
       connecting: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "settings_ethernet",
       }),
       0: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "signal_wifi_0_bar",
       }),
       1: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "network_wifi_1_bar",
       }),
       2: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "network_wifi_2_bar",
       }),
       3: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "network_wifi_3_bar",
       }),
       4: Widget.Label({
-        className: "txt-larger onSurfaceVariant   icon-material",
+        className: "txt-large onSurfaceVariant   icon-material",
         label: "signal_wifi_4_bar",
       }),
     },

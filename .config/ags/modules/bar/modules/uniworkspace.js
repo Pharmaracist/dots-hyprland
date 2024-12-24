@@ -317,14 +317,6 @@ const WorkspaceContents = (count = 10) => {
 }
 
 export default () => EventBox({
-    onScrollUp: () => Hyprland.messageAsync(`dispatch workspace -1`).catch(print),
-    onScrollDown: () => Hyprland.messageAsync(`dispatch workspace +1`).catch(print),
-    onMiddleClickRelease: () => Hyprland.messageAsync(`dispatch workspace previous`).catch(print),
-    onSecondaryClick: () => {
-        const wsOptions = userOptions.asyncGet().workspaces;
-        wsOptions.style = wsOptions.style === 'unicode' ? 'numeric' : 'unicode';
-        userOptions.set('workspaces', wsOptions);
-    },
     child: Box({
         homogeneous: true,
         className: 'bar-group-margin',

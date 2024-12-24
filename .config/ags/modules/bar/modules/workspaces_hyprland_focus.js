@@ -286,17 +286,7 @@ const WorkspaceContents = (count = 10) => {
 
 export default () =>
   EventBox({
-    onScrollUp: () =>
-      Hyprland.messageAsync(`dispatch workspace -1`).catch(print),
-    onScrollDown: () =>
-      Hyprland.messageAsync(`dispatch workspace +1`).catch(print),
-    onMiddleClick: () => toggleWindowOnAllMonitors("osk"),
-    onSecondaryClick: () => App.toggleWindow("overview"),
-    attribute: {
-      clicked: false,
-      ws_group: 0,
-    },
-    child: Box({
+      child: Box({
       homogeneous: true,
       // className: 'bar-group-margin',
       children: [

@@ -13,113 +13,8 @@ export const Dent = () => Widget.Box({});
 
 // Bar layout configurations for different modes
 export const BarLayouts = {
-    10: { // Pads
+    1:{ // Pads
         name: 'Pads',
-        css: 'min-height:4rem',
-        layout: (modules, monitor) => ({
-            start: [
-                Widget.Box({
-                    className: 'bar-group-pad bar-group-standalone',
-                    children: [modules.workspaces.normal()],
-                }),
-            ],
-            center: [
-                Widget.Box({
-                    className: 'bar-group-pad',
-                    children: [modules.InfoModules.title()],
-                }),
-            ],
-            end: [
-                Widget.Box({
-                    className: 'bar-group-pad bar-group-standalone',
-                    children: [modules.MediaModules.musicStuff()],
-                }),
-            ],
-        }),
-    },
-    1: { // Knocks with scrollable modules
-        name: 'Knocks',
-        layout: (modules) => ({
-            start: [
-               
-            ],
-            center: [
-                ScrollableContainer({
-                    name: 'media',
-                    sets: [
-                        [Widget.Box({
-                            css:`min-width:30rem;`,
-                            className: 'spacing-h-15 bar-knocks padding-rl-15',
-                            children: [modules.MediaModules.musicStuff()],
-                        })],
-                        [Widget.Box({
-                            css:`min-width:30rem;`,
-                            className: 'bar-knocks spacing-h-15 padding-rl-15',
-                            children: [modules.InfoModules.logo(), modules.InfoModules.quote()],
-                        })],
-                        [Widget.Box({
-                            css:`min-width:30rem;`,
-                            className: 'bar-knocks spacing-h-15',
-                            children: [
-                                Widget.Box({
-                                    hexpand: true,
-                                    hpack: 'center',
-                                    className: 'spacing-h-5',
-                                    children: [
-                                        modules.ControlModules.wallpaper(),
-                                        modules.InfoModules.colorscheme()
-                                    ]
-                                })
-                            ],
-                        })],
-                    ],
-                }),
-                Widget.Box({
-                    className: 'bar-knocks padding-rl-15',
-                    children: [modules.workspaces.normal()],
-                }),
-                // First scrollable for system info
-                
-                ScrollableContainer({
-                    name: 'system',
-                    sets: [
-                        [Widget.Box({
-                            css:`min-width:30rem;`,
-                            className: 'spacing-h-15 bar-knocks padding-rl-15',
-                            children: [
-                                modules.InfoModules.simpleClock(),
-                                modules.ControlModules.keyboard(),
-                                modules.InfoModules.indicators(),
-                                modules.StatusModules.resourcesBar(),
-                                Widget.Box({ className: 'padding-rl-10',child: modules.StatusModules.battery() }),
-                            ]
-                        })],
-                        [Widget.Box({
-                            css:`min-width:30rem; padding-right: 2rem;`,
-                            className: 'bar-knocks spacing-h-15',
-                            children: [Widget.Box({hexpand: true,hpack: 'center',children:[ modules.InfoModules.colorscheme() ]}), modules.ControlModules.wallpaper()],
-                        })],
-                    ],
-                }),
-                        
-               
-
-                // Second scrollable for media
-             
-            ],
-            end: [
-            ],
-        }),
-    },
-    7: { // Pads
-        name: 'Pads',
-        className: 'bar-nothing',
-        corners: {
-            topLeft: true,
-            topRight: true,
-            bottomLeft: false,
-            bottomRight: false,
-        },
         layout: (modules, monitor) => ({
             start: [
                 Widget.Box({
@@ -157,12 +52,6 @@ export const BarLayouts = {
                 Widget.Box({
                     className: 'bar-round-padding',
                     children: [
-                        modules.StatusModules.systemResources(),
-                    ],
-                }),
-                Widget.Box({
-                    className: 'bar-round-padding',
-                    children: [
                         modules.InfoModules.indicators(),
                     ],
                 }),
@@ -170,114 +59,111 @@ export const BarLayouts = {
             ],
         }),
     },
-    4: { // Floating
-        name: 'Floating',
-        className: 'bar-floating spacing-h-15',
-        css: "min-height:3.2rem",
-      
+    2: { // Knocks with scrollable modules
+        name: 'Knocks',
         layout: (modules) => ({
             start: [
-                modules.CornerModules.topleft(),
-                modules.StatusModules.battery(),
-                modules.workspaces.normal(),
-                modules.MediaModules.mediaIndicator(),
+                Widget.Box({  
+                    vpack: "center",
+                    className: 'start-widget',
+                    children: [modules.InfoModules.logo(),modules.InfoModules.windowTitle()],
+                }),
             ],
             center: [
-                modules.InfoModules.title(),
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            css:`min-width:20rem;`,
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [modules.MediaModules.musicStuff()],
+                        })],
+                        [Widget.Box({
+                            css:`min-width:20rem;`,
+                            hexpand: true,
+                            hpack: 'center',
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [ modules.InfoModules.quote()],
+                        })],
+                        [Widget.Box({
+                            css:`min-width:20rem;`,
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [
+                                Widget.Box({
+                                    hexpand: true,
+                                    hpack: 'center',
+                                    className: 'spacing-h-10',
+                                    children: [
+                                        modules.ControlModules.shortcuts(),
+                                        modules.ControlModules.toggles()
+                                    ]
+                                })
+                            ],
+                        })],
+                    ],
+                }),
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            css:`min-width:14rem;`,
+                            hexpand: true,
+                            halign: 'center',
+                            className: 'spacing-h-5 bar-knocks padding-rl-15',
+                            children: [
+                                modules.InfoModules.weather(),
+
+
+                            ],
+                        })],
+                        [Widget.Box({
+                            css:`min-width:16rem;`,
+                            hexpand: true,
+                            hpack: 'center',
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [modules.workspaces.normal()],
+                        })],
+                    ],
+                }),
+               
+                ScrollableContainer({
+                    name: 'tezy',
+                    sets: [
+                        [Widget.Box({
+                            css:`min-width:10rem;`,
+                            className: 'spacing-h-15 bar-knocks padding-rl-15',
+                            children: [
+                                modules.InfoModules.simpleClock(),
+                                modules.ControlModules.keyboard(),
+                                modules.InfoModules.indicators(),
+                                modules.StatusModules.resourcesBar(),
+                                modules.StatusModules.battery(),
+                            ]
+                        })],
+                        [Widget.Box({
+                            css:`min-width:10rem; padding-right: 2rem;`,
+                            className: 'bar-knocks spacing-h-15',
+                            children: [Widget.Box({hexpand: true,hpack: 'center',children:[ modules.InfoModules.colorscheme() ]}), modules.ControlModules.wallpaper()],
+                        })],
+                    ],
+                }),
+                        
+               
+
+                // Second scrollable for media
+             
             ],
             end: [
-                modules.ControlModules.toggles(),
-                modules.InfoModules.clock(),
-                modules.CornerModules.topright(),
             ],
         }),
     },
-    2: { // Short
-        name: 'Short',
-        className: 'bar-floating-short',
-        css: "min-height:3.2rem",
-        corners: {
-            topLeft: false,
-            topRight: false,
-            bottomLeft: false,
-            bottomRight: false,
-        },
-        layout: (modules) => ({
-            start: [
-                modules.workspaces.focus(),
-            ],
-            center: [
-                modules.InfoModules.clock(),
-            ],
-            end: [
-                modules.InfoModules.indicators(),
-                modules.StatusModules.battery(),
-            ],
-        }),
-    },
-    3: { // Shorter
-        name: 'Shorter',
-        className: 'bar-floating-shorter',
-        css: "min-height:3.2rem",
-        corners: {
-            topLeft: false,
-            topRight: false,
-            bottomLeft: false,
-            bottomRight: false,
-        },
-        layout: (modules) => ({
-            start: [
-                modules.StatusModules.battery(),
-                Separator(),
-                modules.ControlModules.shortcuts(),
-            ],
-            center: [
-                modules.workspaces.focus(),
-            ],
-            end: [
-                modules.InfoModules.indicators(),
-                modules.InfoModules.simpleClock({className:"icon-nerd sec-txt",}),
-            ],
-        }),
-    },
-    5: { // Normal
-        name: 'Normal',
-        number: 1,
+    3: { // Normal
+        name: 'normal',
         className: 'bar-bg',
-        corners: {
-            topLeft: true,
-            topRight: true,
-            bottomLeft: false,
-            bottomRight: false,
-        },
+        css:"min-height:2.23rem",
         layout: (modules) => ({
             start: [
-                modules.CornerModules.topleft(),
                 modules.InfoModules.windowTitle(),
-            ],
-            center: [
-                modules.InfoModules.clock(),
-            ],
-            end: [
-                modules.StatusModules.battery(),
-                modules.StatusModules.system(),
-                modules.CornerModules.topright(),
-            ],
-        }),
-    },
-    6: { // floatnorm
-        name: 'Minimal',
-        className: 'bar-floating-short',
-        css:"min-height:2.8rem",
-        corners: {
-            topLeft: false,
-            topRight: false,
-            bottomLeft: false,
-            bottomRight: false,
-        },
-        layout: (modules) => ({
-            start: [
-                modules.InfoModules.title(),
             ],
             center: [
                 modules.MediaModules.music(),
@@ -289,32 +175,104 @@ export const BarLayouts = {
             ],
         }),
     },
-    8: { // Scrollable
-        name: 'Scrollable',
-        className: 'bar-scrollable',
-        layout: (modules) => {
-            const ModuleSet1 = [
-                modules.InfoModules.simpleClock(),
-                modules.ControlModules.keyboard(),
-                modules.InfoModules.indicators(),
-                modules.StatusModules.battery(),
-            ];
-
-            const ModuleSet2 = [
-                modules.InfoModules.quote(),
-
-            ];
-
-            return {
-                start: [],
-                center: [
-                    ScrollableContainer({
-                        sets: [ModuleSet1, ModuleSet2],
-                    }),
+    4: { // Minimal
+        name: 'Minimal',
+        className: 'bar-floating-short',
+        css:"min-height:2.71rem",
+        layout: (modules) => ({
+            start: [    ScrollableContainer({
+                name: 'media',
+                sets: [
+                    [Widget.Box({
+                        hexpand: true,
+                        halign: 'center',
+                        children: [
+                            modules.StatusModules.battery(),
+                        ],
+                    })],
+                    [Widget.Box({})],
                 ],
-                end: [],
-            };
-        },
+            }),
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            hexpand: true,
+                            halign: 'center',
+                            children: [
+                                modules.workspaces.normal(),
+                            ],
+                        })],
+                        [Widget.Box({
+                            hexpand: true,
+                            hpack: 'center',
+                            children: [modules.workspaces.focus()],
+                        })],
+                        [Widget.Box({
+                            hexpand: true,
+                            hpack: 'center',
+                            children: [modules.ControlModules.shortcuts()],
+                        })],
+                    ],
+                }),
+            ],
+            center: [
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            children: [
+                                modules.InfoModules.weather(),
+                            ],
+                        })],
+                        [Widget.Box({
+                            hpack:"center",
+                            hexpand:true,
+                            children: [modules.InfoModules.clock()],
+                        })],
+                        [Widget.Box({
+                            children: [modules.InfoModules.quote()],
+                        })],
+                        [Widget.Box({
+                            hexpand: true,
+                            hpack: 'center',
+                            children: [modules.InfoModules.colorPicker()],
+                        })],
+                        [Widget.Box({
+                            spacing:10,
+                            hpack:"center",
+                            hexpand:true,
+                            children: [modules.ControlModules.shortcuts(),modules.ControlModules.toggles()],
+                        })],
+                        Widget.Box({}),
+                    ],
+                }),
+            ],
+            end: [
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            children: [modules.StatusModules.tray()],
+                        })],
+                        [Widget.Box({
+                            children: [],
+                        })],
+                    ],
+                }),
+                ScrollableContainer({
+                    name: 'media',
+                    sets: [
+                        [Widget.Box({
+                            children: [modules.InfoModules.indicators()],
+                        })],
+                        [Widget.Box({
+                            children: [],
+                        })],
+                    ],
+                }),
+            ],
+        }),
     },
 };
 

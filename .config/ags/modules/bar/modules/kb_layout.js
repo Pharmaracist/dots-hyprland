@@ -23,7 +23,7 @@ const createKeyboardWidget = () => {
         const label = lang ? lang.layout.toUpperCase() : layout.toUpperCase();
         acc[layout] = Widget.Label({ 
             label,
-            className: 'txt-small sec-txt txt-bold',
+            className: 'txt-small onSurfaceVariant',
             hpack: 'center',
             vpack: 'center',
             justify: 'center'
@@ -32,7 +32,7 @@ const createKeyboardWidget = () => {
     }, { 
         "unknown": Widget.Label({ 
             label: "?",
-            className: 'txt-small sec-txt txt-bold',
+            className: 'txt-small onSurfaceVariant',
             hpack: 'center',
             vpack: 'center',
             justify: 'center'
@@ -72,16 +72,15 @@ const createKeyboardWidget = () => {
         homogeneous: false,
         spacing: 4,
         children: [
-            Widget.Box({
-                hpack: 'center',
-                vpack: 'center',
-                child: Widget.Icon({
-                    icon: 'keyboard',
-                    className: 'txt-norm material-icon',
-                    size: 20,
-                    vpack: 'center'
-                })
-            }),
+            // Widget.Box({
+            //     hpack: 'center',
+            //     // vpack: 'center',
+            //     child: Widget.Label({
+            //         label: 'keyboard_command_key',
+            //         className: 'txt-norm onSurfaceVariant icon-material',
+            //         // vpack: 'center'
+            //     })
+            // }),
             Widget.Box({
                 hpack: 'center',
                 vpack: 'center',

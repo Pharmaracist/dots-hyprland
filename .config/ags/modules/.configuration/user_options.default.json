@@ -1,27 +1,28 @@
 {
   "enabled": true,
-  "opacity": 1,
+  "opacity": 0,
+  "defaultBarMode": 1,
   "modules": {
     "bar": true,
-    "dock": true,
+    "dock": false,
     "sideleft": true,
     "sideright": true,
     "overview": true,
     "cheatsheet": true,
-    "indicators": true,
-    "osd": true,
+    "indicators": false,
+    "osd": false,
     "powermenu": true,
-    "settings": true,
+    "settings": false,
     "session": true,
     "colorscheme": true,
     "screencorners": true,
-    "desktopbackground": true,
+    "desktopbackground": false,
     "wallselect": true,
-    "onscreenkeyboard": true,
-    "crosshair": true,
+    "onscreenkeyboard": false,
+    "crosshair": false,
     "notifications": true,
-    "weather": true,
-    "system": true,
+    "weather": false,
+    "system": false,
     "media": true,
     "clock": true,
     "workspaces": true,
@@ -36,7 +37,7 @@
   },
   "ai": {
     "defaultGPTProvider": "openrouter",
-    "onSearch": "gemini",
+    "onSearch": "openrouter",
     "defaultTemperature": 0.9,
     "enhancements": true,
     "useHistory": true,
@@ -63,7 +64,7 @@
     "layerSmoke": false,
     "layerSmokeStrength": 0.2,
     "barRoundCorners": 0,
-    "fakeScreenRounding": 1,
+    "fakeScreenRounding": 0,
     "visualizer": {},
     "profilePhoto": "",
     "theme": {
@@ -195,15 +196,13 @@
     "pages": {
       "order": [
         "apis",
-        "tools",
-        "github"
+        "tools"
       ],
       "apis": {
         "order": [
-          "gemini",
           "gpt",
           "translater",
-          "ytmusic"
+          "quran"
         ]
       }
     },
@@ -276,7 +275,7 @@
     "updateInterval": 900000
   },
   "workspaces": {
-    "shown": 9,
+    "shown": 10,
     "labels": {
       "1": "一",
       "2": "二",
@@ -289,12 +288,12 @@
       "9": "九",
       "10": "十"
     },
-    "numeric_style": "numeric",
+    "numeric_style": "unicode",
     "defaultLabel": "•",
-    "activeWorkspaceStyle": "normal",
+    "activeWorkspaceStyle": "unicode",
     "focus": 6,
     "enabled": true,
-    "style": "slide",
+    "style": "unicode",
     "duration": 200
   },
   "keybinds": {
@@ -477,7 +476,8 @@
       "heroic-games-launcher",
       "org.gnome.Nautilus",
       "chromium",
-      "visual studio code"
+      "visual studio code",
+      "windsurf"
     ],
     "layer": "top",
     "monitorExclusivity": true,

@@ -20,10 +20,10 @@ class AudioVisualizerService extends Service {
         
         // Set default config
         this.#config = {
-            bars: 30,
-            framerate: 30,
+            bars: 40,
+            framerate: 75,
             sensitivity: 100,
-            mode: 'scientific',
+            mode: 'waves',
             channels: 'mono',
             smoothing: 0.85,
             noise_reduction: 0.85,
@@ -111,8 +111,74 @@ noise_reduction = ${this.#config.noise_reduction}
 11=1
 12=1
 13=1
-14=1.2 
+14=1
 15=1
+16=1
+17=1
+18=1
+19=1
+20=1
+21=1
+22=1
+23=1
+24=1
+25=1
+26=1
+27=1
+28=1
+29=1
+30=1
+31=1
+32=1
+33=1
+34=1
+35=1
+36=1
+37=1
+38=1
+39=1
+40=1
+41=1
+42=1
+43=1
+44=1
+45=1
+46=1
+47=1
+48=1
+49=1
+50=1
+51=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 `
         Utils.writeFile(config, configPath)
 

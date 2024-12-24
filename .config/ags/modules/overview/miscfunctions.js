@@ -6,6 +6,11 @@ import Todo from "../../services/todo.js";
 import { darkMode } from '../.miscutils/system.js';
 import Timer from '../../services/timers.js';
 import Media from '../../services/media.js';
+import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
+import { currentShellMode } from '../../variables.js';
+import userOptions from '../.configuration/user_options.js';
+
+const USER_CONFIG_FILE = GLib.get_home_dir() + '/.ags/config.json';
 
 export const hasUnterminatedBackslash = str => /\\+$/.test(str);
 
@@ -804,14 +809,14 @@ if results:
                 globalThis.listModules();
             }
             else if (cmd === 'enable' && module) {
-                if (!globalThis.config.value.modules?.[module]) {
+                if (!userOptions.value.modules?.[module]) {
                     globalThis.toggleModule(module);
                 } else {
                     execAsync(['notify-send', 'Module Manager', `${module} is already enabled`]).catch(print);
                 }
             }
             else if (cmd === 'disable' && module) {
-                if (globalThis.config.value.modules?.[module]) {
+                if (userOptions.value.modules?.[module]) {
                     globalThis.toggleModule(module);
                 } else {
                     execAsync(['notify-send', 'Module Manager', `${module} is already disabled`]).catch(print);
@@ -824,6 +829,91 @@ if results:
                 execAsync(['notify-send', 'Module Manager', 'Usage:\n>module list\n>module enable <name>\n>module disable <name>\n>module toggle <name>']).catch(print);
             }
         },
+        '>bar': () => {
+            const barModes = {
+                'pads': 1,
+                'knocks': 2,
+                'normal': 3,
+                'minimal': 4,
+                'default': userOptions.value.defaultBarMode || 1
+            };
+
+            if (!args[0]) {
+                execAsync(['notify-send', 'Bar Mode', 
+                    'Usage: >bar [mode]\n' +
+                    'Modes:\n' +
+                    '  default    - Default mode (currently: ' + barModes.default + ')\n' +
+                    '  pads      - Pads mode\n' +
+                    '  knocks    - Knocks mode\n' +
+                    '  normal    - Normal mode\n' +
+                    '  minimal   - Minimal mode\n' +
+                    'Numbers 1-4 also work'
+                ]).catch(print);
+                return;
+            }
+
+            const input = args[0].toLowerCase();
+            let mode;
+
+            if (barModes[input] !== undefined) {
+                mode = barModes[input];
+            } else {
+                mode = parseInt(input);
+            }
+
+            if (mode >= 1 && mode <= 4) {
+                const monitor = Hyprland.active.monitor.id || 0;
+                const newValue = [...currentShellMode.value];
+                newValue[monitor] = mode;
+                currentShellMode.value = newValue;
+                const modeName = Object.entries(barModes).find(([name, num]) => num === mode)?.[0] || 'unknown';
+                execAsync(['notify-send', 'Bar Mode', `Switched to ${modeName} mode`]).catch(print);
+            } else {
+                execAsync(['notify-send', 'Bar Mode', 'Invalid mode. Use >bar to see available modes.']).catch(print);
+            }
+        },
+        '>bard': () => {
+            if (!args[0]) {
+                execAsync(['notify-send', 'Default Bar Mode', 
+                    'Usage: >bard [1-4]\n' +
+                    'Current default: ' + (userOptions.value.defaultBarMode || 1) + '\n\n' +
+                    '1: Pads\n' +
+                    '2: Knocks\n' +
+                    '3: Normal\n' +
+                    '4: Minimal'
+                ]).catch(print);
+                return;
+            }
+
+            const newDefault = parseInt(args[0]);
+            if (newDefault >= 1 && newDefault <= 4) {
+                // Update the value
+                userOptions.value = {
+                    ...userOptions.value,
+                    defaultBarMode: newDefault
+                };
+
+                // Save to config file
+                try {
+                    Utils.writeFile(
+                        JSON.stringify(userOptions.value, null, 2),
+                        USER_CONFIG_FILE
+                    );
+                    
+                    // Switch to the new default mode immediately
+                    const monitor = Hyprland.active.monitor.id || 0;
+                    const newValue = [...currentShellMode.value];
+                    newValue[monitor] = newDefault;
+                    currentShellMode.value = newValue;
+                    
+                    execAsync(['notify-send', 'Default Bar Mode', `Set and switched to default mode ${newDefault}`]).catch(print);
+                } catch (e) {
+                    execAsync(['notify-send', 'Default Bar Mode', 'Failed to save config: ' + e.message]).catch(print);
+                }
+            } else {
+                execAsync(['notify-send', 'Default Bar Mode', 'Invalid mode. Use a number between 1-4.']).catch(print);
+            }
+        },
     };
 
     commands[cmd]?.();
@@ -832,7 +922,7 @@ if results:
 export const execAndClose = (command, terminal) => {
     App.closeWindow('overview');
     if (terminal) {
-        execAsync(['bash', '-c', `${userOptions.asyncGet().apps.terminal} fish -C "${command}"`, '&']).catch(print);
+        execAsync(['bash', '-c', `${userOptions.value.apps.terminal} fish -C "${command}"`, '&']).catch(print);
     } else {
         execAsync(command).catch(print);
     }

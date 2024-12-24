@@ -69,7 +69,7 @@ const Windows = () => {
   ];
 };
 
-const CLOSE_ANIM_TIME = 0; // Longer than actual anim time to make sure widgets animate fully
+const CLOSE_ANIM_TIME = 120; // Longer than actual anim time to make sure widgets animate fully
 const closeWindowDelays = {}; // For animations
 for (let i = 0; i < (Gdk.Display.get_default()?.get_n_monitors() || 1); i++) {
   closeWindowDelays[`osk${i}`] = CLOSE_ANIM_TIME;

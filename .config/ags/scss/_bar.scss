@@ -50,7 +50,7 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-knocks{
     @include large-rounding;
     // @include elevation2;
-    // border: 0.25px solid $outline;
+    border: 0.35px solid $outline;
     background-color: $layer0
 }
 .bar-floating {
@@ -66,7 +66,7 @@ $bar_ws_width_focus_active: 6.045rem;
     background-color: $layer0;
     @include elevation2;
     @include large-rounding;
-    margin: 8px 200px;
+    margin: 8px 120px;
     border-radius: 1.37rem;
     padding: 3px;
     -gtk-outline-radius: 10rem;
@@ -263,6 +263,7 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $battOnLayer2;
 }
 .bar-bat-circprog {
+    border:0.12rem solid $outline;
     @include fluent_decel_long;
     min-width: 0.23rem; // line width
     min-height: 2.1rem;
@@ -375,6 +376,7 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $cpuOnLayer1;
 }
 
+
 .bar-music-playstate {
     @include element_decel;
     min-height: 1.77rem;
@@ -409,14 +411,16 @@ $bar_ws_width_focus_active: 6.045rem;
     color: $musicOnLayer1;
 }
 
-.bar-music-art {
-    margin: 4px;
-    border: 1px solid $surfaceContainerHighest;
-    background-color: $surfaceContainerHighest;
-    border-radius: 8px;
-    min-width: 40px;
-    min-height: 40px;
-}
+// .bar-music-art {
+//     margin: 0;
+//     padding: 0 0.23rem;
+//     background-image: -gtk-icontheme('audio-x-generic-symbolic');
+//     background-size: 1.8rem;
+//     background-position: center;
+//     background-repeat: no-repeat;
+//     border-radius: 19px;
+//     margin-right: 0.75rem;
+// }
 
 .bar-music-extended-bg {
     border-radius: 1.364rem;
@@ -643,7 +647,7 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 .cava-module {
     .cava-container {
-        color: $primary;
+        color: $secondary;
         padding-bottom: 0.05rem;
     }
 
@@ -796,37 +800,26 @@ revealer {
 
 // Resource module styles
 .resourcebar-box {
-    padding: 0.05rem;
-    margin: 0.05rem;
+    // padding: 0.05rem;
+    // margin: 0.05rem;
 }
 
 .bar-resources {
-    padding: 0;
-    margin: 0;
-    
-    .icon-material {
-        color: $onSurface;
-        margin-right: 0.35rem;
-        font-size: 1.1rem;
-        margin-top: 0.15rem; 
-    }
-    
     progressbar {
         @include element_decel;
-        min-height: 0.45rem;
-        margin-top: 0.15rem;
-        
+        // min-height: 0.2rem;
         trough {
-            min-height: 0.45rem;
-            min-width: 6rem;
+            @include full-rounding;
+            // min-height: 0.2rem;
+            min-width: 5rem;
             background-color: $surfaceVariant;
-            border-radius: 0.175rem;
+            
         }
         
         progress {
-            min-height: 0.45rem;
+            // min-height: 0.2rem;
             background-color: $primary;
-            border-radius: 0.175rem;
+            @include full-rounding;
         }
     }
     

@@ -8,21 +8,19 @@ import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 const Resource = (name, icon, command) => {
     return Box({
         className: 'bar-resources',
-        hpack: 'center',
-        halign: 'center',
         vpack: 'center',
         children: [
-            MaterialIcon(icon, 'norm', {
-                className: 'icon-material',
-                hpack: 'center',
+            MaterialIcon(icon, 'smallie', {
+                className: 'onSurfaceVariant icon-material',
+                css: 'margin-right: 0.35rem;',
                 vpack: 'center',
             }),
             Box({
                 hexpand: true,
-                hpack: 'center',
                 vpack: 'center',
                 child: ProgressBar({
                     className: 'resourcebar-progress',
+                    // css: 'margin: -0.2rem 0;',
                     vertical: false,
                     setup: (self) => self.poll(2000, () => {
                         Utils.execAsync(['bash', '-c', command])
@@ -42,7 +40,7 @@ const Resource = (name, icon, command) => {
 const ResourcesWidget = () => Box({
     className: 'resourcebar-box',
     vertical: true,
-    hpack: 'center',
+    vpack: 'center',
     children: [
         Resource(
             'CPU',

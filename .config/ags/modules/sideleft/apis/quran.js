@@ -51,7 +51,7 @@ const WelcomeMessage = () => Box({
                     ],
                 }),
                 Label({
-                    className: 'quran-arabic-text txt-bold',
+                    className: 'quran-arabic-text',
                     css: 'font-size: 2.7rem;',
                     label: 'القرآن الكريم',
                     justification: 'center',
@@ -650,15 +650,8 @@ export const quranCommands = Box({
             setup: setupCursorHover,
             label: 'Show Surahs',
         }),
-        // Box({ hexpand: true }),
-        Button({
-            className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
-            onClicked: toggleSidebarWidth,
-            setup: setupCursorHover,
-            label: isWideSidebar.bind('value').transform(wide => 
-                wide ? 'Narrow' : 'Wide'
-            ),
-        }),
+         Box({ hexpand: true }),
+   
         Button({
             className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
             onClicked: clearChat,

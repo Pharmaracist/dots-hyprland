@@ -44,7 +44,7 @@ export default async () => {
 
         const appIcon = Widget.Icon({
             className: 'app-icon',
-            size: 16,
+            size: 24,
             setup: (self) => self.hook(Hyprland.active.client, () => {
                 const classname = Hyprland.active.client.class;
                 const icon = findAppIcon(classname);
@@ -85,18 +85,18 @@ export default async () => {
         return Widget.EventBox({
             onScrollUp: () => handleScroll(1),
             onScrollDown: () => handleScroll(-1),
-            onPrimaryClick: () => App.toggleWindow('overview'),
+            onPrimaryClick: () => App.toggleWindow('sideleft'),
             child: Widget.Box({
                 homogeneous: false,
                 className: 'bar-space-button',
-                spacing: 8,
+                spacing: 10,
                 children: [
                     Widget.Box({ className: 'bar-corner-spacing' }),
                     Widget.Box({
                         className: 'bar-wintitle',
-                        spacing: 8,
+                        spacing: 10,
                         children: [
-                            appIcon,
+                            // appIcon,
                             Widget.Box({
                                 vertical: true,
                                 spacing: 2,
