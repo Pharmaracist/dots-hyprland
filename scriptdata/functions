@@ -19,7 +19,7 @@ function v() {
       echo "  e = Exit now"
       echo "  s = Skip this command (NOT recommended - your setup might not work correctly)"
       echo "  yesforall = Yes and don't ask again; NOT recommended unless you really sure"
-      read -p "====> " p
+      read -p "Choose an option: " p
       case $p in
         [yY]) echo -e "\e[34mOK, executing...\e[0m" ;break ;;
         [eE]) echo -e "\e[34mExiting...\e[0m" ;exit ;break ;;

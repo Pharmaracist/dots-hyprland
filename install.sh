@@ -41,10 +41,10 @@ startask () {
 
   printf '\n'
   printf 'Do you want to confirm every time before a command executes?\n'
-  printf '  y = Yes, ask me before executing each of them. (DEFAULT)\n'
-  printf '  n = No, just execute them automatically.\n'
-  printf '  a = Abort.\n'
-  read -p "====> " p
+  printf '  y = Yes, ask me before executing each command (DEFAULT)\n'
+  printf '  n = No, execute commands automatically\n'
+  printf '  a = Abort installation\n'
+  read -p "Choose an option: " p
   case $p in
     n) ask=false ;;
     a) exit 1 ;;
