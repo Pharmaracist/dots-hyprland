@@ -66,7 +66,10 @@ const pinButton = Button({
 })
 
 export const WidgetContent = (ORDER) => {
-    const CONTENTS = ORDER.map((tabName) => SIDEBARTABS[tabName]);
+    // Filter out any tab names that don't exist in SIDEBARTABS
+    const validTabs = ORDER.filter(tabName => SIDEBARTABS[tabName]);
+    const CONTENTS = validTabs.map((tabName) => SIDEBARTABS[tabName]);
+    
     return TabContainer({
         icons: CONTENTS.map((item) => item.materialIcon),
         names: CONTENTS.map((item) => item.friendlyName),

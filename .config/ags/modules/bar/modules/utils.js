@@ -25,7 +25,7 @@ const createNerdButton = ({ name, icon, onClicked, onSecondaryClick }) => {
     vpack: "center",
     tooltipText: name,
     onClicked,
-    className: "icon-nerd sec-txt txt-title",
+    className: "icon-nerd sec-txt txt-norm",
     label: icon, // No need for template literal here
   };
   
@@ -66,8 +66,7 @@ const Shortcuts = () => {
 
   const unixporn = createUtilButton({
     name: "Unix Porn",
-    css:"font-size:1.8rem",
-    icon: "\udb81\udfea",
+    icon: "\udb81\udfea ",
     onClicked: () => Utils.execAsync(`windsurf ${App.configDir}`),
     onSecondaryClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
   });
@@ -80,13 +79,13 @@ const Shortcuts = () => {
 
   const gitHubButton = createNerdButton({
     name: "GitHub",
-    icon: "\uea84",
+    icon: "\uea84 ",
     onClicked: () => Utils.execAsync(`firefox --new-window github.com/pharmaracist`),
   });
 
   const yt = createNerdButton({
     name: "YT",
-    icon: "\uf166",
+    icon: "\uf166 ",
     onClicked: () => Utils.execAsync(`firefox --new-window youtube.com`),
   });
 
@@ -117,13 +116,14 @@ const Shortcuts = () => {
     children: [
       geminiScreenshotButton(),
       yt,
-      agsTweaksButton,
       gitHubButton,
       unixporn,
+      // Widget.Label({label: "  "}),
       collage,
-      // screenSnipButton,
+      agsTweaksButton,
+      screenSnipButton,
       colorPickerButton,
-      changeWallpaperButton(),
+      // changeWallpaperButton(),
     ],
   });
 

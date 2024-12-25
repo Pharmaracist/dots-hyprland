@@ -124,7 +124,7 @@ install-local-pkgbuild() {
 }
 
 # Install core dependencies from the meta-packages
-metapkgs=(./arch-packages/illogical-impulse-{audio,backlight,basic,fonts-themes,gnome,gtk,portal,python,screencapture,widgets})
+metapkgs=(./arch-packages/illogical-impulse-{audio,backlight,basic,fonts-themes,gnome,gtk,portal,python,screencapture,widgets,extras,extras-aur})
 metapkgs+=(./arch-packages/illogical-impulse-ags)
 metapkgs+=(./arch-packages/illogical-impulse-microtex-git)
 [[ -f /usr/share/icons/Bibata-Modern-Classic/index.theme ]] || \
@@ -313,6 +313,15 @@ case $SKIP_WALLPAPERS in
     v rsync -av "Wallpapers/Lock.jpg" "$HOME/Pictures/Wallpapers/" 
     ;;
 esac
+
+# Set up Spotify permissions and customization
+echo -e "\e[34m[$0]: Setting up Spotify permissions and Spicetify...\e[0m"
+v sudo chmod a+wr /opt/spotify
+v sudo chmod a+wr /opt/spotify/Apps -R
+
+# Run Spicetify setup script
+v chmod +x ./scriptdata/spicetify.sh
+v ./scriptdata/spicetify.sh
 
 # some foldes (eg. .local/bin) should be processed separately to avoid `--delete' for rsync,
 # since the files here come from different places, not only about one program.

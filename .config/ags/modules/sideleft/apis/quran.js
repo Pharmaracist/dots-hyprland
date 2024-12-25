@@ -593,14 +593,14 @@ surahListRevealer = Revealer({
     vexpand: false,
     child: surahListContainer,
     setup: (revealer) => {
-        revealer.hook(Widget, (self, visible) => {
-            if (!visible && self.revealChild) {
+        revealer.connect('notify::child-revealed', (self) => {
+            if (!self.child_revealed && self.revealChild) {
                 self.revealChild = false;
                 if (isWideSidebar.value) {
                     toggleSidebarWidth();
                 }
             }
-        }, 'visible');
+        });
     },
 });
 

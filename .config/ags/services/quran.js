@@ -159,9 +159,9 @@ class QuranService extends Service {
 
         try {
             // Create cache directory if it doesn't exist
-            const cacheDir = `${Utils.CACHE_DIR}/quran`;
+            const cacheDir = `${GLib.get_user_cache_dir()}/ags/quran`;
             console.log('Creating cache directory:', cacheDir);
-            Utils.mkdirSync(cacheDir);
+            Utils.exec(`mkdir -p "${cacheDir}"`);
 
             // Get complete Quran in one request
             const url = `${this._baseUrl}/quran/ar.asad`;
@@ -204,9 +204,9 @@ class QuranService extends Service {
             console.log('Successfully loaded all verses:', this._verses.length);
             
             // Cache the verses to a file
-            const cachePath = `${Utils.CACHE_DIR}/quran/verses.json`;
+            const cachePath = `${GLib.get_user_cache_dir()}/ags/quran/verses.json`;
             console.log('Writing cache to:', cachePath);
-            await Utils.writeFile(JSON.stringify(allVerses), cachePath);
+            Utils.writeFile(JSON.stringify(allVerses), cachePath);
             console.log('Cache written successfully');
 
             return true;
@@ -219,14 +219,12 @@ class QuranService extends Service {
 
     async _loadVersesFromCache() {
         try {
-            const cachePath = `${Utils.CACHE_DIR}/quran/verses.json`;
+            const cachePath = `${GLib.get_user_cache_dir()}/ags/quran/verses.json`;
             console.log('Checking cache at:', cachePath);
-            const cacheExists = await Utils.fileExists(cachePath);
-            console.log('Cache exists:', cacheExists);
             
-            if (cacheExists) {
+            if (Utils.readFile(cachePath)) {
                 console.log('Loading verses from cache');
-                const cacheContent = await Utils.readFile(cachePath);
+                const cacheContent = Utils.readFile(cachePath);
                 console.log('Cache content length:', cacheContent.length);
                 
                 if (!cacheContent) {

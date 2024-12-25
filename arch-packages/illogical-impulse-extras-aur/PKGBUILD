@@ -1,0 +1,12 @@
+pkgname=illogical-impulse-extras-aur
+pkgver=1.0
+pkgrel=1
+pkgdesc='Illogical Impulse Extra AUR Dependencies'
+arch=(any)
+license=(None)
+depends=(
+    spicetify-cli
+    spotify
+    obsidian
+    python-pywalfox
+)

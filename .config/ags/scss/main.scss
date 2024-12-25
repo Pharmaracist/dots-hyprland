@@ -26,13 +26,13 @@
 @import "./session";
 @import "./notifications";
 @import "./wallpaper";
-@import "./audiofiles";  // Added audio files styling
+// @import "./audiofiles";  // Added audio files styling
 // @import "./prayertimes";
 // @import "./timers";
 // @import "./todo";
 
 // Music is put last as it might mess stuff up with pywal
-@import "./music";
+// @import "./music";
 
 // Classes for interaction
 .growingRadial {

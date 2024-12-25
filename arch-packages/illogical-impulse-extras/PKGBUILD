@@ -1,0 +1,24 @@
+pkgname=illogical-impulse-extras
+pkgver=1.0
+pkgrel=1
+pkgdesc='Illogical Impulse Extra Dependencies from Official Repositories'
+arch=(any)
+license=(None)
+depends=(
+    # Official repo packages
+    cava
+    ttf-font-awesome
+    python-pywal
+    ttc-iosevka
+    gvfs
+    mpv
+    mpd
+    gnome
+)
+optdepends=(
+    # AUR packages
+    'spicetify-cli: Spotify customization'
+    'spotify: Music streaming'
+    'obsidian: Note taking application'
+    'python-pywalfox: Pywal for Firefox'
+)
