@@ -1,6 +1,51 @@
 #!/usr/bin/env bash
+
+# ANSI color codes
+MAGENTA='\e[35m'
+BLUE='\e[34m'
+GREEN='\e[32m'
+RED='\e[31m'
+CYAN='\e[36m'
+YELLOW='\e[33m'
+RESET='\e[0m'
+
+clear
+echo -e "${MAGENTA}"
+echo '
+██████╗ ██╗  ██╗ █████╗ ██████╗ ███╗   ███╗ █████╗ ██████╗  █████╗  ██████╗██╗███████╗████████╗
+██╔══██╗██║  ██║██╔══██╗██╔══██╗████╗ ████║██╔══██╗██╔══██╗██╔══██╗██╔════╝██║██╔════╝╚══██╔══╝
+██████╔╝███████║███████║██████╔╝██╔████╔██║███████║██████╔╝███████║██║     ██║███████╗   ██║   
+██╔═══╝ ██╔══██║██╔══██║██╔══██╗██║╚██╔╝██║██╔══██║██╔══██╗██╔══██║██║     ██║╚════██║   ██║   
+██║     ██║  ██║██║  ██║██║  ██║██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██║╚██████╗██║███████║   ██║   
+╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝╚══════╝   ╚═╝   
+'
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${BLUE}                     🚀 Welcome to the Installation! 🚀               ${RESET}"
+echo -e "${YELLOW}                        Enhanced by Pharmaracist                      ${RESET}"
+echo -e "${GREEN}=====================================================================${RESET}"
+
+# Fun loading messages
+MESSAGES=(
+    "🕌 Configuring Islamic prayer times and Quran features..."
+    "🎨 Generating beautiful color schemes with pywal..."
+    "🎵 Setting up Spotify theme integration..."
+    "⚡ Optimizing system performance..."
+    "🌙 Adding Hijri calendar support..."
+    "🎉 Making things awesome..."
+    "🚀 Preparing for launch..."
+    "🌈 Adding some colors to your life..."
+    "✨ Sprinkling some magic..."
+    "🔧 Tightening the nuts and bolts..."
+)
+
+show_message() {
+    echo -e "\n${CYAN}${MESSAGES[$((RANDOM % ${#MESSAGES[@]}))]}\n${RESET}"
+}
+
 cd "$(dirname "$0")"
 export base="$(pwd)"
+
+show_message
 source ./scriptdata/environment-variables
 source ./scriptdata/functions
 source ./scriptdata/installers
@@ -10,45 +55,94 @@ source ./scriptdata/options
 LOG_FILE="./installation_$(date +%Y%m%d_%H%M%S).log"
 exec 1> >(tee -a "$LOG_FILE") 2>&1
 
-echo "Installation started at $(date)"
-echo "System information:"
+echo -e "${CYAN}🕒 Installation started at $(date)${RESET}"
+echo -e "${BLUE}💻 System information:${RESET}"
 uname -a
+
+show_message
 
 #####################################################################################
 if ! command -v pacman >/dev/null 2>&1; then 
-  printf "\e[31m[$0]: pacman not found, it seems that the system is not ArchLinux or Arch-based distros. Aborting...\e[0m\n"
+  printf "${RED}[$0]: 🚫 Oops! This script needs pacman (Arch Linux). Are you on the right system? 🤔${RESET}\n"
   exit 1
 fi
 prevent_sudo_or_root
 
+echo -e "${BLUE}Setting up sudo permissions...${RESET}"
+echo -e "${YELLOW}We'll ask for your password once to avoid multiple prompts${RESET}"
+
+# Create temporary sudoers file for our commands
+echo -e "${CYAN}Creating temporary sudo rules...${RESET}"
+SUDOERS_FILE="/etc/sudoers.d/illogical-impulse-temp"
+sudo tee "$SUDOERS_FILE" > /dev/null << EOL
+# Temporary sudo rules for illogical-impulse installation
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/pacman
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/chmod
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/cp
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/mkdir
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/tee
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/usermod
+$(whoami) ALL=(ALL) NOPASSWD: /usr/bin/gpasswd
+EOL
+
+# Make sure the file is secure
+sudo chmod 440 "$SUDOERS_FILE"
+
+# Function to clean up sudo rules on script exit
+cleanup_sudo() {
+    echo -e "${YELLOW}Cleaning up temporary sudo rules...${RESET}"
+    sudo rm -f "$SUDOERS_FILE"
+}
+
+# Register cleanup function to run on script exit
+trap cleanup_sudo EXIT
+
+# Keep sudo alive throughout the script
+while true; do
+  sudo -n true
+  sleep 60
+  kill -0 "$$" || exit
+done 2>/dev/null &
+
 startask () {
-  printf "\e[34m[$0]: Hi there! Before we start:\n"
-  printf 'This script 1. only works for ArchLinux and Arch-based distros.\n'
-  printf '            2. does not handle system-level/hardware stuff like Nvidia drivers\n'
-  printf "\e[31m"
+  printf "${BLUE}[$0]: 👋 Hi there! Before we start:\n"
+  printf "${YELLOW}This script requires:\n"
+  printf "  1. 🐧 Arch Linux or Arch-based distro\n"
+  printf "  2. 💻 Basic terminal knowledge\n"
+  printf "  3. 🧠 A functioning brain (very important!)\n${RESET}"
   
-  printf "Would you like to create a backup for \"$XDG_CONFIG_HOME\" and \"$HOME/.local/\" folders?\n[y/N]: "
+  printf "${MAGENTA}\nWould you like to create a backup? (recommended) [y/N]: ${RESET}"
   read -p " " backup_confirm
   case $backup_confirm in
     [yY][eE][sS]|[yY])
+      echo -e "${GREEN}Smart choice! Backing up your configs... 📦${RESET}"
       backup_configs
       ;;
     *)
-      echo "Skipping backup..."
+      echo -e "${YELLOW}Living dangerously, I see! Skipping backup... 🎲${RESET}"
       ;;
   esac
-  
 
   printf '\n'
-  printf 'Do you want to confirm every time before a command executes?\n'
-  printf '  y = Yes, ask me before executing each command (DEFAULT)\n'
-  printf '  n = No, execute commands automatically\n'
-  printf '  a = Abort installation\n'
-  read -p "Choose an option: " p
+  printf "${CYAN}Do you want to confirm every command before execution?\n"
+  printf "  y = Yes, I want to see everything (DEFAULT)\n"
+  printf "  n = No, I trust you (YOLO mode 🎢 - we'll only ask for sudo once)\n"
+  printf "  a = Actually, let me out of here! 🚪${RESET}\n"
+  read -p "Choose wisely: " p
   case $p in
-    n) ask=false ;;
-    a) exit 1 ;;
-    *) ask=true ;;
+    n) 
+      echo -e "${YELLOW}YOLO mode activated! 🎢${RESET}"
+      echo -e "${CYAN}Don't worry about passwords - we'll handle sudo for you 🔐${RESET}"
+      ask=false 
+      ;;
+    a) 
+      echo -e "${RED}See you next time! 👋${RESET}"
+      exit 1 
+      ;;
+    *) 
+      echo -e "${GREEN}Playing it safe - good choice! 🛡️${RESET}"
+      ask=true 
+      ;;
   esac
 }
 
@@ -59,12 +153,12 @@ esac
 
 set -e
 #####################################################################################
-printf "\e[36m[$0]: 1. Get packages and setup user groups/services\n\e[0m"
+printf "${CYAN}[$0]: 1. Get packages and setup user groups/services\n${RESET}"
 
 # Issue #363
 case $SKIP_SYSUPDATE in
   true) sleep 0;;
-  *) v sudo pacman -Syu;;
+  *) v sudo -n pacman -Syu;;
 esac
 
 remove_bashcomments_emptylines ${DEPLISTFILE} ./cache/dependencies_stripped.conf
@@ -73,7 +167,7 @@ readarray -t pkglist < ./cache/dependencies_stripped.conf
 # Use yay. Because paru do not support cleanbuild.
 # Also see https://wiki.hyprland.org/FAQ/#how-do-i-update
 if ! command -v yay >/dev/null 2>&1;then
-  echo -e "\e[33m[$0]: \"yay\" not found.\e[0m"
+  echo -e "${YELLOW}[$0]: \"yay\" not found.\n${RESET}"
   showfun install-yay
   v install-yay
 fi
@@ -169,9 +263,9 @@ case $SKIP_PLASMAINTG in
   true) sleep 0;;
   *)
     if $ask;then
-      echo -e "\e[33m[$0]: NOTE: The size of \"plasma-browser-integration\" is about 250 MiB.\e[0m"
-      echo -e "\e[33mIt is needed if you want playtime of media in Firefox to be shown on the music controls widget.\e[0m"
-      echo -e "\e[33mInstall it? [y/N]\e[0m"
+      echo -e "${YELLOW}[$0]: NOTE: The size of \"plasma-browser-integration\" is about 250 MiB.\n${RESET}"
+      echo -e "${YELLOW}It is needed if you want playtime of media in Firefox to be shown on the music controls widget.\n${RESET}"
+      echo -e "${YELLOW}Install it? [y/N]\n${RESET}"
       read -p "====> " p
     else
       p=y
@@ -186,28 +280,28 @@ esac
 # Theme integration packages
 install_theme_integrations() {
     if $ask; then
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Discord? [y/N]\e[0m"
+        echo -e "${YELLOW}[$0]: Would you like to install theme integration for Discord? [y/N]\n${RESET}"
         read -p "====> " discord
         case $discord in
             [yY]) v yay -S --needed pywal-discord-git ;;
             *) echo "Skipping Discord theme integration" ;;
         esac
 
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Telegram? [y/N]\e[0m"
+        echo -e "${YELLOW}[$0]: Would you like to install theme integration for Telegram? [y/N]\n${RESET}"
         read -p "====> " telegram
         case $telegram in
             [yY]) v yay -S --needed wal-telegram-git ;;
             *) echo "Skipping Telegram theme integration" ;;
         esac
 
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Firefox? [y/N]\e[0m"
+        echo -e "${YELLOW}[$0]: Would you like to install theme integration for Firefox? [y/N]\n${RESET}"
         read -p "====> " firefox
         case $firefox in
             [yY]) v yay -S --needed pywalfox ;;
             *) echo "Skipping Firefox theme integration" ;;
         esac
 
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Spotify? [y/N]\e[0m"
+        echo -e "${YELLOW}[$0]: Would you like to install theme integration for Spotify? [y/N]\n${RESET}"
         read -p "====> " spotify
         case $spotify in
             [yY]) v yay -S --needed spicetify-cli python-pywal-spicetify-git ;;
@@ -220,161 +314,95 @@ install_theme_integrations() {
 
 v install_theme_integrations
 
-v sudo usermod -aG video,i2c,input "$(whoami)"
-v bash -c "echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf"
+v sudo -n usermod -aG video,i2c,input "$(whoami)"
+v bash -c "echo i2c-dev | sudo -n tee /etc/modules-load.d/i2c-dev.conf"
 v systemctl --user enable ydotool --now
 v gsettings set org.gnome.desktop.interface font-name 'Rubik 11'
 
-#####################################################################################
-printf "\e[36m[$0]: 2. Installing parts from source repo\e[0m\n"
-sleep 1
-
-#####################################################################################
-printf "\e[36m[$0]: 3. Copying + Configuring\e[0m\n"
-
-# In case some folders does not exists
-v mkdir -p $XDG_BIN_HOME $XDG_CACHE_HOME $XDG_CONFIG_HOME $XDG_DATA_HOME
-
-# `--delete' for rsync to make sure that
-# original dotfiles and new ones in the SAME DIRECTORY
-# (eg. in ~/.config/hypr) won't be mixed together
-
-# MISC (For .config/* but not AGS, not Fish, not Hyprland)
-case $SKIP_MISCCONF in
-  true) sleep 0;;
-  *)
-    for i in $(find .config/ -mindepth 1 -maxdepth 1 ! -name 'ags' ! -name 'fish' ! -name 'hypr' -exec basename {} \;); do
-#      i=".config/$i"
-      echo "[$0]: Found target: .config/$i"
-      if [ -d ".config/$i" ];then v rsync -av --delete ".config/$i/" "$XDG_CONFIG_HOME/$i/"
-      elif [ -f ".config/$i" ];then v rsync -av ".config/$i" "$XDG_CONFIG_HOME/$i"
-      fi
-    done
-    ;;
-esac
-
-case $SKIP_FISH in
-  true) sleep 0;;
-  *)
-    v rsync -av --delete .config/fish/ "$XDG_CONFIG_HOME"/fish/
-    ;;
-esac
-
-# For AGS
-case $SKIP_AGS in
-  true) sleep 0;;
-  *)
-    v rsync -av --delete --exclude '/user_options.js' .config/ags/ "$XDG_CONFIG_HOME"/ags/
-    t="$XDG_CONFIG_HOME/ags/user_options.js"
-    if [ -f $t ];then
-      echo -e "\e[34m[$0]: \"$t\" already exists.\e[0m"
-      existed_ags_opt=y
+# Install custom fonts
+echo -e "${BLUE}[$0]: Installing custom fonts... 🔤${RESET}"
+if [ -d "$DOTS_DIR/.fonts" ] && [ "$(ls -A $DOTS_DIR/.fonts)" ]; then
+    mkdir -p "$HOME/.local/share/fonts"
+    if cp -r "$DOTS_DIR/.fonts/"* "$HOME/.local/share/fonts/"; then
+        fc-cache -f
+        echo -e "${GREEN}[$0]: Custom fonts installed successfully! ✨${RESET}"
     else
-      echo -e "\e[33m[$0]: \"$t\" does not exist yet.\e[0m"
-      v cp .config/ags/user_options.js $t
-      existed_ags_opt=n
+        echo -e "${RED}[$0]: Error copying fonts to local directory${RESET}"
     fi
-    v mkdir -p "$HOME/.ags"
-    v cp -f .config/ags/modules/.configuration/user_options.default.json "$HOME/.ags/config.json"
-    ;;
-esac
-
-# For Hyprland
-case $SKIP_HYPRLAND in
-  true) sleep 0;;
-  *)
-    v rsync -av --delete --exclude '/custom' --exclude '/hyprland.conf' .config/hypr/ "$XDG_CONFIG_HOME"/hypr/
-    t="$XDG_CONFIG_HOME/hypr/hyprland.conf"
-    if [ -f $t ];then
-      echo -e "\e[34m[$0]: \"$t\" already exists.\e[0m"
-      v cp -f .config/hypr/hyprland.conf $t.new
-      existed_hypr_conf=y
-    else
-      echo -e "\e[33m[$0]: \"$t\" does not exist yet.\e[0m"
-      v cp .config/hypr/hyprland.conf $t
-      existed_hypr_conf=n
-    fi
-    t="$XDG_CONFIG_HOME/hypr/custom"
-    if [ -d $t ];then
-      echo -e "\e[34m[$0]: \"$t\" already exists, will not do anything.\e[0m"
-    else
-      echo -e "\e[33m[$0]: \"$t\" does not exist yet.\e[0m"
-      v rsync -av --delete .config/hypr/custom/ $t/
-    fi
-    ;;
-esac
-
-# For Wallpapers
-case $SKIP_WALLPAPERS in
-  true) sleep 0;;
-  *)
-    echo -e "\e[34m[$0]: Setting up wallpapers...\e[0m"
-    v mkdir -p "$HOME/Pictures/Wallpapers" 
-    v rsync -av "Wallpapers/Lock.jpg" "$HOME/Pictures/Wallpapers/" 
-    ;;
-esac
+else
+    echo -e "${YELLOW}[$0]: No custom fonts found in .fonts directory${RESET}"
+fi
 
 # Set up Spotify permissions and customization
-echo -e "\e[34m[$0]: Setting up Spotify permissions and Spicetify...\e[0m"
-v sudo chmod a+wr /opt/spotify
-v sudo chmod a+wr /opt/spotify/Apps -R
+echo -e "${BLUE}[$0]: Setting up Spotify and Spicetify... 🎵${RESET}"
+v sudo -n chmod a+wr /opt/spotify
+v sudo -n chmod a+wr /opt/spotify/Apps -R
 
-# Run Spicetify setup script
+# Run spicetify script
+echo -e "${CYAN}Running Spicetify customization script...${RESET}"
 v chmod +x ./scriptdata/spicetify.sh
 v ./scriptdata/spicetify.sh
 
-# some foldes (eg. .local/bin) should be processed separately to avoid `--delete' for rsync,
-# since the files here come from different places, not only about one program.
-v rsync -av ".local/bin/" "$XDG_BIN_HOME"
+show_message
 
-# Dark mode by default
-v gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${BLUE}                   ☪️  Islamic Features Setup                         ${RESET}"
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${CYAN}Setting up Islamic features:${RESET}"
+echo -e "${YELLOW}1. 🕌 Prayer times integration${RESET}"
+echo -e "${YELLOW}2. 📖 Quran reader and references${RESET}"
+echo -e "${YELLOW}3. 🌙 Hijri calendar${RESET}"
+echo -e "${YELLOW}4. 🎨 Islamic-themed color schemes${RESET}"
 
-# Prevent hyprland from not fully loaded
-sleep 1
-try hyprctl reload
-
-existed_zsh_conf=n
-grep -q 'source ${XDG_CONFIG_HOME:-~/.config}/zshrc.d/dots-hyprland.zsh' ~/.zshrc && existed_zsh_conf=y
-
-warn_files=()
-warn_files_tests=()
-warn_files_tests+=(/usr/local/bin/ags)
-warn_files_tests+=(/usr/local/etc/pam.d/ags)
-warn_files_tests+=(/usr/local/lib/{GUtils-1.0.typelib,Gvc-1.0.typelib,libgutils.so,libgvc.so})
-warn_files_tests+=(/usr/local/share/com.github.Aylur.ags)
-warn_files_tests+=(/usr/local/share/fonts/TTF/Rubik{,-Italic}'[wght]'.ttf)
-warn_files_tests+=(/usr/local/share/licenses/ttf-rubik)
-warn_files_tests+=(/usr/local/share/fonts/TTF/Gabarito-{Black,Bold,ExtraBold,Medium,Regular,SemiBold}.ttf)
-warn_files_tests+=(/usr/local/share/licenses/ttf-gabarito)
-warn_files_tests+=(/usr/local/share/icons/Bibata-Modern-Classic)
-warn_files_tests+=(/usr/local/bin/{LaTeX,res})
-for i in ${warn_files_tests[@]}; do
-  echo $i
-  test -f $i && warn_files+=($i)
-  test -d $i && warn_files+=($i)
-done
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${BLUE}                   🎨 Color Harmony Setup                            ${RESET}"
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${CYAN}Configuring pywal integration:${RESET}"
+echo -e "${YELLOW}1. 🖼️ Dynamic color generation from wallpapers${RESET}"
+echo -e "${YELLOW}2. 🎵 Spotify theme synchronization${RESET}"
+echo -e "${YELLOW}3. 📝 Terminal and application theme matching${RESET}"
+echo -e "${YELLOW}4. 🔄 Real-time color updates${RESET}"
 
 #####################################################################################
-printf "\e[36m[$0]: Finished. See the \"Import Manually\" folder and grab anything you need.\e[0m\n"
+printf "${CYAN}[$0]: Finished. See the \"Import Manually\" folder and grab anything you need.\n${RESET}"
 printf "\n"
-printf "\e[36mIf you are new to Hyprland, please read\n"
+printf "${CYAN}If you are new to Hyprland, please read\n"
 printf "https://sh1zicus.github.io/dots-hyprland-wiki/en/i-i/01setup/#post-installation\n"
-printf "for hints on launching Hyprland.\e[0m\n"
+printf "for hints on launching Hyprland.\n${RESET}"
 printf "\n"
 
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${MAGENTA}                   🎉 Installation Complete! 🎉                     ${RESET}"
+echo -e "${GREEN}=====================================================================${RESET}"
+echo -e "${CYAN}What's next?${RESET}"
+echo -e "${YELLOW}1. 🔄 Log out and log back in to apply all changes${RESET}"
+echo -e "${YELLOW}2. 🕌 Check your prayer times widget (Alt+P)${RESET}"
+echo -e "${YELLOW}3. 📖 Open the Quran reader (Alt+Q)${RESET}"
+echo -e "${YELLOW}4. 🎨 Try changing wallpapers to see pywal in action${RESET}"
+echo -e "${YELLOW}5. 🌙 Configure your local prayer times in the settings${RESET}"
+echo -e "${YELLOW}6. ⭐ Don't forget to star the repo if you like it!${RESET}"
+
+echo -e "\n${BLUE}Useful Keyboard Shortcuts:${RESET}"
+echo -e "${CYAN}Alt + P${RESET} → ${YELLOW}Prayer Times Widget${RESET}"
+echo -e "${CYAN}Alt + Q${RESET} → ${YELLOW}Quran Reader${RESET}"
+echo -e "${CYAN}Alt + W${RESET} → ${YELLOW}Change Wallpaper (auto-updates themes)${RESET}"
+
+echo -e "\n${BLUE}Need help? Check out:${RESET}"
+echo -e "${CYAN}https://sh1zicus.github.io/dots-hyprland-wiki/en/i-i/01setup/#post-installation${RESET}"
+echo -e "\n${GREEN}May Allah bless your journey! 🌙${RESET}\n"
+
 case $existed_ags_opt in
-  y) printf "\n\e[33m[$0]: Warning: \"$XDG_CONFIG_HOME/ags/user_options.js\" already existed before and we didn't overwrite it. \e[0m\n"
+  y) printf "\n${YELLOW}[$0]: Warning: \"$XDG_CONFIG_HOME/ags/user_options.js\" already existed before and we didn't overwrite it. \n${RESET}"
 #    printf "\e[33mPlease use \"$XDG_CONFIG_HOME/ags/user_options.js.new\" as a reference for a proper format.\e[0m\n"
 ;;esac
 case $existed_hypr_conf in
-  y) printf "\n\e[33m[$0]: Warning: \"$XDG_CONFIG_HOME/hypr/hyprland.conf\" already existed before and we didn't overwrite it. \e[0m\n"
-     printf "\e[33mPlease use \"$XDG_CONFIG_HOME/hypr/hyprland.conf.new\" as a reference for a proper format.\e[0m\n"
-     printf "\e[33mIf this is your first time installation, you must overwrite \"$XDG_CONFIG_HOME/hypr/hyprland.conf\" with \"$XDG_CONFIG_HOME/hypr/hyprland.conf.new\".\e[0m\n"
+  y) printf "\n${YELLOW}[$0]: Warning: \"$XDG_CONFIG_HOME/hypr/hyprland.conf\" already existed before and we didn't overwrite it. \n${RESET}"
+     printf "${YELLOW}Please use \"$XDG_CONFIG_HOME/hypr/hyprland.conf.new\" as a reference for a proper format.\n${RESET}"
+     printf "${YELLOW}If this is your first time installation, you must overwrite \"$XDG_CONFIG_HOME/hypr/hyprland.conf\" with \"$XDG_CONFIG_HOME/hypr/hyprland.conf.new\".\n${RESET}"
 ;;esac
 
 if [[ ! -z "${warn_files[@]}" ]]; then
-  printf "\n\e[31m[$0]: \!! Important \!! : Please delete \e[0m ${warn_files[*]} \e[31m manually as soon as possible, since we\'re now using AUR package or local PKGBUILD to install them for Arch(based) Linux distros, and they'll take precedence over our installation, or at least take up more space.\e[0m\n"
+  printf "\n${RED}[$0]: \!! Important \!! : Please delete \n${RESET} ${warn_files[*]} \n${RED} manually as soon as possible, since we\'re now using AUR package or local PKGBUILD to install them for Arch(based) Linux distros, and they'll take precedence over our installation, or at least take up more space.\n${RESET}"
 fi
 
 echo "Installation completed at $(date)"

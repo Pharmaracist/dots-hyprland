@@ -12,7 +12,7 @@
 # export base="$(pwd)"
 
 install-yay() {
-  x sudo pacman -S --needed --noconfirm base-devel
+  x sudo -n pacman -S --needed --noconfirm base-devel
   x git clone https://aur.archlinux.org/yay-bin.git /tmp/buildyay
   x cd /tmp/buildyay
   x makepkg -o
@@ -43,10 +43,10 @@ install-Rubik (){
   try git init -b main
   try git remote add origin https://github.com/googlefonts/rubik.git
   x git pull origin main && git submodule update --init --recursive
-	x sudo mkdir -p /usr/local/share/fonts/TTF/
-	x sudo cp fonts/variable/Rubik*.ttf /usr/local/share/fonts/TTF/
-	x sudo mkdir -p /usr/local/share/licenses/ttf-rubik/
-	x sudo cp OFL.txt /usr/local/share/licenses/ttf-rubik/LICENSE
+	x sudo -n mkdir -p /usr/local/share/fonts/TTF/
+	x sudo -n cp fonts/variable/Rubik*.ttf /usr/local/share/fonts/TTF/
+	x sudo -n mkdir -p /usr/local/share/licenses/ttf-rubik/
+	x sudo -n cp OFL.txt /usr/local/share/licenses/ttf-rubik/LICENSE
   x fc-cache -fv
   x gsettings set org.gnome.desktop.interface font-name 'Rubik 11'
   x cd $base
@@ -59,10 +59,10 @@ install-Gabarito (){
   try git init -b main
   try git remote add origin https://github.com/naipefoundry/gabarito.git
   x git pull origin main && git submodule update --init --recursive
-	x sudo mkdir -p /usr/local/share/fonts/TTF/
-	x sudo cp fonts/ttf/Gabarito*.ttf /usr/local/share/fonts/TTF/
-	x sudo mkdir -p /usr/local/share/licenses/ttf-gabarito/
-	x sudo cp OFL.txt /usr/local/share/licenses/ttf-gabarito/LICENSE
+	x sudo -n mkdir -p /usr/local/share/fonts/TTF/
+	x sudo -n cp fonts/ttf/Gabarito*.ttf /usr/local/share/fonts/TTF/
+	x sudo -n mkdir -p /usr/local/share/licenses/ttf-gabarito/
+	x sudo -n cp OFL.txt /usr/local/share/licenses/ttf-gabarito/LICENSE
   x fc-cache -fv
   x cd $base
 }
@@ -76,8 +76,8 @@ install-bibata (){
   # Use axel because `curl -O` always downloads a file with 0 byte size, idk why
   x axel https://github.com/ful1e5/Bibata_Cursor/releases/latest/download/$file
   tar -xf $file
-  x sudo mkdir -p /usr/local/share/icons
-  x sudo cp -r $name /usr/local/share/icons
+  x sudo -n mkdir -p /usr/local/share/icons
+  x sudo -n cp -r $name /usr/local/share/icons
   x cd $base
 }
 
@@ -92,8 +92,8 @@ install-MicroTeX (){
   x cd build
   x cmake ..
   x make -j32
-	x sudo mkdir -p /opt/MicroTeX
-  x sudo cp ./LaTeX /opt/MicroTeX/
-  x sudo cp -r ./res /opt/MicroTeX/
+	x sudo -n mkdir -p /opt/MicroTeX
+  x sudo -n cp ./LaTeX /opt/MicroTeX/
+  x sudo -n cp -r ./res /opt/MicroTeX/
   x cd $base
 }
