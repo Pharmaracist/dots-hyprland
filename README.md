@@ -197,6 +197,8 @@ curl -fsSL https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/ins
 - Development tools and utilities
 - Auto-configured settings
 
+> **Note**: The installation process will ask for confirmation before executing commands. This helps you understand what's being installed and gives you control over the process.
+
 ### Manual Installation 🔧
 For those who prefer more control, check the detailed installation steps below.
 </details>

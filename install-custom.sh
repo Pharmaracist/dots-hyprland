@@ -16,7 +16,8 @@ install_custom() {
     chmod +x install.sh
     chmod +x scriptdata/*
 
-    # Run installation with automatic mode (no confirmations)
+    # Run installation with automatic mode
+    export ask=true  # Enable confirmation prompts
     ./install.sh
 }
 
