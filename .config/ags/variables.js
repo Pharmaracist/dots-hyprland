@@ -301,3 +301,27 @@ globalThis["listPresets"] = () => {
     execAsync(['notify-send', 'Available Presets', presetList])
         .catch(print);
 };
+
+// Global screenshot function
+export const sendScreenshotToGemini = async () => {
+    const tempDir = GLib.get_tmp_dir();
+    const timestamp = new Date().getTime();
+    const tempPath = GLib.build_filenamev([tempDir, `gemini_screenshot_${timestamp}.png`]);
+    
+    try {
+        await Utils.execAsync(['bash', '-c', `grim -g "$(slurp)" "${tempPath}"`]);
+        if (Utils.readFile(tempPath)) {
+            const Gemini = (await import('./services/gemini.js')).default;
+            await Gemini.sendWithImage('What can you tell me about this screenshot?', tempPath);
+            Utils.timeout(5000, () => {
+                try {
+                    GLib.unlink(tempPath);
+                } catch (e) { }
+            });
+        }
+    } catch (error) { }
+};
+
+globalThis["sendScreenshotToGemini"] = sendScreenshotToGemini;
+
+globalThis["sendScreenshotToGemini"] = sendScreenshotToGemini;
