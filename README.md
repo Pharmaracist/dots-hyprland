@@ -1,7 +1,7 @@
 <div align="center">
     <h1>【 Pharmaracism's Hyprland Rice 】</h1>
     <p align="center">
-      <img width="40%" src="https://raw.githubusercontent.com/Mangeshrex/dotfiles/main/etc/cat.gif">
+      <img width="40%" src="https://raw.githubusercontent.com/rxyhn/bspdots/main/assets/banner.gif">
     </p>
 </div>
 
