@@ -47,6 +47,19 @@ const changeWallpaperButton = () => createUtilButton({
   onSecondaryClick: () => App.toggleWindow("wallselect"),
 });
 
+const geminiScreenshotButton = () => createUtilButton({
+  name: "Analyze screenshot with AI",
+  icon: "screenshot_region",
+  onClicked: () => {
+    const { sendScreenshotToGemini } = globalThis;
+    if (sendScreenshotToGemini) {
+      sendScreenshotToGemini();
+    } else {
+      Utils.execAsync(['notify-send', 'Error', 'Screenshot to Gemini not available']);
+    }
+  },
+});
+
 const Shortcuts = () => {
   let unsubscriber = () => {};
   let showWallpaperButton = false;
@@ -100,16 +113,17 @@ const Shortcuts = () => {
   });
 
   const box = Box({
-    hpack: "center",
-    className: "spacing-h-10",
+    className: "spacing-h-5",
     children: [
+      geminiScreenshotButton(),
       yt,
       agsTweaksButton,
       gitHubButton,
       unixporn,
       collage,
-      screenSnipButton,
+      // screenSnipButton,
       colorPickerButton,
+      changeWallpaperButton(),
     ],
   });
 

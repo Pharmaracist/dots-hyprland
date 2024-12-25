@@ -44,7 +44,7 @@ function replaceapidom(URL) {
     }
     return URL;
 }
-const CHAT_MODELS = ["gemini-1.5-flash"]
+const CHAT_MODELS = ["gemini-1.5-flash", "gemini-1.5-flash"] // Using same model for both since it supports vision
 const ONE_CYCLE_COUNT = 3;
 
 class GeminiMessage extends Service {
@@ -57,19 +57,29 @@ class GeminiMessage extends Service {
                 'content': ['string'],
                 'thinking': ['boolean'],
                 'done': ['boolean'],
+                'hasImage': ['boolean'],
             });
     }
 
     _role = '';
-    _parts = [{ text: '' }];
+    _parts = [];
     _thinking;
     _done = false;
     _rawData = '';
+    _hasImage = false;
 
-    constructor(role, content, thinking = true, done = false) {
+    constructor(role, content, thinking = true, done = false, imageData = null) {
         super();
         this._role = role;
-        this._parts = [{ text: content }];
+        if (imageData) {
+            this._parts = [
+                { text: content },
+                { inlineData: { mimeType: 'image/jpeg', data: imageData } }
+            ];
+            this._hasImage = true;
+        } else {
+            this._parts = [{ text: content }];
+        }
         this._thinking = thinking;
         this._done = done;
     }
@@ -83,33 +93,33 @@ class GeminiMessage extends Service {
     get role() { return this._role }
     set role(role) { this._role = role; this.emit('changed') }
 
-    get content() {
-        return this._parts.map(part => part.text).join();
-    }
+    get content() { return this._parts[0].text }
     set content(content) {
-        this._parts = [{ text: content }];
-        this.notify('content')
-        this.emit('changed')
+        if (this._hasImage) {
+            this._parts[0].text = content;
+        } else {
+            this._parts = [{ text: content }];
+        }
+        this.notify('content');
+        this.emit('changed');
     }
 
     get parts() { return this._parts }
-
-    get label() { return this._parserState.parsed + this._parserState.stack.join('') }
+    get hasImage() { return this._hasImage }
 
     get thinking() { return this._thinking }
     set thinking(value) {
         this._thinking = value;
-        this.notify('thinking')
-        this.emit('changed')
+        this.notify('thinking');
+        this.emit('changed');
     }
 
     addDelta(delta) {
         if (this.thinking) {
             this.thinking = false;
             this.content = delta;
-        }
-        else {
-            this.content += delta;
+        } else {
+            this.content = this.content + delta;
         }
         this.emit('delta', delta);
     }
@@ -117,17 +127,23 @@ class GeminiMessage extends Service {
     parseSection() {
         if (this._thinking) {
             this.thinking = false;
-            this._parts[0].text = '';
+            if (!this._hasImage) {
+                this._parts[0].text = '';
+            }
         }
-        const parsedData = JSON.parse(this._rawData);
-        if (!parsedData.candidates)
-            this._parts[0].text += `Blocked: ${parsedData.promptFeedback.blockReason}`;
-        else {
-            const delta = parsedData.candidates[0].content.parts[0].text;
-            this._parts[0].text += delta;
+        try {
+            const parsedData = JSON.parse(this._rawData);
+            if (!parsedData.candidates) {
+                this._parts[0].text += `Error: ${parsedData.promptFeedback?.blockReason || 'Unknown error'}`;
+            } else {
+                const delta = parsedData.candidates[0].content.parts[0].text;
+                this._parts[0].text += delta;
+            }
+            this.notify('content');
+        } catch (error) {
+            this._parts[0].text += 'Error parsing response';
+            this.notify('content');
         }
-        // this.emit('delta', delta);
-        this.notify('content');
         this._rawData = '';
     }
 }
@@ -139,6 +155,7 @@ class GeminiService extends Service {
             'clear': [],
             'newMsg': ['int'],
             'hasKey': ['boolean'],
+            'imageProcessing': ['boolean'],
         });
     }
 
@@ -152,6 +169,7 @@ class GeminiService extends Service {
     _messages = [];
     _modelIndex = 0;
     _decoder = new TextDecoder();
+    _processingImage = false;
 
     constructor() {
         super();
@@ -251,21 +269,69 @@ class GeminiService extends Service {
             (stream, res) => {
                 try {
                     const [bytes] = stream.read_line_finish(res);
-                    const line = this._decoder.decode(bytes);
-                    // console.log(line);
-                    if (line == '[{') { // beginning of response
-                        aiResponse._rawData += '{';
-                        this.thinking = false;
+                    if (!bytes) {
+                        // Try to parse accumulated response
+                        if (aiResponse._rawData) {
+                            try {
+                                const response = JSON.parse(aiResponse._rawData);
+                                if (response.error) {
+                                    const errorMsg = `Error: ${response.error.message} (${response.error.status})`;
+                                    aiResponse.addDelta(errorMsg);
+                                }
+                                else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+                                    const text = response.candidates[0].content.parts[0].text;
+                                    aiResponse.addDelta(text);
+                                }
+                                else {
+                                    aiResponse.addDelta('Error: Unexpected response format');
+                                }
+                            } catch (e) {
+                                aiResponse.addDelta('Error parsing response');
+                            }
+                        }
+                        
+                        aiResponse.thinking = false;
+                        aiResponse.done = true;
+                        if (this._usingHistory) this.saveHistory();
+                        return;
                     }
-                    else if (line == ',\u000d' || line == ']') { // end of stream pulse
-                        aiResponse.parseSection();
-                    }
-                    else // Normal content
-                        aiResponse._rawData += line;
 
+                    const line = this._decoder.decode(bytes);
+                    aiResponse._rawData = (aiResponse._rawData || '') + line;
+
+                    // Handle error responses immediately
+                    if (line.includes('"error"')) {
+                        try {
+                            const errorResponse = JSON.parse(aiResponse._rawData + line + '}');
+                            const errorMsg = `Error: ${errorResponse.error.message} (${errorResponse.error.status})`;
+                            aiResponse.addDelta(errorMsg);
+                            aiResponse.thinking = false;
+                            aiResponse.done = true;
+                            return;
+                        } catch (e) {
+                        }
+                    }
+
+                    // Try to parse complete response
+                    if (line.trim().endsWith('}')) {
+                        try {
+                            const response = JSON.parse(aiResponse._rawData);
+                            if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+                                const text = response.candidates[0].content.parts[0].text;
+                                aiResponse.addDelta(text);
+                                aiResponse.thinking = false;
+                                aiResponse.done = true;
+                                return;
+                            }
+                        } catch (e) {
+                        }
+                    }
+
+                    // Continue reading
                     this.readResponse(stream, aiResponse);
-                } catch {
+                } catch (error) {
                     aiResponse.done = true;
+                    aiResponse.addDelta('Error reading response: ' + error.message);
                     if (this._usingHistory) this.saveHistory();
                     return;
                 }
@@ -280,53 +346,176 @@ class GeminiService extends Service {
     send(msg) {
         this._messages.push(new GeminiMessage('user', msg, false));
         this.emit('newMsg', this._messages.length - 1);
-        const aiResponse = new GeminiMessage('model', 'thinking...', true, false)
+        const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
 
-        const body =
-        {
-            "contents": this._messages.map(msg => { let m = { role: msg.role, parts: msg.parts }; return m; }),
+        const body = {
+            "contents": [{
+                "role": "user",
+                "parts": [{ "text": msg }]
+            }],
             "safetySettings": this._safe ? [] : [
-                // { category: "HARM_CATEGORY_DEROGATORY", threshold: "BLOCK_NONE", },
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE", },
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE", },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE", },
-                // { category: "HARM_CATEGORY_UNSPECIFIED", threshold: "BLOCK_NONE", },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
             ],
             "generationConfig": {
                 "temperature": this._temperature,
             },
-            // "key": this._key,
-            // "apiKey": this._key,
         };
-        const proxyResolver = new Gio.SimpleProxyResolver({ 'default-proxy': userOptions.asyncGet().ai.proxyUrl });
-        const session = new Soup.Session({ 'proxy-resolver': proxyResolver });
+
+        const session = new Soup.Session();
+        session.set_timeout(30); // 30 second timeout
+        
+        const proxyUrl = userOptions.asyncGet().ai.proxyUrl;
+        if (proxyUrl && proxyUrl.length > 0) {
+            const proxyResolver = new Gio.SimpleProxyResolver();
+            proxyResolver.set_default_proxy(proxyUrl);
+            session.set_proxy_resolver(proxyResolver);
+        }
+
+        const apiUrl = replaceapidom(`https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this._key}`);
+        
         const message = new Soup.Message({
             method: 'POST',
-            uri: GLib.Uri.parse(replaceapidom(`https://generativelanguage.googleapis.com/v1/models/${this.modelName}:streamGenerateContent?key=${this._key}`), GLib.UriFlags.NONE),
+            uri: GLib.Uri.parse(apiUrl, GLib.UriFlags.NONE),
         });
-        message.request_headers.append('Content-Type', `application/json`);
-        message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
+        
+        message.request_headers.append('Content-Type', 'application/json');
+        const bodyBytes = new GLib.Bytes(JSON.stringify(body));
+        message.set_request_body_from_bytes('application/json', bodyBytes);
+
+        this._messages.push(aiResponse);
+        this.emit('newMsg', this._messages.length - 1);
 
         session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
             try {
                 const stream = session.send_finish(result);
-                this.readResponse(new Gio.DataInputStream({
+                if (!stream) {
+                    throw new Error('No response stream received');
+                }
+                
+                const dataStream = new Gio.DataInputStream({
                     close_base_stream: true,
                     base_stream: stream
-                }), aiResponse);
+                });
+                
+                this.readResponse(dataStream, aiResponse);
             }
             catch (e) {
-                aiResponse.addDelta (e.message);
-                aiResponse.thinking = false;
+                aiResponse.done = true;
+                aiResponse.addDelta('Error in API response: ' + e.message);
             }
         });
-        this._messages.push(aiResponse);
-        this.emit('newMsg', this._messages.length - 1);
 
-        if (this._cycleModels) {
-            this._requestCount++;
-            if (this._cycleModels)
-                this._modelIndex = (this._requestCount - (this._requestCount % ONE_CYCLE_COUNT)) % CHAT_MODELS.length;
+        if (this._cycleModels && ++this._requestCount % ONE_CYCLE_COUNT == 0)
+            this._modelIndex = (this._requestCount - (this._requestCount % ONE_CYCLE_COUNT)) % CHAT_MODELS.length;
+    }
+
+    async processImage(imagePath) {
+        try {
+            this._processingImage = true;
+            this.emit('imageProcessing', true);
+            
+            const imageFile = Gio.File.new_for_path(imagePath);
+            const [success, contents] = imageFile.load_contents(null);
+            
+            if (!success || !contents) {
+                throw new Error('Failed to read image file');
+            }
+            
+            const base64Data = GLib.base64_encode(contents);
+            return base64Data;
+        } catch (error) {
+            throw error;
+        } finally {
+            this._processingImage = false;
+            this.emit('imageProcessing', false);
+        }
+    }
+
+    async sendWithImage(msg, imagePath) {
+        try {
+            const imageData = await this.processImage(imagePath);
+            
+            this._modelIndex = 0;
+            
+            const userMessage = new GeminiMessage('user', msg, false, false, imageData);
+            this._messages.push(userMessage);
+            this.emit('newMsg', this._messages.length - 1);
+            
+            const aiResponse = new GeminiMessage('model', 'Analyzing image...', true, false);
+            
+            const body = {
+                "contents": [{
+                    "role": userMessage.role,
+                    "parts": [
+                        {
+                            "text": msg
+                        },
+                        {
+                            "inline_data": {
+                                "mime_type": "image/png",
+                                "data": imageData
+                            }
+                        }
+                    ]
+                }],
+                "safety_settings": this._safe ? [] : [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                ],
+                "generation_config": {
+                    "temperature": this._temperature,
+                }
+            };
+
+            const session = new Soup.Session();
+            session.set_timeout(30); // 30 second timeout
+            
+            const proxyUrl = userOptions.asyncGet().ai.proxyUrl;
+            if (proxyUrl && proxyUrl.length > 0) {
+                const proxyResolver = new Gio.SimpleProxyResolver();
+                proxyResolver.set_default_proxy(proxyUrl);
+                session.set_proxy_resolver(proxyResolver);
+            }
+
+            const apiUrl = replaceapidom(`https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this._key}`);
+            
+            const message = new Soup.Message({
+                method: 'POST',
+                uri: GLib.Uri.parse(apiUrl, GLib.UriFlags.NONE),
+            });
+            
+            message.request_headers.append('Content-Type', 'application/json');
+            const bodyBytes = new GLib.Bytes(JSON.stringify(body));
+            message.set_request_body_from_bytes('application/json', bodyBytes);
+
+            this._messages.push(aiResponse);
+            this.emit('newMsg', this._messages.length - 1);
+
+            session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
+                try {
+                    const stream = session.send_finish(result);
+                    if (!stream) {
+                        throw new Error('No response stream received');
+                    }
+                    
+                    const dataStream = new Gio.DataInputStream({
+                        close_base_stream: true,
+                        base_stream: stream
+                    });
+                    
+                    this.readResponse(dataStream, aiResponse);
+                }
+                catch (e) {
+                    aiResponse.done = true;
+                    aiResponse.addDelta('Error in vision API response: ' + e.message);
+                }
+            });
+        } catch (error) {
+            throw error;
         }
     }
 }

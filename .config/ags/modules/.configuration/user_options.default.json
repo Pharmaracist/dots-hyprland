@@ -200,6 +200,7 @@
       ],
       "apis": {
         "order": [
+          "gemini",
           "gpt",
           "translater",
           "quran"

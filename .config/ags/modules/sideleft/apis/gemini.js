@@ -1,7 +1,10 @@
-const { Gtk, Pango } = imports.gi;
+const { Gtk, Pango, Gdk } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
+import Service from 'resource:///com/github/Aylur/ags/service.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import { fileExists } from '../../.miscutils/files.js';
+import GLib from 'gi://GLib';
 
 const { Box, Button, Icon, Label, Revealer, Scrollable } = Widget;
 import GeminiService from '../../../services/gemini.js';
@@ -198,25 +201,151 @@ const CommandButton = (command) => Button({
     label: command,
 });
 
-export const geminiCommands = Box({
-    className: 'spacing-h-5',
-    children: [
-        Box({ hexpand: true }),
-        CommandButton('/key'),
-        CommandButton('/model'),
-        CommandButton('/clear'),
-    ]
+const ScreenshotButton = () => Button({
+    className: 'sidebar-chat-chip sidebar-chat-chip-action txt-small',
+    setup: setupCursorHover,
+    tooltipText: 'Take a screenshot and analyze it',
+    child: Box({
+        children: [
+            Icon({
+                icon: 'image-area',
+                size: 14,
+            }),
+            Label({
+                label: ' Analyze Area',
+            }),
+        ]
+    }),
+    onClicked: () => {
+        const tempDir = GLib.get_tmp_dir();
+        const timestamp = new Date().getTime();
+        const tempPath = GLib.build_filenamev([tempDir, `gemini_screenshot_${timestamp}.png`]);
+        
+        chatContent.add(SystemMessage('Select an area to analyze...', 'Screenshot', geminiView));
+        
+        Utils.execAsync(['bash', '-c', `grim -g "$(slurp)" "${tempPath}"`])
+            .then(() => {
+                if (fileExists(tempPath)) {
+                    GeminiService.sendWithImage('What can you tell me about this screenshot?', tempPath)
+                        .catch(error => {
+                            chatContent.add(SystemMessage(`Error processing screenshot: ${error.message}`, 'Error', geminiView));
+                        })
+                        .finally(() => {
+                            // Clean up temp file after a delay
+                            Utils.timeout(5000, () => {
+                                try {
+                                    GLib.unlink(tempPath);
+                                } catch (e) {
+                                    console.error('Error cleaning up temp file:', e);
+                                }
+                            });
+                        });
+                } else {
+                    chatContent.add(SystemMessage('Screenshot cancelled or failed', 'Error', geminiView));
+                }
+            })
+            .catch(error => {
+                chatContent.add(SystemMessage(`Screenshot failed: ${error}`, 'Error', geminiView));
+            });
+    },
 });
 
+const handleClipboardImage = () => {
+    const clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+    if (clipboard.wait_is_image_available()) {
+        const pixbuf = clipboard.wait_for_image();
+        if (!pixbuf) {
+            chatContent.add(SystemMessage('No image found in clipboard', 'Error', geminiView));
+            return false;
+        }
+        
+        // Save the image to a temporary file
+        const tempDir = GLib.get_tmp_dir();
+        const timestamp = new Date().getTime();
+        const tempPath = GLib.build_filenamev([tempDir, `gemini_clipboard_${timestamp}.png`]);
+        
+        try {
+            pixbuf.savev(tempPath, 'png', [], []);
+            return tempPath;
+        } catch (error) {
+            chatContent.add(SystemMessage(`Error saving clipboard image: ${error.message}`, 'Error', geminiView));
+            return false;
+        }
+    }
+    return false;
+};
+
 export const sendMessage = (text) => {
-    // Check if text or API key is empty
-    if (text.length == 0) return;
+    // Ensure text is a string and not empty
+    if (!text || typeof text !== 'string' || text.length === 0) return;
+    
+    // Clear text entry buffer
+    const buffer = chatEntry.get_buffer();
+    buffer.set_text('', 0);
+    
     if (GeminiService.key.length == 0) {
         GeminiService.key = text;
         chatContent.add(SystemMessage(`Key saved to\n\`${GeminiService.keyPath}\``, 'API Key', geminiView));
         text = '';
         return;
     }
+    
+    // Handle image upload command
+    if (text.startsWith('/image')) {
+        const parts = text.split(' ');
+        
+        // Special handling for clipboard
+        if (parts[1] === 'clipboard' || parts[1] === '/Pasted') {
+            const tempPath = handleClipboardImage();
+            if (tempPath) {
+                const description = parts.slice(2).join(' ') || 'Please analyze this image.';
+                GeminiService.sendWithImage(description, tempPath)
+                    .catch(error => {
+                        chatContent.add(SystemMessage(`Error processing image: ${error.message}`, 'Error', geminiView));
+                    })
+                    .finally(() => {
+                        // Clean up temp file after a delay
+                        Utils.timeout(5000, () => {
+                            try {
+                                GLib.unlink(tempPath);
+                            } catch (e) {
+                                console.error('Error cleaning up temp file:', e);
+                            }
+                        });
+                    });
+            }
+            return;
+        }
+        
+        // Regular file handling
+        if (parts.length < 2) {
+            chatContent.add(SystemMessage('Usage:\n`/image PATH_TO_IMAGE [description]`\n`/image clipboard [description]`', '/image', geminiView));
+            return;
+        }
+        
+        let imagePath = parts[1];
+        // Handle home directory expansion
+        if (imagePath.startsWith('~')) {
+            imagePath = imagePath.replace('~', GLib.get_home_dir());
+        }
+        // Convert to absolute path if relative
+        if (!imagePath.startsWith('/')) {
+            imagePath = GLib.build_filenamev([GLib.get_current_dir(), imagePath]);
+        }
+        
+        if (!fileExists(imagePath)) {
+            chatContent.add(SystemMessage(`Image file not found: ${imagePath}\nMake sure the file exists and the path is correct.`, 'Error', geminiView));
+            return;
+        }
+        
+        const description = parts.slice(2).join(' ') || 'Please analyze this image.';
+        GeminiService.sendWithImage(description, imagePath)
+            .catch(error => {
+                chatContent.add(SystemMessage(`Error processing image: ${error.message}`, 'Error', geminiView));
+            });
+        return;
+    }
+    
     // Commands
     if (text.startsWith('/')) {
         if (text.startsWith('/clear')) clearChat();
@@ -248,6 +377,22 @@ export const sendMessage = (text) => {
         }
         else if (text.startsWith('/test'))
             chatContent.add(SystemMessage(markdownTest, `Markdown test`, geminiView));
+        else if (text.startsWith('/help')) {
+            chatContent.add(SystemMessage(
+                'Available commands:\n' +
+                '`/clear` - Clear chat history\n' +
+                '`/image PATH [description]` - Analyze an image file\n' +
+                '`/image clipboard [description]` - Analyze image from clipboard\n' +
+                '`/key [API_KEY]` - View or update API key\n' +
+                '`/model` - Show current model\n' +
+                '`/prompt MESSAGE` - Add a message without sending\n\n' +
+                'You can also:\n' +
+                '• Click the camera button to select and analyze a screen area\n' +
+                '• Paste an image directly into the chat',
+                '/help',
+                geminiView
+            ));
+        }
         else
             chatContent.add(SystemMessage(getString(`Invalid command.`), 'Error', geminiView))
     }
@@ -256,37 +401,15 @@ export const sendMessage = (text) => {
     }
 }
 
-// export const geminiView = Box({
-//     homogeneous: true,
-//     children: [Scrollable({
-//         className: 'sidebar-chat-viewport',
-//         vexpand: true,
-//         child: Box({
-//             vertical: true,
-//             children: [
-//                 geminiWelcome,
-//                 chatContent,
-//             ]
-//         }),
-//         setup: (scrolledWindow) => {
-//             // Show scrollbar
-//             scrolledWindow.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-//             const vScrollbar = scrolledWindow.get_vscrollbar();
-//             vScrollbar.get_style_context().add_class('sidebar-scrollbar');
-//             // Avoid click-to-scroll-widget-to-view behavior
-//             Utils.timeout(1, () => {
-//                 const viewport = scrolledWindow.child;
-//                 viewport.set_focus_vadjustment(new Gtk.Adjustment(undefined));
-//             })
-//             // Always scroll to bottom with new content
-//             const adjustment = scrolledWindow.get_vadjustment();
-//             adjustment.connect("changed", () => Utils.timeout(1, () => {
-//                 if (!chatEntry.hasFocus) return;
-//                 adjustment.set_value(adjustment.get_upper() - adjustment.get_page_size());
-//             }))
-//         }
-//     })]
-// });
+export const geminiCommands = Box({
+    className: 'spacing-h-5',
+    children: [
+        Box({ hexpand: true }),
+        CommandButton('/help'),
+        CommandButton('/clear'),
+        CommandButton('/key'),
+    ]
+});
 
 export const geminiView = Box({
     homogeneous: true,
