@@ -3,11 +3,13 @@ import GtkSource from "gi://GtkSource?version=3.0";
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import GeminiService from '../../../services/gemini.js';
 const { Box, Button, Label, Icon, Scrollable, Stack } = Widget;
 const { execAsync, exec } = Utils;
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import md2pango from '../../.miscutils/md2pango.js';
 import { darkMode } from "../../.miscutils/system.js";
+import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 
 const LATEX_DIR = `${GLib.get_user_cache_dir()}/ags/media/latex`;
 const CUSTOM_SOURCEVIEW_SCHEME_PATH = `${App.configDir}/assets/themes/sourceviewtheme${darkMode.value ? '' : '-light'}.xml`;
@@ -62,25 +64,15 @@ const HighlightedCode = (content, lang) => {
     return sourceView;
 }
 
-const TextBlock = (content = '') => {
-    const item = Label({
-        attribute: {
-            'updateText': (text) => {
-                item.label = text;
-            },
-            type: 'text'
-        },
-        hpack: 'fill',
-        className: 'txt sidebar-chat-txtblock sidebar-chat-txt',
-        useMarkup: true,
-        xalign: 0,
-        wrap: true,
-        selectable: true,
-        label: content,
-        wrapMode: Pango.WrapMode.WORD_CHAR,
-    })
-    return item;
-};
+const TextBlock = (content = '') => Label({
+    hpack: 'fill',
+    className: 'txt sidebar-chat-txtblock sidebar-chat-txt',
+    useMarkup: true,
+    xalign: 0,
+    wrap: true,
+    selectable: true,
+    label: md2pango(content),
+});
 
 Utils.execAsync(['bash', '-c', `rm -rf ${LATEX_DIR}`])
     .then(() => Utils.execAsync(['bash', '-c', `mkdir -p ${LATEX_DIR}`]))
@@ -174,9 +166,30 @@ const CodeBlock = (content = '', lang = 'txt') => {
                 }),
                 onClicked: (self) => {
                     const buffer = sourceView.get_buffer();
-                    const copyContent = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), false); // TODO: fix this
+                    const copyContent = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), false);
                     execAsync([`wl-copy`, `${copyContent}`]).catch(print);
                 },
+                setup: setupCursorHover,
+            }),
+            Button({
+                className: 'sidebar-chat-codeblock-topbar-btn',
+                child: Box({
+                    className: 'spacing-h-5',
+                    children: [
+                        MaterialIcon('terminal', 'small'),
+                        Label({
+                            label: 'Execute',
+                        })
+                    ]
+                }),
+                onClicked: (self) => {
+                    const buffer = sourceView.get_buffer();
+                    const code = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), false);
+                    if (code) {
+                        Utils.execAsync(['foot', '-a', 'floating', 'bash', '-c', `${code}; echo "\nPress any key to exit..."; read -n 1`]);
+                    }
+                },
+                setup: setupCursorHover,
             }),
         ]
     })
@@ -238,90 +251,48 @@ const MessageContent = (content) => {
     const contentBox = Box({
         vertical: true,
         attribute: {
-            'fullUpdate': (self, content, useCursor = false) => {
-                // Clear and add first text widget
-                // const children = contentBox.get_children();
-                // for (let i = 0; i < children.length; i++) {
-                //    const child = children[i];
-                //    child.destroy();
-                // }
-                // contentBox.add(TextBlock())
-                // Loop lines. Put normal text in markdown parser
-                // and put code into code highlighter (TODO)
-                let lines = content.split('\n');
-                let lastProcessed = 0;
-                let inCode = false;
-                let i = 0;
-                let lang = 'txt';
-                const LangCodeBlock = (text) => CodeBlock (text, lang);
-                for (const [index, line] of lines.entries()) {
-                    // Code blocks
-                    const codeBlockRegex = /^\s*```([a-zA-Z0-9]+)?\n?/;
-                    if (codeBlockRegex.test(line)) {
-                        const kids = self.get_children();
-                        //const currentLabel = kids.length < i ? kids[i] : undefined;
-                        const blockContent = lines.slice(lastProcessed, index).join('\n');
-                        if (blockContent) {
-                            if (!inCode) {
-                                // '```XXX ' <- line
-                                const _line = line.trim()
-                                if (_line.length <= 3) { lang = 'txt'; }
-                                else { lang = _line.substr (3).trim(); }
-                                // add text block with prev data, bcz we will create code block
-                                // blockContent contains the prev content
-                                if (blockContent) {
-                                    const text = md2pango(blockContent);
-                                    updateContentAndBlockType (contentBox, i, 'text', TextBlock, text);
-                                    //contentBox.add(CodeBlock('', codeBlockRegex.exec(line)[1]));
-                                }
-                            }
-                            else {
-                                updateContentAndBlockType (contentBox, i, 'code', LangCodeBlock, blockContent);
-                            }
+            fullUpdate: (self, text, typing = false) => {
+                // Clear previous children
+                self.children = [];
 
-                            // next element
-                            i++;
+                // Handle dividers first
+                const dividerBlocks = text.split(/^\s*---\s*$/m);
+                dividerBlocks.forEach((block, i) => {
+                    // Process code blocks within each divider block
+                    const codeBlocks = block.split('```');
+                    codeBlocks.forEach((blockContent, j) => {
+                        if (j % 2 === 0) {
+                            // Regular text block
+                            if (blockContent.trim().length > 0) {
+                                self.add(TextBlock(blockContent));
+                            }
+                        } else {
+                            // Code block
+                            const lines = blockContent.trim().split('\n');
+                            const lang = substituteLang(lines[0].toLowerCase());
+                            const code = lines.slice(1).join('\n');
+                            if (code.length > 0) {
+                                self.add(CodeBlock(code, lang));
+                            }
                         }
+                    });
 
-                        lastProcessed = index + 1;
-                        inCode = !inCode;
+                    // Add divider if not the last block
+                    if (i < dividerBlocks.length - 1) {
+                        self.add(Divider());
                     }
-                    // Breaks
-                    const dividerRegex = /^\s*---/;
-                    if (!inCode && dividerRegex.test(line)) {
-                        const kids = self.get_children();
-                        //const currentLabel = kids.length < i ? kids[i] : undefined;
-                        const blockContent = lines.slice(lastProcessed, index).join('\n');
-                        const text = md2pango(blockContent);
-                        updateContentAndBlockType (contentBox, i, 'text', TextBlock, text);
-                        contentBox.add(Divider());
-                        lastProcessed = index + 1;
+                });
 
-                        i += 2;
-                    }
+                // Add cursor
+                if (typing) {
+                    self.add(Label({
+                        className: 'txt txt-smaller sidebar-chat-cursor',
+                        label: '▌',
+                    }));
                 }
-                if (lastProcessed < lines.length) {
-                    const kids = self.get_children();
-                    //const lastLabel = kids[kids.length - 1];
-                    let blockContent = lines.slice(lastProcessed, lines.length).join('\n');
-                    if (!inCode)
-                        updateContentAndBlockType(contentBox, i, 'text', TextBlock, `${md2pango(blockContent)}${useCursor ? userOptions.asyncGet().ai.writingCursor : ''}`);
-                    else
-                        updateContentAndBlockType(contentBox, i, 'code', LangCodeBlock, blockContent);
-                    
-                    i++;
-                }
-                // Debug: plain text
-                // contentBox.add(Label({
-                //     hpack: 'fill',
-                //     className: 'txt sidebar-chat-txtblock sidebar-chat-txt',
-                //     useMarkup: false,
-                //     xalign: 0,
-                //     wrap: true,
-                //     selectable: true,
-                //     label: '------------------------------\n' + md2pango(content),
-                // }))
-                contentBox.show_all();
+
+                // Show all children
+                self.show_all();
             }
         }
     });
@@ -329,18 +300,17 @@ const MessageContent = (content) => {
     return contentBox;
 }
 
-export const ChatMessage = (message, modelName = 'Model') => {
-    const TextSkeleton = (extraClassName = '') => Box({
-        className: `sidebar-chat-message-skeletonline ${extraClassName}`,
-    })
+const MessageArea = (message, role) => {
     const messageContentBox = MessageContent(message.content);
     const messageLoadingSkeleton = Box({
         vertical: true,
         className: 'spacing-v-5',
-        children: Array.from({ length: 3 }, (_, id) => TextSkeleton(`sidebar-chat-message-skeletonline-offset${id}`)),
+        children: Array.from({ length: 3 }, (_, id) => Box({
+            className: `sidebar-chat-message-skeletonline sidebar-chat-message-skeletonline-offset${id}`,
+        })),
     })
     const messageArea = Stack({
-        homogeneous: message.role !== 'user',
+        homogeneous: role !== 'user',
         transition: 'crossfade',
         transitionDuration: userOptions.asyncGet().animations.durationLarge,
         children: {
@@ -349,19 +319,85 @@ export const ChatMessage = (message, modelName = 'Model') => {
         },
         shown: message.thinking ? 'thinking' : 'message',
     });
+    return messageArea;
+}
+
+export const ChatMessage = (message, modelName = 'Model') => {
+    const messageContentBox = MessageContent(message.content);
+    const messageLoadingSkeleton = Box({
+        vertical: true,
+        className: 'spacing-v-5',
+        children: Array.from({ length: 3 }, (_, id) => Box({
+            className: `sidebar-chat-message-skeletonline sidebar-chat-message-skeletonline-offset${id}`,
+        })),
+    });
+
+    // Add regenerate button for model responses
+    const regenerateButton = message.role === 'model' ? Box({
+        hpack: 'end',
+        className: 'spacing-h-5 sidebar-chat-regenerate',
+        children: [
+            Button({
+                className: 'sidebar-chat-codeblock-topbar-btn',
+                child: Box({
+                    className: 'spacing-h-5',
+                    children: [
+                        MaterialIcon('refresh', 'small'),
+                        Label({
+                            label: 'Regenerate',
+                        })
+                    ]
+                }),
+                setup: setupCursorHover,
+                onClicked: () => {
+                    // Get the last user message
+                    const messages = GeminiService.messages;
+                    let lastUserMsg = '';
+                    for (let i = messages.length - 1; i >= 0; i--) {
+                        if (messages[i].role === 'user') {
+                            lastUserMsg = messages[i].parts[0].text;
+                            break;
+                        }
+                    }
+                    if (lastUserMsg) {
+                        // Remove the last model response
+                        GeminiService._messages.pop();
+                        // Send the last user message again
+                        GeminiService.send(lastUserMsg);
+                    }
+                },
+            }),
+        ]
+    }) : null;
+
+    const messageArea = Stack({
+        homogeneous: message.role !== 'user',
+        transition: 'crossfade',
+        transitionDuration: userOptions.asyncGet().animations.durationLarge,
+        children: {
+            'thinking': messageLoadingSkeleton,
+            'message': Box({
+                vertical: true,
+                children: [
+                    messageContentBox,
+                    regenerateButton,
+                ]
+            }),
+        },
+        shown: message.thinking ? 'thinking' : 'message',
+    });
+
     const thisMessage = Box({
         className: 'sidebar-chat-message',
         homogeneous: true,
         children: [
             Box({
+                className: `sidebar-chat-messagebox ${message.role}`,
                 vertical: true,
                 children: [
                     Label({
-                        hpack: 'start',
-                        xalign: 0,
-                        className: `txt txt-bold sidebar-chat-name sidebar-chat-name-${message.role == 'user' ? 'user' : 'bot'}`,
-                        wrap: true,
-                        useMarkup: true,
+                        className: `sidebar-chat-name txt-small ${message.role}`,
+                        xalign: message.role == 'user' ? 1 : 0,
                         label: (message.role == 'user' ? USERNAME : modelName),
                         wrapMode: Pango.WrapMode.WORD_CHAR,
                     }),
@@ -372,16 +408,15 @@ export const ChatMessage = (message, modelName = 'Model') => {
                     })
                 ],
                 setup: (self) => self
-                    .hook(message, (self, isThinking) => {
+                    .hook(message, () => {
                         messageArea.shown = message.thinking ? 'thinking' : 'message';
                     }, 'notify::thinking')
-                    .hook(message, (self) => { // Message update
-                        messageContentBox.attribute.fullUpdate(messageContentBox, message.content, message.role != 'user');
+                    .hook(message, () => {
+                        messageContentBox.attribute.fullUpdate(messageContentBox, message.content, message.role !== 'user');
                     }, 'notify::content')
-                    .hook(message, (label, isDone) => { // Remove the cursor
+                    .hook(message, () => {
                         messageContentBox.attribute.fullUpdate(messageContentBox, message.content, false);
                     }, 'notify::done')
-                ,
             })
         ]
     });

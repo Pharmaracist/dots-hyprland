@@ -478,7 +478,8 @@
       "org.gnome.Nautilus",
       "chromium",
       "visual studio code",
-      "windsurf"
+      "windsurf",
+      "obsidian"
     ],
     "layer": "top",
     "monitorExclusivity": true,

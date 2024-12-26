@@ -22,7 +22,8 @@ function replaceapidom(URL) {
     }
     return URL;
 }
-const CHAT_MODELS = ["gemini-pro", "gemini-pro"];
+const CHAT_MODELS = ["gemini-pro", "gemini-1.5-pro"];
+export { CHAT_MODELS };
 const ONE_CYCLE_COUNT = 1;
 
 class GeminiMessage extends Service {
@@ -45,19 +46,13 @@ class GeminiMessage extends Service {
     _done = false;
     _rawData = '';
     _hasImage = false;
+    _text = '';
 
-    constructor(role, content, thinking = true, done = false, imageData = null) {
+    constructor(role, text, thinking = false, done = true) {
         super();
         this._role = role;
-        if (imageData) {
-            this._parts = [
-                { text: content },
-                { inlineData: { mimeType: 'image/jpeg', data: imageData } }
-            ];
-            this._hasImage = true;
-        } else {
-            this._parts = [{ text: content }];
-        }
+        this._parts = [{ text: text || '' }];
+        this._text = text || '';
         this._thinking = thinking;
         this._done = done;
     }
@@ -92,12 +87,17 @@ class GeminiMessage extends Service {
         this.emit('changed');
     }
 
+    get text() { return this._text }
+    set text(value) { this._text = value }
+
     addDelta(delta) {
         if (this.thinking) {
             this.thinking = false;
-            this.content = delta;
+            this.parts[0].text = delta;
+            this.text = delta;
         } else {
-            this.content = this.content + delta;
+            this.parts[0].text += delta;
+            this.text += delta;
         }
         this.emit('delta', delta);
     }
@@ -159,7 +159,7 @@ class GeminiService extends Service {
         this._requestCount = 0;
         this._temperature = 0.7;
         this._safe = true;
-        this._cycleModels = false;
+        this._cycleModels = true;  // Enable model cycling
         this._usingHistory = true;
         this._customPrompt = '';
 
@@ -241,18 +241,18 @@ class GeminiService extends Service {
             
             // Add base system messages
             const baseMessages = [
-                { 
-                    role: "user", 
-                    parts: [{ 
-                        text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
-                    }]
-                },
-                { 
-                    role: "model", 
-                    parts: [{ 
-                        text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
-                    }]
-                }
+                // { 
+                //     role: "user", 
+                //     parts: [{ 
+                //         text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
+                //     }]
+                // },
+                // { 
+                //     role: "model", 
+                //     parts: [{ 
+                //         text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
+                //     }]
+                // }
             ];
             
             // Add custom prompt
@@ -499,11 +499,27 @@ class GeminiService extends Service {
         }
     }
 
+    async processImage(imagePath) {
+        // Convert image to base64 and get MIME type
+        const file = Gio.File.new_for_path(imagePath);
+        const fileInfo = file.query_info('standard::content-type', 0, null);
+        const mimeType = fileInfo.get_content_type();
+
+        // Read file content
+        const [, contents] = file.load_contents(null);
+        const base64 = GLib.base64_encode(contents);
+
+        return [base64, mimeType];
+    }
+
     async sendWithImage(msg, imagePath) {
+        if (!this._key) {
+            console.error('No API key set');
+            return;
+        }
+
         try {
-            this._processingImage = true;
             const [imageData, mimeType] = await this.processImage(imagePath);
-            this._processingImage = false;
 
             this.addMessage('user', msg);
             const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
@@ -516,15 +532,10 @@ class GeminiService extends Service {
             const message = new Soup.Message({
                 method: 'POST',
                 uri: GLib.Uri.parse(
-                    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this._key}`,
+                    replaceapidom(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this._key}`),
                     GLib.UriFlags.NONE
                 ),
             });
-
-            const contents = this._messages.map(msg => ({
-                role: msg.role,
-                parts: [{ text: msg.parts[0].text }]
-            }));
 
             const body = {
                 contents: [{
@@ -553,26 +564,13 @@ class GeminiService extends Service {
             message.request_headers.append('Content-Type', 'application/json');
             message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
 
-            session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
-                try {
-                    const stream = session.send_finish(result);
-                    if (!stream) {
-                        throw new Error('No response stream received');
-                    }
-
-                    const dataStream = new Gio.DataInputStream({
-                        close_base_stream: true,
-                        base_stream: stream
-                    });
-
-                    this.readResponse(dataStream, aiResponse);
-                } catch (e) {
-                    aiResponse.done = true;
-                    aiResponse.addDelta('Error in vision API response: ' + e.message);
-                }
-            });
+            const stream = await session.send_async(message, GLib.DEFAULT_PRIORITY, null);
+            await this.readResponse(stream, aiResponse);
         } catch (error) {
             console.error('Error processing image:', error);
+            const aiResponse = new GeminiMessage('model', 'Failed to process image: ' + error.message, false, true);
+            this._messages.push(aiResponse);
+            this.emit('newMsg', this._messages.length - 1);
         }
     }
 
@@ -586,8 +584,8 @@ class GeminiService extends Service {
 
             // Parse response
             const decoder = new TextDecoder();
-            const responseText = decoder.decode(bytes);
-            const response = JSON.parse(responseText);
+            const rawResponse = decoder.decode(bytes);
+            const response = JSON.parse(rawResponse);
 
             // Handle error responses
             if (response.error) {
@@ -605,16 +603,21 @@ class GeminiService extends Service {
             }
 
             // Update message with the response text
-            aiResponse.addDelta(content.parts[0].text);
+            const messageText = content.parts[0].text;
+            aiResponse.addDelta(messageText);
             
-            // If this was a successful response, add it to history
-            if (!aiResponse.text.startsWith('/')) {
-                this._messages[this._messages.length - 1] = {
-                    role: 'model',
-                    parts: [{ text: content.parts[0].text }],
-                    thinking: false,
-                    done: true
-                };
+            // If this was a successful response, update the message in history
+            if (aiResponse.text && !aiResponse.text.startsWith('/')) {
+                const messageIndex = this._messages.length - 1;
+                if (messageIndex >= 0) {
+                    this._messages[messageIndex] = {
+                        role: 'model',
+                        parts: [{ text: messageText }],
+                        text: messageText,
+                        thinking: false,
+                        done: true
+                    };
+                }
             }
 
         } catch (error) {
@@ -640,15 +643,15 @@ class GeminiService extends Service {
     async processImage(imagePath) {
         try {
             this._processingImage = true;
-            const imageFile = Gio.File.new_for_path(imagePath);
-            const [success, contents] = imageFile.load_contents(null);
+            const file = Gio.File.new_for_path(imagePath);
+            const fileInfo = file.query_info('standard::content-type', 0, null);
+            const mimeType = fileInfo.get_content_type();
 
-            if (!success || !contents) {
-                throw new Error('Failed to read image file');
-            }
+            // Read file content
+            const [, contents] = file.load_contents(null);
+            const base64 = GLib.base64_encode(contents);
 
-            const base64Data = GLib.base64_encode(contents);
-            return [base64Data, 'image/jpeg'];
+            return [base64, mimeType];
         } catch (error) {
             throw error;
         } finally {

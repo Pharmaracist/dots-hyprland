@@ -7,13 +7,14 @@ import { fileExists } from '../../.miscutils/files.js';
 import GLib from 'gi://GLib';
 
 const { Box, Button, Icon, Label, Revealer, Scrollable } = Widget;
-import GeminiService from '../../../services/gemini.js';
+import GeminiService, { CHAT_MODELS } from '../../../services/gemini.js';
 import { setupCursorHover, setupCursorHoverInfo } from '../../.widgetutils/cursorhover.js';
 import { SystemMessage, ChatMessage } from "./ai_chatmessage.js";
 import { ConfigToggle, ConfigSegmentedSelection, ConfigGap } from '../../.commonwidgets/configwidgets.js';
 import { markdownTest } from '../../.miscutils/md2pango.js';
 import { MarginRevealer } from '../../.widgethacks/advancedrevealers.js';
 import { chatEntry } from '../apiwidgets.js';
+import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 
 const MODEL_NAME = `Gemini`;
 
@@ -211,59 +212,132 @@ const clearChat = () => {
 }
 
 const CommandButton = (command) => Button({
-    className: 'sidebar-chat-chip sidebar-chat-chip-action txt txt-small',
-    onClicked: () => sendMessage(command),
+    className: 'sidebar-chat-toolbar-btn',
+    child: Box({
+        className: 'spacing-h-5',
+        children: [
+            MaterialIcon(
+                command === '/help' ? 'help' :
+                command === '/clear' ? 'delete' :
+                command === '/model' ? 'model_training' :
+                command === '/tuneall' ? 'settings_suggest' :
+                'key',
+                'larger'
+            ),
+            Label({
+                label: command.slice(1),
+            }),
+        ],
+    }),
     setup: setupCursorHover,
-    label: command,
+    onClicked: () => sendMessage(command),
+    tooltipText: command === '/clear' ? 'Clear chat' : 
+                command === '/help' ? 'Show help' :
+                command === '/model' ? 'Switch model' :
+                command === '/tuneall' ? 'Replace prompt' :
+                'Set API key',
 });
 
-const ScreenshotButton = () => Button({
-    className: 'sidebar-chat-chip sidebar-chat-chip-action txt-small',
-    setup: setupCursorHover,
-    tooltipText: 'Take a screenshot and analyze it',
+const UploadButton = () => Button({
+    className: 'sidebar-chat-toolbar-btn',
     child: Box({
+        className: 'spacing-h-5',
         children: [
-            Icon({
-                icon: 'image-area',
-                size: 14,
-            }),
+            MaterialIcon('upload_file', 'larger'),
             Label({
-                label: ' Analyze Area',
+                label: 'Upload',
             }),
-        ]
+        ],
     }),
+    setup: setupCursorHover,
     onClicked: () => {
-        const tempDir = GLib.get_tmp_dir();
-        const timestamp = new Date().getTime();
-        const tempPath = GLib.build_filenamev([tempDir, `gemini_screenshot_${timestamp}.png`]);
+        // Hide sidebar while file picker is open
+        App.toggleWindow("sideleft");
         
-        chatContent.add(SystemMessage('Select an area to analyze...', 'Screenshot', geminiView));
-        
-        Utils.execAsync(['bash', '-c', `grim -g "$(slurp)" "${tempPath}"`])
-            .then(() => {
-                if (fileExists(tempPath)) {
-                    GeminiService.sendWithImage('What can you tell me about this screenshot?', tempPath)
-                        .catch(error => {
-                            chatContent.add(SystemMessage(`Error processing screenshot: ${error.message}`, 'Error', geminiView));
-                        })
-                        .finally(() => {
-                            // Clean up temp file after a delay
-                            Utils.timeout(5000, () => {
+        const dialog = new Gtk.FileChooserDialog({
+            title: 'Select a PDF or Image file',
+            action: Gtk.FileChooserAction.OPEN,
+        });
+        dialog.add_button('Cancel', Gtk.ResponseType.CANCEL);
+        dialog.add_button('Open', Gtk.ResponseType.ACCEPT);
+
+        const pdfFilter = new Gtk.FileFilter();
+        pdfFilter.set_name('PDF files');
+        pdfFilter.add_mime_type('application/pdf');
+        dialog.add_filter(pdfFilter);
+
+        const imageFilter = new Gtk.FileFilter();
+        imageFilter.set_name('Image files');
+        imageFilter.add_mime_type('image/png');
+        imageFilter.add_mime_type('image/jpeg');
+        dialog.add_filter(imageFilter);
+
+        dialog.connect('response', (dialog, response) => {
+            if (response === Gtk.ResponseType.ACCEPT) {
+                const path = dialog.get_file().get_path();
+                const mimeType = Utils.exec(`file --mime-type -b "${path}"`).trim();
+
+                // Show sidebar again after file is selected
+                App.toggleWindow("sideleft");
+
+                if (mimeType === 'application/pdf') {
+                    try {
+                        const tempDir = GLib.get_tmp_dir();
+                        const timestamp = new Date().getTime();
+                        const textPath = GLib.build_filenamev([tempDir, `pdf_text_${timestamp}.txt`]);
+                        
+                        console.log('Processing PDF:', path);
+                        console.log('Temp text file:', textPath);
+                        
+                        // First check if pdftotext is available
+                        const hasPdfToText = Utils.exec('which pdftotext').trim() !== '';
+                        if (!hasPdfToText) {
+                            console.error('pdftotext not found. Please install poppler-utils');
+                            chatContent.add(SystemMessage('pdftotext not found. Please install poppler-utils', '/pdf', geminiView));
+                            return;
+                        }
+
+                        Utils.execAsync(['pdftotext', path, textPath])
+                            .then(() => {
+                                console.log('PDF text extraction completed');
+                                const content = Utils.readFile(textPath);
+                                console.log('Extracted text length:', content?.length || 0);
+                                
+                                if (content) {
+                                    GeminiService.send(`Here's the content of the PDF file:\n\n${content}`);
+                                } else {
+                                    console.error('No text content extracted from PDF');
+                                    chatContent.add(SystemMessage('No text could be extracted from the PDF', '/pdf', geminiView));
+                                }
+                                // Clean up temp file
                                 try {
-                                    GLib.unlink(tempPath);
+                                    GLib.unlink(textPath);
+                                    console.log('Temp file cleaned up');
                                 } catch (e) {
                                     console.error('Error cleaning up temp file:', e);
                                 }
+                            })
+                            .catch(error => {
+                                console.error('Error executing pdftotext:', error);
+                                chatContent.add(SystemMessage(`Failed to process PDF file: ${error}`, '/pdf', geminiView));
                             });
-                        });
-                } else {
-                    chatContent.add(SystemMessage('Screenshot cancelled or failed', 'Error', geminiView));
+                    } catch (error) {
+                        console.error('Error in PDF processing setup:', error);
+                        chatContent.add(SystemMessage(`Failed to process PDF file: ${error}`, '/pdf', geminiView));
+                    }
+                } else if (mimeType.startsWith('image/')) {
+                    GeminiService.sendWithImage("What's in this image?", path);
                 }
-            })
-            .catch(error => {
-                chatContent.add(SystemMessage(`Screenshot failed: ${error}`, 'Error', geminiView));
-            });
+            } else {
+                // Show sidebar again if cancelled
+                App.toggleWindow("sideleft");
+            }
+            dialog.destroy();
+        });
+
+        dialog.show();
     },
+    tooltipText: 'Upload file (PDF/Image)',
 });
 
 const handleClipboardImage = () => {
@@ -292,165 +366,105 @@ const handleClipboardImage = () => {
 };
 
 export const sendMessage = (text) => {
-    // Ensure text is a string and not empty
-    if (!text || typeof text !== 'string' || text.length === 0) return;
-    
-    // Clear text entry buffer
-    const buffer = chatEntry.get_buffer();
-    buffer.set_text('', 0);
-    
-    if (GeminiService.key.length == 0) {
-        GeminiService.key = text;
-        chatContent.add(SystemMessage(`Key saved to\n\`${GeminiService.keyPath}\``, 'API Key', geminiView));
-        text = '';
-        return;
-    }
-    
-    // Handle tune command
-    if (text.startsWith('/tune')) {
-        const newPrompt = text.slice(5).trim();
-        
-        // Handle default case
-        if (newPrompt === 'default') {
-            GeminiService.clearCustomPrompt();
-            chatContent.add(SystemMessage('Custom prompt cleared. Using default behavior.', '/tune', geminiView));
-            return;
-        }
-        
-        // Show current prompt
-        if (!newPrompt) {
-            const currentPrompt = GeminiService._customPrompt;
-            chatContent.add(SystemMessage(`Current custom prompt: ${currentPrompt ? '\n' + currentPrompt : '(none)'}`, '/tune', geminiView));
-            return;
-        }
-        
-        // Set new prompt
-        if (GeminiService.setCustomPrompt(newPrompt)) {
-            chatContent.add(SystemMessage('Custom prompt updated! New conversations will use this prompt.', '/tune', geminiView));
-        } else {
-            chatContent.add(SystemMessage('Failed to update custom prompt.', 'Error', geminiView));
-        }
-        return;
-    }
-    
-    // Handle image upload command
-    if (text.startsWith('/image')) {
-        const parts = text.split(' ');
-        
-        // Special handling for clipboard
-        if (parts[1] === 'clipboard' || parts[1] === '/Pasted') {
-            const tempPath = handleClipboardImage();
-            if (tempPath) {
-                const description = parts.slice(2).join(' ') || 'Please analyze this image.';
-                GeminiService.sendWithImage(description, tempPath)
-                    .catch(error => {
-                        chatContent.add(SystemMessage(`Error processing image: ${error.message}`, 'Error', geminiView));
-                    })
-                    .finally(() => {
-                        // Clean up temp file after a delay
-                        Utils.timeout(5000, () => {
-                            try {
-                                GLib.unlink(tempPath);
-                            } catch (e) {
-                                console.error('Error cleaning up temp file:', e);
-                            }
-                        });
-                    });
-            }
-            return;
-        }
-        
-        // Regular file handling
-        if (parts.length < 2) {
-            chatContent.add(SystemMessage('Usage:\n`/image PATH_TO_IMAGE [description]`\n`/image clipboard [description]`', '/image', geminiView));
-            return;
-        }
-        
-        let imagePath = parts[1];
-        // Handle home directory expansion
-        if (imagePath.startsWith('~')) {
-            imagePath = imagePath.replace('~', GLib.get_home_dir());
-        }
-        // Convert to absolute path if relative
-        if (!imagePath.startsWith('/')) {
-            imagePath = GLib.build_filenamev([GLib.get_current_dir(), imagePath]);
-        }
-        
-        if (!fileExists(imagePath)) {
-            chatContent.add(SystemMessage(`Image file not found: ${imagePath}\nMake sure the file exists and the path is correct.`, 'Error', geminiView));
-            return;
-        }
-        
-        const description = parts.slice(2).join(' ') || 'Please analyze this image.';
-        GeminiService.sendWithImage(description, imagePath)
-            .catch(error => {
-                chatContent.add(SystemMessage(`Error processing image: ${error.message}`, 'Error', geminiView));
-            });
-        return;
-    }
-    
-    // Commands
+    if (!text) return;
+
+    // Handle commands
     if (text.startsWith('/')) {
-        if (text.startsWith('/clear')) clearChat();
-        else if (text.startsWith('/load')) {
+        if (text === '/help') {
+            const helpText = `Available commands:
+/help - Show this help message
+/clear - Clear chat history
+/key - Set API key
+/model - Switch between Gemini models
+/tuneall [text] - Replace entire prompt
+/tune default - Reset to default behavior
+
+Example prompts:
+• /tuneall You should use more emojis 😊
+• /tuneall Please be more technical in your responses
+• /tuneall You are a helpful assistant that specializes in Linux
+• /tuneall You are a casual and friendly assistant that uses emojis`;
+            chatContent.add(SystemMessage(helpText, '/help', geminiView));
+            return;
+        }
+
+        if (text === '/clear') {
             clearChat();
-            GeminiService.loadHistory();
+            return;
         }
-        else if (text.startsWith('/model')) chatContent.add(SystemMessage(`${getString("Currently using")} \`${GeminiService.modelName}\``, '/model', geminiView))
-        else if (text.startsWith('/prompt')) {
-            const firstSpaceIndex = text.indexOf(' ');
-            const prompt = text.slice(firstSpaceIndex + 1);
-            if (firstSpaceIndex == -1 || prompt.length < 1) {
-                chatContent.add(SystemMessage(`Usage: \`/prompt MESSAGE\``, '/prompt', geminiView))
+
+        if (text === '/key') {
+            chatContent.add(SystemMessage('Please enter your API key:', '/key', geminiView));
+            return;
+        }
+
+        if (text === '/model') {
+            GeminiService._modelIndex = (GeminiService._modelIndex + 1) % CHAT_MODELS.length;
+            const modelName = CHAT_MODELS[GeminiService._modelIndex];
+            chatContent.add(SystemMessage(`Switched to ${modelName}`, '/model', geminiView));
+            return;
+        }
+
+        // Handle tuning commands
+        if (text.startsWith('/tuneall')) {
+            const newPrompt = text.slice('/tuneall'.length).trim();
+            
+            // Show help if no argument
+            if (!newPrompt) {
+                const currentPrompt = GeminiService._customPrompt || '(none)';
+                chatContent.add(SystemMessage(`Current custom prompt:\n${currentPrompt}\n\nUse:\n• /tuneall [instructions] to replace prompt\n• /tuneall default to reset`, '/tuneall', geminiView));
+                return;
             }
-            else {
-                GeminiService.addMessage('user', prompt)
+            
+            // Handle default case
+            if (newPrompt === 'default') {
+                GeminiService.clearCustomPrompt();
+                chatContent.add(SystemMessage('Custom prompt cleared. Using default behavior.', '/tuneall', geminiView));
+                return;
             }
-        }
-        else if (text.startsWith('/key')) {
-            const parts = text.split(' ');
-            if (parts.length == 1) chatContent.add(SystemMessage(
-                `${getString("Key stored in:")} \n\`${GeminiService.keyPath}\`\n${getString("To update this key, type")} \`/key YOUR_API_KEY\``,
-                '/key',
-                geminiView));
-            else {
-                GeminiService.key = parts[1];
-                chatContent.add(SystemMessage(`${getString("Updated API Key at")}\n\`${GeminiService.keyPath}\``, '/key', geminiView));
+            
+            // Set new prompt
+            if (GeminiService.setCustomPrompt(newPrompt)) {
+                chatContent.add(SystemMessage('Custom prompt replaced! New conversations will use this prompt.', '/tuneall', geminiView));
+            } else {
+                chatContent.add(SystemMessage('Failed to update custom prompt.', 'Error', geminiView));
             }
+            return;
         }
-        else if (text.startsWith('/test'))
-            chatContent.add(SystemMessage(markdownTest, `Markdown test`, geminiView));
-        else if (text.startsWith('/help')) {
-            chatContent.add(SystemMessage(
-                'Available commands:\n' +
-                '`/clear` - Clear chat history\n' +
-                '`/image PATH [description]` - Analyze an image file\n' +
-                '`/image clipboard [description]` - Analyze image from clipboard\n' +
-                '`/key [API_KEY]` - View or update API key\n' +
-                '`/model` - Show current model\n' +
-                '`/prompt MESSAGE` - Add a message without sending\n\n' +
-                'You can also:\n' +
-                '• Click the camera button to select and analyze a screen area\n' +
-                '• Paste an image directly into the chat',
-                '/help',
-                geminiView
-            ));
+
+        // Handle API key input
+        if (GeminiService._key === '') {
+            Utils.writeFile(text, KEY_FILE_LOCATION)
+                .then(() => {
+                    GeminiService._key = text;
+                    chatContent.add(SystemMessage('API key set successfully!', '/key', geminiView));
+                })
+                .catch(error => {
+                    console.error(error);
+                    chatContent.add(SystemMessage('Failed to save API key', '/key', geminiView));
+                });
+            return;
         }
-        else
-            chatContent.add(SystemMessage(getString(`Invalid command.`), 'Error', geminiView))
+
+        // Invalid command
+        chatContent.add(SystemMessage(getString(`Invalid command.`), 'Error', geminiView));
+        return;
     }
-    else {
-        GeminiService.send(text);
-    }
-}
+
+    // Handle normal messages
+    GeminiService.send(text);
+};
 
 export const geminiCommands = Box({
     className: 'spacing-h-5',
     children: [
         Box({ hexpand: true }),
         CommandButton('/help'),
+        ...(GeminiService._key === '' ? [CommandButton('/key')] : []),
+        CommandButton('/model'),
+        // CommandButton('/tuneall'),
         CommandButton('/clear'),
-        CommandButton('/key'),
+        UploadButton(),
     ]
 });
 
@@ -493,6 +507,39 @@ export const geminiView = Box({
                     geminiView.attribute.pinnedDown = adjustment.get_value() == (adjustment.get_upper() - adjustment.get_page_size());
                 });
             }
+        })
+    ]
+});
+
+const MessageContent = (msg, type = 'user', view = geminiView) => Widget.Box({
+    vertical: true,
+    children: [
+        Widget.Box({
+            class_name: `message ${type}`,
+            vertical: true,
+            children: [
+                Widget.Label({
+                    class_name: 'text',
+                    label: msg.text || '',
+                    hpack: type === 'user' ? 'end' : 'start',
+                    wrap: true,
+                    selectable: true,
+                    max_width_chars: 60,
+                }),
+                // Add execute button if message contains code block
+                ...msg.text?.includes('```') ? [Widget.Button({
+                    class_name: 'execute-btn',
+                    hpack: 'start',
+                    label: ' Execute in Kitty',
+                    setup: btn => btn.on_clicked = () => {
+                        // Extract code from the message
+                        const code = msg.text.match(/```(?:\w+\n|\n)?([^`]+)```/)?.[1]?.trim();
+                        if (code) {
+                            Utils.execAsync(['kitty', '--class', 'floating', '-e', 'bash', '-c', `${code}; echo "\nPress any key to exit..."; read -n 1`]);
+                        }
+                    }
+                })] : []
+            ]
         })
     ]
 });
