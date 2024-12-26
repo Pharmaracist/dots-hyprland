@@ -92,66 +92,49 @@ class YouTubeMusicService extends Service {
     constructor() {
         super();
         
-        // Initialize MPV socket
-        this._initMpv();
-        
         // Initialize with default values
         this._currentTrack = null;
         this._volume = 1.0;
         this._playing = false;
         this._repeat = false;
         this._shuffle = false;
-        this._currentVideoId = null;
-        this._playlist = [];
-        this._metadataFile = '/tmp/ytmusic-metadata.json';
         this._position = 0;
         this._duration = 0;
+        this._loading = false;
+        this._cachingStatus = new Map();
+        this._showDownloaded = false;
+        this._downloadedTracks = [];
+        this._mprisPlayer = null;
+        this._options = { ...DEFAULT_OPTIONS };
+        this._audioUrlCache = new Map();
+        this._audioUrlCacheOrder = [];
+        this._trackInfoCache = new Map();
+        this._trackInfoCacheOrder = [];
+        this._preloadQueue = new Set();
+        this._maxPreloadItems = 3;
+        this._cacheTimeout = 30 * 60 * 1000;
+        this._currentVideoId = null;
+        this._playlist = [];
+        this._currentIndex = -1;
+        this._stateFile = GLib.build_filenamev([App.configDir, 'state', 'ytmusic-state.json']);
+        this._updateInterval = null;
+        this._lastOnlineResults = [];
+        this._currentSearchQuery = '';
+        this._lastDownloadedResults = [];
+        this._defaultContent = [];
+        this._cache = new Map();
+
+        // Initialize MPRIS
+        this._setupMprisHandlers();
         
-        // Initialize options first
-        this._initOptions();
-        
-        // Ensure cache directory exists
-        const cacheDir = this._getOption('cacheDir');
-        if (!GLib.file_test(cacheDir, GLib.FileTest.EXISTS)) {
-            GLib.mkdir_with_parents(cacheDir, 0o755);
-        }
-        
-        // Load saved state - this will override the default values
+        // Load saved state
         this._loadState();
-
-        // Connect to MPRIS
-        this._initMpris();
         
-        // Set up state change listeners
-        this.connect('notify::current-track', () => this._saveState());
-        this.connect('notify::volume', () => this._saveState());
-        this.connect('notify::playing', () => this._saveState());
-        this.connect('notify::repeat', () => this._saveState());
-        this.connect('notify::shuffle', () => this._saveState());
-        this.connect('notify::position', () => this._saveState());
-        this.connect('notify::duration', () => this._saveState());
-        this.connect('notify::loading', () => this._saveState());
-
-        // Set up periodic state saving
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 30 * 1000, () => {
-            this._saveState();
-            return GLib.SOURCE_CONTINUE;
-        });
-
-        // Set up periodic cache cleanup
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 5 * 60 * 1000, () => {
-            this._cleanupCache();
-            return GLib.SOURCE_CONTINUE;
-        });
-
-        // Set up periodic position update
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
+        // Start update interval
+        this._updateInterval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
             this._updatePlayingState();
             return GLib.SOURCE_CONTINUE;
         });
-
-        this._initDownloadedTracks();
-        this._initDefaultContent();
     }
 
     _initOptions() {
@@ -190,8 +173,13 @@ class YouTubeMusicService extends Service {
         this.notify('current-track');
     }
 
-    get playing() { return this._playing; }
+    get playing() {
+        const player = this._findMprisPlayer();
+        return player?.playbackStatus === 'Playing' || false;
+    }
+
     set playing(value) {
+        if (this._playing === value) return;
         this._playing = value;
         this.notify('playing');
     }
@@ -259,104 +247,89 @@ class YouTubeMusicService extends Service {
         }
     }
 
+    async _getRelatedTracks(videoId) {
+        try {
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+ytm = YTMusic()
+results = ytm.get_watch_playlist('${videoId}', limit=20)
+if results and 'tracks' in results:
+    tracks = []
+    for track in results['tracks']:
+        tracks.append({
+            'videoId': track['videoId'],
+            'title': track['title'],
+            'artists': [{'name': a['name']} for a in track.get('artists', [])],
+            'duration': track.get('duration_seconds', 0),
+            'thumbnail': track.get('thumbnails', [{}])[-1].get('url', '')
+        })
+    print(json.dumps(tracks))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
+            if (!output.trim()) {
+                return [];
+            }
+            return JSON.parse(output.trim());
+        } catch (error) {
+            console.error('Error getting related tracks:', error);
+            return [];
+        }
+    }
+
     async play(videoId = null) {
         try {
             if (!videoId && !this._currentVideoId) return;
             
             if (videoId) {
-                // Don't kill mpv, just check if it's running
-                const socketExists = GLib.file_test('/tmp/mpvsocket', GLib.FileTest.EXISTS);
-                if (socketExists) {
-                    // Try to communicate with existing mpv
-                    try {
-                        await Utils.execAsync(['socat', '-', '/tmp/mpvsocket'], {
-                            input: '{ "command": ["get_property", "pid"] }\n'
-                        });
-                        // If successful, mpv is running, stop here
-                        return;
-                    } catch (e) {
-                        // Socket exists but not responding, clean up
-                        await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(print);
-                    }
-                }
+                // Kill any existing MPV instance
+                await this._killAllMpv();
 
                 this._currentVideoId = videoId;
                 this.loading = true;
+                this.notify('loading');
                 
                 try {
+                    // Get track info for the clicked song
                     const trackInfo = await this._getTrackInfo(videoId);
-                    if (!trackInfo || trackInfo.error) {
+                    if (!trackInfo) {
                         throw new Error('Failed to get track info');
                     }
 
+                    // Get related tracks for continuous playback
+                    const relatedTracks = await this._getRelatedTracks(videoId);
+                    const playlist = [
+                        `https://music.youtube.com/watch?v=${videoId}`,
+                        ...relatedTracks.map(track => `https://music.youtube.com/watch?v=${track.videoId}`)
+                    ];
+
+                    // Update current track to match bar's format
                     this._currentTrack = {
                         videoId,
-                        title: trackInfo.title,
-                        artists: trackInfo.artists || [],
-                        thumbnail: trackInfo.thumbnail,
-                        duration: trackInfo.duration
+                        trackTitle: trackInfo.title,
+                        trackArtists: trackInfo.artists,
+                        coverPath: trackInfo.thumbnail,
+                        length: trackInfo.duration * 1000000 // Convert to microseconds for MPRIS
                     };
                     this.notify('current-track');
 
-                    // Check if file exists in Music directory
-                    const musicDir = GLib.get_home_dir() + '/Music';
-                    const localFile = `${musicDir}/${trackInfo.title}.opus`;
-
-                    // Set MPRIS metadata
-                    const metadata = {
-                        'xesam:title': trackInfo.title,
-                        'xesam:artist': trackInfo.artists.map(a => a.name),
-                        'mpris:length': trackInfo.duration * 1000000, // Convert to microseconds
-                        'mpris:artUrl': trackInfo.thumbnail,
-                        'xesam:url': `https://music.youtube.com/watch?v=${videoId}`,
-                    };
-
-                    const mprisOptions = [
+                    // Start playback using mpv with minimal arguments
+                    const mpvArgs = [
+                        'mpv',
                         '--no-video',
-                        '--loop-playlist',
                         '--input-ipc-server=/tmp/mpvsocket',
-                        '--script=' + App.configDir + '/scripts/mpv-notify.lua',
-                        '--force-seekable=yes',
-                        '--hr-seek=yes',
-                        '--audio-display=no',
-                        '--no-terminal',
-                        '--no-resume-playback',
-                        '--force-window=no',
-                        '--mpris-name=ytmusic',
-                        `--metadata-codepage=UTF-8`,
-                        `--title=${trackInfo.title}`,
-                        `--force-media-title=${trackInfo.title}`,
+                        '--loop-playlist',
+                        ...playlist
                     ];
 
-                    // Add metadata
-                    Object.entries(metadata).forEach(([key, value]) => {
-                        if (Array.isArray(value)) {
-                            mprisOptions.push(`--metadata=${key}=${value.join(',')}`);
-                        } else {
-                            mprisOptions.push(`--metadata=${key}=${value}`);
-                        }
+                    console.log('Starting MPV with args:', mpvArgs);
+
+                    const mpvProcess = await Utils.execAsync(mpvArgs, {
+                        spawn: true,
                     });
 
-                    if (GLib.file_test(localFile, GLib.FileTest.EXISTS)) {
-                        // Play local file directly
-                        await Utils.execAsync([
-                            'mpv',
-                            ...mprisOptions,
-                            localFile
-                        ], {
-                            spawn: true,
-                        }).catch(print);
-                    } else {
-                        // Stream from YouTube
-                        const url = `https://music.youtube.com/watch?v=${videoId}`;
-                        await Utils.execAsync([
-                            'mpv',
-                            ...mprisOptions,
-                            '--ytdl-format=bestaudio[acodec=opus]/bestaudio/best',
-                            url
-                        ], {
-                            spawn: true,
-                        }).catch(print);
+                    if (!mpvProcess) {
+                        throw new Error('Failed to start MPV');
                     }
 
                     this.playing = true;
@@ -364,307 +337,72 @@ class YouTubeMusicService extends Service {
 
                 } catch (error) {
                     console.error('Error during playback:', error);
-                    this._showNotification('Playback Error', error.message, 'error');
+                    this._showNotification('Playback Error', error.toString());
+                    throw error;
                 } finally {
                     this.loading = false;
                     this.notify('loading');
                 }
+            } else {
+                // Just toggle play/pause
+                await this.togglePlay();
             }
         } catch (error) {
             console.error('Error in play:', error);
-            this._showNotification('Error', error.message, 'error');
+            this._showNotification('Error', error.toString());
             this.loading = false;
             this.notify('loading');
+            throw error;
         }
     }
 
-    async stop() {
-        try {
-            await Utils.execAsync(['killall', '-9', 'mpv']).catch(() => {});
-            this._currentTrack = null;
-            this._currentVideoId = null;
-            this._playing = false;
-            this._mprisPlayer = null;
-            this.notify('current-track');
-            this.notify('playing');
-        } catch (error) {
-            // Removed console logging
-            this._cleanup();
-        }
-    }
-
-    async togglePlay() {
-        try {
-            if (!this._currentVideoId) return;
-
-            // Check if MPV is actually running
-            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
-            if (!mpvRunning) {
-                // MPV not running, restart playback
-                await this.play(this._currentVideoId);
-                return;
-            }
-
-            // Toggle pause state
-            if (this._playing) {
-                await this._sendMpvCommand(['set_property', 'pause', true]);
-                this._playing = false;
-            } else {
-                await this._sendMpvCommand(['set_property', 'pause', false]);
-                this._playing = true;
-            }
-            
-            this.notify('playing');
-        } catch (e) {
-            console.error('Error toggling play state:', e);
-            this._notifyError('Failed to toggle playback');
-            
-            // Reset state if something went wrong
-            const mpvRunning = await Utils.execAsync(['pgrep', 'mpv']).catch(() => null);
-            this._playing = mpvRunning !== null;
-            this.notify('playing');
-        }
-    }
-
-    _cleanup() {
-        this._currentTrack = null;
-        this._currentVideoId = null;
-        this._playing = false;
-        this._mprisPlayer = null;
-        this.notify('current-track');
-        this.notify('playing');
-    }
-
-    async _queueSimilarTracks() {
-        if (!this._currentVideoId) return;
-
-        try {
-            // Get recommendations from ytmusic_helper.py
-            const result = await YTMusicAPI.getRadio(this._currentVideoId);
-
-            const tracks = result;
-            for (const track of tracks) {
-                if (!this._queuedTracks.has(track.videoId)) {
-                    this.addToPlaylist(track);
-                    this._queuedTracks.add(track.videoId);
-                }
-            }
-        } catch (error) {
-            // Removed console logging
-        }
-    }
-
-    _initMpris() {
-        // Initial setup
-        const players = Mpris.players;
-        const ytPlayer = players.find(p => p.identity.toLowerCase().includes('youtube'));
-        if (ytPlayer) {
-            this._mprisPlayer = ytPlayer;
-            this._setupMprisHandlers();
-        }
-
-        // Watch for changes
-        Mpris.connect('changed', () => {
-            const players = Mpris.players;
-            const ytPlayer = players.find(p => p.identity.toLowerCase().includes('youtube'));
-            
-            if (ytPlayer !== this._mprisPlayer) {
-                this._mprisPlayer = ytPlayer;
-                if (ytPlayer) {
-                    this._setupMprisHandlers();
-                } else {
-                    this._currentTrack = null;
-                    this._playing = false;
-                    this._position = 0;
-                    this.notify('current-track');
-                    this.notify('playing');
-                    this.notify('position');
-                }
-            }
-        });
-    }
-
-    _setupMprisHandlers() {
-        if (!this._mprisPlayer) return;
-
-        this._mprisPlayer.connect('notify::metadata', () => {
-            const metadata = this._mprisPlayer.metadata;
-            if (!metadata) return;
-
-            try {
-                const track = {
-                    title: metadata['xesam:title']?.toString() || '',
-                    artists: (metadata['xesam:artist'] || []).map(name => ({ name: name.toString() })),
-                    album: metadata['xesam:album']?.toString() || '',
-                    artUrl: metadata['mpris:artUrl']?.toString() || '',
-                    length: parseInt(metadata['mpris:length']?.toString() || '0', 10),
-                };
-                
-                if (JSON.stringify(this._currentTrack) !== JSON.stringify(track)) {
-                    this._currentTrack = track;
-                    this.notify('current-track');
-                }
-            } catch (e) {
-                console.error('Error updating metadata:', e);
-            }
-        });
-
-        this._mprisPlayer.connect('notify::playback-status', () => {
-            const newStatus = this._mprisPlayer.playbackStatus === 'Playing';
-            if (this._playing !== newStatus) {
-                this._playing = newStatus;
-                this.notify('playing');
-            }
-        });
-
-        this._mprisPlayer.connect('notify::position', () => {
-            const newPosition = this._mprisPlayer.position || 0;
-            if (Math.abs(this._position - newPosition) > 1.0) {
-                this._position = newPosition;
-                this.notify('position');
-            }
-        });
-    }
-
-    async seek(position) {
-        if (!this._mprisPlayer || !this._duration) return;
-
-        try {
-            // Clamp position between 0 and duration
-            const clampedPosition = Math.max(0, Math.min(position, this._duration));
-            
-            // Convert to microseconds for MPRIS
-            const positionUs = Math.floor(clampedPosition * 1000000);
-            
-            // Update position immediately for responsive UI
-            this._position = clampedPosition;
-            this.notify('position');
-
-            // Send seek command to MPV
-            await this._sendMpvCommand(['seek', clampedPosition, 'absolute']);
-            
-            // Verify seek succeeded
-            const actualPosition = await this._getMpvProperty('time-pos');
-            if (Math.abs(actualPosition - clampedPosition) > 1) {
-                // Seek didn't work as expected, update UI with actual position
-                this._position = actualPosition;
-                this.notify('position');
-            }
-        } catch (e) {
-            console.error('Error seeking:', e);
-            // Revert to actual position on error
-            const actualPosition = await this._getMpvProperty('time-pos').catch(() => 0);
-            this._position = actualPosition;
-            this.notify('position');
-        }
-    }
-
-    async _getMpvProperty(property) {
-        const response = await this._sendMpvCommand(['get_property', property]);
-        if (response?.error === 'success' && response.data !== undefined) {
-            return response.data;
-        }
-        return null;
-    }
-
-    async _sendMpvCommand(command) {
-        try {
-            const cmdJson = JSON.stringify({
-                command: command,
-                request_id: Date.now()
-            });
-            
-            // Write command to socket
-            await Utils.execAsync([
-                'socat',
-                '-',
-                'UNIX-CONNECT:/tmp/mpvsocket'
-            ], cmdJson);
-
-            return true;
-        } catch (e) {
-            console.error('Error sending MPV command:', e);
-            return false;
-        }
-    }
-
-    async _initMpv() {
+    async _killAllMpv() {
         try {
             // Only kill mpv if socket doesn't exist or isn't responding
-            const socketExists = GLib.file_test('/tmp/mpvsocket', GLib.FileTest.EXISTS);
-            if (socketExists) {
+            if (Utils.readFile('/tmp/mpvsocket')) {
                 try {
+                    // Try to communicate with the socket
                     await Utils.execAsync(['socat', '-', '/tmp/mpvsocket'], {
-                        input: '{ "command": ["get_property", "pid"] }\n'
+                        input: 'get_property pid\n',
+                        timeout: 1000,
                     });
-                    // If successful, mpv is running, stop here
                     return;
                 } catch (e) {
                     // Socket exists but not responding, clean up
-                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(print);
+                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
                 }
             }
             // Kill mpv only if no valid socket exists
             await Utils.execAsync(['pkill', 'mpv']).catch(() => {});
-            
-            // Create MPV socket directory if it doesn't exist
-            const socketDir = '/tmp/mpv-sockets';
-            if (!GLib.file_test(socketDir, GLib.FileTest.EXISTS)) {
-                GLib.mkdir_with_parents(socketDir, 0o755);
-            }
-
-            // Set up MPV socket
-            const socketPath = GLib.build_filenamev([socketDir, 'ytmusic.sock']);
-            await Utils.execAsync(['mpv', '--idle', '--input-ipc-server=' + socketPath]);
-
-            // Set up end of file handler
-            this._setupMPVEventHandler(socketPath);
         } catch (error) {
-            console.error('Error initializing MPV:', error);
+            console.error('Error killing mpv:', error);
         }
     }
 
-    _setupMPVEventHandler(socketPath) {
-        // Listen for MPV events using socat
-        const cmd = ['socat', '-u', `UNIX-CONNECT:${socketPath}`, '-'];
-        Utils.execAsync(cmd).then(output => {
-            if (output && output.includes('"event":"end-file"')) {
-                this._onTrackEnd();
-            }
-        }).catch(error => {
-            console.error('Error setting up MPV event handler:', error);
-        });
+    async togglePlay() {
+        const player = this._findMprisPlayer();
+        if (player) player.playPause();
     }
 
-    async _onTrackEnd() {
-        // If we have more tracks in the search results, play the next one
-        if (this._searchResults && this._searchResults.length > 0) {
-            const currentIndex = this._searchResults.findIndex(track => track.videoId === this._currentVideoId);
-            if (currentIndex >= 0 && currentIndex < this._searchResults.length - 1) {
-                const nextTrack = this._searchResults[currentIndex + 1];
-                await this.play(nextTrack.videoId);
-            }
-        }
+    async next() {
+        const player = this._findMprisPlayer();
+        if (player) player.next();
     }
 
-    async pause() {
-        try {
-            if (!this._currentVideoId || !this._playing) return;
-            
-            await this._sendMpvCommand(['set_property', 'pause', true]);
-            this._playing = false;
-            this.notify('playing');
-        } catch (e) {
-            console.error('Error pausing:', e);
-            this._notifyError('Failed to pause');
-        }
+    async previous() {
+        const player = this._findMprisPlayer();
+        if (player) player.previous();
     }
 
     async stop() {
         try {
             if (!this._currentVideoId) return;
             
-            await this._sendMpvCommand(['stop']);
+            const player = this._findMprisPlayer();
+            if (player) {
+                player.stop();
+            }
+            await Utils.execAsync(['pkill', 'mpv']).catch(() => {});
             this._playing = false;
             this._position = 0;
             this.notify('playing');
@@ -675,36 +413,68 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _updatePlayingState() {
+    _findMprisPlayer() {
+        const players = Mpris.players;
+        
+        // Try to find our MPV player
+        const mpvPlayer = players.find(p => 
+            p.identity === 'mpv' || 
+            p.busName?.includes('mpv') ||
+            p.name?.includes('mpv')
+        );
+
+        return mpvPlayer || null;
+    }
+
+    _setupMprisHandlers() {
+        this._mprisPlayer = this._findMprisPlayer();
+        if (!this._mprisPlayer) {
+            console.log('No MPV MPRIS player found');
+            return;
+        }
+
+        this._connectMprisSignals();
+    }
+
+    _connectMprisSignals() {
+        if (!this._mprisPlayer) return;
+
+        this._mprisPlayer.connect('notify::playback-status', () => {
+            const newStatus = this._mprisPlayer.playbackStatus === 'Playing';
+            this._playing = newStatus;
+            this.notify('playing');
+        });
+
+        this._mprisPlayer.connect('notify::position', () => {
+            const newPosition = this._mprisPlayer.position / 1000000; // Convert from microseconds
+            if (Math.abs(this._position - newPosition) > 1.0) {
+                this._position = newPosition;
+                this.notify('position');
+            }
+        });
+    }
+
+    _updatePlayingState() {
         if (!this._currentVideoId) return;
 
         try {
-            // Get current playback position and duration
-            const [position, duration] = await Promise.all([
-                this._getMpvProperty('time-pos'),
-                this._getMpvProperty('duration')
-            ]);
+            const player = this._findMprisPlayer();
+            if (player) {
+                const newStatus = player.playBackStatus === 'Playing';
+                if (this._playing !== newStatus) {
+                    this._playing = newStatus;
+                    this.notify('playing');
+                }
 
-            if (position !== null) {
-                this._position = position;
-                this.notify('position');
-            }
-
-            if (duration !== null && duration !== this._duration) {
-                this._duration = duration;
-                this.notify('duration');
-            }
-
-            // Check if track has ended
-            if (position !== null && duration !== null && position >= duration - 0.5) {
-                // Track has ended, play next track
-                await this._playNextTrack();
+                const newPosition = player.position / 1000000; // Convert from microseconds
+                if (Math.abs(this._position - newPosition) > 1.0) {
+                    this._position = newPosition;
+                    this.notify('position');
+                }
             }
         } catch (e) {
             console.error('Error updating playing state:', e);
         }
-
-        return GLib.SOURCE_CONTINUE;
     }
 
     async _playNextTrack() {
@@ -769,6 +539,59 @@ class YouTubeMusicService extends Service {
         this.notify('playlist');
     }
 
+    async _getTrackInfo(videoId) {
+        try {
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+import sys
+
+try:
+    ytm = YTMusic()
+    result = ytm.get_song(videoId='${videoId}')
+    if result:
+        # Extract video ID from one of several possible locations
+        video_id = result.get('videoId') or result.get('videoDetails', {}).get('videoId') or '${videoId}'
+        
+        # Get the best quality thumbnail
+        thumbnails = result.get('thumbnails', []) or result.get('videoDetails', {}).get('thumbnail', {}).get('thumbnails', [])
+        thumbnail_url = thumbnails[-1].get('url') if thumbnails else ''
+        
+        # Get artists - handle different possible structures
+        artists = result.get('artists', []) or result.get('videoDetails', {}).get('author', '').split(',')
+        if isinstance(artists, list):
+            artist_list = [a.get('name') if isinstance(a, dict) else str(a).strip() for a in artists]
+        else:
+            artist_list = [str(artists).strip()]
+        
+        track_info = {
+            'videoId': video_id,
+            'title': result.get('title') or result.get('videoDetails', {}).get('title', ''),
+            'artists': artist_list,
+            'duration': result.get('duration_seconds') or result.get('videoDetails', {}).get('lengthSeconds', 0),
+            'thumbnail': thumbnail_url
+        }
+        print(json.dumps(track_info))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
+            if (!output.trim()) {
+                throw new Error('No track info returned');
+            }
+            
+            const result = JSON.parse(output.trim());
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error getting track info:', error);
+            throw error;
+        }
+    }
+
     async _performSearch(query) {
         try {
             const result = await YTMusicAPI.searchSongs(query);
@@ -797,52 +620,39 @@ class YouTubeMusicService extends Service {
         }
 
         try {
-            this._loading = true;
+            this.loading = true;
             this.notify('loading');
-
-            let results;
-            const lowerQuery = query.toLowerCase();
-
-            if (this._showDownloaded) {
-                // Optimize local search with pre-filtering
-                results = this._downloadedTracks.filter(track => {
-                    const titleMatch = track.title?.toLowerCase().includes(lowerQuery);
-                    const artistMatch = track.artists?.some(artist => 
-                        artist.name?.toLowerCase().includes(lowerQuery)
-                    );
-                    return titleMatch || artistMatch;
-                });
-                this._lastDownloadedResults = results;
+            
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+ytm = YTMusic()
+results = ytm.search('${query}', filter='songs', limit=10)
+tracks = []
+for track in results:
+    tracks.append({
+        'videoId': track['videoId'],
+        'title': track['title'],
+        'artists': [{'name': a['name']} for a in track.get('artists', [])],
+        'duration': track.get('duration_seconds', 0),
+        'thumbnail': track.get('thumbnails', [{}])[-1].get('url', '')
+    })
+print(json.dumps(tracks))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
+            if (!output.trim()) {
+                this._searchResults = [];
             } else {
-                // Online search
-                const isOnline = await this._isOnline();
-                if (!isOnline) {
-                    this._showNotification('Search Failed', 'No internet connection', 'error');
-                    return;
-                }
-
-                results = await this._performSearch(query);
-                
-                // Update download status efficiently
-                const cacheDir = this._getOption('cacheDir');
-                results = results.map(result => ({
-                    ...result,
-                    isDownloaded: GLib.file_test(
-                        GLib.build_filenamev([cacheDir, `${result.videoId}.mp3`]),
-                        GLib.FileTest.EXISTS
-                    )
-                }));
-
-                this._lastOnlineResults = results;
+                this._searchResults = JSON.parse(output.trim());
             }
-
-            this._searchResults = results;
+            
             this.notify('search-results');
         } catch (error) {
-            logError(error);
-            this._showNotification('Search Failed', error.message, 'error');
+            console.error('Error searching:', error);
+            this._searchResults = [];
+            this.notify('search-results');
         } finally {
-            this._loading = false;
+            this.loading = false;
             this.notify('loading');
         }
     }
@@ -907,45 +717,6 @@ class YouTubeMusicService extends Service {
         this._audioUrlCacheOrder.push(videoId);
     }
 
-    async _getTrackInfo(videoId) {
-        // Check memory cache first
-        const cachedInfo = this._trackInfoCache.get(videoId);
-        if (cachedInfo) {
-            return cachedInfo;
-        }
-
-        // Check disk cache
-        const cacheKey = `track_info_${videoId}`;
-        const cachedData = this._getCached(cacheKey);
-        if (cachedData) {
-            this._trackInfoCache.set(videoId, cachedData);
-            return cachedData;
-        }
-
-        try {
-            const trackInfo = await YTMusicAPI.getTrackInfo(videoId);
-            
-            if (!trackInfo.error) {
-                // Cache the successful result
-                this._trackInfoCache.set(videoId, trackInfo);
-                this._setCache(cacheKey, trackInfo);
-                
-                // Cleanup old cache entries if needed
-                if (this._trackInfoCache.size > this._options.maxMemoryCacheSize) {
-                    const oldestKey = this._trackInfoCacheOrder[0];
-                    this._trackInfoCache.delete(oldestKey);
-                    this._trackInfoCacheOrder.shift();
-                }
-                this._trackInfoCacheOrder.push(videoId);
-            }
-            
-            return trackInfo;
-        } catch (error) {
-            console.error('Error getting track info:', error);
-            return { error: error.message };
-        }
-    }
-
     async _getAudioUrl(videoId, shouldCache = true) {
         return `https://music.youtube.com/watch?v=${videoId}`;
     }
@@ -953,7 +724,27 @@ class YouTubeMusicService extends Service {
     async _searchSongs(query) {
         if (!query) return [];
         try {
-            return await YTMusicAPI.searchSongs(query);
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+ytm = YTMusic()
+results = ytm.search('${query}', filter='songs', limit=10)
+tracks = []
+for track in results:
+    tracks.append({
+        'videoId': track['videoId'],
+        'title': track['title'],
+        'artists': [{'name': a['name']} for a in track.get('artists', [])],
+        'duration': track.get('duration_seconds', 0),
+        'thumbnail': track.get('thumbnails', [{}])[-1].get('url', '')
+    })
+print(json.dumps(tracks))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
+            if (!output.trim()) {
+                return [];
+            }
+            return JSON.parse(output.trim());
         } catch (error) {
             console.error('Error searching songs:', error);
             return [];
@@ -963,7 +754,28 @@ class YouTubeMusicService extends Service {
     async _getRadio(videoId) {
         if (!videoId) return [];
         try {
-            return await YTMusicAPI.getRadio(videoId);
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+ytm = YTMusic()
+results = ytm.get_watch_playlist('${videoId}', limit=10)
+if results and 'tracks' in results:
+    tracks = []
+    for track in results['tracks']:
+        tracks.append({
+            'videoId': track['videoId'],
+            'title': track['title'],
+            'artists': [{'name': a['name']} for a in track.get('artists', [])],
+            'duration': track.get('duration_seconds', 0),
+            'thumbnail': track.get('thumbnails', [{}])[-1].get('url', '')
+        })
+    print(json.dumps(tracks))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
+            if (!output.trim()) {
+                return [];
+            }
+            return JSON.parse(output.trim());
         } catch (error) {
             console.error('Error getting radio:', error);
             return [];
@@ -1110,7 +922,7 @@ class YouTubeMusicService extends Service {
             // Update position and duration
             const length = metadata['mpris:length'] || 0;
             if (length > 0) {
-                this._duration = Math.floor(length / 1000000);
+                this._duration = Math.floor(length / 1000000); // Convert from microseconds
                 this.notify('duration');
             }
 
@@ -1126,18 +938,13 @@ class YouTubeMusicService extends Service {
 
     async _showNotification(summary, body = '', urgency = 'normal') {
         try {
-            Utils.execAsync([
-                'notify-send',
-                '--app-name=YouTube Music',
-                '--urgency=' + urgency,
-                '--icon=music',
-                summary,
-                body || ''
-            ]).catch(error => {
-                console.error('Failed to show notification:', error);
+            Utils.notify({
+                summary: summary,
+                body: body,
+                urgency: urgency,
             });
-        } catch (error) {
-            console.error('Error showing notification:', error);
+        } catch (e) {
+            console.error('Notification error:', e);
         }
     }
 
@@ -1296,39 +1103,6 @@ class YouTubeMusicService extends Service {
         }
     }
 
-    async _getTrackInfo(videoId) {
-        if (!videoId) return null;
-        try {
-            return await YTMusicAPI.getTrackInfo(videoId);
-        } catch (error) {
-            console.error('Error getting track info:', error);
-            return null;
-        }
-    }
-
-    async _killAllMpv() {
-        try {
-            // Only kill mpv if socket doesn't exist or isn't responding
-            const socketExists = GLib.file_test('/tmp/mpvsocket', GLib.FileTest.EXISTS);
-            if (socketExists) {
-                try {
-                    await Utils.execAsync(['socat', '-', '/tmp/mpvsocket'], {
-                        input: '{ "command": ["get_property", "pid"] }\n'
-                    });
-                    // MPV is running and responding, don't kill it
-                    return;
-                } catch (e) {
-                    // Socket exists but not responding, clean up
-                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(print);
-                }
-            }
-            // Kill mpv only if no valid socket exists
-            await Utils.execAsync(['pkill', 'mpv']).catch(() => {});
-        } catch (error) {
-            console.error('Error killing mpv:', error);
-        }
-    }
-
     async stopAllInstances() {
         try {
             // Only kill mpv if socket doesn't exist or isn't responding
@@ -1342,7 +1116,7 @@ class YouTubeMusicService extends Service {
                     return;
                 } catch (e) {
                     // Socket exists but not responding, clean up
-                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(print);
+                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
                 }
             }
             // Kill mpv only if no valid socket exists
@@ -1380,17 +1154,25 @@ class YouTubeMusicService extends Service {
             }
 
             // Get trending/recommended music
-            const results = await YTMusicAPI.getTrending();
+            const pythonScript = `
+from ytmusicapi import YTMusic
+import json
+ytm = YTMusic()
+results = ytm.get_trending()
+for result in results:
+    print(json.dumps({
+        'videoId': result['videoId'],
+        'title': result['title'],
+        'artists': [{'name': a['name']} for a in result.get('artists', [])],
+        'duration': result.get('duration_seconds', 0),
+        'thumbnail': result.get('thumbnails', [{}])[-1].get('url', '')
+    }))
+`;
+            const output = await Utils.execAsync(['python3', '-c', pythonScript]);
             
-            // Update download status
-            const cacheDir = this._getOption('cacheDir');
-            this._defaultContent = results.map(result => ({
-                ...result,
-                isDownloaded: GLib.file_test(
-                    GLib.build_filenamev([cacheDir, `${result.videoId}.mp3`]),
-                    GLib.FileTest.EXISTS
-                )
-            }));
+            this._defaultContent = output.split('\n')
+                .filter(line => line.trim())
+                .map(line => JSON.parse(line.trim()));
 
             // If no search is active, show default content
             if (!this._currentSearchQuery) {

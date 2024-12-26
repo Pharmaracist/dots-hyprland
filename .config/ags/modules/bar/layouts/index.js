@@ -1,6 +1,21 @@
 // Layout definitions for different bar modes
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import ScrollableContainer from '../modules/scrollable.js';
+import App from 'resource:///com/github/Aylur/ags/app.js';
+import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+
+// Create variables to track sidebar visibility
+const sideleftVisible = Variable(false);
+const siderightVisible = Variable(false);
+
+App.connect('window-toggled', (_, name, visible) => {
+    if (name === 'sideleft') {
+        sideleftVisible.value = visible;
+    }
+    else if (name === 'sideright') {
+        siderightVisible.value = visible;
+    }
+});
 
 // Utility component for visual separation
 export const Separator = () => Widget.Box({
@@ -63,13 +78,19 @@ export const BarLayouts = {
         name: 'Knocks',
         layout: (modules) => ({
             start: [
-                Widget.Box({  
-                    vpack: "center",
-                    className: 'start-widget',
-                    children: [modules.InfoModules.logo(),modules.InfoModules.windowTitle()],
-                }),
             ],
             center: [
+                Widget.Revealer({
+                    transition: 'slide_right',
+                    transitionDuration: 150,
+                    connections: [[sideleftVisible, self => {
+                        self.reveal_child = sideleftVisible.value;
+                    }]],
+                    child: Widget.Box({
+                        className: 'spacing-h-15 bar-knocks padding-rl-15',
+                        children: [modules.ControlModules.shortcuts()],
+                    }),
+                }),
                 ScrollableContainer({
                     name: 'media',
                     sets: [
@@ -146,6 +167,17 @@ export const BarLayouts = {
                             children: [Widget.Box({hexpand: true,hpack: 'center',children:[ modules.InfoModules.colorscheme() ]}), modules.ControlModules.wallpaper()],
                         })],
                     ],
+                }),
+                Widget.Revealer({
+                    transition: 'slide_left',
+                    transitionDuration: 150,
+                    connections: [[siderightVisible, self => {
+                        self.reveal_child = siderightVisible.value;
+                    }]],
+                    child: Widget.Box({
+                        className: 'spacing-h-15 bar-knocks padding-rl-15',
+                        children: [modules.ControlModules.toggles()],
+                    }),
                 }),
                         
                

@@ -209,29 +209,31 @@ export const MediaControls = () => Box({
                 // xalign: 0,
                 children: [
                         Button({
-                            className: 'control-button sec-txt',
-                            tooltipText: 'play/pause',
-                            child: MaterialIcon('skip_previous', 'normal'),
+                            className: 'txt-norm txt-norm sec-txt bar-music-button',
+                            label: '󰒮',
                             onClicked: () => {
-                                YTMusic._sendMpvCommand(['playlist-prev']);
+                                YTMusic.previous();
                                 return true;
                             },
                             setup: setupCursorHover,
                         }),
                         Button({
-                            className: 'button-play',
-                            child: MaterialIcon(YTMusic.playing ? 'pause' : 'play_arrow', 'larger'),
-                            onClicked: () => {
-                                YTMusic.playing ? YTMusic._sendMpvCommand(['cycle', 'pause']) : YTMusic.play();
-                                return true;
-                            },
-                            setup: setupCursorHover,
+                            className: 'txt-norm txt-norm sec-txt bar-music-button',
+                            setup: (self) => {
+                                const update = () => {
+                                  const player = YTMusic._findMprisPlayer();
+                                  self.label = player?.playbackStatus === 'Playing' ? '󰏤' : '󰐊';
+                                };
+                                self.hook(Mpris, update, 'player-changed');
+                                update();
+                              },
+                            onClicked: () => YTMusic.togglePlay(),
                         }),
                         Button({
-                            className: 'control-button',
-                            child: MaterialIcon('skip_next', 'normal'),
+                            className: 'txt-norm txt-norm sec-txt bar-music-button',
+                            label: '󰒭',
                             onClicked: () => {
-                                YTMusic._sendMpvCommand(['playlist-next']);
+                                YTMusic.next();
                                 return true;
                             },
                             setup: setupCursorHover,
@@ -371,14 +373,24 @@ const SearchResults = () => Box({
                 children: [
                     Widget.Box({
                         className: 'track-thumbnail',
-                        css: `
-                            background-image: url("${item.thumbnail || ''}");
-                            background-size: contain;
+                        css: item.thumbnail ? `
+                            background-image: url("${item.thumbnail}");
+                            background-size: cover;
                             background-repeat: no-repeat;
                             background-position: center;
                             min-width: 48px;
                             min-height: 48px;
                             margin-right: 8px;
+                            border-radius: 8px;
+                        ` : `
+                            background-image: -gtk-icontheme('audio-x-generic-symbolic');
+                            background-size: 24px;
+                            background-repeat: no-repeat;
+                            background-position: center;
+                            min-width: 48px;
+                            min-height: 48px;
+                            margin-right: 8px;
+                            border-radius: 8px;
                         `,
                     }),
                     Widget.Button({

@@ -479,7 +479,8 @@
       "chromium",
       "visual studio code",
       "windsurf",
-      "obsidian"
+      "obsidian",
+      "firefox"
     ],
     "layer": "top",
     "monitorExclusivity": true,
