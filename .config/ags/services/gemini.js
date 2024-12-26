@@ -8,33 +8,11 @@ import { fileExists } from '../modules/.miscutils/files.js';
 
 const HISTORY_DIR = `${GLib.get_user_state_dir()}/ags/user/ai/chats/`;
 const HISTORY_FILENAME = `gemini.txt`;
-const HISTORY_PATH = HISTORY_DIR + HISTORY_FILENAME;
-const initMessages =
-    [
-        { role: "user", parts: [{ text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don’t have enough information to provide a confident answer, simply say “I don’t know” or “I’m not sure.”. \nThanks!" }], },
-        { role: "model", parts: [{ text: "Got it!" }], },
-        { role: "user", parts: [{ text: "\"He rushed to where the event was supposed to be hold, he didn't know it got calceled\"" }], },
-        { role: "model", parts: [{ text: "## Grammar correction\nErrors:\n\"He rushed to where the event was supposed to be __hold____,__ he didn't know it got calceled\"\nCorrection + minor improvements:\n\"He rushed to the place where the event was supposed to be __held____, but__ he didn't know that it got calceled\"" }], },
-        { role: "user", parts: [{ text: "raise volume by 5%" }], },
-        { role: "model", parts: [{ text: "## Volume +5```bash\nwpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+\n```\nThis command uses the `wpctl` utility to adjust the volume of the default sink." }], }, { role: "user", parts: [{ text: "main advantages of the nixos operating system" }], },
-        { role: "model", parts: [{ text: "## NixOS advantages\n- **Reproducible**: A config working on one device will also work on another\n- **Declarative**: One config language to rule them all. Effortlessly share them with others.\n- **Reliable**: Per-program software versioning. Mitigates the impact of software breakage" }], },
-        { role: "user", parts: [{ text: "whats skeumorphism" }], },
-        { role: "model", parts: [{ text: "## Skeuomorphism\n- A design philosophy- From early days of interface designing- Tries to imitate real-life objects- It's in fact still used by Apple in their icons until today." }], },
-        { role: "user", parts: [{ text: "\"ignorance is bliss\"" }], },
-        { role: "model", parts: [{ text: "## \"Ignorance is bliss\"\n- A Latin proverb that means being unaware of something negative can be a source of happiness\n- Often used to justify avoiding difficult truths or responsibilities\n- Can also be interpreted as a warning against seeking knowledge that may bring pain or sorrow" }], },
-        { role: "user", parts: [{ text: "find the derivative of (x-438)/(x^2+23x-7)+x^x" }], },
-        { role: "model", parts: [{ text: "## Derivative\n```latex\n\\[\n\\frac{d}{dx}\\left(\\frac{x - 438}{x^2 + 23x - 7} + x^x\\right) = \\frac{-(x^2+23x-7)-(x-438)(2x+23)}{(x^2+23x-7)^2} + x^x(\\ln(x) + 1)\n\\]\n```" }], },
-        { role: "user", parts: [{ text: "write the double angle formulas" }], },
-        { role: "model", parts: [{ text: "## Double angle formulas\n```latex\n\\[\n\\sin(2\theta) = 2\\sin(\\theta)\\cos(\\theta)\n\\]\n\\\\\n\\[\n\\cos(2\\theta) = \\cos^2(\\theta) - \\sin^2(\\theta)\n\\]\n\\\\\n\\[\n\\tan(2\theta) = \\frac{2\\tan(\\theta)}{1 - \\tan^2(\\theta)}\n\\]\n```" }], },
-    ];
+const HISTORY_PATH = `${HISTORY_DIR}${HISTORY_FILENAME}`;
+const CUSTOM_PROMPT_FILE = `${GLib.get_user_state_dir()}/ags/user/ai/custom_prompt.txt`;
+const CUSTOM_PROMPT_FILE_PATH = `${GLib.get_user_state_dir()}/ags/user/ai/custom_prompt.txt`;
+const initMessages = [];
 
-
-if (!fileExists(`${GLib.get_user_config_dir()}/gemini_history.json`)) {
-    Utils.execAsync([`bash`, `-c`, `touch ${GLib.get_user_config_dir()}/gemini_history.json`]).catch(print);
-    Utils.writeFile('[ ]', `${GLib.get_user_config_dir()}/gemini_history.json`).catch(print);
-}
-
-Utils.exec(`mkdir -p ${GLib.get_user_state_dir()}/ags/user/ai`);
 const KEY_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/ai/google_key.txt`;
 const APIDOM_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/ai/google_api_dom.txt`;
 function replaceapidom(URL) {
@@ -44,8 +22,8 @@ function replaceapidom(URL) {
     }
     return URL;
 }
-const CHAT_MODELS = ["gemini-1.5-flash", "gemini-1.5-flash"] // Using same model for both since it supports vision
-const ONE_CYCLE_COUNT = 3;
+const CHAT_MODELS = ["gemini-pro", "gemini-pro"];
+const ONE_CYCLE_COUNT = 1;
 
 class GeminiMessage extends Service {
     static {
@@ -161,7 +139,7 @@ class GeminiService extends Service {
 
     _assistantPrompt = userOptions.asyncGet().ai.enhancements;
     _cycleModels = true;
-    _usingHistory = userOptions.asyncGet().ai.useHistory;
+    _usingHistory = true; // Enable history by default
     _key = '';
     _requestCount = 0;
     _safe = userOptions.asyncGet().ai.safety;
@@ -170,18 +148,174 @@ class GeminiService extends Service {
     _modelIndex = 0;
     _decoder = new TextDecoder();
     _processingImage = false;
+    _customPrompt = '';
 
     constructor() {
         super();
 
+        this._key = '';
+        this._messages = [];
+        this._modelIndex = 0;
+        this._requestCount = 0;
+        this._temperature = 0.7;
+        this._safe = true;
+        this._cycleModels = false;
+        this._usingHistory = true;
+        this._customPrompt = '';
+
+        // Load custom prompt first
+        this.loadCustomPrompt();
+
+        // Then initialize messages
+        this._messages = this.getInitialMessages();
+
+        // Finally load history if it exists
+        if (this._usingHistory) {
+            this.loadHistory();
+        }
+
         if (fileExists(KEY_FILE_LOCATION)) this._key = Utils.readFile(KEY_FILE_LOCATION).trim();
         else this.emit('hasKey', false);
 
-        // if (this._usingHistory) Utils.timeout(1000, () => this.loadHistory());
-        if (this._usingHistory) this.loadHistory();
-        else this._messages = this._assistantPrompt ? [...initMessages] : [];
-
         this.emit('initialized');
+    }
+
+    getInitialMessages() {
+        // Always start with the base system prompt
+        let messages = [
+            { 
+                role: "user", 
+                parts: [{ 
+                    text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
+                }]
+            },
+            { 
+                role: "model", 
+                parts: [{ 
+                    text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
+                }]
+            }
+        ];
+        
+        // Add custom prompt if exists and not empty
+        if (this._customPrompt && this._customPrompt !== 'default') {
+            messages.push({
+                role: "user",
+                parts: [{ text: this._customPrompt }]
+            });
+            messages.push({
+                role: "model",
+                parts: [{ text: "I'll also follow these additional instructions in my responses." }]
+            });
+        }
+        
+        return messages;
+    }
+
+    loadCustomPrompt() {
+        try {
+            if (fileExists(CUSTOM_PROMPT_FILE)) {
+                this._customPrompt = Utils.readFile(CUSTOM_PROMPT_FILE).trim();
+                // Reset messages to include custom prompt
+                this._messages = this.getInitialMessages();
+                return true;
+            }
+        } catch (error) {
+            console.error('Error loading custom prompt:', error);
+        }
+        this._customPrompt = '';
+        return false;
+    }
+
+    setCustomPrompt(prompt) {
+        try {
+            // Create directory if it doesn't exist
+            Utils.exec(`mkdir -p ${GLib.get_user_state_dir()}/ags/user/ai`);
+            
+            // Save the prompt
+            Utils.writeFile(prompt, CUSTOM_PROMPT_FILE);
+            this._customPrompt = prompt;
+            
+            // Clear existing messages
+            this._messages = [];
+            
+            // Add base system messages
+            const baseMessages = [
+                { 
+                    role: "user", 
+                    parts: [{ 
+                        text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
+                    }]
+                },
+                { 
+                    role: "model", 
+                    parts: [{ 
+                        text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
+                    }]
+                }
+            ];
+            
+            // Add custom prompt
+            if (prompt && prompt !== 'default') {
+                baseMessages.push({
+                    role: "user",
+                    parts: [{ text: `Additional instructions: ${prompt}` }]
+                });
+                baseMessages.push({
+                    role: "model",
+                    parts: [{ text: "I'll also follow these additional instructions in my responses." }]
+                });
+            }
+            
+            this._messages = baseMessages;
+            
+            // Clear history since we're changing the base behavior
+            if (fileExists(HISTORY_PATH)) {
+                Utils.exec(`rm ${HISTORY_PATH}`);
+            }
+            
+            this.emit('clear');
+            return true;
+        } catch (error) {
+            console.error('Error setting custom prompt:', error);
+            return false;
+        }
+    }
+
+    clearCustomPrompt() {
+        try {
+            if (fileExists(CUSTOM_PROMPT_FILE)) {
+                Utils.exec(`rm ${CUSTOM_PROMPT_FILE}`);
+            }
+            this._customPrompt = '';
+            
+            // Reset to default messages
+            this._messages = [
+                { 
+                    role: "user", 
+                    parts: [{ 
+                        text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
+                    }]
+                },
+                { 
+                    role: "model", 
+                    parts: [{ 
+                        text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
+                    }]
+                }
+            ];
+            
+            // Clear history since we're changing the base behavior
+            if (fileExists(HISTORY_PATH)) {
+                Utils.exec(`rm ${HISTORY_PATH}`);
+            }
+            
+            this.emit('clear');
+            return true;
+        } catch (error) {
+            console.error('Error clearing custom prompt:', error);
+            return false;
+        }
     }
 
     get modelName() { return CHAT_MODELS[this._modelIndex] }
@@ -220,280 +354,204 @@ class GeminiService extends Service {
     get lastMessage() { return this._messages[this._messages.length - 1] }
 
     saveHistory() {
-        Utils.exec(`bash -c 'mkdir -p ${HISTORY_DIR} && touch ${HISTORY_PATH}'`);
-        Utils.writeFile(JSON.stringify(this._messages.map(msg => {
-            let m = { role: msg.role, parts: msg.parts }; return m;
-        })), HISTORY_PATH);
+        try {
+            Utils.exec(`mkdir -p ${HISTORY_DIR}`);
+            const historyData = this._messages.map(msg => ({
+                role: msg.role,
+                parts: [{ text: msg.parts[0].text }],
+                thinking: msg.thinking,
+                done: msg.done
+            }));
+            Utils.writeFile(JSON.stringify(historyData, null, 2), HISTORY_PATH);
+        } catch (error) {
+            console.error('Error saving history:', error);
+        }
     }
 
     loadHistory() {
-        this._messages = [];
-        this.appendHistory();
-        this._usingHistory = true;
-    }
+        try {
+            if (fileExists(HISTORY_PATH)) {
+                const historyContent = Utils.readFile(HISTORY_PATH);
+                const historyData = JSON.parse(historyContent);
 
-    appendHistory() {
-        if (fileExists(HISTORY_PATH)) {
-            const readfile = Utils.readFile(HISTORY_PATH);
-            JSON.parse(readfile).forEach(element => {
-                // this._messages.push(element);
-                this.addMessage(element.role, element.parts[0].text);
-            });
-            // console.log(this._messages)
-            // this._messages = this._messages.concat(JSON.parse(readfile));
-            // for (let index = 0; index < this._messages.length; index++) {
-            //     this.emit('newMsg', index);
-            // }
-        }
-        else {
-            this._messages = this._assistantPrompt ? [...initMessages] : []
+                // Clear current messages
+                this._messages = [];
+
+                // Reconstruct messages from history
+                historyData.forEach(msg => {
+                    const message = new GeminiMessage(
+                        msg.role,
+                        msg.parts[0].text,
+                        msg.thinking || false,
+                        msg.done !== false
+                    );
+                    this._messages.push(message);
+                    this.emit('newMsg', this._messages.length - 1);
+                });
+
+                console.log('Loaded chat history:', this._messages.length, 'messages');
+            } else {
+                this._messages = this.getInitialMessages();
+                console.log('No chat history found, starting fresh');
+            }
+        } catch (error) {
+            console.error('Error loading history:', error);
+            this._messages = this.getInitialMessages();
         }
     }
 
     clear() {
-        this._messages = this._assistantPrompt ? [...initMessages] : [];
-        if (this._usingHistory) this.saveHistory();
+        this._messages = this.getInitialMessages();
+        this.saveHistory();
         this.emit('clear');
     }
 
     get assistantPrompt() { return this._assistantPrompt; }
     set assistantPrompt(value) {
         this._assistantPrompt = value;
-        if (value) this._messages = [...initMessages];
+        if (value) this._messages = this.getInitialMessages();
         else this._messages = [];
     }
 
-    readResponse(stream, aiResponse) {
-        stream.read_line_async(
-            0, null,
-            (stream, res) => {
-                try {
-                    const [bytes] = stream.read_line_finish(res);
-                    if (!bytes) {
-                        // Try to parse accumulated response
-                        if (aiResponse._rawData) {
-                            try {
-                                const response = JSON.parse(aiResponse._rawData);
-                                if (response.error) {
-                                    const errorMsg = `Error: ${response.error.message} (${response.error.status})`;
-                                    aiResponse.addDelta(errorMsg);
-                                }
-                                else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-                                    const text = response.candidates[0].content.parts[0].text;
-                                    aiResponse.addDelta(text);
-                                }
-                                else {
-                                    aiResponse.addDelta('Error: Unexpected response format');
-                                }
-                            } catch (e) {
-                                aiResponse.addDelta('Error parsing response');
-                            }
-                        }
-                        
-                        aiResponse.thinking = false;
-                        aiResponse.done = true;
-                        if (this._usingHistory) this.saveHistory();
-                        return;
-                    }
-
-                    const line = this._decoder.decode(bytes);
-                    aiResponse._rawData = (aiResponse._rawData || '') + line;
-
-                    // Handle error responses immediately
-                    if (line.includes('"error"')) {
-                        try {
-                            const errorResponse = JSON.parse(aiResponse._rawData + line + '}');
-                            const errorMsg = `Error: ${errorResponse.error.message} (${errorResponse.error.status})`;
-                            aiResponse.addDelta(errorMsg);
-                            aiResponse.thinking = false;
-                            aiResponse.done = true;
-                            return;
-                        } catch (e) {
-                        }
-                    }
-
-                    // Try to parse complete response
-                    if (line.trim().endsWith('}')) {
-                        try {
-                            const response = JSON.parse(aiResponse._rawData);
-                            if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-                                const text = response.candidates[0].content.parts[0].text;
-                                aiResponse.addDelta(text);
-                                aiResponse.thinking = false;
-                                aiResponse.done = true;
-                                return;
-                            }
-                        } catch (e) {
-                        }
-                    }
-
-                    // Continue reading
-                    this.readResponse(stream, aiResponse);
-                } catch (error) {
-                    aiResponse.done = true;
-                    aiResponse.addDelta('Error reading response: ' + error.message);
-                    if (this._usingHistory) this.saveHistory();
-                    return;
-                }
-            });
-    }
-
-    addMessage(role, message) {
-        this._messages.push(new GeminiMessage(role, message, false));
-        this.emit('newMsg', this._messages.length - 1);
-    }
-
-    send(msg) {
-        this._messages.push(new GeminiMessage('user', msg, false));
-        this.emit('newMsg', this._messages.length - 1);
-        const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
-
-        const body = {
-            "contents": [{
-                "role": "user",
-                "parts": [{ "text": msg }]
-            }],
-            "safetySettings": this._safe ? [] : [
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            ],
-            "generationConfig": {
-                "temperature": this._temperature,
-            },
-        };
-
-        const session = new Soup.Session();
-        session.set_timeout(30); // 30 second timeout
-        
-        const proxyUrl = userOptions.asyncGet().ai.proxyUrl;
-        if (proxyUrl && proxyUrl.length > 0) {
-            const proxyResolver = new Gio.SimpleProxyResolver();
-            proxyResolver.set_default_proxy(proxyUrl);
-            session.set_proxy_resolver(proxyResolver);
+    async send(msg) {
+        if (!this._key) {
+            console.error('No API key found');
+            return;
         }
 
-        const apiUrl = replaceapidom(`https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this._key}`);
-        
-        const message = new Soup.Message({
-            method: 'POST',
-            uri: GLib.Uri.parse(apiUrl, GLib.UriFlags.NONE),
-        });
-        
-        message.request_headers.append('Content-Type', 'application/json');
-        const bodyBytes = new GLib.Bytes(JSON.stringify(body));
-        message.set_request_body_from_bytes('application/json', bodyBytes);
+        // Don't add system messages to history
+        if (!msg.startsWith('/')) {
+            this.addMessage('user', msg);
+        }
 
+        const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
         this._messages.push(aiResponse);
         this.emit('newMsg', this._messages.length - 1);
 
-        session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
-            try {
-                const stream = session.send_finish(result);
-                if (!stream) {
-                    throw new Error('No response stream received');
-                }
-                
-                const dataStream = new Gio.DataInputStream({
-                    close_base_stream: true,
-                    base_stream: stream
-                });
-                
-                this.readResponse(dataStream, aiResponse);
-            }
-            catch (e) {
-                aiResponse.done = true;
-                aiResponse.addDelta('Error in API response: ' + e.message);
-            }
-        });
-
-        if (this._cycleModels && ++this._requestCount % ONE_CYCLE_COUNT == 0)
-            this._modelIndex = (this._requestCount - (this._requestCount % ONE_CYCLE_COUNT)) % CHAT_MODELS.length;
-    }
-
-    async processImage(imagePath) {
         try {
-            this._processingImage = true;
-            this.emit('imageProcessing', true);
-            
-            const imageFile = Gio.File.new_for_path(imagePath);
-            const [success, contents] = imageFile.load_contents(null);
-            
-            if (!success || !contents) {
-                throw new Error('Failed to read image file');
-            }
-            
-            const base64Data = GLib.base64_encode(contents);
-            return base64Data;
-        } catch (error) {
-            throw error;
-        } finally {
-            this._processingImage = false;
-            this.emit('imageProcessing', false);
-        }
-    }
+            const session = new Soup.Session();
+            session.set_timeout(30);
 
-    async sendWithImage(msg, imagePath) {
-        try {
-            const imageData = await this.processImage(imagePath);
-            
-            this._modelIndex = 0;
-            
-            const userMessage = new GeminiMessage('user', msg, false, false, imageData);
-            this._messages.push(userMessage);
-            this.emit('newMsg', this._messages.length - 1);
-            
-            const aiResponse = new GeminiMessage('model', 'Analyzing image...', true, false);
-            
+            const message = new Soup.Message({
+                method: 'POST',
+                uri: GLib.Uri.parse(
+                    `https://generativelanguage.googleapis.com/v1/models/${CHAT_MODELS[this._modelIndex]}:generateContent?key=${this._key}`,
+                    GLib.UriFlags.NONE
+                ),
+            });
+
+            // Only include actual conversation messages
+            const contents = this._messages
+                .filter(msg => !msg.text?.startsWith('/'))
+                .map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.parts[0].text }]
+                }));
+
             const body = {
-                "contents": [{
-                    "role": userMessage.role,
-                    "parts": [
-                        {
-                            "text": msg
-                        },
-                        {
-                            "inline_data": {
-                                "mime_type": "image/png",
-                                "data": imageData
-                            }
-                        }
-                    ]
-                }],
-                "safety_settings": this._safe ? [] : [
+                contents,
+                safetySettings: [
                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
                     { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
                     { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
                     { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                 ],
-                "generation_config": {
-                    "temperature": this._temperature,
+                generationConfig: {
+                    temperature: this._temperature,
+                },
+            };
+
+            message.request_headers.append('Content-Type', 'application/json');
+            message.set_request_body_from_bytes(
+                'application/json',
+                new GLib.Bytes(JSON.stringify(body))
+            );
+
+            const response = await new Promise((resolve, reject) => {
+                session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
+                    try {
+                        const stream = session.send_finish(result);
+                        if (!stream) {
+                            reject(new Error('No response stream received'));
+                            return;
+                        }
+                        resolve(stream);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
+
+            const dataStream = new Gio.DataInputStream({
+                close_base_stream: true,
+                base_stream: response
+            });
+
+            this.readResponse(dataStream, aiResponse);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            aiResponse.thinking = false;
+            aiResponse.done = true;
+            aiResponse.addDelta(`Error sending message: ${error.message}`);
+            if (this._usingHistory) {
+                this.saveHistory();
+            }
+        }
+    }
+
+    async sendWithImage(msg, imagePath) {
+        try {
+            this._processingImage = true;
+            const [imageData, mimeType] = await this.processImage(imagePath);
+            this._processingImage = false;
+
+            this.addMessage('user', msg);
+            const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
+            this._messages.push(aiResponse);
+            this.emit('newMsg', this._messages.length - 1);
+
+            const session = new Soup.Session();
+            session.set_timeout(30);
+
+            const message = new Soup.Message({
+                method: 'POST',
+                uri: GLib.Uri.parse(
+                    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this._key}`,
+                    GLib.UriFlags.NONE
+                ),
+            });
+
+            const contents = this._messages.map(msg => ({
+                role: msg.role,
+                parts: [{ text: msg.parts[0].text }]
+            }));
+
+            const body = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: msg },
+                        {
+                            inline_data: {
+                                mime_type: mimeType,
+                                data: imageData
+                            }
+                        }
+                    ]
+                }],
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                ],
+                generationConfig: {
+                    temperature: this._temperature,
                 }
             };
 
-            const session = new Soup.Session();
-            session.set_timeout(30); // 30 second timeout
-            
-            const proxyUrl = userOptions.asyncGet().ai.proxyUrl;
-            if (proxyUrl && proxyUrl.length > 0) {
-                const proxyResolver = new Gio.SimpleProxyResolver();
-                proxyResolver.set_default_proxy(proxyUrl);
-                session.set_proxy_resolver(proxyResolver);
-            }
-
-            const apiUrl = replaceapidom(`https://generativelanguage.googleapis.com/v1/models/${this.modelName}:generateContent?key=${this._key}`);
-            
-            const message = new Soup.Message({
-                method: 'POST',
-                uri: GLib.Uri.parse(apiUrl, GLib.UriFlags.NONE),
-            });
-            
             message.request_headers.append('Content-Type', 'application/json');
-            const bodyBytes = new GLib.Bytes(JSON.stringify(body));
-            message.set_request_body_from_bytes('application/json', bodyBytes);
-
-            this._messages.push(aiResponse);
-            this.emit('newMsg', this._messages.length - 1);
+            message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
 
             session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
                 try {
@@ -501,21 +559,101 @@ class GeminiService extends Service {
                     if (!stream) {
                         throw new Error('No response stream received');
                     }
-                    
+
                     const dataStream = new Gio.DataInputStream({
                         close_base_stream: true,
                         base_stream: stream
                     });
-                    
+
                     this.readResponse(dataStream, aiResponse);
-                }
-                catch (e) {
+                } catch (e) {
                     aiResponse.done = true;
                     aiResponse.addDelta('Error in vision API response: ' + e.message);
                 }
             });
         } catch (error) {
+            console.error('Error processing image:', error);
+        }
+    }
+
+    readResponse(stream, aiResponse) {
+        try {
+            // Read the entire response at once
+            const bytes = stream.read_bytes(1024 * 1024, null); // 1MB buffer
+            if (!bytes || bytes.get_size() === 0) {
+                throw new Error('Empty response received');
+            }
+
+            // Parse response
+            const decoder = new TextDecoder();
+            const responseText = decoder.decode(bytes);
+            const response = JSON.parse(responseText);
+
+            // Handle error responses
+            if (response.error) {
+                throw new Error(`API Error: ${response.error.message}`);
+            }
+
+            // Check for valid response structure
+            if (!response.candidates || !response.candidates[0] || !response.candidates[0].content) {
+                throw new Error('Invalid response structure');
+            }
+
+            const content = response.candidates[0].content;
+            if (!content.parts || !content.parts[0] || typeof content.parts[0].text !== 'string') {
+                throw new Error('Invalid content structure');
+            }
+
+            // Update message with the response text
+            aiResponse.addDelta(content.parts[0].text);
+            
+            // If this was a successful response, add it to history
+            if (!aiResponse.text.startsWith('/')) {
+                this._messages[this._messages.length - 1] = {
+                    role: 'model',
+                    parts: [{ text: content.parts[0].text }],
+                    thinking: false,
+                    done: true
+                };
+            }
+
+        } catch (error) {
+            console.error('Error processing response:', error);
+            aiResponse.addDelta(`Error: ${error.message}`);
+        } finally {
+            // Always mark as done
+            aiResponse.thinking = false;
+            aiResponse.done = true;
+            if (this._usingHistory) {
+                this.saveHistory();
+            }
+        }
+    }
+
+    addMessage(role, message) {
+        const msg = new GeminiMessage(role, message, false, true);
+        this._messages.push(msg);
+        this.emit('newMsg', this._messages.length - 1);
+        if (this._usingHistory) this.saveHistory();
+    }
+
+    async processImage(imagePath) {
+        try {
+            this._processingImage = true;
+            const imageFile = Gio.File.new_for_path(imagePath);
+            const [success, contents] = imageFile.load_contents(null);
+
+            if (!success || !contents) {
+                throw new Error('Failed to read image file');
+            }
+
+            const base64Data = GLib.base64_encode(contents);
+            return [base64Data, 'image/jpeg'];
+        } catch (error) {
             throw error;
+        } finally {
+            this._processingImage = false;
+            this.emit('imageProcessing', false);
         }
     }
 }

@@ -351,8 +351,6 @@ echo -e "${GREEN}===============================================================
 echo -e "${CYAN}Setting up Islamic features:${RESET}"
 echo -e "${YELLOW}1. 🕌 Prayer times integration${RESET}"
 echo -e "${YELLOW}2. 📖 Quran reader and references${RESET}"
-echo -e "${YELLOW}3. 🌙 Hijri calendar${RESET}"
-echo -e "${YELLOW}4. 🎨 Islamic-themed color schemes${RESET}"
 
 echo -e "${GREEN}=====================================================================${RESET}"
 echo -e "${BLUE}                   🎨 Color Harmony Setup                            ${RESET}"

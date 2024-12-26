@@ -61,74 +61,90 @@ const GeminiInfo = () => {
     });
 }
 
-export const GeminiSettings = () => MarginRevealer({
-    transition: 'slide_down',
-    revealChild: true,
-    extraSetup: (self) => self
-        .hook(GeminiService, (self) => Utils.timeout(200, () => {
-            self.attribute.hide();
-        }), 'newMsg')
-        .hook(GeminiService, (self) => Utils.timeout(200, () => {
-            self.attribute.show();
-        }), 'clear')
-    ,
-    child: Box({
-        vertical: true,
-        className: 'sidebar-chat-settings',
-        children: [
-            ConfigSegmentedSelection({
-                hpack: 'center',
-                icon: 'casino',
-                name: 'Randomness',
-                desc: getString("Gemini's temperature value.\n  Precise = 0\n  Balanced = 0.5\n  Creative = 1"),
-                options: [
-                    { value: 0.00, name: getString('Precise'), },
-                    { value: 0.50, name: getString('Balanced'), },
-                    { value: 1.00, name: getString('Creative'), },
-                ],
-                initIndex: 2,
-                onChange: (value, name) => {
-                    GeminiService.temperature = value;
-                },
-            }),
-            ConfigGap({ vertical: true, size: 10 }), // Note: size can only be 5, 10, or 15
-            Box({
-                vertical: true,
-                hpack: 'fill',
-                className: 'sidebar-chat-settings-toggles',
-                children: [
-                    ConfigToggle({
-                        icon: 'model_training',
-                        name: getString('Enhancements'),
-                        desc: getString("Tells Gemini:\n- It's a Linux sidebar assistant\n- Be brief and use bullet points"),
-                        initValue: GeminiService.assistantPrompt,
-                        onChange: (self, newValue) => {
-                            GeminiService.assistantPrompt = newValue;
-                        },
-                    }),
-                    ConfigToggle({
-                        icon: 'shield',
-                        name: getString('Safety'),
-                        desc: getString("When turned off, tells the API (not the model) \nto not block harmful/explicit content"),
-                        initValue: GeminiService.safe,
-                        onChange: (self, newValue) => {
-                            GeminiService.safe = newValue;
-                        },
-                    }),
-                    ConfigToggle({
-                        icon: 'history',
-                        name: getString('History'),
-                        desc: getString("Saves chat history\nMessages in previous chats won't show automatically, but they are there"),
-                        initValue: GeminiService.useHistory,
-                        onChange: (self, newValue) => {
-                            GeminiService.useHistory = newValue;
-                        },
-                    }),
-                ]
-            })
-        ]
-    })
-});
+export const GeminiSettings = () => {
+    const customPromptButton = Button({
+        className: 'txt-small txt-action-button',
+        label: 'Set Custom Prompt',
+        onClicked: () => {
+            const currentPrompt = GeminiService.getCustomPrompt();
+            const entry = Widget.Entry({
+                text: currentPrompt,
+                placeholder_text: 'Enter additional instructions for the AI...',
+                className: 'custom-prompt-entry',
+            });
+            dialog.present();
+        },
+    });
+
+    return MarginRevealer({
+        transition: 'slide_down',
+        revealChild: true,
+        extraSetup: (self) => self
+            .hook(GeminiService, (self) => Utils.timeout(200, () => {
+                self.attribute.hide();
+            }), 'newMsg')
+            .hook(GeminiService, (self) => Utils.timeout(200, () => {
+                self.attribute.show();
+            }), 'clear')
+        ,
+        child: Box({
+            vertical: true,
+            className: 'sidebar-chat-settings',
+            children: [
+                ConfigSegmentedSelection({
+                    hpack: 'center',
+                    icon: 'casino',
+                    name: 'Randomness',
+                    desc: getString("Gemini's temperature value.\n  Precise = 0\n  Balanced = 0.5\n  Creative = 1"),
+                    options: [
+                        { value: 0.00, name: getString('Precise'), },
+                        { value: 0.50, name: getString('Balanced'), },
+                        { value: 1.00, name: getString('Creative'), },
+                    ],
+                    initIndex: 2,
+                    onChange: (value, name) => {
+                        GeminiService.temperature = value;
+                    },
+                }),
+                ConfigGap({ vertical: true, size: 10 }), // Note: size can only be 5, 10, or 15
+                Box({
+                    vertical: true,
+                    hpack: 'fill',
+                    className: 'sidebar-chat-settings-toggles',
+                    children: [
+                        ConfigToggle({
+                            icon: 'model_training',
+                            name: getString('Enhancements'),
+                            desc: getString("Tells Gemini:\n- It's a Linux sidebar assistant\n- Be brief and use bullet points"),
+                            initValue: GeminiService.assistantPrompt,
+                            onChange: (self, newValue) => {
+                                GeminiService.assistantPrompt = newValue;
+                            },
+                        }),
+                        ConfigToggle({
+                            icon: 'shield',
+                            name: getString('Safety'),
+                            desc: getString("When turned off, tells the API (not the model) \nto not block harmful/explicit content"),
+                            initValue: GeminiService.safe,
+                            onChange: (self, newValue) => {
+                                GeminiService.safe = newValue;
+                            },
+                        }),
+                        ConfigToggle({
+                            icon: 'history',
+                            name: getString('History'),
+                            desc: getString("Saves chat history\nMessages in previous chats won't show automatically, but they are there"),
+                            initValue: GeminiService.useHistory,
+                            onChange: (self, newValue) => {
+                                GeminiService.useHistory = newValue;
+                            },
+                        }),
+                    ]
+                })
+            ]
+        })
+    });
+};
 
 export const GoogleAiInstructions = () => Box({
     homogeneous: true,
@@ -287,6 +303,33 @@ export const sendMessage = (text) => {
         GeminiService.key = text;
         chatContent.add(SystemMessage(`Key saved to\n\`${GeminiService.keyPath}\``, 'API Key', geminiView));
         text = '';
+        return;
+    }
+    
+    // Handle tune command
+    if (text.startsWith('/tune')) {
+        const newPrompt = text.slice(5).trim();
+        
+        // Handle default case
+        if (newPrompt === 'default') {
+            GeminiService.clearCustomPrompt();
+            chatContent.add(SystemMessage('Custom prompt cleared. Using default behavior.', '/tune', geminiView));
+            return;
+        }
+        
+        // Show current prompt
+        if (!newPrompt) {
+            const currentPrompt = GeminiService._customPrompt;
+            chatContent.add(SystemMessage(`Current custom prompt: ${currentPrompt ? '\n' + currentPrompt : '(none)'}`, '/tune', geminiView));
+            return;
+        }
+        
+        // Set new prompt
+        if (GeminiService.setCustomPrompt(newPrompt)) {
+            chatContent.add(SystemMessage('Custom prompt updated! New conversations will use this prompt.', '/tune', geminiView));
+        } else {
+            chatContent.add(SystemMessage('Failed to update custom prompt.', 'Error', geminiView));
+        }
         return;
     }
     

@@ -41,7 +41,7 @@
 - **Productivity**: Todo list, calendar, timers, multi-monitor support
 - **Development**: Full dev environment with VSCode, Git, Python setup
 - **System Tools**: Resource monitoring, package management, auto-updates
-- **Security**: Custom screen locking, privacy features, secure sharing
+<!-- - **Security**: Custom screen locking, privacy features, secure sharing -->
 </details>
 
 <details>
@@ -62,12 +62,34 @@ curl -fsSL https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/ins
 - X86_64 architecture
 - Internet connection
 - Basic terminal knowledge
+- A Brain 🙂🧠
 </details>
 
+## 🖼️ Gallery
+
+<div align="center">
+  <details open>
+    <summary>📸 Screenshots</summary>
+    <br/>
+    
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+    <img src="pics/Pasted%20image.png" alt="Screenshot 1" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(2).png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(3).png" alt="Screenshot 3" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(4).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(6).png" alt="Screenshot 5" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(7).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
+  </div>
+
+  </details>
+</div>
+
 ## 🙏 Credits
-- Material Design 3 for inspiration
+- End-4 for the original Hyprland rice
+- Sh1zicus for the help to make this work and the awesome kickstart 
+- My GF for the support hehe !!
 - Hyprland community
-- All the amazing ricers
-- osu!lazer, Windows 11, AvdanOS (concept), Old End4 Configs
+- All the amazing ricers at Unixporn
+- osu!lazer, Novelknocks , Hybrid , AvdanOS (concept), Old End4 Configs
 
 *Note: This README was made by AI cuz im too lazy to write it myself! ..Pharmaracist*
