@@ -830,46 +830,12 @@ if results:
             }
         },
         '>bar': () => {
-            const barModes = {
-                'pads': 1,
-                'knocks': 2,
-                'normal': 3,
-                'minimal': 4,
-                'default': userOptions.value.defaultBarMode || 1
-            };
-
-            if (!args[0]) {
-                execAsync(['notify-send', 'Bar Mode', 
-                    'Usage: >bar [mode]\n' +
-                    'Modes:\n' +
-                    '  default    - Default mode (currently: ' + barModes.default + ')\n' +
-                    '  pads      - Pads mode\n' +
-                    '  knocks    - Knocks mode\n' +
-                    '  normal    - Normal mode\n' +
-                    '  minimal   - Minimal mode\n' +
-                    'Numbers 1-4 also work'
-                ]).catch(print);
-                return;
-            }
-
-            const input = args[0].toLowerCase();
-            let mode;
-
-            if (barModes[input] !== undefined) {
-                mode = barModes[input];
-            } else {
-                mode = parseInt(input);
-            }
-
-            if (mode >= 1 && mode <= 4) {
-                const monitor = Hyprland.active.monitor.id || 0;
-                const newValue = [...currentShellMode.value];
-                newValue[monitor] = mode;
-                currentShellMode.value = newValue;
-                const modeName = Object.entries(barModes).find(([name, num]) => num === mode)?.[0] || 'unknown';
-                execAsync(['notify-send', 'Bar Mode', `Switched to ${modeName} mode`]).catch(print);
-            } else {
-                execAsync(['notify-send', 'Bar Mode', 'Invalid mode. Use >bar to see available modes.']).catch(print);
+            if (cmd.startsWith('>bar')) {
+                const mode = parseInt(cmd.substring(4).trim());
+                if (!isNaN(mode)) {
+                    updateBarMode(mode);
+                    return true;
+                }
             }
         },
         '>bard': () => {
@@ -887,31 +853,16 @@ if results:
 
             const newDefault = parseInt(args[0]);
             if (newDefault >= 1 && newDefault <= 4) {
-                // Update the value
-                userOptions.value = {
-                    ...userOptions.value,
-                    defaultBarMode: newDefault
-                };
-
-                // Save to config file
-                try {
-                    Utils.writeFile(
-                        JSON.stringify(userOptions.value, null, 2),
-                        USER_CONFIG_FILE
-                    );
-                    
-                    // Switch to the new default mode immediately
-                    const monitor = Hyprland.active.monitor.id || 0;
-                    const newValue = [...currentShellMode.value];
-                    newValue[monitor] = newDefault;
-                    currentShellMode.value = newValue;
-                    
-                    execAsync(['notify-send', 'Default Bar Mode', `Set and switched to default mode ${newDefault}`]).catch(print);
-                } catch (e) {
-                    execAsync(['notify-send', 'Default Bar Mode', 'Failed to save config: ' + e.message]).catch(print);
-                }
+                updateBarMode(newDefault);
+                execAsync(['notify-send', 'Default Bar Mode', `Set default to ${newDefault}`]).catch(print);
+                
+                // Switch to the new default mode immediately
+                const monitor = Hyprland.active.monitor.id || 0;
+                const newValue = [...currentShellMode.value];
+                newValue[monitor] = newDefault;
+                currentShellMode.value = newValue;
             } else {
-                execAsync(['notify-send', 'Default Bar Mode', 'Invalid mode. Use a number between 1-4.']).catch(print);
+                execAsync(['notify-send', 'Default Bar Mode', 'Invalid mode. Use >bard to see available modes.']).catch(print);
             }
         },
     };

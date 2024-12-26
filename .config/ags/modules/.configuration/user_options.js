@@ -71,5 +71,31 @@ const monitor = Utils.monitorFile (USER_CONFIG_FOLDER + 'config.json', (file, ev
     if (event == 1) { update (file.get_path()); }
 });
 
+async function updateBarMode(mode) {
+    const configFile = USER_CONFIG_FOLDER + 'config.json';
+    if (!fileExists(configFile)) return;
+
+    try {
+        // Read current config
+        const currentConfig = JSON.parse(Utils.readFile(configFile));
+        
+        // Update only the bar mode
+        currentConfig.defaultBarMode = mode;
+        
+        // Write back the full config
+        await Utils.writeFile(JSON.stringify(currentConfig, null, 2), configFile);
+        
+        // Update the runtime config
+        update(configFile);
+    } catch (e) {
+        console.error('Error updating bar mode:', e);
+        Utils.notify({
+            summary: 'Failed to update bar mode',
+            body: e.message || 'Unknown error'
+        });
+    }
+}
+
 globalThis['userOptions'] = _userOptions;
+globalThis['updateBarMode'] = updateBarMode;
 export default _userOptions;

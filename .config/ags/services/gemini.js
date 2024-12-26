@@ -5,6 +5,7 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Soup from 'gi://Soup?version=3.0';
 import { fileExists } from '../modules/.miscutils/files.js';
+import Todo from './todo.js';
 
 const HISTORY_DIR = `${GLib.get_user_state_dir()}/ags/user/ai/chats/`;
 const HISTORY_FILENAME = `gemini.txt`;
@@ -25,6 +26,31 @@ function replaceapidom(URL) {
 const CHAT_MODELS = ["gemini-pro", "gemini-1.5-pro"];
 export { CHAT_MODELS };
 const ONE_CYCLE_COUNT = 1;
+
+function getContextPrompt() {
+    const content = Todo.gemini_content;
+    return `
+Here are my current tasks and notes. Please consider them when answering:
+
+Tasks:
+${content.todos}
+
+Notes:
+${content.notes}
+
+You can help me manage my tasks and notes with these commands:
+- To add a task, respond with: !addtask Your task content here
+- To add a note, respond with: !addnote Your note content here
+- To mark a task as done, respond with: !done task_number (task numbers start from 0)
+- To remove a task/note, respond with: !remove task_number (task numbers start from 0)
+
+When the user starts a message with "remember", automatically save it as a note without asking any questions.
+When the user says "note it", save the previous message as a note.
+
+Important: Task and note numbers start from 0. When referring to tasks or notes, always use their index number.
+Please respond naturally, and if I ask you to add/modify tasks or notes, use the commands above in your response.
+`.trim();
+}
 
 class GeminiMessage extends Service {
     static {
@@ -147,6 +173,7 @@ class GeminiService extends Service {
     _messages = [];
     _modelIndex = 0;
     _decoder = new TextDecoder();
+    _encoder = new TextEncoder();
     _processingImage = false;
     _customPrompt = '';
 
@@ -413,231 +440,109 @@ class GeminiService extends Service {
         else this._messages = [];
     }
 
-    async send(msg) {
-        if (!this._key) {
-            console.error('No API key found');
-            return;
-        }
-
-        // Don't add system messages to history
-        if (!msg.startsWith('/')) {
-            this.addMessage('user', msg);
-        }
-
-        const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
-        this._messages.push(aiResponse);
-        this.emit('newMsg', this._messages.length - 1);
-
-        try {
-            const session = new Soup.Session();
-            session.set_timeout(30);
-
-            const message = new Soup.Message({
-                method: 'POST',
-                uri: GLib.Uri.parse(
-                    `https://generativelanguage.googleapis.com/v1/models/${CHAT_MODELS[this._modelIndex]}:generateContent?key=${this._key}`,
-                    GLib.UriFlags.NONE
-                ),
-            });
-
-            // Only include actual conversation messages
-            const contents = this._messages
-                .filter(msg => !msg.text?.startsWith('/'))
-                .map(msg => ({
-                    role: msg.role,
-                    parts: [{ text: msg.parts[0].text }]
-                }));
-
-            const body = {
-                contents,
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ],
-                generationConfig: {
-                    temperature: this._temperature,
-                },
-            };
-
-            message.request_headers.append('Content-Type', 'application/json');
-            message.set_request_body_from_bytes(
-                'application/json',
-                new GLib.Bytes(JSON.stringify(body))
-            );
-
-            const response = await new Promise((resolve, reject) => {
-                session.send_async(message, GLib.DEFAULT_PRIORITY, null, (_, result) => {
-                    try {
-                        const stream = session.send_finish(result);
-                        if (!stream) {
-                            reject(new Error('No response stream received'));
-                            return;
-                        }
-                        resolve(stream);
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-            });
-
-            const dataStream = new Gio.DataInputStream({
-                close_base_stream: true,
-                base_stream: response
-            });
-
-            this.readResponse(dataStream, aiResponse);
-        } catch (error) {
-            console.error('Error sending message:', error);
-            aiResponse.thinking = false;
-            aiResponse.done = true;
-            aiResponse.addDelta(`Error sending message: ${error.message}`);
-            if (this._usingHistory) {
-                this.saveHistory();
-            }
-        }
-    }
-
-    async processImage(imagePath) {
-        // Convert image to base64 and get MIME type
-        const file = Gio.File.new_for_path(imagePath);
-        const fileInfo = file.query_info('standard::content-type', 0, null);
-        const mimeType = fileInfo.get_content_type();
-
-        // Read file content
-        const [, contents] = file.load_contents(null);
-        const base64 = GLib.base64_encode(contents);
-
-        return [base64, mimeType];
-    }
-
-    async sendWithImage(msg, imagePath) {
-        if (!this._key) {
-            console.error('No API key set');
-            return;
-        }
-
-        try {
-            const [imageData, mimeType] = await this.processImage(imagePath);
-
-            this.addMessage('user', msg);
-            const aiResponse = new GeminiMessage('model', 'thinking...', true, false);
-            this._messages.push(aiResponse);
-            this.emit('newMsg', this._messages.length - 1);
-
-            const session = new Soup.Session();
-            session.set_timeout(30);
-
-            const message = new Soup.Message({
-                method: 'POST',
-                uri: GLib.Uri.parse(
-                    replaceapidom(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${this._key}`),
-                    GLib.UriFlags.NONE
-                ),
-            });
-
-            const body = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: msg },
-                        {
-                            inline_data: {
-                                mime_type: mimeType,
-                                data: imageData
-                            }
-                        }
-                    ]
-                }],
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ],
-                generationConfig: {
-                    temperature: this._temperature,
-                }
-            };
-
-            message.request_headers.append('Content-Type', 'application/json');
-            message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
-
-            const stream = await session.send_async(message, GLib.DEFAULT_PRIORITY, null);
-            await this.readResponse(stream, aiResponse);
-        } catch (error) {
-            console.error('Error processing image:', error);
-            const aiResponse = new GeminiMessage('model', 'Failed to process image: ' + error.message, false, true);
-            this._messages.push(aiResponse);
-            this.emit('newMsg', this._messages.length - 1);
-        }
-    }
-
-    readResponse(stream, aiResponse) {
-        try {
-            // Read the entire response at once
-            const bytes = stream.read_bytes(1024 * 1024, null); // 1MB buffer
-            if (!bytes || bytes.get_size() === 0) {
-                throw new Error('Empty response received');
-            }
-
-            // Parse response
-            const decoder = new TextDecoder();
-            const rawResponse = decoder.decode(bytes);
-            const response = JSON.parse(rawResponse);
-
-            // Handle error responses
-            if (response.error) {
-                throw new Error(`API Error: ${response.error.message}`);
-            }
-
-            // Check for valid response structure
-            if (!response.candidates || !response.candidates[0] || !response.candidates[0].content) {
-                throw new Error('Invalid response structure');
-            }
-
-            const content = response.candidates[0].content;
-            if (!content.parts || !content.parts[0] || typeof content.parts[0].text !== 'string') {
-                throw new Error('Invalid content structure');
-            }
-
-            // Update message with the response text
-            const messageText = content.parts[0].text;
-            aiResponse.addDelta(messageText);
-            
-            // If this was a successful response, update the message in history
-            if (aiResponse.text && !aiResponse.text.startsWith('/')) {
-                const messageIndex = this._messages.length - 1;
-                if (messageIndex >= 0) {
-                    this._messages[messageIndex] = {
-                        role: 'model',
-                        parts: [{ text: messageText }],
-                        text: messageText,
-                        thinking: false,
-                        done: true
-                    };
-                }
-            }
-
-        } catch (error) {
-            console.error('Error processing response:', error);
-            aiResponse.addDelta(`Error: ${error.message}`);
-        } finally {
-            // Always mark as done
-            aiResponse.thinking = false;
-            aiResponse.done = true;
-            if (this._usingHistory) {
-                this.saveHistory();
-            }
-        }
-    }
-
     addMessage(role, message) {
-        const msg = new GeminiMessage(role, message, false, true);
-        this._messages.push(msg);
+        if (typeof message === 'string') {
+            this._messages.push(new GeminiMessage(role, message));
+        } else {
+            this._messages.push(message);
+        }
         this.emit('newMsg', this._messages.length - 1);
         if (this._usingHistory) this.saveHistory();
+    }
+
+    send(msg) {
+        if (!this._key) {
+            this.emit('hasKey', false);
+            return;
+        }
+
+        const contextPrompt = getContextPrompt();
+        const fullMsg = `${contextPrompt}\n\nMy question is: ${msg}`;
+
+        const aiResponse = new GeminiMessage('assistant', '', true, false);
+        this.addMessage('user', msg);
+        
+        // Check if this is a remember command
+        if (msg.toLowerCase().startsWith('remember ')) {
+            const noteContent = msg.substring(9).trim();
+            Todo.addNote(noteContent);
+            aiResponse.content = `Added note: ${noteContent}`;
+            aiResponse.thinking = false;
+            aiResponse.done = true;
+            this.addMessage('assistant', aiResponse);
+            return;
+        }
+
+        // Check if this is a note it command
+        if (msg.toLowerCase() === 'note it') {
+            const lastMessage = this._messages[this._messages.length - 2]; // Get the message before 'note it'
+            if (lastMessage && lastMessage.content) {
+                Todo.addNote(lastMessage.content);
+                aiResponse.content = `Added note: ${lastMessage.content}`;
+                aiResponse.thinking = false;
+                aiResponse.done = true;
+                this.addMessage('assistant', aiResponse);
+                return;
+            }
+        }
+
+        this.addMessage('assistant', aiResponse);
+
+        const body = {
+            contents: [{
+                role: 'user',
+                parts: [{ text: fullMsg }],
+            }],
+            safetySettings: this._safe ? [{
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+            }] : [],
+            generationConfig: {
+                temperature: this._temperature,
+                candidateCount: 1,
+                stopSequences: [],
+                maxOutputTokens: 2048,
+                topP: 0.8,
+                topK: 10
+            },
+        };
+
+        const session = new Soup.Session();
+        const message = new Soup.Message({
+            method: 'POST',
+            uri: GLib.Uri.parse(replaceapidom(`https://generativelanguage.googleapis.com/v1beta/models/${CHAT_MODELS[this._modelIndex]}:generateContent`), GLib.UriFlags.NONE),
+        });
+
+        message.request_headers.append('Content-Type', 'application/json');
+        message.request_headers.append('x-goog-api-key', this._key);
+        message.set_request_body_from_bytes('application/json',
+            new GLib.Bytes(this._encoder.encode(JSON.stringify(body)))
+        );
+
+        session.send_and_read_async(
+            message,
+            GLib.PRIORITY_DEFAULT,
+            null,
+            (sess, result) => {
+                try {
+                    const bytes = session.send_and_read_finish(result);
+                    this.readResponse(bytes, aiResponse);
+                } catch (error) {
+                    console.error('Error:', error);
+                    aiResponse.content = `Error: ${error.message}`;
+                    aiResponse.thinking = false;
+                    aiResponse.done = true;
+                }
+            }
+        );
+
+        if (this._cycleModels) {
+            this._requestCount++;
+            if (this._requestCount >= ONE_CYCLE_COUNT) {
+                this._requestCount = 0;
+                this._modelIndex = (this._modelIndex + 1) % CHAT_MODELS.length;
+            }
+        }
     }
 
     async processImage(imagePath) {
@@ -657,6 +562,157 @@ class GeminiService extends Service {
         } finally {
             this._processingImage = false;
             this.emit('imageProcessing', false);
+        }
+    }
+
+    async sendWithImage(msg, imagePath) {
+        if (!this._key) {
+            console.error('No API key set');
+            return;
+        }
+
+        try {
+            const [imageData, mimeType] = await this.processImage(imagePath);
+
+            this.addMessage('user', msg);
+            const aiResponse = new GeminiMessage('assistant', 'thinking...', true, false);
+            this._messages.push(aiResponse);
+            this.emit('newMsg', this._messages.length - 1);
+
+            const session = new Soup.Session();
+            const message = new Soup.Message({
+                method: 'POST',
+                uri: GLib.Uri.parse(replaceapidom(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`), GLib.UriFlags.NONE),
+            });
+
+            const body = {
+                contents: [{
+                    role: "assistant",
+                    parts: [
+                        { text: msg },
+                        {
+                            inline_data: {
+                                mime_type: mimeType,
+                                data: imageData
+                            }
+                        }
+                    ]
+                }],
+                safetySettings: this._safe ? [{
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                }] : [],
+                generationConfig: {
+                    temperature: this._temperature,
+                }
+            };
+
+            message.request_headers.append('Content-Type', 'application/json');
+            message.request_headers.append('x-goog-api-key', this._key);
+            message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
+
+            const stream = await session.send_async(message, GLib.DEFAULT_PRIORITY, null);
+            await this.readResponse(stream, aiResponse);
+        } catch (error) {
+            console.error('Error processing image:', error);
+            const aiResponse = new GeminiMessage('assistant', 'Failed to process image: ' + error.message, false, true);
+            this._messages.push(aiResponse);
+            this.emit('newMsg', this._messages.length - 1);
+        }
+    }
+
+    readResponse(bytes, aiResponse) {
+        try {
+            if (!bytes) {
+                throw new Error('No response received');
+            }
+
+            const text = this._decoder.decode(bytes.get_data());
+            const response = JSON.parse(text);
+
+            if (response.error) {
+                throw new Error(response.error.message || 'Unknown error');
+            }
+
+            if (!response.candidates || !response.candidates[0]?.content?.parts?.[0]?.text) {
+                throw new Error('Invalid response format');
+            }
+
+            const messageText = response.candidates[0].content.parts[0].text;
+            
+            // Process commands in the response
+            const lines = messageText.split('\n');
+            const processedLines = [];
+            let isRemembering = false;
+            let rememberedText = [];
+            
+            for (const line of lines) {
+                if (line.startsWith('!remember')) {
+                    isRemembering = true;
+                    continue;
+                }
+                
+                if (line.startsWith('!addtask ')) {
+                    const task = line.substring(9).trim();
+                    Todo.add(task);
+                    processedLines.push(`Added task: ${task}`);
+                }
+                else if (line.startsWith('!addnote ')) {
+                    const note = line.substring(9).trim();
+                    Todo.addNote(note);
+                    processedLines.push(`Added note: ${note}`);
+                }
+                else if (line.startsWith('!done ')) {
+                    const idMatch = line.match(/!done\s+(\d+)/);
+                    if (idMatch) {
+                        const id = parseInt(idMatch[1]);
+                        if (!isNaN(id)) {
+                            Todo.check(id);
+                            processedLines.push(`Marked task ${id} as done`);
+                        }
+                    } else {
+                        processedLines.push("Error: Invalid task number format");
+                    }
+                }
+                else if (line.startsWith('!remove ')) {
+                    const idMatch = line.match(/!remove\s+(\d+)/);
+                    if (idMatch) {
+                        const id = parseInt(idMatch[1]);
+                        if (!isNaN(id)) {
+                            Todo.remove(id);
+                            processedLines.push(`Removed item ${id}`);
+                        }
+                    } else {
+                        processedLines.push("Error: Invalid item number format");
+                    }
+                }
+                else {
+                    processedLines.push(line);
+                    if (isRemembering && line.trim()) {
+                        rememberedText.push(line.trim());
+                    }
+                }
+            }
+
+            // If we were remembering text, save it as a note
+            if (isRemembering && rememberedText.length > 0) {
+                const note = rememberedText.join('\n');
+                Todo.addNote(note);
+                processedLines.push('\nSaved this response as a note!');
+            }
+
+            aiResponse.content = processedLines.join('\n');
+            aiResponse.thinking = false;
+            aiResponse.done = true;
+
+            if (this._usingHistory) {
+                this.saveHistory();
+            }
+        } catch (error) {
+            console.error('Error processing response:', error);
+            aiResponse.content = `Error: ${error.message}`;
+            aiResponse.thinking = false;
+            aiResponse.done = true;
         }
     }
 }

@@ -1,150 +1,258 @@
 const { Gio, GLib } = imports.gi;
 import Service from 'resource:///com/github/Aylur/ags/service.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-const { exec, execAsync } = Utils;
+const { execAsync } = Utils;
 
 class TodoService extends Service {
     static {
-        Service.register(
-            this,
-            { 'updated': [], },
-        );
+        Service.register(this, {
+            'updated': ['double'],
+        }, {
+            'todo_json': ['jsobject', 'rw'],
+            'notes_json': ['jsobject', 'rw'],
+            'gemini_content': ['jsobject', 'r'],
+        });
     }
 
-    _todoPath = '';
-    _todoJson = [];
-    _obsidianPath = '';
+    #todoFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'todo.json']);
+    #notesFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'notes.json']);
+    #todoMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/todo.md']);
+    #notesMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/notes.md']);
+    #todoJson = [];
+    #notesJson = [];
+    #md = '';
+    #notesMd = '';
 
-    refresh(value) {
-        this.emit('updated', value);
-    }
-
-    connectWidget(widget, callback) {
-        this.connect(widget, callback, 'updated');
-    }
-
-    get todo_json() {
-        return this._todoJson;
-    }
-
-    _save() {
-        Utils.writeFile(JSON.stringify(this._todoJson), this._todoPath)
-            .catch(print);
-        this._syncToObsidianFull();
-    }
-
-    _syncToObsidianFull() {
-        try {
-            let content = '# Todo List\n\n';
-            this._todoJson.forEach(todo => {
-                const checkbox = todo.done ? '[x]' : '[ ]';
-                content += `- ${checkbox} ${todo.content} (Added: ${todo.timestamp || new Date().toLocaleString()})\n`;
-            });
-            Utils.writeFile(content, this._obsidianPath).catch(print);
-        } catch (error) {
-            print(`Error syncing to Obsidian: ${error}`);
-        }
-    }
-
-    add(content) {
-        const timestamp = new Date().toLocaleString();
-        const newTodo = { content, done: false, timestamp };
-        this._todoJson.push(newTodo);
-        this._save();
-        this.emit('updated');
-    }
-
-    check(index) {
-        if (index >= 0 && index < this._todoJson.length) {
-            this._todoJson[index].done = true;
-            this._save();
-            this.emit('updated');
-        }
-    }
-
-    uncheck(index) {
-        if (index >= 0 && index < this._todoJson.length) {
-            this._todoJson[index].done = false;
-            this._save();
-            this.emit('updated');
-        }
-    }
-
-    remove(index) {
-        if (index >= 0 && index < this._todoJson.length) {
-            this._todoJson.splice(index, 1);
-            this._save();
-            this.emit('updated');
-        }
-    }
-
-    _syncFromObsidian() {
-        try {
-            const file = Gio.File.new_for_path(this._obsidianPath);
-            const [, contents] = file.load_contents(null);
-            const decoder = new TextDecoder('utf-8');
-            const lines = decoder.decode(contents).split('\n');
-            
-            // Parse markdown file and update JSON
-            const newTodos = [];
-            lines.forEach(line => {
-                const todoMatch = line.match(/^- \[([ x])\] (.+) \(Added: (.+)\)$/);
-                if (todoMatch) {
-                    newTodos.push({
-                        content: todoMatch[2],
-                        done: todoMatch[1] === 'x',
-                        timestamp: todoMatch[3]
-                    });
-                }
-            });
-            
-            // Only update if there are actual changes
-            if (JSON.stringify(this._todoJson) !== JSON.stringify(newTodos)) {
-                this._todoJson = newTodos;
-                this._save();
-                this.emit('updated');
-            }
-        } catch (error) {
-            print(`Error syncing from Obsidian: ${error}`);
-        }
+    #emitUpdated() {
+        this.emit('updated', GLib.get_monotonic_time());
     }
 
     constructor() {
         super();
-        this._todoPath = `${GLib.get_user_state_dir()}/ags/user/todo.json`;
-        this._obsidianPath = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/todo.md']);
-        
-        // Ensure Obsidian directory exists
-        Utils.exec(`mkdir -p ${GLib.path_get_dirname(this._obsidianPath)}`);
-        
-        // Initialize or load JSON file
+
         try {
-            const fileContents = Utils.readFile(this._todoPath);
-            this._todoJson = JSON.parse(fileContents);
-        } catch {
-            Utils.exec(`mkdir -p ${GLib.get_user_cache_dir()}/ags/user`);
-            Utils.exec(`touch ${this._todoPath}`);
-            Utils.writeFile("[]", this._todoPath).then(() => {
-                this._todoJson = [];
-                this._save();
-            }).catch(print);
+            const todoFileContent = Utils.readFile(this.#todoFile);
+            this.#todoJson = todoFileContent ? JSON.parse(todoFileContent) : [];
+        } catch (e) {
+            this.#todoJson = [];
+            Utils.writeFile('[]', this.#todoFile).catch(print);
         }
 
-        // Monitor Obsidian file for changes
+        try {
+            const notesFileContent = Utils.readFile(this.#notesFile);
+            this.#notesJson = notesFileContent ? JSON.parse(notesFileContent) : [];
+        } catch (e) {
+            this.#notesJson = [];
+            Utils.writeFile('[]', this.#notesFile).catch(print);
+        }
+
+        // Initialize markdown content
+        this.#md = Utils.readFile(this.#todoMdFile) || '';
+        this.#notesMd = Utils.readFile(this.#notesMdFile) || '';
+
+        // create files if they don't exist
+        Utils.writeFile(this.#md || ' ', this.#todoMdFile).catch(print);
+        Utils.writeFile(this.#notesMd || ' ', this.#notesMdFile).catch(print);
+
+        // Monitor files for changes
         Utils.monitorFile(
-            this._obsidianPath,
-            (file, event) => {
-                if (event === 0 || event === 1) { // Created or Changed
-                    this._syncFromObsidian();
-                }
-            }
+            this.#todoMdFile,
+            () => Utils.timeout(100, () => this.#syncFromMd())
+        );
+        Utils.monitorFile(
+            this.#notesMdFile,
+            () => Utils.timeout(100, () => this.#syncFromNotesMd())
         );
 
         // Initial sync
-        if (GLib.file_test(this._obsidianPath, GLib.FileTest.EXISTS)) {
-            this._syncFromObsidian();
+        this.#syncFromMd();
+        this.#syncFromNotesMd();
+    }
+
+    get todo_json() { return this.#todoJson }
+    set todo_json(value) { this.#todoJson = value }
+
+    get notes_json() { return this.#notesJson }
+    set notes_json(value) { this.#notesJson = value }
+
+    get gemini_content() {
+        const todos = this.#todoJson
+            .filter(task => task.type !== 'note')
+            .map(task => `- [${task.done ? 'x' : ' '}] ${task.content}`)
+            .join('\n');
+
+        const notes = this.#notesJson
+            .map(note => `- ${note.content}`)
+            .join('\n');
+
+        return {
+            todos: todos || 'No tasks',
+            notes: notes || 'No notes',
+        };
+    }
+
+    #syncToMd() {
+        const md = this.#todoJson
+            .filter(task => task.type !== 'note')
+            .map(task => `- [${task.done ? 'x' : ' '}] ${task.content}`)
+            .join('\n');
+        Utils.writeFile(md || ' ', this.#todoMdFile)
+            .catch(print);
+    }
+
+    #syncToNotesMd() {
+        const md = this.#notesJson
+            .map(note => `- ${note.content}`)
+            .join('\n');
+        Utils.writeFile(md || ' ', this.#notesMdFile)
+            .catch(print);
+    }
+
+    #syncFromMd() {
+        const newMd = Utils.readFile(this.#todoMdFile);
+        if (!newMd) {
+            this.#todoJson = [];
+            Utils.writeFile('[]', this.#todoFile).catch(print);
+            this.notify('todo_json');
+            this.#emitUpdated();
+            return;
+        }
+
+        if (newMd === this.#md) return;
+
+        this.#md = newMd;
+        const newTodos = newMd.split('\n')
+            .filter(line => line.trim() && line.match(/^- \[[ x]\]/))
+            .map(line => ({
+                content: line.substring(6),
+                done: line[3] === 'x',
+                type: 'todo',
+            }));
+
+        this.#todoJson = newTodos;
+        Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
+            .catch(print);
+
+        this.notify('todo_json');
+        this.#emitUpdated();
+    }
+
+    #syncFromNotesMd() {
+        const newMd = Utils.readFile(this.#notesMdFile);
+        if (!newMd) {
+            this.#notesJson = [];
+            Utils.writeFile('[]', this.#notesFile).catch(print);
+            this.notify('notes_json');
+            this.#emitUpdated();
+            return;
+        }
+
+        if (newMd === this.#notesMd) return;
+
+        this.#notesMd = newMd;
+        const newNotes = newMd.split('\n')
+            .filter(line => line.trim() && line.startsWith('- '))
+            .map(line => ({
+                content: line.substring(2).trim(),
+                type: 'note',
+            }));
+
+        this.#notesJson = newNotes;
+        Utils.writeFile(JSON.stringify(this.#notesJson), this.#notesFile)
+            .catch(print);
+
+        this.notify('notes_json');
+        this.#emitUpdated();
+    }
+
+    add(content) {
+        this.#todoJson.push({ content, done: false, type: 'todo' });
+        Utils.writeFile(JSON.stringify(this.#todoJson || []), this.#todoFile)
+            .catch(print);
+        this.#syncToMd();
+        this.notify('todo_json');
+        this.#emitUpdated();
+    }
+
+    addNote(content) {
+        this.#notesJson.push({ content, type: 'note' });
+        Utils.writeFile(JSON.stringify(this.#notesJson || []), this.#notesFile)
+            .catch(print);
+        this.#syncToNotesMd();
+        this.notify('notes_json');
+        this.#emitUpdated();
+    }
+
+    check(id) {
+        if (id < 0 || id >= this.#todoJson.length) return;
+        
+        const task = this.#todoJson[id];
+        if (!task || task.type === 'note') return;
+        
+        task.done = true;
+        Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
+            .catch(print);
+        this.#syncToMd();
+        this.notify('todo_json');
+        this.#emitUpdated();
+    }
+
+    uncheck(id) {
+        if (id < 0 || id >= this.#todoJson.length) return;
+        
+        const task = this.#todoJson[id];
+        if (!task || task.type === 'note') return;
+        
+        task.done = false;
+        Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
+            .catch(print);
+        this.#syncToMd();
+        this.notify('todo_json');
+        this.#emitUpdated();
+    }
+
+    remove(id, isNote = false) {
+        if (id < 0) return;
+        
+        if (isNote) {
+            if (id >= 0 && id < this.#notesJson.length) {
+                this.#notesJson.splice(id, 1);
+                Utils.writeFile(JSON.stringify(this.#notesJson), this.#notesFile)
+                    .catch(print);
+                this.#syncToNotesMd();
+                this.notify('notes_json');
+            }
         } else {
-            this._syncToObsidianFull();
+            if (id >= 0 && id < this.#todoJson.length) {
+                this.#todoJson.splice(id, 1);
+                Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
+                    .catch(print);
+                this.#syncToMd();
+                this.notify('todo_json');
+            }
+        }
+        this.#emitUpdated();
+    }
+
+    edit(id, newContent) {
+        if (id >= 0 && id < this.#todoJson.length) {
+            this.#todoJson[id].content = newContent;
+            Utils.writeFile(JSON.stringify(this.#todoJson || []), this.#todoFile)
+                .catch(print);
+            this.#syncToMd();
+            this.notify('todo_json');
+            this.#emitUpdated();
+        }
+    }
+
+    editNote(id, newContent) {
+        if (id >= 0 && id < this.#notesJson.length) {
+            this.#notesJson[id].content = newContent;
+            Utils.writeFile(JSON.stringify(this.#notesJson || []), this.#notesFile)
+                .catch(print);
+            this.#syncToNotesMd();
+            this.notify('notes_json');
+            this.#emitUpdated();
         }
     }
 }
