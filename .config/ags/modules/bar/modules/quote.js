@@ -16,7 +16,7 @@ const QuoteWidget = () => {
         truncate: 'end',
         // wrapMode: 'word',  // Wrap at word boundaries
         // widthChars: 35,    // Force width to roughly 10rem
-        maxWidthChars: 40, // Maximum width in characters
+        maxWidthChars: 50, // Maximum width in characters
     });
 
     // Create the main widget

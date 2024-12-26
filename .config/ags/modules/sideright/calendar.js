@@ -5,7 +5,7 @@ const { Box, Button, Label } = Widget;
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../.widgetutils/cursorhover.js';
 
-import { TodoWidget } from "./todolist.js";
+// import { TodoWidget } from "./todolist.js";
 import { TimerWidget } from "./timers.js";
 import { PrayerTimesWidget } from "./prayertimes.js";
 import { getCalendarLayout } from "./calendar_layout.js";
@@ -143,7 +143,7 @@ const contentStack = Widget.Stack({
     children: {
         'prayers': PrayerTimesWidget(),
         'calendar': CalendarWidget(),
-        'todo': TodoWidget(),
+        // 'todo': TodoWidget(),
         'timers': TimerWidget(),
         'media': Media(),
     },
@@ -196,7 +196,7 @@ export const ModuleCalendar = () => Box({
                     children: [
                         StackButton('prayers', 'mosque', getString('Prayers')),
                         StackButton('calendar', 'calendar_month', getString('Calendar')),
-                        StackButton('todo', 'done_outline', getString('Todo')),
+                        // StackButton('todo', 'done_outline', getString('Todo')),
                         StackButton('timers', 'timer', getString('Timers')),
                         StackButton('media', 'library_music', getString('Media')),
                     ]

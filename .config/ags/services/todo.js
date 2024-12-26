@@ -7,24 +7,38 @@ class TodoService extends Service {
     static {
         Service.register(this, {
             'updated': ['double'],
+            'changed': [],
+            'todo_json': ['jsobject'],
+            'notes_json': ['jsobject'],
         }, {
             'todo_json': ['jsobject', 'rw'],
             'notes_json': ['jsobject', 'rw'],
+            'images_json': ['jsobject', 'rw'],
+            'pdfs_json': ['jsobject', 'rw'],
             'gemini_content': ['jsobject', 'r'],
         });
     }
 
     #todoFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'todo.json']);
     #notesFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'notes.json']);
+    #imagesFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'images.json']);
+    #pdfsFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'pdfs.json']);
+    #imagesDir = GLib.build_filenamev([GLib.get_home_dir(), 'Pictures', 'Dashboard']);
+    #pdfsDir = GLib.build_filenamev([GLib.get_home_dir(), 'Documents', 'Dashboard']);
     #todoMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/todo.md']);
     #notesMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/notes.md']);
     #todoJson = [];
     #notesJson = [];
+    #imagesJson = [];
+    #pdfsJson = [];
     #md = '';
     #notesMd = '';
 
     #emitUpdated() {
         this.emit('updated', GLib.get_monotonic_time());
+        this.emit('changed');
+        this.notify('todo_json');
+        this.notify('notes_json');
     }
 
     constructor() {
@@ -46,6 +60,22 @@ class TodoService extends Service {
             Utils.writeFile('[]', this.#notesFile).catch(print);
         }
 
+        try {
+            const imagesFileContent = Utils.readFile(this.#imagesFile);
+            this.#imagesJson = imagesFileContent ? JSON.parse(imagesFileContent) : [];
+        } catch (e) {
+            this.#imagesJson = [];
+            Utils.writeFile('[]', this.#imagesFile).catch(print);
+        }
+
+        try {
+            const pdfsFileContent = Utils.readFile(this.#pdfsFile);
+            this.#pdfsJson = pdfsFileContent ? JSON.parse(pdfsFileContent) : [];
+        } catch (e) {
+            this.#pdfsJson = [];
+            Utils.writeFile('[]', this.#pdfsFile).catch(print);
+        }
+
         // Initialize markdown content
         this.#md = Utils.readFile(this.#todoMdFile) || '';
         this.#notesMd = Utils.readFile(this.#notesMdFile) || '';
@@ -53,6 +83,11 @@ class TodoService extends Service {
         // create files if they don't exist
         Utils.writeFile(this.#md || ' ', this.#todoMdFile).catch(print);
         Utils.writeFile(this.#notesMd || ' ', this.#notesMdFile).catch(print);
+
+        // Create directories if they don't exist
+        Utils.ensureDirectory(GLib.build_filenamev([GLib.get_user_state_dir(), 'ags']));
+        Utils.ensureDirectory(this.#imagesDir);
+        Utils.ensureDirectory(this.#pdfsDir);
 
         // Monitor files for changes
         Utils.monitorFile(
@@ -75,6 +110,12 @@ class TodoService extends Service {
     get notes_json() { return this.#notesJson }
     set notes_json(value) { this.#notesJson = value }
 
+    get images_json() { return this.#imagesJson }
+    set images_json(value) { this.#imagesJson = value }
+
+    get pdfs_json() { return this.#pdfsJson }
+    set pdfsJson(value) { this.#pdfsJson = value }
+
     get gemini_content() {
         const todos = this.#todoJson
             .filter(task => task.type !== 'note')
@@ -85,9 +126,19 @@ class TodoService extends Service {
             .map(note => `- ${note.content}`)
             .join('\n');
 
+        const images = this.#imagesJson
+            .map(image => `- ${image.name}`)
+            .join('\n');
+
+        const pdfs = this.#pdfsJson
+            .map(pdf => `- ${pdf.name}`)
+            .join('\n');
+
         return {
             todos: todos || 'No tasks',
             notes: notes || 'No notes',
+            images: images || 'No images',
+            pdfs: pdfs || 'No PDFs',
         };
     }
 
@@ -170,7 +221,6 @@ class TodoService extends Service {
         Utils.writeFile(JSON.stringify(this.#todoJson || []), this.#todoFile)
             .catch(print);
         this.#syncToMd();
-        this.notify('todo_json');
         this.#emitUpdated();
     }
 
@@ -179,7 +229,6 @@ class TodoService extends Service {
         Utils.writeFile(JSON.stringify(this.#notesJson || []), this.#notesFile)
             .catch(print);
         this.#syncToNotesMd();
-        this.notify('notes_json');
         this.#emitUpdated();
     }
 
@@ -187,13 +236,12 @@ class TodoService extends Service {
         if (id < 0 || id >= this.#todoJson.length) return;
         
         const task = this.#todoJson[id];
-        if (!task || task.type === 'note') return;
+        if (!task || task.type !== 'todo') return;
         
         task.done = true;
         Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
             .catch(print);
         this.#syncToMd();
-        this.notify('todo_json');
         this.#emitUpdated();
     }
 
@@ -201,13 +249,12 @@ class TodoService extends Service {
         if (id < 0 || id >= this.#todoJson.length) return;
         
         const task = this.#todoJson[id];
-        if (!task || task.type === 'note') return;
+        if (!task || task.type !== 'todo') return;
         
         task.done = false;
         Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
             .catch(print);
         this.#syncToMd();
-        this.notify('todo_json');
         this.#emitUpdated();
     }
 
@@ -220,7 +267,7 @@ class TodoService extends Service {
                 Utils.writeFile(JSON.stringify(this.#notesJson), this.#notesFile)
                     .catch(print);
                 this.#syncToNotesMd();
-                this.notify('notes_json');
+                this.#emitUpdated();
             }
         } else {
             if (id >= 0 && id < this.#todoJson.length) {
@@ -228,10 +275,128 @@ class TodoService extends Service {
                 Utils.writeFile(JSON.stringify(this.#todoJson), this.#todoFile)
                     .catch(print);
                 this.#syncToMd();
-                this.notify('todo_json');
+                this.#emitUpdated();
             }
         }
-        this.#emitUpdated();
+    }
+
+    addImage(sourcePath) {
+        try {
+            // Generate unique filename
+            const timestamp = new Date().getTime();
+            const sourceFile = Gio.File.new_for_path(sourcePath);
+            const filename = sourceFile.get_basename();
+            const name = filename.split('.')[0];
+            const ext = filename.split('.').pop();
+            const newFilename = `${name}_${timestamp}.${ext}`;
+            const destPath = GLib.build_filenamev([this.#imagesDir, newFilename]);
+
+            // Copy file to images directory
+            if (this.#copyFile(sourcePath, destPath)) {
+                this.#imagesJson.push({
+                    path: destPath,
+                    name: filename,
+                    timestamp: timestamp,
+                });
+                Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
+                    .catch(print);
+                this.notify('images_json');
+                this.#emitUpdated();
+                return true;
+            }
+            return false;
+        } catch (e) {
+            print(`Error adding image: ${e}`);
+            return false;
+        }
+    }
+
+    addPdf(sourcePath) {
+        try {
+            // Generate unique filename
+            const timestamp = new Date().getTime();
+            const sourceFile = Gio.File.new_for_path(sourcePath);
+            const filename = sourceFile.get_basename();
+            const name = filename.split('.')[0];
+            const ext = filename.split('.').pop();
+            const newFilename = `${name}_${timestamp}.${ext}`;
+            const destPath = GLib.build_filenamev([this.#pdfsDir, newFilename]);
+
+            // Copy file to PDFs directory
+            if (this.#copyFile(sourcePath, destPath)) {
+                this.#pdfsJson.push({
+                    path: destPath,
+                    name: filename,
+                    timestamp: timestamp,
+                });
+                Utils.writeFile(JSON.stringify(this.#pdfsJson || []), this.#pdfsFile)
+                    .catch(print);
+                this.notify('pdfs_json');
+                this.#emitUpdated();
+                return true;
+            }
+            return false;
+        } catch (e) {
+            print(`Error adding PDF: ${e}`);
+            return false;
+        }
+    }
+
+    deleteImage(id) {
+        if (id >= 0 && id < this.#imagesJson.length) {
+            const image = this.#imagesJson[id];
+            if (this.#deleteFile(image.path)) {
+                this.#imagesJson.splice(id, 1);
+                Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
+                    .catch(print);
+                this.notify('images_json');
+                this.#emitUpdated();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    deletePdf(id) {
+        if (id >= 0 && id < this.#pdfsJson.length) {
+            const pdf = this.#pdfsJson[id];
+            const file = Gio.File.new_for_path(pdf.path);
+            try {
+                if (file.query_exists(null)) {
+                    file.delete(null);
+                }
+                this.#pdfsJson.splice(id, 1);
+                Utils.writeFile(JSON.stringify(this.#pdfsJson), this.#pdfsFile)
+                    .catch(print);
+                this.notify('pdfs_json');
+                this.#emitUpdated();
+                return true;
+            } catch (e) {
+                print(`Error deleting PDF: ${e}`);
+            }
+        }
+        return false;
+    }
+
+    #copyFile(source, dest) {
+        try {
+            const sourceFile = Gio.File.new_for_path(source);
+            const destFile = Gio.File.new_for_path(dest);
+            return sourceFile.copy(destFile, Gio.FileCopyFlags.OVERWRITE, null, null);
+        } catch (e) {
+            print(`Error copying file: ${e}`);
+            return false;
+        }
+    }
+
+    #deleteFile(path) {
+        try {
+            const file = Gio.File.new_for_path(path);
+            return file.delete(null);
+        } catch (e) {
+            print(`Error deleting file: ${e}`);
+            return false;
+        }
     }
 
     edit(id, newContent) {
@@ -239,7 +404,6 @@ class TodoService extends Service {
             this.#todoJson[id].content = newContent;
             Utils.writeFile(JSON.stringify(this.#todoJson || []), this.#todoFile)
                 .catch(print);
-            this.#syncToMd();
             this.notify('todo_json');
             this.#emitUpdated();
         }
@@ -250,8 +414,27 @@ class TodoService extends Service {
             this.#notesJson[id].content = newContent;
             Utils.writeFile(JSON.stringify(this.#notesJson || []), this.#notesFile)
                 .catch(print);
-            this.#syncToNotesMd();
             this.notify('notes_json');
+            this.#emitUpdated();
+        }
+    }
+
+    editImage(id, newPath) {
+        if (id >= 0 && id < this.#imagesJson.length) {
+            this.#imagesJson[id].path = newPath;
+            Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
+                .catch(print);
+            this.notify('images_json');
+            this.#emitUpdated();
+        }
+    }
+
+    editPdf(id, newPath) {
+        if (id >= 0 && id < this.#pdfsJson.length) {
+            this.#pdfsJson[id].path = newPath;
+            Utils.writeFile(JSON.stringify(this.#pdfsJson || []), this.#pdfsFile)
+                .catch(print);
+            this.notify('pdfs_json');
             this.#emitUpdated();
         }
     }

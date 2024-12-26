@@ -1,3 +1,188 @@
+.notes-container {
+    @include large-rounding;
+    @include elevation-border;
+    @include elevation2;
+    margin-bottom: 0.682rem;
+    background-color: $layer0;
+    padding: 1.364rem;
+    
+    .content-container {
+        min-width: 800px;
+        .category-sidebar {
+            background-color: $layer1;
+            // border-right: 1px solid $border;
+            @include normal-rounding;
+            padding: 0.1rem;
+            margin-right: 1.2rem;
+            
+            .category-button {
+                min-height: 2.5rem;
+                padding: 0.5rem 0.8rem;
+                margin: 0.2rem 0;
+                border-radius: 0.5rem;
+                transition: all 0.2s ease;
+                
+                &:hover {
+                    background-color: $hovercolor;
+                }
+                
+                &.active {
+                    background-color: $activecolor;
+                }
+                
+                .category-icon {
+                    font-size: 1.364rem;
+                    color: $cheatsheetTitle;
+                    margin-right: 0.8rem;
+                }
+                
+                .category-label {
+                    color: $onLayer1;
+                }
+            }
+            
+            .sidebar-subcategories {
+                margin-left: 1.5rem;
+                padding-left: 1rem;
+                border-left: 1px solid $outline;
+            }
+        }
+        
+        .content-panel {
+            // flex-grow: 1;
+            
+            .content-entry {
+                // @include cheatsheet-bind-lineheight;
+                background-color: $layer1;
+                color: $onLayer1;
+                border: 0.038rem solid $outline;
+                min-width: 70rem;
+                @include normal-rounding;
+                padding: 0.436rem 1.305rem;
+            }
+            
+            .content-list {
+                .note-item,
+                .todo-item {
+                    @include small-rounding;
+                    background-color: $layer1;
+                    color: $onLayer1;
+                    margin-bottom: 0.17rem;
+                    padding: 0.136rem 0.205rem;
+                    
+                    &:hover {
+                        background-color: $layer1Hover;
+                    }
+                    
+                    &.note-done,
+                    &.todo-done {
+                        opacity: 0.5;
+                        // text-decoration: line-through;
+                    }
+                    
+                    .note-content,
+                    .todo-content {
+                        margin: 0 0.5rem;
+                    }
+                    
+                    .note-delete-btn,
+                    .todo-delete-btn {
+                        @include element_decel;
+                        @include full-rounding;
+                        min-width: 1.364rem;
+                        min-height: 1.364rem;
+                        
+                        &:hover,
+                        &:focus {
+                            background-color: $layer0Hover;
+                        }
+
+                        &:active {
+                            background-color: $layer0Active;
+                        }
+                    }
+                }
+            }
+        }
+        
+        .image-grid-container {
+            padding: 12px;
+            .image-grid {
+                .image-row {
+                    margin-bottom: 12px;
+                }
+            }
+        }
+
+        .image-item {
+            margin: 6px;
+            background-color: $layer1;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background-color: $layer1Hover;
+                
+                .image-info {
+                    .image-action-btn {
+                        opacity: 1;
+                    }
+                }
+            }
+
+            .image-container {
+                padding: 0;
+                margin: 6px;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+                
+                &:hover {
+                    
+                }
+
+                .image-drawing {
+                    border-radius: 8px;
+                }
+            }
+
+            .image-info {
+                padding: 4px 8px 8px 8px;
+               
+                .image-name {
+                    color: $onLayer1;
+                    font-size: 14px;
+                }
+
+                .image-action-btn {
+                    opacity: 0;
+                    padding: 4px;
+                    min-width: 24px;
+                    min-height: 24px;
+                    border-radius: 12px;
+                    background-color: $layer2;
+                    color: $onLayer2;
+
+                    &:hover {
+                        background-color: $layer2Hover;
+                    }
+                }
+            }
+        }
+
+        .file-chooser-btn {
+            margin-left: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background-color: $layer2;
+            color: $onLayer2;
+
+            &:hover {
+                background-color: $layer2Hover;
+            }
+        }
+    }
+}
+
 .cheatsheet-bg {
     @include large-rounding;
     @include elevation-border;

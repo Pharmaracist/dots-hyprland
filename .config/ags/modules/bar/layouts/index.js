@@ -86,9 +86,32 @@ export const BarLayouts = {
                     connections: [[sideleftVisible, self => {
                         self.reveal_child = sideleftVisible.value;
                     }]],
-                    child: Widget.Box({
-                        className: 'spacing-h-15 bar-knocks padding-rl-15',
-                        children: [modules.ControlModules.shortcuts()],
+                    child:  ScrollableContainer({
+                        name: 'media',
+                        sets: [
+                        
+                            [Widget.Box({
+                                css:`min-width:20rem;`,
+                                className: 'spacing-h-15 bar-knocks padding-rl-15',
+                                children: [
+                                    Widget.Box({
+                                        hexpand: true,
+                                        hpack: 'center',
+                                        className: 'spacing-h-10',
+                                        children: [
+                                            modules.InfoModules.colorPicker(),
+                                            modules.ControlModules.toggles()
+                                        ]
+                                    })
+                                ],
+                            })],
+                            [Widget.Box({
+                                hexpand: true,
+                                hpack: 'center',
+                                className: 'bar-knocks',
+                                children: [modules.InfoModules.colorscheme()],
+                            })],
+                        ],
                     }),
                 }),
                 ScrollableContainer({
@@ -174,9 +197,17 @@ export const BarLayouts = {
                     connections: [[siderightVisible, self => {
                         self.reveal_child = siderightVisible.value;
                     }]],
-                    child: Widget.Box({
-                        className: 'spacing-h-15 bar-knocks padding-rl-15',
-                        children: [modules.ControlModules.toggles()],
+                    child: ScrollableContainer({
+                        name: 'media',
+                        sets: [
+                            [Widget.Box({
+                                css:`min-width:23rem;`,
+                                hexpand: true,
+                                hpack: 'center',
+                                className: 'spacing-h-15 bar-knocks padding-rl-15',
+                                children: [ modules.InfoModules.logo() , modules.InfoModules.quote()],
+                            })],
+                        ],
                     }),
                 }),
                         
@@ -264,11 +295,6 @@ export const BarLayouts = {
                         })],
                         [Widget.Box({
                             children: [modules.InfoModules.quote()],
-                        })],
-                        [Widget.Box({
-                            hexpand: true,
-                            hpack: 'center',
-                            children: [modules.InfoModules.colorPicker()],
                         })],
                         [Widget.Box({
                             spacing:10,

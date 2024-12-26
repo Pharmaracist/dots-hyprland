@@ -2,22 +2,28 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import { setupCursorHover } from "../.widgetutils/cursorhover.js";
 import PopupWindow from '../.widgethacks/popupwindow.js';
 import Keybinds from "./keybinds.js";
-import PeriodicTable from "./periodictable.js";
+// import PeriodicTable from "./periodictable.js";
+import Todo from "./todo.js";
 import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 import clickCloseRegion from '../.commonwidgets/clickcloseregion.js';
 
 const cheatsheets = [
     {
+        name: getString('Todo'),
+        materialIcon: 'task_alt',
+        contentWidget: Todo,
+    },
+    {
         name: getString('Keybinds'),
         materialIcon: 'keyboard',
         contentWidget: Keybinds,
     },
-    {
-        name: getString('Periodic table'),
-        materialIcon: 'experiment',
-        contentWidget: PeriodicTable,
-    },
+    // {
+    //     name: getString('Periodic table'),
+    //     materialIcon: 'experiment',
+    //     contentWidget: PeriodicTable,
+    // },
 ];
 
 const CheatsheetHeader = () => Widget.CenterBox({
@@ -33,25 +39,25 @@ const CheatsheetHeader = () => Widget.CenterBox({
                 children: [
                     Widget.Label({
                         hpack: 'center',
-                        css: 'margin-right: 0.682rem;',
-                        className: 'txt-title',
-                        label: getString('Cheat sheet'),
+                        css: 'margin-bottom: 0.682rem;',
+                        className: 'txt-title numbertext',
+                        label: getString('Pharmaracist Dashboard'),
                     }),
-                    Widget.Label({
-                        vpack: 'center',
-                        className: "cheatsheet-key txt-small",
-                        label: "󰖳",
-                    }),
-                    Widget.Label({
-                        vpack: 'center',
-                        className: "cheatsheet-key-notkey txt-small",
-                        label: "+",
-                    }),
-                    Widget.Label({
-                        vpack: 'center',
-                        className: "cheatsheet-key txt-small",
-                        label: "/",
-                    })
+                    // Widget.Label({
+                    //     vpack: 'center',
+                    //     className: "cheatsheet-key txt-small",
+                    //     label: "O",
+                    // }),
+                    // Widget.Label({
+                    //     vpack: 'center',
+                    //     className: "cheatsheet-key-notkey txt-small",
+                    //     label: "+",
+                    // }),
+                    // Widget.Label({
+                    //     vpack: 'center',
+                    //     className: "cheatsheet-key txt-small",
+                    //     label: "/",
+                    // })
                 ]
             }),
         ]
@@ -74,6 +80,7 @@ const CheatsheetHeader = () => Widget.CenterBox({
 const sheetContents = [];
 const SheetContent = (id) => {
     sheetContents[id] = ExpandingIconTabContainer({
+        css: 'min-width: 800px; min-height: 600px;',
         tabsHpack: 'center',
         tabSwitcherClassName: 'sidebar-icontabswitcher',
         transitionDuration: userOptions.asyncGet().animations.durationLarge * 1.4,
@@ -92,6 +99,7 @@ export default (id) => {
     const widgetContent = Widget.Box({
         vertical: true,
         className: "cheatsheet-bg spacing-v-5",
+        css: 'min-width: 800px; min-height: 600px;',
         children: [
             CheatsheetHeader(),
             sheets,
