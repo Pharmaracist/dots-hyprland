@@ -77,6 +77,7 @@ curl -fsSL https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/ins
     <img src="pics/Pasted%20image%20(2).png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(3).png" alt="Screenshot 3" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(4).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(5).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(6).png" alt="Screenshot 5" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(7).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(8).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
