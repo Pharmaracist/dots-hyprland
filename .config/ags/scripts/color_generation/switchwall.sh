@@ -25,7 +25,7 @@ switch() {
     # Set wallpaper with adjusted animation parameters
     swww img "$imgpath" \
         --transition-fps 144 \
-        --transition-type grow \
+        --transition-type wipe \
         --transition-duration 0.8 \
         --transition-bezier .16,0,.84,.99 \
         --transition-pos "$cursorposx,$cursorposy_inverted" \

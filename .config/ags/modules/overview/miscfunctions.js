@@ -8,9 +8,11 @@ import Timer from '../../services/timers.js';
 import Media from '../../services/media.js';
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import { currentShellMode } from '../../variables.js';
+import { config } from '../../variables.js';
 import userOptions from '../.configuration/user_options.js';
 
 const USER_CONFIG_FILE = GLib.get_home_dir() + '/.ags/config.json';
+const CONFIG_PATH = GLib.get_home_dir() + '/.ags/config.json';
 
 export const hasUnterminatedBackslash = str => /\\+$/.test(str);
 
@@ -863,6 +865,58 @@ if results:
                 currentShellMode.value = newValue;
             } else {
                 execAsync(['notify-send', 'Default Bar Mode', 'Invalid mode. Use >bard to see available modes.']).catch(print);
+            }
+        },
+        '>barp': () => {
+            try {
+                if (!config.value.bar) config.value.bar = {};
+                const newPosition = config.value.bar.position === 'top' ? 'bottom' : 'top';
+                config.value = {
+                    ...config.value,
+                    bar: {
+                        ...config.value.bar,
+                        position: newPosition
+                    }
+                };
+                Utils.writeFile(JSON.stringify(config.value, null, 2), CONFIG_PATH)
+                    .then(() => {
+                        execAsync(['notify-send', 'Bar Position', `Changed to ${newPosition}`]).catch(print);
+                        App.resetCss();
+                        execAsync(['bash', '-c', 'ags -q; sleep 0.1; ags']).catch(print);
+                    })
+                    .catch(error => {
+                        console.error('Error saving config:', error);
+                        execAsync(['notify-send', 'Error', 'Failed to save bar position']).catch(print);
+                    });
+            } catch (error) {
+                console.error('Error toggling bar position:', error);
+                execAsync(['notify-send', 'Error', 'Failed to toggle bar position']).catch(print);
+            }
+        },
+        '>toggleBarPosition': () => {
+            try {
+                if (!config.value.bar) config.value.bar = {};
+                const newPosition = config.value.bar.position === 'top' ? 'bottom' : 'top';
+                config.value = {
+                    ...config.value,
+                    bar: {
+                        ...config.value.bar,
+                        position: newPosition
+                    }
+                };
+                Utils.writeFile(JSON.stringify(config.value, null, 2), CONFIG_PATH)
+                    .then(() => {
+                        execAsync(['notify-send', 'Bar Position', `Changed to ${newPosition}`]).catch(print);
+                        App.resetCss();
+                        execAsync(['bash', '-c', 'ags -q; sleep 0.1; ags']).catch(print);
+                    })
+                    .catch(error => {
+                        console.error('Error saving config:', error);
+                        execAsync(['notify-send', 'Error', 'Failed to save bar position']).catch(print);
+                    });
+            } catch (error) {
+                console.error('Error toggling bar position:', error);
+                execAsync(['notify-send', 'Error', 'Failed to toggle bar position']).catch(print);
             }
         },
     };

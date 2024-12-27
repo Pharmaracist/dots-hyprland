@@ -24,6 +24,9 @@ import WaveIcon from './wave.js';
 import ColorScheme from '../colorscheme.js';
 import ColorPicker from "./color_picker.js";
 import { changeWallpaperButton } from "./utils.js";
+import Fetcher from "./fetcher.js";
+import PinnedApps from "./pinned_apps.js";
+import ActiveApps from "./active_apps.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -130,6 +133,7 @@ export const InfoModules = {
     logo(){return WaveIcon();},
     colorscheme() { return ColorScheme(); },
     colorPicker() { return ColorPicker(); },
+    fetcher() { return Fetcher(); },
     quote() { 
         try {
             return Widget.Box({
@@ -150,6 +154,11 @@ export const MediaModules = {
     mediaIndicator() { return MediaIndicator(); },
 };
 
+export const AppModules = {
+    pinnedApps() { return PinnedApps(); },
+    activeApps() { return ActiveApps(); },
+};
+
 // Initialize all async modules
 const initializeAsyncModules = async () => {
     await Promise.all(Object.values(asyncModules).map(fn => fn()));
@@ -167,6 +176,7 @@ export const initializeModules = async () => {
         ControlModules,
         InfoModules,
         MediaModules,
+        AppModules,
     };
 };
 
@@ -177,4 +187,5 @@ export default {
     ControlModules,
     InfoModules,
     MediaModules,
+    AppModules,
 };

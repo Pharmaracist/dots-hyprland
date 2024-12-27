@@ -12,6 +12,8 @@ import { setupCursorHover } from '../.widgetutils/cursorhover.js';
 import { getAllFiles, searchIcons } from './icons.js'
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { substitute } from '../.miscutils/icons.js';
+import { dockPinned, currentDockMode } from '../../variables.js';
+import { DockLayouts, createDockContent } from './layouts.js';
 
 const configPath = `${App.configDir}/modules/.configuration/user_options.default.json`;
 const readConfig = () => JSON.parse(Utils.readFile(configPath));
@@ -26,9 +28,13 @@ Utils.monitorFile(configPath, (_, event) => {
     }
 });
 
+let isPinned = false;
+dockPinned.connect('changed', () => {
+    isPinned = dockPinned.value;
+});
+
 const icon_files = readConfig().icons.searchPaths.map(e => getAllFiles(e)).flat(1)
 
-let isPinned = false
 let cachePath = new Map()
 
 let timers = []
@@ -67,8 +73,8 @@ const PinButton = () => Widget.Button({
         child: MaterialIcon('push_pin', 'hugeass')
     }),
     onClicked: (self) => {
-        isPinned = !isPinned
-        self.className = `${isPinned ? "pinned-dock-app-btn" : "dock-app-btn animate"} dock-app-btn-animate`
+        dockPinned.value = !dockPinned.value;
+        self.className = `${dockPinned.value ? "pinned-dock-app-btn" : "dock-app-btn animate"} dock-app-btn-animate`;
     },
     setup: setupCursorHover,
 })
@@ -243,62 +249,51 @@ const PinnedApps = () => Widget.Box({
         }),
 });
 
-export default (monitor = 0) => {
-    const dockContent = Box({
-        className: 'dock-bg spacing-h-5',
-        children: [
-            // PinButton(),
-            PinnedApps(),
-            // DockSeparator(),
-            // Taskbar(),
-            // LauncherButton(),
-        ]
-    })
-    const dockRevealer = Revealer({
-        attribute: {
-            'updateShow': self => { // I only use mouse to resize. I don't care about keyboard resize if that's a thing
-                if (readConfig().dock.monitorExclusivity)
-                    self.revealChild = Hyprland.active.monitor.id === monitor;
-                else
-                    self.revealChild = true;
+const DockModules = {
+    pin: () => PinButton(),
+    launcher: () => LauncherButton(),
+    taskbar: () => Taskbar(),
+    pinned: () => PinnedApps(),
+};
 
-                return self.revealChild
-            }
-        },
+export default (monitor = 0) => {
+    const stack = Widget.Stack({
+        transition: 'slide_up_down',
+        transitionDuration: readConfig().animations?.durationSmall || 60,
+    });
+
+    // Initialize layouts
+    Promise.all([
+        createDockContent(DockLayouts[1], DockModules),
+        createDockContent(DockLayouts[2], DockModules),
+        createDockContent(DockLayouts[3], DockModules),
+        createDockContent(DockLayouts[4], DockModules),
+        createDockContent(DockLayouts[5], DockModules),
+    ]).then(contents => {
+        stack.items = [
+            ['mode1', contents[0]],
+            ['mode2', contents[1]],
+            ['mode3', contents[2]],
+            ['mode4', contents[3]],
+            ['mode5', contents[4]],
+        ];
+    });
+
+    currentDockMode.connect('changed', () => {
+        stack.shown = `mode${currentDockMode.value}`;
+    });
+
+    const dockRevealer = Widget.Revealer({
         revealChild: false,
         transition: 'slide_up',
-        transitionDuration: readConfig().animations.durationLarge,
-        child: dockContent,
-        setup: (self) => {
-            const callback = (self, trigger) => {
-                if (!readConfig().dock.trigger.includes(trigger)) return
-                const flag = self.attribute.updateShow(self)
+        transitionDuration: readConfig().animations?.durationSmall || 60,
+        child: stack,
+    });
 
-                if (flag) clearTimes();
-
-                const hidden = readConfig().dock.autoHide.find(e => e["trigger"] === trigger)
-
-                if (hidden) {
-                    let id = Utils.timeout(hidden.interval, () => {
-                        if (!isPinned) { self.revealChild = false }
-                        timers = timers.filter(e => e !== id)
-                    })
-                    timers.push(id)
-                }
-            }
-
-            self
-                // .hook(Hyprland, (self) => self.attribute.updateShow(self))
-                .hook(Hyprland.active.workspace, self => callback(self, "workspace-active"))
-                .hook(Hyprland.active.client, self => callback(self, "client-active"))
-                .hook(Hyprland, self => callback(self, "client-added"), "client-added")
-                .hook(Hyprland, self => callback(self, "client-removed"), "client-removed")
-        },
-    })
     return EventBox({
         onHover: () => {
+            clearTimes();
             dockRevealer.revealChild = true;
-            clearTimes()
         },
         child: Box({
             homogeneous: true,
@@ -306,8 +301,8 @@ export default (monitor = 0) => {
             children: [dockRevealer],
         }),
         setup: self => self.on("leave-notify-event", () => {
-            if (!isPinned) dockRevealer.revealChild = false;
-            clearTimes()
+            if (!dockPinned.value) dockRevealer.revealChild = false;
+            clearTimes();
         })
-    })
-}
+    });
+};

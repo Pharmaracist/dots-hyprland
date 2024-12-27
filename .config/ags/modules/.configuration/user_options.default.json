@@ -31,6 +31,25 @@
     "network": true,
     "volume": true,
     "keyboard": true,
+     "pinnedApps": [
+      "zen-browser",
+      "spotify",
+      "firefox",
+      "kdeconnect",
+      "spotube",
+      "github-desktop",
+      "visual-studio-code",
+      "zeditor",
+      "nwg-look",
+      "Obisidian",
+      "steam",
+      "heroic-games-launcher",
+      "org.gnome.Nautilus", 
+      "chromium",
+      "visual studio code",
+      "windsurf",
+      "obsidian"
+    ],
     "quran": {
       "verseNumberStyle": "circle"
     }
@@ -466,25 +485,23 @@
     "enabled": true,
     "hiddenThickness": 5,
     "pinnedApps": [
-      "zen-browser",
-      "spotube",
-      "github-desktop",
-      "visual-studio-code",
-      "zeditor",
-      "nwg-look",
-      "Obisidian",
-      "steam",
-      "heroic-games-launcher",
+      "firefox",
       "org.gnome.Nautilus",
-      "chromium",
-      "visual studio code",
-      "windsurf",
-      "obsidian",
-      "firefox"
+      "code",
+      "org.gnome.Terminal"
     ],
+    "searchPinnedAppIcons": true,
+    "iconSizes": {
+      "default": 32,
+      "minimal": 24,
+      "full": 40,
+      "windows": 28,
+      "ubuntu": 36
+    },
+    "activeAppIconSize": 32,
+    "pinnedAppIconSize": 32,
     "layer": "top",
     "monitorExclusivity": true,
-    "searchPinnedAppIcons": false,
     "trigger": [
       "client-added",
       "client-removed"

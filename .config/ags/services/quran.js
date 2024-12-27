@@ -340,31 +340,33 @@ class QuranService extends Service {
                 return;
             }
 
-            let fullText = '';
-            data.data.ayahs.forEach((ayah, index) => {
-                const verseKey = `${surahNumber}:${ayah.numberInSurah}`;
-                const verseText = ayah.text;
-                const numberWithSpacing = ` ${this.getVerseNumberStyle(ayah.numberInSurah)} `;
-                
-                if (index === 0) {
-                    // Add Surah name
-                    const surahName = this.getSurahName(surahNumber);
-                    if (surahName) {
-                        fullText = `سورة ${surahName}\n\n`;
-                        // Add to history
-                        this.addToHistory(surahNumber, surahName);
-                    }
-                    // Add Bismillah for all Surahs except At-Tawbah (9)
-                    if (surahNumber !== 9) {
-                        fullText += 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\n\n';
-                    }
-                    fullText += verseText + numberWithSpacing;
-                } else {
-                    fullText += verseText + numberWithSpacing;
+            // Add Surah name
+            const surahName = this.getSurahName(surahNumber);
+            if (surahName) {
+                // Add to history
+                this.addToHistory(surahNumber, surahName);
+                data.data.name = surahName;
+            }
+
+            // Process verses
+            const processedVerses = data.data.ayahs.map(ayah => {
+                // For first verse, remove Bismillah if present
+                if (ayah.numberInSurah === 1) {
+                    const verse = ayah.text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '')
+                        .replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s*/, '');
+                    return `${verse} ${this.getVerseNumberStyle(ayah.numberInSurah)}`;
                 }
+                return `${ayah.text} ${this.getVerseNumberStyle(ayah.numberInSurah)}`;
             });
-            
-            this.emit('surah-received', fullText);
+
+            // Add Bismillah for all Surahs except At-Tawbah (9)
+            const bismillah = surahNumber !== 9 ? 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ' : '';
+
+            this.emit('surah-received', JSON.stringify({
+                name: data.data.name,
+                bismillah,
+                verses: processedVerses.join(' ')
+            }));
         } catch (error) {
             console.error('Fetch error:', error);
             this.emit('error', 'Failed to fetch surah. Please try again.');

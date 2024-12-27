@@ -9,14 +9,14 @@ const UPDATE_INTERVAL = 3 * 60 * 60 * 1000;
 const QuoteWidget = () => {
     // Create widget with initial content
     const label = Label({
-        className: 'bar-time',
+        className: 'txt-small onSurfaceVariant',
         label: 'Loading quote...',
         justification: 'left',
         // wrap: true,
         truncate: 'end',
         // wrapMode: 'word',  // Wrap at word boundaries
         // widthChars: 35,    // Force width to roughly 10rem
-        maxWidthChars: 50, // Maximum width in characters
+        maxWidthChars: 45, // Maximum width in characters
     });
 
     // Create the main widget
@@ -26,7 +26,7 @@ const QuoteWidget = () => {
             Quotes.fetch();
         },
         child: Box({
-            className: 'bar-time spacing-h-5',
+            className: 'spacing-h-5',
             hexpand: false,
             vexpand: true,
             children: [label],

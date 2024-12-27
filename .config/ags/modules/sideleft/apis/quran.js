@@ -199,49 +199,83 @@ export const quranContent = Box({
         if (surahHandler) {
             QuranService.disconnect(surahHandler);
         }
-        surahHandler = QuranService.connect('surah-received', (_, text) => {
+        surahHandler = QuranService.connect('surah-received', (_, content) => {
             contentBox.children = []; // Clear previous content
             
-            contentBox.add(Box({
-                className: 'quran-message',
-                vertical: true,
-                hpack: 'center',
-                css: 'padding: 1rem; background-color: $surfaceContainerLow; border-radius: $rounding_large; margin: 1rem;',
-                children: [Box({
+            try {
+                const data = JSON.parse(content);
+                contentBox.add(Box({
+                    className: 'quran-message',
+                    vertical: true,
                     hpack: 'center',
+                    css: 'padding: 1rem; background-color: $surfaceContainerLow; border-radius: $rounding_large; margin: 1rem;',
                     children: [
+                        // Surah name
+                        Label({
+                            className: 'quran-arabic-text',
+                            css: 'font-size: 2.7rem;',
+                            label: data.name,
+                            justification: 'center',
+                            hpack: 'center',
+                        }),
+                        // Bismillah
+                        data.bismillah ? Label({
+                            className: 'quran-arabic-text',
+                            css: 'font-size: 1.7rem; margin: 1rem 0 2rem 0;',
+                            label: data.bismillah,
+                            justification: 'center',
+                            hpack: 'center',
+                        }) : null,
+                        // Verses
                         Box({
-                            vertical: true,
+                            hpack: 'center',
                             children: [
-                                Label({
-                                    className: 'txt txt-hugeass quran-arabic-text',
-                                    wrap: true,
-                                    justify: Gtk.Justification.CENTER,
-                                    label: text,
-                                    css: 'line-height: 2.0; letter-spacing: 0.5px;',
-                                    selectable: true,
-                                }),
                                 Box({
-                                    className: 'spacing-h-5',
-                                    hpack: 'center',
-                                    css: 'margin-top: 1rem;',
+                                    vertical: true,
                                     children: [
-                                        Button({
-                                            className: 'txt-small sidebar-chat-chip',
-                                            label: 'Copy Text',
-                                            setup: setupCursorHover,
-                                            onClicked: () => {
-                                                const clipboard = Gtk.Clipboard.get_default(imports.gi.Gdk.Display.get_default());
-                                                clipboard.set_text(text, -1);
-                                            },
+                                        Label({
+                                            className: 'txt txt-hugeass quran-arabic-text',
+                                            wrap: true,
+                                            justify: Gtk.Justification.CENTER,
+                                            label: data.verses,
+                                            css: 'line-height: 2.0; letter-spacing: 0.5px;',
+                                            selectable: true,
+                                        }),
+                                        Box({
+                                            className: 'spacing-h-5',
+                                            hpack: 'center',
+                                            css: 'margin-top: 1rem;',
+                                            children: [
+                                                Button({
+                                                    className: 'txt-small sidebar-chat-chip',
+                                                    label: 'Copy Text',
+                                                    setup: setupCursorHover,
+                                                    onClicked: () => {
+                                                        const clipboard = Gtk.Clipboard.get_default(imports.gi.Gdk.Display.get_default());
+                                                        clipboard.set_text(data.verses, -1);
+                                                    },
+                                                }),
+                                            ],
                                         }),
                                     ],
                                 }),
                             ],
                         }),
-                    ],
-                })],
-            }));
+                    ].filter(Boolean), // Remove null items
+                }));
+            } catch (e) {
+                console.error('Error displaying surah:', e);
+                contentBox.add(Box({
+                    className: 'quran-message',
+                    vertical: true,
+                    hpack: 'center',
+                    css: 'padding: 8px;',
+                    children: [Label({
+                        className: 'txt txt-small txt-error',
+                        label: 'Error displaying surah',
+                    })],
+                }));
+            }
 
             // Restore scroll position
             if (currentSurah) {

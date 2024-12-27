@@ -135,7 +135,22 @@ export const isModuleEnabled = (module) => {
 // Global vars for external control (through keybinds)
 export const showMusicControls = Variable(false, {});
 export const showColorScheme = Variable(false, {});
+export const dockPinned = Variable(false, {});
+export const currentDockMode = Variable(1, {});
+
 globalThis["openMusicControls"] = showMusicControls;
+globalThis["dockPinned"] = dockPinned;
+globalThis["currentDockMode"] = currentDockMode;
+
+globalThis["toggleDockPin"] = () => {
+    globalThis.dockPinned.value = !globalThis.dockPinned.value;
+};
+
+globalThis["cycleDockMode"] = () => {
+    const maxMode = 5; // Adding Windows (4) and Ubuntu (5) modes
+    currentDockMode.value = (currentDockMode.value % maxMode) + 1;
+};
+
 globalThis["openColorScheme"] = showColorScheme;
 globalThis["mpris"] = Mpris;
 globalThis["getString"] = getString;
@@ -321,7 +336,5 @@ export const sendScreenshotToGemini = async () => {
         }
     } catch (error) { }
 };
-
-globalThis["sendScreenshotToGemini"] = sendScreenshotToGemini;
 
 globalThis["sendScreenshotToGemini"] = sendScreenshotToGemini;

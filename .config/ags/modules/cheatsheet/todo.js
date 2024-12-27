@@ -36,10 +36,8 @@ const TodoItem = (task, id) => {
         revealChild: true,
         transition: 'slide_down',
         transitionDuration: 250,
-        child: Button({
-            className: 'task-item',
-            css: `background-color: @layer1; border-radius: 8px; padding: 4px; margin: 2px 0; 
-                  ${task.done ? 'opacity: 0.7;' : ''}`,
+        child: Box({
+            className: task.done ? 'todo-item todo-done' : 'todo-item',
             child: Box({
                 children: [
                     Box({
@@ -50,7 +48,7 @@ const TodoItem = (task, id) => {
                                 css: 'padding: 8px;',
                                 setup: (box) => {
                                     box.pack_start(Button({
-                                        className: 'task-action-btn',
+                                        className: 'todo-check-btn',
                                         css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
                                         child: Label({
                                             className: 'icon-material',
@@ -58,25 +56,18 @@ const TodoItem = (task, id) => {
                                             css: 'font-size: 16px; color: @accent;',
                                         }),
                                         onClicked: () => {
-                                            const contentWidth = taskContent.get_allocated_width();
-                                            crosser.toggleClassName('task-crosser-crossed', true);
-                                            crosser.css = `margin-left: -${contentWidth}px;`;
-                                            Utils.timeout(200, () => {
-                                                widgetRevealer.revealChild = false;
-                                            });
-                                            Utils.timeout(350, () => {
-                                                if (task.done) {
-                                                    Todo.uncheck(id);
-                                                } else {
-                                                    Todo.check(id);
-                                                }
-                                                updateContent();
-                                            });
+                                            if (task.done) {
+                                                Todo.uncheck(id);
+                                            } else {
+                                                Todo.check(id);
+                                            }
                                         },
                                     }), false, false, 0);
+                                    
                                     box.pack_start(taskContent, true, true, 0);
+                                    
                                     box.pack_start(Button({
-                                        className: 'task-action-btn',
+                                        className: 'todo-delete-btn',
                                         css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
                                         child: Label({
                                             className: 'icon-material',
@@ -84,18 +75,10 @@ const TodoItem = (task, id) => {
                                             css: 'font-size: 16px; color: @error;',
                                         }),
                                         onClicked: () => {
-                                            const contentWidth = taskContent.get_allocated_width();
-                                            crosser.toggleClassName('task-crosser-removed', true);
-                                            crosser.css = `margin-left: -${contentWidth}px;`;
-                                            Utils.timeout(200, () => {
-                                                widgetRevealer.revealChild = false;
-                                            });
-                                            Utils.timeout(350, () => {
-                                                Todo.remove(id, false);
-                                                updateContent();
-                                            });
+                                            Todo.remove(id, task.type === 'note');
                                         },
                                     }), false, false, 0);
+                                    
                                     box.pack_start(crosser, false, false, 0);
                                 },
                             }),
@@ -145,29 +128,21 @@ const NoteItem = (note, id) => {
                                 spacing: 8,
                                 css: 'padding: 8px;',
                                 setup: (box) => {
-                                    box.pack_start(noteContent, true, true, 0);
-                                    box.pack_start(Button({
-                                        className: 'task-action-btn',
-                                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+                                    box.pack_start(Box({
+                                        hexpand: true,
+                                        children: [noteContent],
+                                    }), true, true, 0);
+
+                                    box.pack_end(Button({
+                                        className: 'delete-button',
                                         child: Label({
                                             className: 'icon-material',
                                             label: 'delete',
-                                            css: 'font-size: 16px; color: @error;',
                                         }),
                                         onClicked: () => {
-                                            const contentWidth = noteContent.get_allocated_width();
-                                            crosser.toggleClassName('task-crosser-removed', true);
-                                            crosser.css = `margin-left: -${contentWidth}px;`;
-                                            Utils.timeout(200, () => {
-                                                widgetRevealer.revealChild = false;
-                                            });
-                                            Utils.timeout(350, () => {
-                                                Todo.remove(id, true);
-                                                updateContent();
-                                            });
+                                            Todo.remove(id, note.type === 'note');
                                         },
                                     }), false, false, 0);
-                                    box.pack_start(crosser, false, false, 0);
                                 },
                             }),
                         ],
@@ -602,29 +577,6 @@ export default () => {
                         }),
                         Label({
                             label: 'Done',
-                            css: 'margin-left: 4px; font-size: 14px; color: @onLayer1;',
-                        }),
-                    ],
-                }),
-            }),
-            Button({
-                className: 'category-button',
-                onClicked: self => {
-                    contentStack.shown = 'notes';
-                    contentEntry.placeholderText = 'New Note';
-                    entryBox.get_children()[1].shown = 'notes';
-                    if (activeButton) activeButton.toggleClassName('active', false);
-                    self.toggleClassName('active', true);
-                    activeButton = self;
-                },
-                child: Box({
-                    children: [
-                        Label({
-                            className: 'category-icon icon-material',
-                            label: 'note',
-                        }),
-                        Label({
-                            label: 'Notes',
                             css: 'margin-left: 4px; font-size: 14px; color: @onLayer1;',
                         }),
                     ],

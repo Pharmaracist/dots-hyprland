@@ -4,6 +4,7 @@ import PopupWindow from '../.widgethacks/popupwindow.js';
 import Keybinds from "./keybinds.js";
 // import PeriodicTable from "./periodictable.js";
 import Todo from "./todo.js";
+import Quran from "./quran.js";
 import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 import clickCloseRegion from '../.commonwidgets/clickcloseregion.js';
@@ -18,6 +19,11 @@ const cheatsheets = [
         name: getString('Keybinds'),
         materialIcon: 'keyboard',
         contentWidget: Keybinds,
+    },
+    {
+        name: getString('Quran'),
+        materialIcon: 'book',
+        contentWidget: Quran,
     },
     // {
     //     name: getString('Periodic table'),

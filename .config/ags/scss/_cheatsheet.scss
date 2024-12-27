@@ -351,3 +351,92 @@ $coloractinium: $term7;
     @include cheatsheet-periodictable-legend-color;
     background-color: $coloractinium;
 }
+
+// .quran-container {
+//     @include normal-rounding;
+//     padding: 1rem;
+//     background-color: $layer1;
+    
+//     .quran-recent {
+//         @include normal-rounding;
+//         background-color: $layer0;
+        
+//         .quran-welcome-logo {
+//             @include normal-rounding;
+//             background-color: $layer1;
+//         }
+        
+//         .quran-arabic-text {
+//             color: $onLayer1;
+//         }
+        
+//         .welcome-example-btn {
+//             @include normal-rounding;
+//             padding: 0.5rem 1rem;
+//             background-color: $layer1;
+//             // transition: all 0.2s ease;
+            
+//             &:hover {
+//                 background-color: $layer1Hover;
+//             }
+            
+//             &:active {
+//                 background-color: $layer1Active;
+//             }
+//         }
+//     }
+
+//     .surah-scrollable {
+//         padding: 1rem;
+//         background-color: $layer0;
+//         @include normal-rounding;
+//     }
+
+//     .surah-content {
+//         .surah-header {
+//             margin-bottom: 2rem;
+//             padding-bottom: 1rem;
+//             // border-bottom: 1px solid $outline;
+//         }
+
+//         .verse-container {
+//             margin-bottom: 1.5rem;
+//             padding: 0.5rem;
+//             @include normal-rounding;
+//             background-color: $layer1;
+//             // transition: all 0.2s ease;
+
+//             &:hover {
+//                 background-color: $layer1Hover;
+//             }
+
+//             &.bismillah {
+//                 // background-color: transparent;
+//                 margin: 2rem 0;
+                
+//                 &:hover {
+//                     // background-color: transparent;
+//                 }
+                
+//                 .verse-text {
+//                     // font-size: 1.8rem !important;
+//                     // color: $onLayer1 !important;
+//                 }
+//             }
+
+//             .verse-content {
+//                 margin-bottom: 0.5rem;
+
+//                 .verse-text {
+//                     padding: 0.5rem;
+//                     color: $onLayer1;
+//                 }
+//             }
+
+//             .verse-number {
+//                 color: $onLayer1Secondary;
+//                 padding-left: 0.5rem;
+//             }
+//         }
+//     }
+// }

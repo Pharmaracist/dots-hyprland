@@ -29,7 +29,7 @@ const ColorButton = ({ icon, value, tooltip }) => Widget.Button({
         ]).catch(print);
     },
     setup: setupCursorHover,
-    child: MaterialIcon(icon, 'norm'),
+    child: MaterialIcon(icon, 'large'),
 });
 
 const DarkModeToggle = () => {
@@ -37,8 +37,8 @@ const DarkModeToggle = () => {
         transition: 'slide_left_right',
         transitionDuration: 200,
         items: [
-            ['light', MaterialIcon('light_mode', 'norm')],
-            ['dark', MaterialIcon('dark_mode', 'norm')],
+            ['light', MaterialIcon('light_mode', 'large')],
+            ['dark', MaterialIcon('dark_mode', 'large')],
         ],
     });
     
@@ -66,8 +66,8 @@ const TransparencyToggle = () => {
         transition: 'slide_left_right',
         transitionDuration: 200,
         items: [
-            ['opaque', MaterialIcon('blur_off', 'norm')],
-            ['transparent', MaterialIcon('blur_on', 'norm')],
+            ['opaque', MaterialIcon('blur_off', 'large')],
+            ['transparent', MaterialIcon('blur_on', 'large')],
         ],
     });
 
