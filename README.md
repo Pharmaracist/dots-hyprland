@@ -53,11 +53,6 @@
 curl -s https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install.sh | bash
 ```
 
-### 🎩 For Fedora Users:
-```bash
-curl -s https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install-fedora.sh | bash
-```
-
 ### 💻 Manual Installation:
 If you prefer to see what's being installed, you can manually clone and run the installation script:
 
