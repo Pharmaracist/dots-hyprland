@@ -174,18 +174,31 @@ case $SKIP_SYSUPDATE in
     ;;
 esac
 
+# Enable Flathub if not already enabled
+if ! flatpak remotes --show-details | grep -q "Flathub"; then
+    echo -e "${YELLOW}Enabling Flathub repository...${RESET}"
+    v flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+fi
+
 # Install Development Tools and Libraries
 echo -e "${YELLOW}Installing development tools and libraries...${RESET}"
 v sudo dnf group install -y "Development Tools" "Development Libraries"
-v sudo dnf install -y cmake gcc-c++ libxcb-devel libX11-devel pixman-devel cairo-devel pango-devel
+v sudo dnf install -y cmake gcc-c++ libxcb-devel libX11-devel pixman-devel cairo-devel \
+    pango-devel wayland-devel wayland-protocols-devel libdrm-devel \
+    libxkbcommon-devel systemd-devel libinput-devel libevdev-devel \
+    mesa-libEGL-devel mesa-libGLES-devel mesa-libgbm-devel \
+    xcb-util-devel xcb-util-keysyms-devel xcb-util-cursor-devel \
+    xcb-util-wm-devel xcb-util-renderutil-devel
 
 # Install Wayland Development Packages
 echo -e "${YELLOW}Installing Wayland development packages...${RESET}"
-v sudo dnf install -y wayland-devel libwayland-client libwayland-cursor libwayland-egl wayland-protocols-devel
+v sudo dnf install -y wayland-devel libwayland-client libwayland-cursor \
+    libwayland-egl wayland-protocols-devel
 
 # Install XDG Desktop Portal
 echo -e "${YELLOW}Installing XDG desktop portal and dependencies...${RESET}"
-v sudo dnf install -y xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-wlr
+v sudo dnf install -y xdg-desktop-portal xdg-desktop-portal-gtk \
+    xdg-desktop-portal-wlr xdg-user-dirs xdg-utils
 
 # Install COPR for Hyprland
 if ! dnf repolist | grep -q "solopasha-hyprland"; then
@@ -196,7 +209,9 @@ fi
 
 # Install Hyprland and related packages
 echo -e "${YELLOW}Installing Hyprland and related packages...${RESET}"
-v sudo dnf install -y hyprland waybar wofi wlroots swww grim slurp wl-clipboard swaylock swayidle swaybg
+v sudo dnf install -y hyprland waybar wofi wlroots swww grim slurp \
+    wl-clipboard swaylock swayidle swaybg dunst rofi-wayland \
+    kitty alacritty foot wezterm
 
 # Install Additional Dependencies
 echo -e "${YELLOW}Installing additional required packages...${RESET}"
@@ -213,8 +228,6 @@ v sudo dnf install -y \
     pavucontrol \
     blueman \
     NetworkManager-tui \
-    xdg-user-dirs \
-    xdg-utils \
     qt5-qtwayland \
     qt6-qtwayland \
     ripgrep \
@@ -222,7 +235,17 @@ v sudo dnf install -y \
     ImageMagick \
     nodejs \
     npm \
-    neofetch
+    neofetch \
+    eww \
+    socat \
+    cpio \
+    unzip \
+    sassc
+
+# Install additional multimedia codecs
+echo -e "${YELLOW}Installing multimedia codecs...${RESET}"
+v sudo dnf install -y gstreamer1-plugins-{bad-\*,good-\*,base} \
+    gstreamer1-plugin-openh264 mozilla-openh264
 
 # Install fonts
 echo -e "${YELLOW}Installing required fonts...${RESET}"
@@ -233,7 +256,18 @@ v sudo dnf install -y \
     jetbrains-mono-fonts \
     fontawesome-fonts \
     liberation-fonts \
-    mozilla-fira-*-fonts
+    mozilla-fira-*-fonts \
+    fira-code-fonts
+
+# Install Flatpak applications
+echo -e "${YELLOW}Installing Flatpak applications...${RESET}"
+v flatpak install -y flathub com.github.tchx84.Flatseal
+
+# Enable services
+echo -e "${YELLOW}Enabling required services...${RESET}"
+v systemctl --user enable --now wireplumber.service
+v systemctl --user enable --now pipewire.service
+v systemctl --user enable --now pipewire-pulse.service
 
 # Read dependencies from configuration
 remove_bashcomments_emptylines ${DEPLISTFILE} ./cache/dependencies_stripped.conf
