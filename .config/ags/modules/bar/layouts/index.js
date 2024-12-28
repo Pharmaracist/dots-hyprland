@@ -108,16 +108,17 @@ export const BarLayouts = {
                     name: 'media',
                     sets: [
                         [Widget.Box({
-                            hpack: 'end',
+                            hpack: 'fill',
+                            hexpand: true,
                             className: 'bar-knocks padding-rl-5',
                             children: [modules.MediaModules.musicStuff()],
                         })],
                         [Widget.Box({
                             hexpand: true,
-                            hpack: 'end',
+                            hpack: 'fill',
                             className: 'bar-knocks padding-rl-15',
                             children: [
-                                Widget.Box({ hpack: 'end', children: [modules.AppModules.pinnedApps()]}) ],
+                                Widget.Box({ hpack: 'center', children: [modules.AppModules.pinnedApps()]}) ],
                         })],
                         [Widget.Box({
                             hpack: 'end',
@@ -152,7 +153,7 @@ export const BarLayouts = {
                         [Widget.Box({
                             css:`min-width:20rem;`,
                             hexpand: true,
-                            hpack: 'start',
+                            hpack: 'fill',
                             className: ' bar-knocks padding-rl-15',
                             children: [
                                 modules.InfoModules.simpleClock(),
@@ -163,10 +164,10 @@ export const BarLayouts = {
                             ]
                         })],
                         [Widget.Box({
-                            hpack: 'start',
-                            css:`min-width:20rem;`,
+                            hpack: 'fill',
+                            hexpand: true,
                             className: 'bar-knocks padding-rl-10',
-                            children: [ modules.InfoModules.fetcher()],
+                            children: [ Widget.Box({ hpack: 'center',hexpand: true, children: [modules.InfoModules.fetcher()]})],
                         })],
                     ],
                 }),

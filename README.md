@@ -12,7 +12,8 @@
 [![Repo size](https://img.shields.io/github/repo-size/pharmaracist/dots-hyprland?style=for-the-badge&logo=github&color=CAC992&logoColor=D9E0EE&labelColor=292324)](https://github.com/pharmaracist/dots-hyprland)
 [![License](https://img.shields.io/github/license/pharmaracist/dots-hyprland?style=for-the-badge&logo=github&color=8CABD9&logoColor=D9E0EE&labelColor=292324)](https://github.com/pharmaracist/dots-hyprland/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/pharmaracist/dots-hyprland?style=for-the-badge&logo=github&color=F5A97F&logoColor=D9E0EE&labelColor=292324)](https://github.com/pharmaracist/dots-hyprland/issues)
-[![Required Arch](https://img.shields.io/badge/Required-Arch%20Linux-blue?style=for-the-badge&logo=arch-linux&logoColor=D9E0EE&labelColor=292324&color=7DC4E4)](https://archlinux.org/)
+[![Required Arch](https://img.shields.io/badge/Supports-Arch%20Linux-blue?style=for-the-badge&logo=arch-linux&logoColor=D9E0EE&labelColor=292324&color=7DC4E4)](https://archlinux.org/)
+[![Required Fedora](https://img.shields.io/badge/Supports-Fedora-blue?style=for-the-badge&logo=fedora&logoColor=D9E0EE&labelColor=292324&color=51A2DA)](https://getfedora.org/)
 [![Hyprland](https://img.shields.io/badge/Made%20for-Hyprland-pink?style=for-the-badge&logo=linux&logoColor=D9E0EE&labelColor=292324&color=C6A0F6)](https://hyprland.org/)
 
 <a href="https://discord.gg/your-discord-link">
@@ -45,14 +46,50 @@
 </details>
 
 <details>
-<summary>🚀 Quick Installation</summary>
+<summary>🚀 Installation</summary>
 
-One command to rule them all:
+### 🐧 For Arch Linux Users:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install-custom.sh | bash
+curl -s https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install.sh | bash
 ```
 
-> **Note**: Installation will ask for confirmation before executing commands.
+### 🎩 For Fedora Users:
+```bash
+curl -s https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install-fedora.sh | bash
+```
+
+### 💻 Manual Installation:
+If you prefer to see what's being installed, you can manually clone and run the installation script:
+
+```bash
+# Clone the repository
+git clone https://github.com/pharmaracist/dots-hyprland.git
+
+# Change to the directory
+cd dots-hyprland
+
+# For Arch Linux
+chmod +x install.sh
+./install.sh
+
+# For Fedora
+chmod +x install-fedora.sh
+./install-fedora.sh
+```
+
+### 🔧 System Requirements
+
+#### For Arch Linux:
+- Base Arch Linux installation
+- Internet connection
+- Basic terminal knowledge
+
+#### For Fedora:
+- Fedora Workstation 38 or newer
+- Internet connection
+- Basic terminal knowledge
+
+### 🎨 Features
 </details>
 
 <details>
