@@ -68,19 +68,20 @@ const CheatsheetHeader = () => Widget.CenterBox({
             }),
         ]
     }),
-    endWidget: Widget.Button({
-        vpack: 'start',
-        hpack: 'end',
-        className: "cheatsheet-closebtn icon-material txt txt-hugeass",
-        onClicked: () => {
-            closeWindowOnAllMonitors('cheatsheet');
-        },
-        child: Widget.Label({
-            className: 'icon-material txt txt-hugeass',
-            label: 'close'
-        }),
-        setup: setupCursorHover,
-    }),
+    endWidget: Widget.Box({}),
+//     Widget.Button({
+//         vpack: 'start',
+//         hpack: 'end',
+//         className: "cheatsheet-closebtn icon-material txt txt-hugeass",
+//         onClicked: () => {
+//             closeWindowOnAllMonitors('cheatsheet');
+//         },
+//         child: Widget.Label({
+//             className: 'icon-material txt txt-hugeass',
+//             label: 'close'
+//         }),
+//         setup: setupCursorHover,
+//     }),
 });
 
 const sheetContents = [];

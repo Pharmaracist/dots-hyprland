@@ -26,6 +26,7 @@ import Session from "./modules/session/main.js";
 import SideLeft from "./modules/sideleft/main.js";
 import SideRight from "./modules/sideright/main.js";
 import { COMPILED_STYLE_DIR } from "./init.js";
+import Ipod from "./modules/ipod/main.js";
 
 const range = (length, start = 1) =>
   Array.from({ length }, (_, i) => i + start);
@@ -65,6 +66,7 @@ const Windows = () => {
           forMonitors((id) => Corner(id, "bottom right", true)),
         ]
       : []),
+      Ipod(),
     ...(modules.wallselect !== false ? [Wallselect()] : []),
   ];
 };

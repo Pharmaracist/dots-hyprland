@@ -8,14 +8,16 @@ export default (monitor) =>
   Widget.Window({
     name: `desktopbackground`,
     keymode: "on-demand",
-    // anchor: ['top', 'bottom', 'left', 'right'],
     layer: "background",
     exclusivity: "ignore",
     visible: false,
     child: Widget.Overlay({
       child: WallpaperImage(monitor),
-      // child: Widget.Box({}),
-      overlays: [TimeAndLaunchesWidget(), SystemWidget()],
+      overlays: [
+        TimeAndLaunchesWidget(), 
+        // SystemWidget(),
+     
+      ],
       setup: (self) => {
         self.set_overlay_pass_through(self.get_children()[1], true);
       },

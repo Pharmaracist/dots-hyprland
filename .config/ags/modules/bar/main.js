@@ -5,6 +5,7 @@ import { currentShellMode } from "../../variables.js";
 // Import modular components
 import { BarLayouts, createBarContent } from "./layouts/index.js";
 import { initializeModules } from "./modules/registry.js";
+import { toggleWindow as toggleIpod } from '../ipod/main.js';
 
 // Create different bar contents
 const createBarContents = async (monitor) => {
@@ -54,7 +55,9 @@ const createBar = async (monitor = 0) => {
         visible: true,
         child: Widget.Box({
             css: 'min-height: 3rem;',
-            children: [stack],
+            children: [
+                stack,
+            ],
         }),
     });
 

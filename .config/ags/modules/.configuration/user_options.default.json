@@ -16,7 +16,7 @@
     "session": true,
     "colorscheme": true,
     "screencorners": true,
-    "desktopbackground": false,
+    "desktopbackground": true,
     "wallselect": true,
     "onscreenkeyboard": false,
     "crosshair": false,

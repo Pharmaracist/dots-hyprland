@@ -112,3 +112,151 @@
     padding: 0rem;
     background-color: $layer2;
 }
+
+.wallselect-widget {
+    .wallselect-content {
+        background-color: $surfaceContainer;
+        padding: 1.5rem;
+        border-radius: $rounding-large;
+        border: 0.5px solid $outline;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+        .wallselect-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: $onSurface;
+        }
+    }
+}
+
+.ipod-widget {
+    @include large-rounding;
+    background: $layer0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 0.5px solid $outline;
+    margin: 0 1rem 1rem;
+    .ipod-content {
+        padding: 1rem 2.1rem;
+        
+        .left-section {
+            .app-icon {
+                color: white;
+                opacity: 0.8;
+            }
+            
+            .ipod-cover {
+                margin-bottom: 16px;
+                
+                .cover-art-box {
+                    @include large-rounding;
+                    background: linear-gradient(160deg, $onSurfaceVariant, $secondaryContainer);
+                    min-width: 400px;
+                    min-height: 400px;
+                    margin-right: 2rem;
+                    padding: 5rem;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+                    border: 0.5px solid $outline;
+                    
+                }
+            }
+        }
+        .cover-art {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            margin-right:1.3rem;
+           
+        }
+        .track-title {
+            @include mainfont;
+            font-size: 2.8rem;
+            color: $onSurfaceVariant;
+        }
+        
+        .track-artist {
+            @include mainfont;
+            color: $onSurface;
+            margin-top: 0.5rem;
+            font-size: 1.8rem;
+        }
+        .track-info {
+            margin: 8px 0;
+
+        }
+
+        .right-section {
+            .volume-indicator {
+                margin: 0 4px;
+                
+                .volume-container {
+                    min-width: 28px;
+                    min-height: 28px;
+                    
+                    .volume-label {
+                        color: white;
+                        font-size: 10px;
+                        margin: 0;
+                    }
+                    
+                    .volume-progress {
+                        min-height: 28px;
+                        min-width: 4px;
+                        padding: 2px;
+                        margin: 2px;
+                        background-color: rgba(255, 255, 255, 0.1);
+                        color: $secondaryContainer;
+                        font-size: 0;
+                    }
+                }
+            }
+            
+            .app-icon-volume-container{
+                background-color: $surfaceContainerLow;
+    @include large-rounding;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+                .control-button, 
+                .control-buttons {
+                    margin-top: 2rem;
+                    padding: 0.5rem;
+                        min-width: 2.5rem;
+                        min-height: 2.5rem;
+                        border-radius: 50%;
+                        color: $onSurfaceVariant;
+                        background: transparent;
+                        transition: all 200ms ease;
+                        font-size: 2rem;
+                        &:hover {
+                            background: $surfaceContainerHighest;
+                        }
+                        
+                        &:active {
+                            background: $surfaceContainerHigh;
+                        }
+                        
+                        &.active {
+                            color: $primary;
+                        }
+                    }
+        
+            }
+            }
+            }
+            .cava-visualizer {
+            
+                .cava-bar {
+                    font-family: monospace;
+                    min-width: 3px;
+                    transition: color 100ms linear;
+                    color:$secondary;
+                    border-radius: 12px;
+                    
+                    &.cava-bar-med {
+                        color: $secondary;
+                    }
+                    
+                    &.cava-bar-high {
+                        color: $primary;
+                    }
+                }
+            }

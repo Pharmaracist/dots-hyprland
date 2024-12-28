@@ -1,6 +1,8 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import App from "resource:///com/github/Aylur/ags/app.js";
+import PopupWindow from '../.widgethacks/popupwindow.js';
+import clickCloseRegion from '../.commonwidgets/clickcloseregion.js';
 const { GLib } = imports.gi;
 const { Box, EventBox, Scrollable, Label } = Widget;
 
@@ -169,6 +171,8 @@ const createContent = async () => {
             onScrollUp: (event) => handleScroll({ direction: 'up', event }),
             onScrollDown: (event) => handleScroll({ direction: 'down', event }),
             onPrimaryClick: () => App.closeWindow("wallselect"),
+            onSecondaryClick: () => App.closeWindow("wallselect"),
+            onMiddleClick: () => App.closeWindow("wallselect"),
             child: scroll,
         });
 
@@ -216,29 +220,39 @@ const GenerateButton = () => Widget.Button({
     },
 });
 
-// Main Window
+const toggleWindow = () => {
+    const win = App.getWindow('wallselect');
+    if (!win) return;
+    win.visible = !win.visible;
+};
+
+export { toggleWindow };
+
 export default () =>
     Widget.Window({
         name: "wallselect",
-        anchor:
-            getBarPosition() === "top"
-                ? ["top", "left", "right"]
-                : ["bottom", "left", "right"],
+        anchor: ['top', 'bottom', 'right', 'left'],
+        layer: 'overlay',
         visible: false,
-        child: Box({
-            vertical: true,
-            children: [
-                EventBox({
-                    onPrimaryClick: () => App.closeWindow("wallselect"),
+        child: Widget.Overlay({
+            child: EventBox({
+                onPrimaryClick: () => App.closeWindow("wallselect"),
+                onSecondaryClick: () => App.closeWindow("wallselect"),
+                onMiddleClick: () => App.closeWindow("wallselect"),
+                child: Box({
+                    css: 'min-height: 1000px;',
                 }),
+            }),
+            overlays: [
                 Box({
                     vertical: true,
                     className: "sidebar-right spacing-v-15",
+                    vpack: getBarPosition() === "top" ? 'start' : 'end',
                     children: [
                         Box({
                             className: "wallselect-header",
                             children: [
-                                Box({ hexpand: true }), // Пустое пространство для выравнивания
+                                Box({ hexpand: true }), // Empty space for alignment
                                 GenerateButton(),
                             ],
                         }),
@@ -250,8 +264,7 @@ export default () =>
                                     App,
                                     async (_, name, visible) => {
                                         if (name === "wallselect" && visible) {
-                                            const content =
-                                                await createContent();
+                                            const content = await createContent();
                                             self.children = [content];
                                         }
                                     },
