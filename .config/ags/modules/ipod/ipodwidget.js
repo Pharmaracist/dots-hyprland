@@ -11,7 +11,7 @@ const TRANSITION_DURATION = 50;
 
 const AppIcon = () => Widget.Icon({
     className: 'app-icon',
-    size: 48,
+    size: 40,
 }).hook(Mpris, self => {
     const player = getPlayer();
     if (!player) return;
@@ -48,7 +48,8 @@ const VolumeIndicator = () => {
     });
     
     const volumeLabel = Widget.Label({
-        className: 'volume-label',
+        className: 'volume-label txt-norm onSurfaceVariant',
+        css: `margin:0 2rem 0 1rem`,
         label: `${Math.round(defaultVolume * 100)}`,
     });
     
@@ -101,7 +102,7 @@ const VolumeIndicator = () => {
 
 const MediaControls = () => {
     const playIcon = Widget.Label({
-        className: 'icon-material txt-2rem',
+        className: 'icon-material',
         label: 'play_arrow',
     });
 
@@ -117,7 +118,7 @@ const MediaControls = () => {
             Widget.Button({
                 className: 'control-button',
                 child: Widget.Label({
-                    className: 'icon-material txt-2rem',
+                    className: 'icon-material',
                     label: 'shuffle',
                 }),
                 onClicked: () => {
@@ -134,7 +135,7 @@ const MediaControls = () => {
             Widget.Button({
                 className: 'control-button',
                 child: Widget.Label({
-                    className: 'icon-material txt-2rem',
+                    className: 'icon-material ',
                     label: 'skip_previous',
                 }),
                 onClicked: () => {
@@ -144,7 +145,7 @@ const MediaControls = () => {
                 },
             }),
             Widget.Button({
-                className: 'control-button',
+                className: 'play-button control-button',
                 child: playIcon,
                 onClicked: () => {
                     const player = getPlayer();
@@ -283,9 +284,60 @@ const CavaVisualizer = () => {
     return visualizer;
 };
 
+const CoverArt = () => {
+    const box = Widget.Box({
+        className: 'cover-art',
+        css: `
+            min-width: 160px;
+            min-height: 160px;
+            background-image: url('${COVER_FALLBACK}');
+            background-size: cover;
+            background-position: center;
+            border-radius: 18px;
+            padding: 0 1.6rem;
+                margin:1rem 3rem  1rem 0;
+        `,
+    });
+
+    box.hook(Mpris, self => {
+        const player = getPlayer();
+        const coverPath = player?.cover_path;
+        const isPlaying = player?.playbackStatus === 'Playing';
+        
+        // Hide if no player or no cover
+        self.visible = !!(player && (isPlaying || coverPath));
+        
+        if (coverPath) {
+            self.css = `
+                min-width: 160px;
+                min-height: 160px;
+                background-image: url('${coverPath}');
+                background-size: cover;
+                background-position: center;
+                border-radius: 18px;
+                padding: 0 1.6rem;
+                margin:1rem 3rem  1rem 0;
+            `;
+        } else {
+            self.css = `
+                min-width: 160px;
+                min-height: 160px;
+                background-image: url('${COVER_FALLBACK}');
+                background-size: cover;
+                background-position: center;
+                border-radius: 18px;
+                padding: 0 1.6rem;
+                margin:1rem 3rem  1rem 0;
+            `;
+        }
+    });
+
+    return box;
+};
+
 export default () => Widget.Box({
     className: 'ipod-widget',
-    css: 'min-height: 240px;',
+    css: 'min-height: 260px;',
     children: [
         Widget.Box({
             className: 'ipod-content',
@@ -300,43 +352,7 @@ export default () => Widget.Box({
                             children: [
                                 Widget.Box({
                                     className: 'left-section',
-                                    children: [
-                                        Widget.Box({
-                                            className: 'cover-art',
-                                            css: `
-                                                min-width: 180px;
-                                                min-height: 180px;
-                                                background-image: url('${COVER_FALLBACK}');
-                                                background-size: cover;
-                                                background-position: center;
-                                                border-radius: 14px;
-                                                padding: 0 1.5rem;
-                                            `,
-                                        }).hook(Mpris, self => {
-                                            const coverPath = getPlayer()?.cover_path;
-                                            if (coverPath) {
-                                                self.css = `
-                                                    min-width: 180px;
-                                                    min-height: 180px;
-                                                    background-image: url('${coverPath}');
-                                                    background-size: cover;
-                                                    background-position: center;
-                                                    border-radius: 14px;
-                                                    padding: 0 1.5rem;
-                                                `;
-                                            } else {
-                                                self.css = `
-                                                    min-width: 180px;
-                                                    min-height: 180px;
-                                                    background-image: url('${COVER_FALLBACK}');
-                                                    background-size: cover;
-                                                    background-position: center;
-                                                    border-radius: 14px;
-                                                    padding: 0 2rem;
-                                                `;
-                                            }
-                                        }),
-                                    ],
+                                    children: [CoverArt()],
                                 }),
                                 Widget.Box({
                                     className: 'volume-indicator-container',
@@ -364,7 +380,7 @@ export default () => Widget.Box({
                                         VolumeIndicator(),
                                     ] 
                                 }),
-                            ],
+                            ]
                         }),
                     ],
                 }),

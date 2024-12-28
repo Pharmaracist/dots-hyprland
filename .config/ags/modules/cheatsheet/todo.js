@@ -425,6 +425,80 @@ export default () => {
         },
     });
 
+    const imageAddButton = Button({
+        className: 'add-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'add',
+                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                }),
+                Label({
+                    label: 'Add Image',
+                    css: 'color: @onLayer2;',
+                }),
+            ],
+        }),
+        onClicked: () => {
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select Image', '--file-filter=Images | *.png *.jpg *.jpeg *.gif *.webp'])
+                .then(path => {
+                    if (path) {
+                        path = path.trim();
+                        console.log('Selected image path:', path);
+                        if (Todo.addImage(path)) {
+                            console.log('Image added successfully');
+                            Todo.notify('images_json');
+                            updateContent();
+                        } else {
+                            console.log('Failed to add image');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error selecting image:', error);
+                });
+        },
+    });
+
+    const pdfAddButton = Button({
+        className: 'add-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'add',
+                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                }),
+                Label({
+                    label: 'Add PDF',
+                    css: 'color: @onLayer2;',
+                }),
+            ],
+        }),
+        onClicked: () => {
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select PDF', '--file-filter=PDF Files | *.pdf'])
+                .then(path => {
+                    if (path) {
+                        path = path.trim();
+                        console.log('Selected PDF path:', path);
+                        if (Todo.addPdf(path)) {
+                            console.log('PDF added successfully');
+                            Todo.notify('pdfs_json');
+                            updateContent();
+                        } else {
+                            console.log('Failed to add PDF');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error selecting PDF:', error);
+                });
+        },
+    });
+
     const entryBox = Box({
         className: 'entry-box',
         spacing: 8,
@@ -437,9 +511,22 @@ export default () => {
                     ['current', todoAddButton],
                     ['done', todoAddButton],
                     ['notes', noteAddButton],
+                    ['images', imageAddButton],
+                    ['pdfs', pdfAddButton]
                 ],
                 setup: self => {
                     self.shown = 'current';
+                    self.connect('notify::shown', () => {
+                        if (self.shown === 'current' || self.shown === 'done') {
+                            contentEntry.placeholderText = 'New Todo';
+                        } else if (self.shown === 'notes') {
+                            contentEntry.placeholderText = 'New Note';
+                        } else if (self.shown === 'images') {
+                            contentEntry.placeholderText = 'Select Image';
+                        } else if (self.shown === 'pdfs') {
+                            contentEntry.placeholderText = 'Select PDF';
+                        }
+                    });
                 },
             }),
         ],
@@ -538,13 +625,12 @@ export default () => {
         children: [
             Button({
                 className: 'category-button active',
-                onClicked: self => {
+                onClicked: function(button) {
                     contentStack.shown = 'current';
-                    contentEntry.placeholderText = 'New Todo';
                     entryBox.get_children()[1].shown = 'current';
                     if (activeButton) activeButton.toggleClassName('active', false);
-                    self.toggleClassName('active', true);
-                    activeButton = self;
+                    button.toggleClassName('active', true);
+                    activeButton = button;
                 },
                 child: Box({
                     children: [
@@ -561,13 +647,12 @@ export default () => {
             }),
             Button({
                 className: 'category-button',
-                onClicked: self => {
+                onClicked: function(button) {
                     contentStack.shown = 'done';
-                    contentEntry.placeholderText = 'New Todo';
                     entryBox.get_children()[1].shown = 'done';
                     if (activeButton) activeButton.toggleClassName('active', false);
-                    self.toggleClassName('active', true);
-                    activeButton = self;
+                    button.toggleClassName('active', true);
+                    activeButton = button;
                 },
                 child: Box({
                     children: [
@@ -593,6 +678,13 @@ export default () => {
         const images = Todo.images_json;
         const pdfs = Todo.pdfs_json;
 
+        console.log('Updating content:', { 
+            todos: todos.length, 
+            notes: notes.length, 
+            images: images.length, 
+            pdfs: pdfs.length 
+        });
+
         // Filter tasks and notes
         const activeTodos = todos.filter(todo => todo.type === 'todo' && !todo.done);
         const doneTodos = todos.filter(todo => todo.type === 'todo' && todo.done);
@@ -600,19 +692,16 @@ export default () => {
         
         // Map tasks to their respective lists
         contentList.children = activeTodos.map((todo, i) => {
-            // Find the actual index in the full todos array
             const id = todos.findIndex(t => t === todo);
             return TodoItem(todo, id);
         });
         
         doneList.children = doneTodos.map((todo, i) => {
-            // Find the actual index in the full todos array
             const id = todos.findIndex(t => t === todo);
             return TodoItem(todo, id);
         });
         
         noteList.children = noteItems.map((note, i) => {
-            // Find the actual index in the full notes array
             const id = notes.findIndex(n => n === note);
             return NoteItem(note, id);
         });
@@ -629,6 +718,7 @@ export default () => {
             imageRows.push(row);
         }
         imageList.children = imageRows;
+        console.log('Updated image grid with', images.length, 'images');
 
         // Create rows of 4 PDFs
         const pdfRows = [];
@@ -642,22 +732,36 @@ export default () => {
             pdfRows.push(row);
         }
         pdfList.children = pdfRows;
+        console.log('Updated PDF grid with', pdfs.length, 'PDFs');
     };
 
+    // Connect to all relevant signals
     Todo.connect('changed', () => {
+        console.log('Todo service changed');
         Utils.timeout(50, () => {
             updateContent();
         });
     });
 
-    updateContent();
+    Todo.connect('notify::images_json', () => {
+        console.log('Images updated');
+        Utils.timeout(50, () => {
+            updateContent();
+        });
+    });
 
-    const todoCategories = CategoryButton('Tasks', 'task_alt', null, true);
-    const noteCategories = CategoryButton('Notes', 'note', null);
-    const imageCategories = CategoryButton('Images', 'image', null);
-    const pdfCategories = CategoryButton('PDFs', 'picture_as_pdf', null);
+    Todo.connect('notify::pdfs_json', () => {
+        console.log('PDFs updated');
+        Utils.timeout(50, () => {
+            updateContent();
+        });
+    });
 
-    todoCategories.children[1].child = todoSubcategories;
+    // Load initial content
+    Utils.timeout(50, () => {
+        console.log('Loading initial content');
+        updateContent();
+    });
 
     const noteSubcategories = Box({
         vertical: true,
@@ -665,9 +769,12 @@ export default () => {
         children: [
             Button({
                 className: 'category-button',
-                onClicked: () => {
+                onClicked: function(button) {
                     contentStack.shown = 'notes';
-                    updateContent();
+                    entryBox.get_children()[1].shown = 'notes';
+                    if (activeButton) activeButton.toggleClassName('active', false);
+                    button.toggleClassName('active', true);
+                    activeButton = button;
                 },
                 child: Box({
                     children: [
@@ -685,17 +792,18 @@ export default () => {
         ],
     });
 
-    noteCategories.children[1].child = noteSubcategories;
-
     const imageSubcategories = Box({
         vertical: true,
         className: 'sidebar-subcategories',
         children: [
             Button({
                 className: 'category-button',
-                onClicked: () => {
+                onClicked: function(button) {
                     contentStack.shown = 'images';
-                    updateContent();
+                    entryBox.get_children()[1].shown = 'images';
+                    if (activeButton) activeButton.toggleClassName('active', false);
+                    button.toggleClassName('active', true);
+                    activeButton = button;
                 },
                 child: Box({
                     children: [
@@ -713,17 +821,18 @@ export default () => {
         ],
     });
 
-    imageCategories.children[1].child = imageSubcategories;
-
     const pdfSubcategories = Box({
         vertical: true,
         className: 'sidebar-subcategories',
         children: [
             Button({
                 className: 'category-button',
-                onClicked: () => {
+                onClicked: function(button) {
                     contentStack.shown = 'pdfs';
-                    updateContent();
+                    entryBox.get_children()[1].shown = 'pdfs';
+                    if (activeButton) activeButton.toggleClassName('active', false);
+                    button.toggleClassName('active', true);
+                    activeButton = button;
                 },
                 child: Box({
                     children: [
@@ -740,6 +849,17 @@ export default () => {
             }),
         ],
     });
+
+    const todoCategories = CategoryButton('Tasks', 'task_alt', null, true);
+    const noteCategories = CategoryButton('Notes', 'note', null);
+    const imageCategories = CategoryButton('Images', 'image', null);
+    const pdfCategories = CategoryButton('PDFs', 'picture_as_pdf', null);
+
+    todoCategories.children[1].child = todoSubcategories;
+
+    noteCategories.children[1].child = noteSubcategories;
+
+    imageCategories.children[1].child = imageSubcategories;
 
     pdfCategories.children[1].child = pdfSubcategories;
 

@@ -20,16 +20,16 @@ class AudioVisualizerService extends Service {
         
         // Set default config
         this.#config = {
-            bars: 73,
-            framerate: 30,
-            sensitivity: 150,
-            mode: 'normal',
-            channels: 'mono',
+            bars: 200,
+            framerate: 60,
+            sensitivity: 100,
+            mode: 'scientific',
+            channels: 'stereo',
             smoothing: 0.6,
-            noise_reduction: 0.7,
-            barWidth: 6,
-            monstercat: 0.8,
-            gravity: 0.8
+            noise_reduction: 0.77,
+            barWidth: 3,
+            monstercat: 0.77,
+            gravity: 0.2
         }
         
         this.#loadConfig()
@@ -81,74 +81,27 @@ mode = ${this.#config.mode}
 smoothing = ${this.#config.smoothing}
 barWidth = ${this.#config.barWidth}
 spacing = 0
-
+autosens = 1
+overshoot = 90
 [input]
 method = pulse
 source = ${audioSource}
+
+sample_rate = 44100
+sample_bits = 16
+channels = 2
+autoconnect = 2
 
 [output]
 method = raw
 raw_target = /dev/stdout
 data_format = ascii
-channels = mono
+channels = stereo
 ascii_max_range = 7
 
 [smoothing]
 monstercat = ${this.#config.monstercat}
 noise_reduction = ${this.#config.noise_reduction}
-
-[eq]
-1=1
-2=1
-3=1
-4=1
-5=1
-6=1
-7=1
-8=1
-9=1
-10=1
-11=1
-12=1
-13=1
-14=1
-15=1
-16=1
-17=1
-18=1
-19=1
-20=1
-21=1
-22=1
-23=1
-24=1
-25=1
-26=1
-27=1
-28=1
-29=1
-30=1
-31=1
-32=1
-33=1
-34=1
-35=1
-36=1
-37=1
-38=1
-39=1
-40=1
-41=1
-42=1
-43=1
-44=1
-45=1
-46=1
-47=1
-48=1
-49=1
-50=1
-51=1
 
 
 
