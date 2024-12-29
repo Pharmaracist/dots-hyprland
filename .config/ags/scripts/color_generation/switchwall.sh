@@ -70,27 +70,35 @@ remove_old_link() {
 if [ "$1" == "--noswitch" ]; then
     imgpath=$(swww query | awk -F 'image: ' '{print $2}')
     [ -z "$imgpath" ] && exit 1
-elif [ -n "$1" ]; then
-    switch "$1"
-    generate_colors "$1"
+    generate_colors "$imgpath"
+else
+    # Get the image path
+    if [ -n "$1" ]; then
+        imgpath="$1"
+    else
+        cd "$(xdg-user-dir PICTURES)" || exit 1
+        imgpath=$(yad --width 1200 --height 800 --file --add-preview --large-preview --title="Choose wallpaper")
+    fi
+
+    # Check if image exists
+    [ -z "$imgpath" ] && exit 1
+
+    # Switch wallpaper and generate colors
+    switch "$imgpath"
+    generate_colors "$imgpath"
 
     # Remove old symbolic link if it exists
     remove_old_link
 
     # Extract the file extension from the image path
-    img_extension="${1##*.}"
+    img_extension="${imgpath##*.}"
 
     # Create symbolic link for the image with the correct extension
-    ln -sf "$1" "$LINK_PATH.jpg" >/dev/null 2>&1
-
-    # Execute the custom script after processing
-    execute_custom_script
-else
-    # Prompt user to select an image
-    cd "$(xdg-user-dir PICTURES)" || exit 1
-    imgpath=$(yad --width 1200 --height 800 --file --add-preview --large-preview --title="Choose wallpaper")
-    [ -n "$imgpath" ] && switch "$imgpath" && generate_colors "$imgpath" && remove_old_link && ln -sf "$imgpath" "$LINK_PATH.${imgpath##*.}" >/dev/null 2>&1
+    ln -sf "$imgpath" "$LINK_PATH.$img_extension" >/dev/null 2>&1
 
     # Execute the custom script after processing
     execute_custom_script
 fi
+
+# Always update folder colors at the end
+bash "$CONFIG_DIR/scripts/color_generation/update_folder_colors.sh"
