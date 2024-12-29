@@ -168,22 +168,21 @@
         .right-section {
             .volume-indicator {
                 .volume-container {
-                    min-width: 28px;
-                    min-height: 28px;
+                    min-width: 1.77rem;
+                    min-height: 1.77rem;
                     .volume-label {
-                        color: white;
-                        font-size: 10px;
+                        color: $onSurface;
+                        font-size: 0.9rem;
                         margin: 0;
                     }
                     
                     .volume-progress {
-                        min-height: 28px;
-                        min-width: 4px;
-                        padding: 2px;
-                        margin: 2px;
-                        background-color: rgba(255, 255, 255, 0.1);
-                        color: $secondaryContainer;
-                        font-size: 0;
+                        @include full-rounding;
+                        @include element_decel;
+                        min-height: 1.77rem;
+                        min-width: 1.77rem;
+                        background-color: transparentize($onSurfaceVariant, 0.8);
+                        color: $onSurface;
                     }
                 }
             }
@@ -250,3 +249,51 @@
                 margin-top:1rem;
                 border: 0.5px solid $outline;
             }
+            .duration-bar {
+                margin: 1rem 0 0;
+                padding: 0 0.2rem;
+                
+                .duration-progress {
+                    @include element_decel;
+                    
+                    trough {
+                        @include full-rounding;
+                        min-height: 0.2rem;
+                        min-width: 20rem;
+                        background-color: transparentize($onSurfaceVariant, 0.8);
+                        
+                        highlight {
+                            @include full-rounding;
+                            min-height: 0.5rem;
+                            background-color: $onSurface;
+                        }
+                    }
+        
+                    slider {
+                        @include full-rounding;
+                        min-width: 0.273rem;
+                        min-height: 0.1rem;
+                        background-color: transparentize($onSurfaceVariant, 0.7);
+                        
+                        &:hover {
+                            background-color: transparentize($onSurfaceVariant, 0.6);
+                        }
+                        
+                        &:active {
+                            background-color: transparentize($onSurface, 0.5);
+                        }
+                    }
+                }
+                
+                .duration-label-container {
+                    min-width: 100px;
+                }
+                
+                .duration-text {
+                    @include mainfont;
+                    font-size: 0.9em;
+                    color: $onSurface;
+                    margin: 0 0.5rem;
+                }
+            }
+         

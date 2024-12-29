@@ -1,12 +1,19 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
-import { AnimatedCircProg } from "../.commonwidgets/cairo_circularprogress.js";
-import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 import Audio from 'resource:///com/github/Aylur/ags/service/audio.js';
 import cava from "../../services/cava.js";
+import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import GLib from 'gi://GLib';
+import { AnimatedCircProg } from "../.commonwidgets/cairo_circularprogress.js";
+import { MaterialIcon } from "../.commonwidgets/materialicon.js";
 
 const COVER_FALLBACK = 'media-optical-symbolic';
-const getPlayer = () => Mpris.getPlayer('');
+const getPlayer = () => {
+    const players = Mpris.players;
+    const activePlayer = players.find(p => p.trackTitle);
+    return activePlayer || Mpris.getPlayer('');
+};
+
 const TRANSITION_DURATION = 50;
 
 const AppIcon = () => Widget.Icon({
@@ -45,26 +52,25 @@ const VolumeIndicator = () => {
         className: 'volume-progress',
         vpack: 'center',
         hpack: 'center',
+        initFrom: defaultVolume * 100,
+        initTo: defaultVolume * 100,
+        initAnimTime: 200,
+        initAnimPoints: 10,
     });
     
     const volumeLabel = Widget.Label({
         className: 'volume-label txt-norm onSurfaceVariant',
-        css: `margin:0 2rem 0 1rem`,
         label: `${Math.round(defaultVolume * 100)}`,
     });
     
-    volumeLabel.hook(Mpris, () => {
+    const updateVolume = () => {
         const player = getPlayer();
         if (!player) return;
-        volumeLabel.label = `${Math.round(player.volume * 100)}`;
-    });
-    
-    volumeCircProg.hook(Mpris, () => {
-        const player = getPlayer();
-        if (!player) return;
-        volumeCircProg.css = `font-size: ${player.volume * 100}px;`;
-    });
-    
+        const volume = Math.round(player.volume * 100);
+        volumeLabel.label = `${volume}`;
+        volumeCircProg.css = `font-size: ${volume}px; transition: 200ms linear;`;
+    };
+
     return Widget.Box({
         className: 'volume-indicator',
         children: [
@@ -85,15 +91,24 @@ const VolumeIndicator = () => {
                     className: 'volume-container',
                     homogeneous: true,
                     children: [
-                        Widget.Overlay({
-                            child: Widget.Box({
-                                vpack: 'center',
-                                homogeneous: true,
-                                children: [volumeLabel],
-                            }),
-                            overlays: [volumeCircProg],
+                        Widget.Box({
+                            homogeneous: true,
+                            children: [
+                                Widget.Overlay({
+                                    child: Widget.Box({
+                                        vpack: 'center',
+                                        homogeneous: true,
+                                        children: [volumeLabel],
+                                    }),
+                                    overlays: [volumeCircProg],
+                                }),
+                            ],
                         }),
                     ],
+                    setup: self => {
+                        self.hook(Mpris, updateVolume);
+                        updateVolume();
+                    },
                 }),
             }),
         ],
@@ -121,15 +136,19 @@ const MediaControls = () => {
                     className: 'icon-material',
                     label: 'shuffle',
                 }),
-                onClicked: () => {
+                onClicked: self => {
                     const player = getPlayer();
                     if (!player) return;
                     player.shuffle = !player.shuffle;
+                    // Update icon immediately
+                    self.child.label = player.shuffle ? 'shuffle_on' : 'shuffle';
+                    self.toggleClassName('active', player.shuffle);
                 },
                 setup: self => self.hook(Mpris, () => {
                     const player = getPlayer();
                     if (!player) return;
                     self.toggleClassName('active', player.shuffle);
+                    self.child.label = player.shuffle ? 'shuffle_on' : 'shuffle';
                 }),
             }),
             Widget.Button({
@@ -179,16 +198,40 @@ const MediaControls = () => {
                 onClicked: () => {
                     const player = getPlayer();
                     if (!player) return;
-                    if (player.loopStatus === 'None') player.loopStatus = 'Playlist';
-                    else if (player.loopStatus === 'Playlist') player.loopStatus = 'Track';
-                    else player.loopStatus = 'None';
+                    
+                    // Simple cycle through states
+                    switch (player.loopStatus) {
+                        case 'None':
+                            player.loopStatus = 'Playlist';
+                            break;
+                        case 'Playlist':
+                            player.loopStatus = 'Track';
+                            break;
+                        case 'Track':
+                        default:
+                            player.loopStatus = 'None';
+                            break;
+                    }
                 },
-                setup: self => self.hook(Mpris, () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    self.child.label = player.loopStatus === 'Track' ? 'repeat_one' : 'repeat';
-                    self.toggleClassName('active', player.loopStatus !== 'None');
-                }),
+                setup: button => {
+                    button.hook(Mpris, () => {
+                        const player = getPlayer();
+                        if (!player) return;
+                        
+                        // Update icon based on status
+                        const label = button.child;
+                        if (player.loopStatus === 'Track') {
+                            label.label = 'repeat_one';
+                        } else if (player.loopStatus === 'Playlist') {
+                            label.label = 'repeat_on';
+                        } else {
+                            label.label = 'repeat';
+                        }
+                        
+                        // Update active state
+                        button.toggleClassName('active', player.loopStatus !== 'None');
+                    });
+                },
             }),
         ],
     });
@@ -335,6 +378,145 @@ const CoverArt = () => {
     return box;
 };
 
+// Format time in seconds to M:SS or H:MM:SS
+function formatTime(seconds) {
+    if (seconds <= 0) return '0:00';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+const DurationBar = () => {
+    const progressBar = Widget.Slider({
+        className: 'duration-progress',
+        drawValue: false,
+        min: 0,
+        max: 1,
+        value: 0,
+    });
+
+    const totalTimeLabel = Widget.Label({
+        className: 'duration-text',
+        label: '0:00',
+    });
+
+    const currentTimeLabel = Widget.Label({
+        className: 'duration-text',
+        label: '0:00',
+    });
+
+    const box = Widget.Box({
+        className: 'duration-bar',
+        vertical: false,
+        children: [
+            Widget.Box({
+                css: 'margin-right:2px',
+                children: [currentTimeLabel],
+            }),
+            Widget.Box({
+                className: 'duration-bar-container',
+                hexpand: true,
+                children: [progressBar],
+            }),
+            Widget.Box({
+                css: 'margin-right:2px',
+                children: [totalTimeLabel],
+            }),
+        ],
+    });
+
+    // Handle slider change
+    progressBar.connect('change-value', (_, value) => {
+        const player = getPlayer();
+        if (!player || !player.canSeek) return;
+        
+        try {
+            const metadata = player.metadata;
+            const length = metadata['mpris:length'] || 0;
+            const currentPosition = Math.floor(player.position * 1000000); // Convert to microseconds
+            
+            if (length > 0) {
+                const targetMicroseconds = Math.floor(value * length);
+                const offset = targetMicroseconds - currentPosition;
+                
+                console.log('Seeking:', {
+                    current: currentPosition,
+                    target: targetMicroseconds,
+                    offset: offset
+                });
+
+                // Use GDBus directly
+                Utils.execAsync([
+                    'gdbus',
+                    'call',
+                    '--session',
+                    '--dest', player.busName,
+                    '--object-path', '/org/mpris/MediaPlayer2',
+                    '--method', 'org.mpris.MediaPlayer2.Player.Seek',
+                    offset.toString()
+                ]).catch(e => console.error('Seek error:', e));
+            }
+        } catch (e) {
+            console.error('Error seeking:', e);
+        }
+    });
+
+    // Update timer
+    const updateTimer = () => {
+        const player = getPlayer();
+        if (!player) {
+            totalTimeLabel.label = '0:00';
+            currentTimeLabel.label = '0:00';
+            progressBar.value = 0;
+            return;
+        }
+
+        try {
+            const metadata = player.metadata;
+            const length = metadata['mpris:length'] || 0;
+            const position = Math.floor(player.position * 1000000); // Convert seconds to microseconds
+
+            if (length > 0) {
+                const lengthSec = Math.floor(length / 1000000);
+                const positionSec = Math.floor(position / 1000000);
+                const progress = position / length;
+
+                progressBar.value = progress;
+                totalTimeLabel.label = formatTime(lengthSec);
+                currentTimeLabel.label = formatTime(positionSec);
+            }
+        } catch (e) {
+            console.error('Error updating duration:', e);
+        }
+    };
+
+    // Update on player changes
+    box.hook(Mpris, (_, player) => {
+        updateTimer();
+    });
+
+    // Regular updates while playing
+    Utils.interval(1000, () => {
+        if (box.is_destroyed) return false;
+        const player = getPlayer();
+        if (player?.playBackStatus === 'Playing') {
+            updateTimer();
+        }
+        return true;
+    });
+
+    // Initial update
+    Utils.timeout(100, updateTimer);
+
+    return box;
+};
+
 export default () => Widget.Box({
     className: 'ipod-widget',
     css: 'min-height: 260px;',
@@ -366,7 +548,9 @@ export default () => Widget.Box({
                                             vpack: 'end',
                                             hpack: 'start',
                                             hexpand: true,
+                                            vertical: true,
                                             children: [
+                                                DurationBar(),
                                                 MediaControls(),
                                             ],
                                         }),
@@ -376,7 +560,7 @@ export default () => Widget.Box({
                                     vpack: 'start', 
                                     className: 'app-icon-volume-container',
                                     children:[ 
-                                        AppIcon(),
+                                        // AppIcon(),
                                         VolumeIndicator(),
                                     ] 
                                 }),
