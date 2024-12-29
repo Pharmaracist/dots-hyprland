@@ -68,7 +68,8 @@ const VolumeIndicator = () => {
         if (!player) return;
         const volume = Math.round(player.volume * 100);
         volumeLabel.label = `${volume}`;
-        volumeCircProg.css = `font-size: ${volume}px; transition: 200ms linear;`;
+        const fontSize = Math.max(1, volume);
+        volumeCircProg.css = `font-size: ${fontSize}px; transition: 200ms linear;`;
     };
 
     return Widget.Box({
