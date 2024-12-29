@@ -60,7 +60,6 @@ const timeRow = Widget.Box({
               className: "avatar-box",
               setup: self => self.hook(App, () => {
                 const profilePhoto = getProfilePhoto();
-                console.log('Setting profile photo:', profilePhoto);
                 if (profilePhoto && profilePhoto !== '') {
                   self.children = [
                     Widget.Box({

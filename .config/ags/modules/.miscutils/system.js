@@ -1,4 +1,4 @@
-const { GLib } = imports.gi;
+const { GLib, Gio } = imports.gi;
 import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { execAsync, exec } = Utils;
@@ -63,14 +63,54 @@ export const getDistroName = () => {
     return 'Linux';
 }
 
+export const profilePhotoVar = Variable('');
+
+async function initializeProfilePhoto() {
+    const maxAttempts = 3;
+    const timeout = 1000;
+    let attempts = 0;
+
+    const tryGetPhoto = () => {
+        try {
+            const userConfig = Utils.readFile(GLib.get_home_dir() + '/.ags/config.json');
+            const config = JSON.parse(userConfig);
+            const photoPath = config?.appearance?.profilePhoto || '';
+            
+            if (photoPath) {
+                const file = Gio.File.new_for_path(photoPath);
+                if (file.query_exists(null)) {
+                    console.log('Profile photo found:', photoPath);
+                    profilePhotoVar.value = photoPath;
+                    return true;
+                }
+            }
+            
+            attempts++;
+            if (attempts < maxAttempts) {
+                console.log(`Profile photo not found, attempt ${attempts}/${maxAttempts}`);
+                GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeout, () => {
+                    tryGetPhoto();
+                    return GLib.SOURCE_REMOVE;
+                });
+                return false;
+            } else {
+                console.log('Profile photo not found after all attempts');
+                profilePhotoVar.value = '';
+                return true;
+            }
+        } catch (error) {
+            console.error(`Error getting profile photo:`, error);
+            profilePhotoVar.value = '';
+            return true;
+        }
+    };
+
+    tryGetPhoto();
+}
+
+// Initialize the profile photo on startup
+initializeProfilePhoto();
+
 export function getProfilePhoto() {
-    try {
-        const userConfig = Utils.readFile(GLib.get_home_dir() + '/.ags/config.json');
-        const config = JSON.parse(userConfig);
-        console.log('Profile photo path:', config?.appearance?.profilePhoto);
-        return config?.appearance?.profilePhoto || '';
-    } catch (error) {
-        console.error('Error getting profile photo:', error);
-        return '';
-    }
+    return profilePhotoVar.value;
 }
