@@ -37,6 +37,8 @@
 
 ### 🎮 Core Features
 - **Smart Desktop**: Overview widget, AI assistants (ChatGPT/Gemini), dynamic workspaces
+- **Fallback UI**: fallback to waybar mode
+- **Dynamic Icon**:Dynmic Icon theme using papirus
 - **Beautiful UI**: Material You design, fluid animations, custom widgets
 - **Rich Media**: Spotify with Spicetify, MPV, MPD, YouTube Music
 - **Productivity**: Todo list, calendar, timers, multi-monitor support
@@ -112,7 +114,9 @@ chmod +x install-fedora.sh
     <img src="pics/Pasted%20image%20(5).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(6).png" alt="Screenshot 5" style="width: 100%; border-radius: 10px;">
     <img src="pics/Pasted%20image%20(7).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(8).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(8).png" alt="Screenshot 7" style="width: 100%; border-radius: 10px;">
+    <img src="pics/Pasted%20image%20(9).png" alt="Screenshot 8" style="width: 100%; border-radius: 10px;">
+
 
   </div>
 
