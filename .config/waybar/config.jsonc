@@ -3,13 +3,13 @@
 {
 // sourced from header module //
 
-    "layer": "top",
+    // "layer": "top",
     "position": "top",
     "mod": "dock",
-   "margin-left": 10,
- "margin-right": 10,
- "margin-top": 7,
- "margin-bottom": 0,
+   "margin-left": 30,
+ "margin-right": 30,
+ "margin-top": 10,
+ "margin-bottom": 15,
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
@@ -18,8 +18,8 @@
 
 // positions generated based on config.ctl //
 
-	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/spacer","mpris"],
-	"modules-center": ["custom/padd","custom/l_end","custom/r_end","hyprland/window","custom/padd"],
+	"modules-left": ["custom/applauncher","custom/smallspacer","hyprland/workspaces","custom/spacer"],
+	"modules-center": ["custom/padd","custom/l_end","custom/r_end","mpris","custom/padd"],
 	"modules-right": ["custom/padd","custom/l_end","group/expand","network","group/expand-3","group/expand-2","group/expand-4","memory","cpu","clock","custom/notification","custom/padd"],
 
 
@@ -78,8 +78,8 @@
 
 
 "mpris": {
-	"format": "{player_icon} {dynamic}",
-	"format-paused": "<span color='grey'>{status_icon} {dynamic}</span>",
+	"format": "{dynamic}",
+	"format-paused": "{dynamic}",
 	"max-length": 50,
 	"player-icons": {
 		"default": "⏸",
@@ -136,7 +136,7 @@
   
   "hyprland/window": {  
 //"format": "{}"   // <--- these is the default value  
-"format": "<span  weight='bold' >{class}</span>",
+"format": "{class}",
  "max-length": 120,
  "icon": false,
  "icon-size": 13,
@@ -303,9 +303,9 @@
     },
 
     "clock": {
-        "format": "{:%I:%M %p}",
+        "format": "{:%I:%M}",
         "rotate": 0,
-       "on-click": "/usr/local/bin/ags -t ActivityCenter",
+    //    "on-click": "/usr/local/bin/ags -t ActivityCenter",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": {
             "mode": "month",
@@ -507,7 +507,11 @@
         "tooltip": false
     },
 
-
+"custom/applauncher":{
+    "format": "\ueabc",
+    "on-click": "rofi -show-icons -show drun",
+    "tooltip": false
+},
 "backlight/slider": {
     "min": 5,
     "max": 100,

@@ -1,42 +1,48 @@
+@import url("/home/pharmaracist/.cache/wal/colors-waybar.css");
+
 * {
-    font-family: "JetBrains Mono Nerd Font";
+    font-family: "iosevka";
     /*font-family: "JetBrainsMono Nerd Font";*/
-    font-weight: bold; 
-    font-size: 15px;
+    font-weight: 300; 
+    font-size: 18px;
+    min-height: 30px;
+    border-radius: 999px;
 }
 
 #custom-notification {
-  font-family: "JetBrains Mono Nerd Font";
+  font-family: "iosevka";
   font-size: 17px;
- color: #A1BDCE;
+ color: @color7;
  margin: 2px 0px 0px 0px;
 }
 
 window#waybar {
-    background: #0F0F17; 
-  /*  border-radius: 15px; */
+    background-color:alpha( @background,0.12);
+    /* color: @foreground; */
+    transition-property: background-color;
+    transition-duration: .5s;
  /*  border: 2px solid #124323; */
 /* border: 0px solid #A1BDCE; */
- border: 3px solid rgba(255, 255, 255, 0.1);
- border-radius: 10px;
+ border: 1.1px solid rgba(199, 194, 201, 0.5);
+ 
 }
 
 
 tooltip {
-        background: #171717;
-        color: #A1BDCE;
+        background: @background;
+        color: @foreground;
         font-size: 13px;
-        border-radius: 7px;
-       border: 2px solid #101a24;
+        border-radius: 12px;
+       border: 2px solid @color4;
 
 
     }
 #workspaces{
 background: rgba(23, 23, 23, 0.0);
-    color: #888789;
+    color: @color7;
     box-shadow: none;
 	text-shadow: none;
-    border-radius: 9px;
+    border-radius: 12px;
     transition: 0.2s ease;
     padding-left: 4px;
     padding-right: 4px;
@@ -46,10 +52,10 @@ background: rgba(23, 23, 23, 0.0);
 
 #workspaces button {
 background: rgba(23, 23, 23, 0.0);
-    color: #A1BDCE;
+    color: @foreground;
     box-shadow: none;
 	text-shadow: none;
-    border-radius: 9px;
+    border-radius:12px;
     transition: 0.2s ease;
     padding-left: 4px;
     padding-right: 4px;
@@ -62,7 +68,7 @@ background: rgba(23, 23, 23, 0.0);
 
  
   /* background-image: url("/home/anik/Documents/bar1.png");*/
-    color: #A1BDCE;   
+    color: @foreground;   
     transition: all 0.3s ease;
     padding-left: 4px;
     padding-right: 4px;
@@ -71,7 +77,7 @@ background: rgba(23, 23, 23, 0.0);
 
 #workspaces button:hover {
     background: none;
-    color: #72D792;
+    color: @color8;
     animation: ws_hover 20s ease-in-out 1;
     transition: all 0.5s cubic-bezier(.55,-0.68,.48,1.682);
 }
@@ -87,13 +93,13 @@ background: rgba(23, 23, 23, 0.0);
     padding-left: 3px;
     padding-right: 3px;
     margin-right: 0px;
-    color: @wb-color;
+    color: @foreground;
     animation: tb_normal 20s ease-in-out 1;
 }
 
 #taskbar button.active {
-    background: @wb-act-bg;
-    color: @wb-act-color;
+    background: @color4;
+    color: @background;
     margin-left: 3px;
     padding-left: 12px;
     padding-right: 12px;
@@ -104,8 +110,8 @@ background: rgba(23, 23, 23, 0.0);
 }
 
 #taskbar button:hover {
-    background: @wb-hvr-bg;
-    color: @wb-hvr-color;
+    background: @color8;
+    color: @color7;
     animation: tb_hover 20s ease-in-out 1;
     transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
 }
@@ -114,7 +120,7 @@ background: rgba(23, 23, 23, 0.0);
     min-height: 16px;
     font-weight: bold;
     font-size: 13px;
-    color: #9488e3;
+    color: @foreground;
 }
 
 #tray menu separator {
@@ -133,13 +139,13 @@ opacity: 0.0;
 #custom-mouse{
 font-size: 14px;
 margin-bottom: 6px;
-background:  #161320;
+background:  @background;
 }
 
 
 #custom-power{
     font-size: 15px;
-    color: #FFFFFF;
+    color: @foreground;
     background:  rgba(22, 19, 32, 0.9);
     margin: 6px 0px 6px 0px;
     padding-left: 4px;
@@ -147,7 +153,7 @@ background:  #161320;
     }
 
 #backlight{
-    color: #2096C0;
+    color: @color7;
     background: rgba(23, 23, 23, 0.0);
     font-weight: normal;
     font-size: 19px;
@@ -158,8 +164,8 @@ background:  #161320;
 }
 #bluetooth,
 #custom-cliphist{
-    color: #E6E7E7;
-    background:  #161320;
+    color: @foreground;
+    background:  @background;
     opacity: 1;
     margin: 4px 0px 4px 0px;
     padding-left: 4px;
@@ -167,20 +173,18 @@ background:  #161320;
  
 }
 #battery{
-    font-weight: normal;
+    /* font-weight: normal; */
     font-size: 22px;
-    color: #a6d189;
-    background:  rgba(23, 23, 23, 0.0);
+    color: @color7;
     opacity: 1;
-    margin: 0px 0px 0px 0px;
-    padding-left: 0px;
-    padding-right: 0px;
+    padding: 0 10px;
+
  
 }
 
 #idle_inhibitor{
-color: #24966e;
-background: @bar-bg;
+color: @color7;
+background: @background;
     opacity: 1;
     margin: 4px 0px 4px 0px;
     padding-left: 4px;
@@ -188,13 +192,13 @@ background: @bar-bg;
 
 }
 #clock{
-    color: #A1BDCE;
-    font-size: 15px;
-    font-weight: 900;
-    font-family: "JetBrains Mono Nerd Font";
+    color: @foreground;
+    font-size: 18px;
+    /* font-weight: 900; */
+    font-family: "Gabarito", "Poppins", "Readex Pro", "Lexend", sans-serif;
     background: rgba(23, 23, 23, 0.0);
     opacity: 1;
-    margin: 3px 0px 0px 0px;
+    /* margin: 3px 0px 0px 0px; */
     padding-left: 10px;
     padding-right: 10px;
     border: none;
@@ -203,21 +207,23 @@ background: @bar-bg;
 #pulseaudio{
 font-weight: normal;
 font-size: 18px;
-color: #6F8FDB;
-    background:  rgba(22, 19, 32, 0.0);
+font-family: "JetBrainsMono Nerd Font";
+color: @foreground;
+    /* background:  rgba(22, 19, 32, 0.0); */
     opacity: 1;
     margin: 0px 0px 0px 0px;
-    padding-left: 3px;
-    padding-right: 3px;
+    padding: 0 10px;
+
 }
 #cpu{
 font-weight: normal;
 font-size: 22px;
-color: #915CAF;
+color: @color2;
+padding: 0 2.5px;
 }
 #custom-led{
-background: #427287;
-color: #FFFFFF;
+background: @color4;
+color: @foreground;
 margin-top: 7px;
 margin-bottom: 7px;
 padding-left: 6px;
@@ -230,10 +236,12 @@ margin-right: 6px;
 #memory{
 font-weight: normal;
 font-size: 22px;
-color: #E4C9AF;
+color: @color6;
 }
 #mpris{
-color: white;
+color: @foreground;
+font-family: "Gabarito", "Poppins", "Readex Pro", "Lexend", sans-serif;
+font-weight: 100;
 animation: repeat;
 	animation-name: blink;
 	animation-duration: 3s;
@@ -244,23 +252,22 @@ animation: repeat;
 
 @keyframes blink {
     to {
-        color: #4a4a4a;
+        color: @color7;
         
     }
 }
 #network{
-color: #A1BDCE;
+color: @color7;
 font-weight: normal;
 font-size: 19px;
-padding-right: 0px;
-padding-left: 4px
+padding: 0 3px;
 }
 #custom-notifications,
 #custom-spotify,
 #taskbar,
 #custom-theme,
 #custom-menu{
-color: #E8EDF0;
+color: @foreground;
 background:  rgba(23, 23, 23, 0.0);
 margin: 0px 0px 0px 0px;
     padding-left: 1px;
@@ -272,8 +279,10 @@ margin: 0px 0px 0px 0px;
 #custom-wallchange,
 #custom-wbar,
 #window{
-color: #A1BDCE;
-font-family: "Martian Mono";
+color: @foreground;
+font-weight: normal;
+font-size: 18px;
+background:  rgba(23, 23, 23, 0.0);
 }
 #custom-l_end,
 #custom-r_end,
@@ -283,7 +292,7 @@ font-family: "Martian Mono";
 #cava,
 #upower#headset,
 #upower{
-color: #a6d189;
+color: @color7;
 }
 #mpris{
 font-size: 15px;
@@ -291,7 +300,7 @@ font-weight: bold
 }
 #custom-rr_end {
 font-weight: normal;
-    color: #E8EDF0;
+    color: @foreground;
     background:  rgba(23, 23, 23, 0.0);
     opacity: 1;
     margin: 0px 0px 0px 0px;
@@ -303,7 +312,7 @@ font-weight: normal;
 
 #backlight-slider slider,
 #pulseaudio-slider slider {
-  background: #A1BDCE;
+  background: @color7;
   background-color: transparent;
   box-shadow: none;
   margin-right: 7px;
@@ -316,23 +325,24 @@ font-weight: normal;
   min-height: 10px;
   margin-bottom: -4px;
   border-radius: 8px;
-  background: #343434;
+  background: @background;
 }
 
 #backlight-slider highlight,
 #pulseaudio-slider highlight {
-  border-radius: 8px;
-  background-color: #2096C0;
+  border-radius: 25px;
+  background-color: @color7;
+  color: @background;
 }
 
 #battery.charging, #battery.plugged {
-	color: #E8EDF0;
+	color: @foreground;
 	
 }
 
 
 #battery.critical:not(.charging) {
-    color: red;
+    color: @color1;
 }
 
 
@@ -381,7 +391,7 @@ font-weight: normal;
 
 #custom-expand {
     min-width: 25px;
-    color: #A1BDCE;
+    color: @foreground;
     font-size: 16px;
 }
 
@@ -390,3 +400,18 @@ font-weight: normal;
     border-left-width: 0.5;
 }
 
+#custom-applauncher {
+    font-family: "Font Awesome 6 Brands";
+    font-size: 4rem;
+    padding:0 30px 0px 50px;
+    margin:-20px;
+    color: @foreground;
+}
+#hyprland-window {
+    font-family: "Iosevka";
+    font-weight: 900;
+    padding:0 30px 0px 50px;
+    margin:-20px;
+    color: @foreground;
+
+}
