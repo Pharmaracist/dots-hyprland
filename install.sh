@@ -403,4 +403,9 @@ if [[ ! -z "${warn_files[@]}" ]]; then
   printf "\n${RED}[$0]: \!! Important \!! : Please delete \n${RESET} ${warn_files[*]} \n${RED} manually as soon as possible, since we\'re now using AUR package or local PKGBUILD to install them for Arch(based) Linux distros, and they'll take precedence over our installation, or at least take up more space.\n${RESET}"
 fi
 
+
+echo -e "${BLUE}Configuring papirus-folders sudoers..."
+echo 'ALL ALL=(ALL) NOPASSWD: /sbin/papirus-folders' | sudo tee /etc/sudoers.d/papirus-folders > /dev/null
+sudo chmod 440 /etc/sudoers.d/papirus-folders
+
 echo "Installation completed at $(date)"

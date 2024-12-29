@@ -10,11 +10,16 @@ class TodoService extends Service {
             'changed': [],
             'todo_json': ['jsobject'],
             'notes_json': ['jsobject'],
+            'images_json': ['jsobject'],
+            'pdfs_json': ['jsobject'],
+            'videos_json': ['jsobject'],
+            'gemini_content': ['jsobject'],
         }, {
             'todo_json': ['jsobject', 'rw'],
             'notes_json': ['jsobject', 'rw'],
             'images_json': ['jsobject', 'rw'],
             'pdfs_json': ['jsobject', 'rw'],
+            'videos_json': ['jsobject', 'rw'],
             'gemini_content': ['jsobject', 'r'],
         });
     }
@@ -23,14 +28,19 @@ class TodoService extends Service {
     #notesFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'notes.json']);
     #imagesFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'images.json']);
     #pdfsFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'pdfs.json']);
+    #videosFile = GLib.build_filenamev([GLib.get_user_state_dir(), 'ags', 'videos.json']);
     #imagesDir = GLib.build_filenamev([GLib.get_home_dir(), 'Pictures', 'Dashboard']);
     #pdfsDir = GLib.build_filenamev([GLib.get_home_dir(), 'Documents', 'Dashboard']);
+    #pdfThumbnailsDir = GLib.build_filenamev([GLib.get_home_dir(), 'Documents', 'Dashboard', 'thumbnails']);
+    #videosDir = GLib.build_filenamev([GLib.get_home_dir(), 'Videos', 'Dashboard']);
+    #thumbnailsDir = GLib.build_filenamev([GLib.get_home_dir(), 'Videos', 'Dashboard', 'thumbnails']);
     #todoMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/todo.md']);
     #notesMdFile = GLib.build_filenamev([GLib.get_home_dir(), 'Documents/obsidian/notes.md']);
     #todoJson = [];
     #notesJson = [];
     #imagesJson = [];
     #pdfsJson = [];
+    #videosJson = [];
     #md = '';
     #notesMd = '';
 
@@ -76,6 +86,14 @@ class TodoService extends Service {
             Utils.writeFile('[]', this.#pdfsFile).catch(print);
         }
 
+        try {
+            const videosFileContent = Utils.readFile(this.#videosFile);
+            this.#videosJson = videosFileContent ? JSON.parse(videosFileContent) : [];
+        } catch (e) {
+            this.#videosJson = [];
+            Utils.writeFile('[]', this.#videosFile).catch(print);
+        }
+
         // Initialize markdown content
         this.#md = Utils.readFile(this.#todoMdFile) || '';
         this.#notesMd = Utils.readFile(this.#notesMdFile) || '';
@@ -88,6 +106,9 @@ class TodoService extends Service {
         Utils.ensureDirectory(GLib.build_filenamev([GLib.get_user_state_dir(), 'ags']));
         Utils.ensureDirectory(this.#imagesDir);
         Utils.ensureDirectory(this.#pdfsDir);
+        Utils.ensureDirectory(this.#pdfThumbnailsDir);
+        Utils.ensureDirectory(this.#videosDir);
+        Utils.ensureDirectory(this.#thumbnailsDir);
 
         // Monitor files for changes
         Utils.monitorFile(
@@ -116,6 +137,15 @@ class TodoService extends Service {
     get pdfs_json() { return this.#pdfsJson }
     set pdfsJson(value) { this.#pdfsJson = value }
 
+    get videos_json() { return this.#videosJson }
+    set videos_json(value) {
+        this.#videosJson = value;
+        Utils.writeFile(JSON.stringify(value, null, 2), this.#videosFile)
+            .catch(console.error);
+        this.emit('changed');
+        this.notify('videos_json');
+    }
+
     get gemini_content() {
         const todos = this.#todoJson
             .filter(task => task.type !== 'note')
@@ -134,11 +164,16 @@ class TodoService extends Service {
             .map(pdf => `- ${pdf.name}`)
             .join('\n');
 
+        const videos = this.#videosJson
+            .map(video => `- ${video.name}`)
+            .join('\n');
+
         return {
             todos: todos || 'No tasks',
             notes: notes || 'No notes',
             images: images || 'No images',
             pdfs: pdfs || 'No PDFs',
+            videos: videos || 'No videos',
         };
     }
 
@@ -311,71 +346,138 @@ class TodoService extends Service {
         }
     }
 
-    addPdf(sourcePath) {
-        try {
-            // Generate unique filename
-            const timestamp = new Date().getTime();
-            const sourceFile = Gio.File.new_for_path(sourcePath);
-            const filename = sourceFile.get_basename();
-            const name = filename.split('.')[0];
-            const ext = filename.split('.').pop();
-            const newFilename = `${name}_${timestamp}.${ext}`;
-            const destPath = GLib.build_filenamev([this.#pdfsDir, newFilename]);
+    async addPdf(path, name = '') {
+        const id = this.#pdfsJson.length;
+        const thumbnailName = `${GLib.uuid_string_random()}.jpg`;
+        const thumbnailPath = GLib.build_filenamev([this.#pdfThumbnailsDir, thumbnailName]);
+        
+        // Generate thumbnail
+        await this.#generatePdfThumbnail(path, thumbnailPath);
+        
+        const pdf = {
+            id,
+            path,
+            name: name || path.split('/').pop(),
+            type: 'pdf',
+            thumbnail: thumbnailPath,
+            timestamp: GLib.DateTime.new_now_local().format('%Y-%m-%d %H:%M'),
+        };
+        
+        this.#pdfsJson.push(pdf);
+        Utils.writeFile(JSON.stringify(this.#pdfsJson, null, 2), this.#pdfsFile)
+            .catch(console.error);
+        
+        this.emit('changed');
+        this.notify('pdfs_json');
+        return id;
+    }
 
-            // Copy file to PDFs directory
-            if (this.#copyFile(sourcePath, destPath)) {
-                this.#pdfsJson.push({
-                    path: destPath,
-                    name: filename,
-                    timestamp: timestamp,
-                });
-                Utils.writeFile(JSON.stringify(this.#pdfsJson || []), this.#pdfsFile)
-                    .catch(print);
-                this.notify('pdfs_json');
-                this.#emitUpdated();
-                return true;
+    deletePdf(id) {
+        if (id >= 0 && id < this.#pdfsJson.length) {
+            const pdf = this.#pdfsJson[id];
+            // Delete thumbnail if it exists
+            if (pdf.thumbnail) {
+                try {
+                    Utils.exec(['rm', pdf.thumbnail]);
+                } catch (e) {
+                    console.error('Error deleting PDF thumbnail:', e);
+                }
             }
-            return false;
+            this.#pdfsJson.splice(id, 1);
+            Utils.writeFile(JSON.stringify(this.#pdfsJson, null, 2), this.#pdfsFile)
+                .catch(console.error);
+            this.emit('changed');
+            this.notify('pdfs_json');
+        }
+    }
+
+    async #generatePdfThumbnail(pdfPath, thumbnailPath) {
+        try {
+            await Utils.execAsync([
+                'pdftoppm', '-jpeg', '-f', '1', '-l', '1',
+                '-scale-to', '200',
+                pdfPath, thumbnailPath.replace('.jpg', '')
+            ]);
+            // pdftoppm adds -1.jpg to the filename, so we need to rename it
+            const generatedPath = `${thumbnailPath.replace('.jpg', '')}-1.jpg`;
+            await Utils.execAsync(['mv', generatedPath, thumbnailPath]);
+            return true;
         } catch (e) {
-            print(`Error adding PDF: ${e}`);
+            console.error('Error generating PDF thumbnail:', e);
             return false;
+        }
+    }
+
+    async addVideo(path, name = '') {
+        const id = this.#videosJson.length;
+        const thumbnailName = `${GLib.uuid_string_random()}.jpg`;
+        const thumbnailPath = GLib.build_filenamev([this.#thumbnailsDir, thumbnailName]);
+        
+        // Generate thumbnail
+        await this.#generateThumbnail(path, thumbnailPath);
+        
+        const video = {
+            id,
+            path,
+            name: name || path.split('/').pop(),
+            type: 'video',
+            thumbnail: thumbnailPath,
+            timestamp: GLib.DateTime.new_now_local().format('%Y-%m-%d %H:%M'),
+        };
+        
+        this.#videosJson.push(video);
+        Utils.writeFile(JSON.stringify(this.#videosJson, null, 2), this.#videosFile)
+            .catch(console.error);
+        
+        this.emit('changed');
+        this.notify('videos_json');
+        return id;
+    }
+
+    deleteVideo(id) {
+        if (id >= 0 && id < this.#videosJson.length) {
+            const video = this.#videosJson[id];
+            // Delete thumbnail if it exists
+            if (video.thumbnail) {
+                try {
+                    Utils.exec(['rm', video.thumbnail]);
+                } catch (e) {
+                    console.error('Error deleting thumbnail:', e);
+                }
+            }
+            this.#videosJson.splice(id, 1);
+            Utils.writeFile(JSON.stringify(this.#videosJson, null, 2), this.#videosFile)
+                .catch(console.error);
+            this.emit('changed');
+            this.notify('videos_json');
         }
     }
 
     deleteImage(id) {
         if (id >= 0 && id < this.#imagesJson.length) {
             const image = this.#imagesJson[id];
-            if (this.#deleteFile(image.path)) {
-                this.#imagesJson.splice(id, 1);
-                Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
-                    .catch(print);
-                this.notify('images_json');
-                this.#emitUpdated();
-                return true;
-            }
+            this.#imagesJson.splice(id, 1);
+            Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
+                .catch(print);
+            this.notify('images_json');
+            this.#emitUpdated();
         }
-        return false;
     }
 
-    deletePdf(id) {
-        if (id >= 0 && id < this.#pdfsJson.length) {
-            const pdf = this.#pdfsJson[id];
-            const file = Gio.File.new_for_path(pdf.path);
-            try {
-                if (file.query_exists(null)) {
-                    file.delete(null);
-                }
-                this.#pdfsJson.splice(id, 1);
-                Utils.writeFile(JSON.stringify(this.#pdfsJson), this.#pdfsFile)
-                    .catch(print);
-                this.notify('pdfs_json');
-                this.#emitUpdated();
-                return true;
-            } catch (e) {
-                print(`Error deleting PDF: ${e}`);
-            }
+    async #generateThumbnail(videoPath, thumbnailPath) {
+        try {
+            await Utils.execAsync([
+                'ffmpeg', '-y', '-i', videoPath,
+                '-ss', '00:00:01',  // Take frame at 1 second
+                '-vframes', '1',
+                '-vf', 'scale=200:-1',  // Scale width to 200px, maintain aspect ratio
+                thumbnailPath
+            ]);
+            return true;
+        } catch (e) {
+            console.error('Error generating thumbnail:', e);
+            return false;
         }
-        return false;
     }
 
     #copyFile(source, dest) {

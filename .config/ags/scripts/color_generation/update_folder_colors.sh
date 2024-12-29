@@ -212,14 +212,11 @@ echo "Debug: Got color name: $color_name" >&2
 papirus_color=$(convert_to_papirus_color "$color_name")
 echo "Debug: Converted to papirus color: $papirus_color" >&2
 
-# Update folder color using papirus-folders with polkit
+# Update folder color using papirus-folders without password
 if [ "$papirus_color" != "" ]; then
     echo "Debug: Running papirus-folders with color $papirus_color" >&2
-    pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY papirus-folders -C "$papirus_color" --theme Papirus-Dark
+    sudo /sbin/papirus-folders -C "$papirus_color" --theme Papirus-Dark
     
     # Set icon theme to ensure changes are applied
-    gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
-    # Reset icon theme to force refresh
-    gsettings set org.gnome.desktop.interface icon-theme "dummy"
     gsettings set org.gnome.desktop.interface icon-theme "Papirus-Dark"
 fi

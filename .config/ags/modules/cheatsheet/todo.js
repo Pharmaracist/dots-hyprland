@@ -18,12 +18,13 @@ const TodoItem = (task, id) => {
         children: [
             Label({
                 label: task.content,
+                className: 'txt-norm onSurfaceVariant',
                 hexpand: true,
                 xalign: 0,
                 justification: 'left',
                 wrap: true,
                 wrapMode: Pango.WrapMode.WORD_CHAR,
-                css: `margin-left: 8px; color: ${task.done ? '@onLayer1Secondary' : '@onLayer1'};`,
+                css: `margin-left: 8px;`,
             }),
         ],
     });
@@ -49,11 +50,11 @@ const TodoItem = (task, id) => {
                                 setup: (box) => {
                                     box.pack_start(Button({
                                         className: 'todo-check-btn',
-                                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+                                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
                                         child: Label({
-                                            className: 'icon-material',
+                                            className: 'icon-material onSurfaceVariant txt-norm',
                                             label: task.done ? 'radio_button_checked' : 'radio_button_unchecked',
-                                            css: 'font-size: 16px; color: @accent;',
+                                            css: 'font-size: 16px;',
                                         }),
                                         onClicked: () => {
                                             if (task.done) {
@@ -68,11 +69,11 @@ const TodoItem = (task, id) => {
                                     
                                     box.pack_start(Button({
                                         className: 'todo-delete-btn',
-                                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+                                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
                                         child: Label({
-                                            className: 'icon-material',
+                                            className: 'icon-material onSurfaceVariant txt-norm',
                                             label: 'delete',
-                                            css: 'font-size: 16px; color: @error;',
+                                            css: 'font-size: 16px;',
                                         }),
                                         onClicked: () => {
                                             Todo.remove(id, task.type === 'note');
@@ -98,12 +99,13 @@ const NoteItem = (note, id) => {
         children: [
             Label({
                 label: note.content,
+                className: 'txt-norm onSurfaceVariant',
                 hexpand: true,
                 xalign: 0,
                 justification: 'left',
                 wrap: true,
                 wrapMode: Pango.WrapMode.WORD_CHAR,
-                css: 'margin-left: 8px; color: @onLayer1;',
+                css: 'margin-left: 8px;',
             }),
         ],
     });
@@ -118,7 +120,7 @@ const NoteItem = (note, id) => {
         transitionDuration: 250,
         child: Button({
             className: 'note-item',
-            css: 'background-color: @layer1; border-radius: 8px; padding: 4px; margin: 2px 0;',
+            css: 'border-radius: 8px; padding: 4px; margin: 2px 0;',
             child: Box({
                 children: [
                     Box({
@@ -136,7 +138,7 @@ const NoteItem = (note, id) => {
                                     box.pack_end(Button({
                                         className: 'delete-button',
                                         child: Label({
-                                            className: 'icon-material',
+                                            className: 'icon-material onSurfaceVariant txt-norm',
                                             label: 'delete',
                                         }),
                                         onClicked: () => {
@@ -169,7 +171,7 @@ const ImageItem = (image, id) => {
     }
 
     return Box({
-        className: 'image-item',
+        className: 'image-item onSurfaceVariant',
         vertical: true,
         spacing: 4,
         children: [
@@ -246,11 +248,25 @@ const ImageItem = (image, id) => {
 };
 
 const PdfItem = (pdf, id) => {
+    let pixbuf;
+    try {
+        if (pdf.thumbnail) {
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                pdf.thumbnail,
+                200,  // width
+                200,  // height
+                true  // preserve aspect ratio
+            );
+        }
+    } catch (e) {
+        print(`Error loading PDF thumbnail: ${e}`);
+    }
+
     return Box({
         className: 'pdf-item',
         vertical: true,
         spacing: 4,
-        css: 'min-width: 200px; max-width: 200px; background-color: @layer1; border-radius: 8px; margin: 4px;',
+        css: 'min-width: 200px; max-width: 200px; border-radius: 8px; margin: 4px;',
         children: [
             Button({
                 className: 'pdf-container',
@@ -258,53 +274,237 @@ const PdfItem = (pdf, id) => {
                     Utils.execAsync(['xdg-open', pdf.path]);
                     App.closeWindow('cheatsheet');
                 },
-                child: Overlay({
-                    child: Box({
-                        className: 'pdf-preview',
-                        homogeneous: true,
-                        css: 'min-width: 200px; min-height: 200px; border-radius: 8px; background-color: @layer2;',
-                    }),
-                    overlays: [
-                        Label({
-                            className: 'icon-material pdf-icon',
-                            label: 'picture_as_pdf',
-                            css: 'font-size: 64px; color: @onLayer2;',
-                            hpack: 'center',
-                            vpack: 'center',
-                        }),
-                    ],
+                child: Widget.DrawingArea({
+                    className: 'pdf-preview',
+                    css: 'min-width: 200px; min-height: 200px; border-radius: 8px;',
+                    setup: area => {
+                        if (pixbuf) {
+                            area.set_size_request(200, 200);
+                            area.connect('draw', (widget, cr) => {
+                                const scale = widget.get_scale_factor();
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw the thumbnail
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+
+                                if (pixbuf) {
+                                    cr.scale(width / pixbuf.get_width(), height / pixbuf.get_height());
+                                    Gdk.cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+                                    cr.paint();
+                                }
+                            });
+                        } else {
+                            // Fallback to PDF icon if no thumbnail
+                            area.set_size_request(200, 200);
+                            area.connect('draw', (widget, cr) => {
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw background
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+                            });
+
+                            return Box({
+                                className: 'pdf-fallback',
+                                children: [
+                                    Label({
+                                        className: 'icon-material onSurfaceVariant txt-norm',
+                                        label: 'picture_as_pdf',
+                                        css: 'font-size: 64px;',
+                                    }),
+                                ],
+                            });
+                        }
+                    },
                 }),
             }),
             Box({
                 className: 'pdf-info',
-                spacing: 4,
-                homogeneous: false,
-                css: 'padding: 4px 8px 8px 8px;',
                 children: [
                     Button({
                         className: 'pdf-action-btn',
-                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
                         onClicked: () => {
                             Todo.deletePdf(id);
                             updateContent();
                         },
                         child: Label({
-                            className: 'icon-material',
+                            className: 'icon-material onSurfaceVariant txt-norm',
                             label: 'delete',
-                            css: 'font-size: 16px; color: @onLayer2;',
-                            hpack: 'center',
-                            vpack: 'center',
+                            css: 'font-size: 16px;',
                         }),
                     }),
                     Label({
-                        className: 'pdf-name',
-                        label: pdf.name,
+                        label: pdf.name || 'Untitled PDF',
                         xalign: 0,
-                        hexpand: true,
                         justification: 'left',
                         truncate: 'end',
                         maxWidthChars: 25,
-                        css: 'margin-left: 4px; font-size: 14px; color: @onLayer1;',
+                        className: 'onSurfaceVariant txt-norm',
+                        css: 'margin-left: 4px; font-size: 14px;',
+                    }),
+                ],
+            }),
+        ],
+    });
+};
+
+const VideoItem = (video, id) => {
+    let pixbuf;
+    try {
+        if (video.thumbnail) {
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                video.thumbnail,
+                200,  // width
+                112,  // height
+                true  // preserve aspect ratio
+            );
+        }
+    } catch (e) {
+        print(`Error loading video thumbnail: ${e}`);
+    }
+
+    return Box({
+        className: 'video-item onSurfaceVariant',
+        vertical: true,
+        spacing: 4,
+        children: [
+            Button({
+                className: 'video-container',
+                onClicked: () => {
+                    Utils.execAsync(['xdg-open', video.path]);
+                    App.closeWindow('cheatsheet');
+                },
+                child: Widget.DrawingArea({
+                    className: 'video-preview',
+                    css: 'min-width: 200px; min-height: 112px; border-radius: 8px;',
+                    setup: area => {
+                        if (pixbuf) {
+                            area.set_size_request(200, 112);
+                            area.connect('draw', (widget, cr) => {
+                                const scale = widget.get_scale_factor();
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw the thumbnail
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+
+                                if (pixbuf) {
+                                    cr.scale(width / pixbuf.get_width(), height / pixbuf.get_height());
+                                    Gdk.cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+                                    cr.paint();
+                                }
+                            });
+                        } else {
+                            // Fallback to play icon if no thumbnail
+                            area.set_size_request(200, 112);
+                            area.connect('draw', (widget, cr) => {
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw background
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+                            });
+
+                            return Box({
+                                className: 'video-fallback',
+                                children: [
+                                    Label({
+                                        className: 'icon-material onSurfaceVariant txt-norm',
+                                        label: 'play_circle',
+                                        css: 'font-size: 48px;',
+                                    }),
+                                ],
+                            });
+                        }
+                    },
+                }),
+            }),
+            Box({
+                className: 'video-info',
+                children: [
+                    Button({
+                        className: 'video-action-btn',
+                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+                        onClicked: () => {
+                            Todo.deleteVideo(id);
+                            updateContent();
+                        },
+                        child: Label({
+                            className: 'icon-material onSurfaceVariant txt-norm',
+                            label: 'delete',
+                            css: 'font-size: 16px;',
+                        }),
+                    }),
+                    Label({
+                        label: video.name || 'Untitled Video',
+                        xalign: 0,
+                        justification: 'left',
+                        truncate: 'end',
+                        maxWidthChars: 25,
+                        className: 'onSurfaceVariant txt-norm',
+                        css: 'margin-left: 4px; font-size: 14px;',
                     }),
                 ],
             }),
@@ -324,11 +524,11 @@ const CategoryButton = (label, icon, onClicked, expanded = false) => {
         child: Box({
             children: [
                 Label({
-                    className: 'category-icon icon-material',
+                    className: 'category-icon icon-material onSurfaceVariant txt-norm',
                     label: expanded ? 'expand_more' : 'chevron_right',
                 }),
                 Label({
-                    className: 'category-icon icon-material',
+                    className: 'category-icon icon-material onSurfaceVariant txt-norm',
                     label: icon,
                 }),
                 Label({
@@ -375,17 +575,16 @@ export default () => {
 
     const todoAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
         child: Box({
             children: [
                 Label({
                     className: 'icon-material',
                     label: 'add',
-                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                    css: 'font-size: 16px;',
                 }),
                 Label({
                     label: 'Add Task',
-                    css: 'color: @onLayer2;',
                 }),
             ],
         }),
@@ -401,17 +600,16 @@ export default () => {
 
     const noteAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
         child: Box({
             children: [
                 Label({
                     className: 'icon-material',
                     label: 'add',
-                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                    css: 'font-size: 16px;',
                 }),
                 Label({
                     label: 'Add Note',
-                    css: 'color: @onLayer2;',
                 }),
             ],
         }),
@@ -427,17 +625,16 @@ export default () => {
 
     const imageAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
         child: Box({
             children: [
                 Label({
                     className: 'icon-material',
                     label: 'add',
-                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                    css: 'font-size: 16px;',
                 }),
                 Label({
                     label: 'Add Image',
-                    css: 'color: @onLayer2;',
                 }),
             ],
         }),
@@ -464,17 +661,16 @@ export default () => {
 
     const pdfAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px; background-color: @layer2;',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
         child: Box({
             children: [
                 Label({
                     className: 'icon-material',
                     label: 'add',
-                    css: 'font-size: 16px; color: @accent; margin-right: 4px;',
+                    css: 'font-size: 16px;',
                 }),
                 Label({
                     label: 'Add PDF',
-                    css: 'color: @onLayer2;',
                 }),
             ],
         }),
@@ -499,6 +695,34 @@ export default () => {
         },
     });
 
+    const videoAddButton = Button({
+        className: 'add-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material onSurfaceVariant txt-norm',
+                    label: 'add',
+                    css: 'font-size: 16px;',
+                }),
+                Label({
+                    label: 'Add Video',
+                    className: 'onSurfaceVariant txt-norm',
+                }),
+            ],
+        }),
+        onClicked: () => {
+            Utils.execAsync(['bash', '-c', 'zenity --file-selection --title="Select a Video"']).then((path) => {
+                if (path) {
+                    path = path.trim();
+                    const name = path.split('/').pop();
+                    Todo.addVideo(path, name);
+                    updateContent();
+                }
+            });
+        },
+    });
+
     const entryBox = Box({
         className: 'entry-box',
         spacing: 8,
@@ -512,7 +736,8 @@ export default () => {
                     ['done', todoAddButton],
                     ['notes', noteAddButton],
                     ['images', imageAddButton],
-                    ['pdfs', pdfAddButton]
+                    ['pdfs', pdfAddButton],
+                    ['videos', videoAddButton]
                 ],
                 setup: self => {
                     self.shown = 'current';
@@ -525,6 +750,8 @@ export default () => {
                             contentEntry.placeholderText = 'Select Image';
                         } else if (self.shown === 'pdfs') {
                             contentEntry.placeholderText = 'Select PDF';
+                        } else if (self.shown === 'videos') {
+                            contentEntry.placeholderText = 'Select Video';
                         }
                     });
                 },
@@ -536,21 +763,21 @@ export default () => {
         className: 'content-list',
         vertical: true,
         spacing: 8,
-        css: 'min-height: 400px; overflow-y: auto; padding: 12px;',
+        css: 'padding: 8px;',
     });
 
     const doneList = Box({
-        className: 'content-list',
+        className: 'done-list',
         vertical: true,
         spacing: 8,
-        css: 'min-height: 400px; overflow-y: auto; padding: 12px;',
+        css: 'padding: 8px;',
     });
 
     const noteList = Box({
-        className: 'content-list',
+        className: 'note-list',
         vertical: true,
         spacing: 8,
-        css: 'min-height: 400px; overflow-y: auto; padding: 12px;',
+        css: 'padding: 8px;',
     });
 
     const imageList = Box({
@@ -558,7 +785,6 @@ export default () => {
         vertical: true,
         spacing: 8,
         css: 'min-height: 400px;',
-        children: [],
     });
 
     const imageGrid = Box({
@@ -566,6 +792,7 @@ export default () => {
         vertical: true,
         vexpand: true,
         spacing: 8,
+        css: 'padding: 12px;',
         children: [imageList],
     });
 
@@ -574,7 +801,6 @@ export default () => {
         vertical: true,
         spacing: 8,
         css: 'min-height: 400px;',
-        children: [],
     });
 
     const pdfGrid = Box({
@@ -586,36 +812,75 @@ export default () => {
         children: [pdfList],
     });
 
+    const videoList = Box({
+        className: 'video-grid',
+        vertical: true,
+        spacing: 8,
+        css: 'min-height: 400px;',
+    });
+
+    const videoGrid = Box({
+        className: 'video-grid-container',
+        vertical: true,
+        vexpand: true,
+        spacing: 8,
+        css: 'padding: 12px;',
+        children: [videoList],
+    });
+
     const contentStack = Stack({
         transition: 'slide_up_down',
         transitionDuration: 200,
-        css: 'min-width: 800px; height: 500px;',
-        children: {
-            'current': Box({
+        items: [
+            ['current', Box({
                 vertical: true,
+                vexpand: true,
                 children: [contentList],
-            }),
-            'done': Box({
+            })],
+            ['done', Box({
                 vertical: true,
+                vexpand: true,
                 children: [doneList],
-            }),
-            'notes': Box({
+            })],
+            ['notes', Box({
                 vertical: true,
+                vexpand: true,
                 children: [noteList],
-            }),
-            'images': Box({
+            })],
+            ['images', Box({
                 vertical: true,
                 vexpand: true,
                 children: [imageGrid],
-            }),
-            'pdfs': Box({
+            })],
+            ['pdfs', Box({
                 vertical: true,
                 vexpand: true,
                 children: [pdfGrid],
-            }),
-        },
+            })],
+            ['videos', Box({
+                vertical: true,
+                vexpand: true,
+                children: [videoGrid],
+            })],
+        ],
         setup: stack => {
             stack.shown = 'current';
+            stack.connect('notify::shown', () => {
+                const name = stack.shown;
+                if (name === 'current') {
+                    contentEntry.placeholderText = 'New Todo';
+                } else if (name === 'done') {
+                    contentEntry.placeholderText = 'New Todo';
+                } else if (name === 'notes') {
+                    contentEntry.placeholderText = 'New Note';
+                } else if (name === 'images') {
+                    contentEntry.placeholderText = 'Select Image';
+                } else if (name === 'pdfs') {
+                    contentEntry.placeholderText = 'Select PDF';
+                } else if (name === 'videos') {
+                    contentEntry.placeholderText = 'Select Video';
+                }
+            });
         },
     });
 
@@ -635,12 +900,13 @@ export default () => {
                 child: Box({
                     children: [
                         Label({
-                            className: 'category-icon icon-material',
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
                             label: 'task_alt',
                         }),
                         Label({
                             label: 'Current',
-                            css: 'margin-left: 4px; font-size: 14px; color: @onLayer1;',
+                            className: 'onSurfaceVariant txt-norm',
+                            css: 'margin-left: 4px; font-size: 14px;',
                         }),
                     ],
                 }),
@@ -657,12 +923,13 @@ export default () => {
                 child: Box({
                     children: [
                         Label({
-                            className: 'category-icon icon-material',
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
                             label: 'done_all',
                         }),
                         Label({
                             label: 'Done',
-                            css: 'margin-left: 4px; font-size: 14px; color: @onLayer1;',
+                            className: 'onSurfaceVariant txt-norm',
+                            css: 'margin-left: 4px; font-size: 14px;',
                         }),
                     ],
                 }),
@@ -677,34 +944,23 @@ export default () => {
         const notes = Todo.notes_json;
         const images = Todo.images_json;
         const pdfs = Todo.pdfs_json;
-
-        console.log('Updating content:', { 
-            todos: todos.length, 
-            notes: notes.length, 
-            images: images.length, 
-            pdfs: pdfs.length 
-        });
+        const videos = Todo.videos_json;
 
         // Filter tasks and notes
-        const activeTodos = todos.filter(todo => todo.type === 'todo' && !todo.done);
-        const doneTodos = todos.filter(todo => todo.type === 'todo' && todo.done);
-        const noteItems = notes.filter(note => note.type === 'note');
-        
-        // Map tasks to their respective lists
-        contentList.children = activeTodos.map((todo, i) => {
-            const id = todos.findIndex(t => t === todo);
-            return TodoItem(todo, id);
-        });
-        
-        doneList.children = doneTodos.map((todo, i) => {
-            const id = todos.findIndex(t => t === todo);
-            return TodoItem(todo, id);
-        });
-        
-        noteList.children = noteItems.map((note, i) => {
-            const id = notes.findIndex(n => n === note);
-            return NoteItem(note, id);
-        });
+        const currentTodos = todos.filter(todo => !todo.done);
+        const doneTodos = todos.filter(todo => todo.done);
+
+        // Update current tasks
+        contentList.children = currentTodos.map((todo, id) => TodoItem(todo, id));
+        console.log('Updated current tasks with', currentTodos.length, 'items');
+
+        // Update done tasks
+        doneList.children = doneTodos.map((todo, id) => TodoItem(todo, id));
+        console.log('Updated done tasks with', doneTodos.length, 'items');
+
+        // Update notes
+        noteList.children = notes.map((note, id) => NoteItem(note, id));
+        console.log('Updated notes with', notes.length, 'notes');
 
         // Create rows of 4 images
         const imageRows = [];
@@ -733,6 +989,20 @@ export default () => {
         }
         pdfList.children = pdfRows;
         console.log('Updated PDF grid with', pdfs.length, 'PDFs');
+
+        // Create rows of 4 Videos
+        const videoRows = [];
+        for (let i = 0; i < videos.length; i += 4) {
+            const rowVideos = videos.slice(i, i + 4);
+            const row = Box({
+                className: 'video-row',
+                spacing: 8,
+                children: rowVideos.map((video, idx) => VideoItem(video, i + idx)),
+            });
+            videoRows.push(row);
+        }
+        videoList.children = videoRows;
+        console.log('Updated video grid with', videos.length, 'videos');
     };
 
     // Connect to all relevant signals
@@ -752,6 +1022,13 @@ export default () => {
 
     Todo.connect('notify::pdfs_json', () => {
         console.log('PDFs updated');
+        Utils.timeout(50, () => {
+            updateContent();
+        });
+    });
+
+    Todo.connect('notify::videos_json', () => {
+        console.log('Videos updated');
         Utils.timeout(50, () => {
             updateContent();
         });
@@ -779,7 +1056,7 @@ export default () => {
                 child: Box({
                     children: [
                         Label({
-                            className: 'category-icon icon-material',
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
                             label: 'note',
                         }),
                         Label({
@@ -808,7 +1085,7 @@ export default () => {
                 child: Box({
                     children: [
                         Label({
-                            className: 'category-icon icon-material',
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
                             label: 'image',
                         }),
                         Label({
@@ -837,7 +1114,7 @@ export default () => {
                 child: Box({
                     children: [
                         Label({
-                            className: 'category-icon icon-material',
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
                             label: 'picture_as_pdf',
                         }),
                         Label({
@@ -850,10 +1127,40 @@ export default () => {
         ],
     });
 
+    const videoSubcategories = Box({
+        vertical: true,
+        className: 'sidebar-subcategories',
+        children: [
+            Button({
+                className: 'category-button',
+                onClicked: function(button) {
+                    contentStack.shown = 'videos';
+                    entryBox.get_children()[1].shown = 'videos';
+                    if (activeButton) activeButton.toggleClassName('active', false);
+                    button.toggleClassName('active', true);
+                    activeButton = button;
+                },
+                child: Box({
+                    children: [
+                        Label({
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
+                            label: 'video_library',
+                        }),
+                        Label({
+                            className: 'category-label',
+                            label: 'All Videos',
+                        }),
+                    ],
+                }),
+            }),
+        ],
+    });
+
     const todoCategories = CategoryButton('Tasks', 'task_alt', null, true);
     const noteCategories = CategoryButton('Notes', 'note', null);
     const imageCategories = CategoryButton('Images', 'image', null);
     const pdfCategories = CategoryButton('PDFs', 'picture_as_pdf', null);
+    const videoCategories = CategoryButton('Videos', 'video_library', null);
 
     todoCategories.children[1].child = todoSubcategories;
 
@@ -863,6 +1170,8 @@ export default () => {
 
     pdfCategories.children[1].child = pdfSubcategories;
 
+    videoCategories.children[1].child = videoSubcategories;
+
     const categorySidebar = Box({
         className: 'category-sidebar',
         vertical: true,
@@ -871,6 +1180,7 @@ export default () => {
             noteCategories,
             imageCategories,
             pdfCategories,
+            videoCategories,
         ],
     });
 

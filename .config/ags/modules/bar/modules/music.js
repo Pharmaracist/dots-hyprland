@@ -51,9 +51,14 @@ const showVolumeIndicator = (volume) => {
 export default () =>
   EventBox({
     onPrimaryClick: () => {
+      const player = findPlayer();
+      if (!player?.trackTitle) return;
       showMusicControls.setValue(!showMusicControls.value);
     },
-   
+    setup: (self) => self.hook(Mpris, () => {
+      const player = findPlayer();
+      self.visible = player?.trackTitle ? true : false;
+    }),
     child: Box({
       css: `padding: 0.5rem;`,
       hexpand: true,
