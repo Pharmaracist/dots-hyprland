@@ -1,355 +1,253 @@
-import Widget from 'resource:///com/github/Aylur/ags/widget.js';
-import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
-import Audio from 'resource:///com/github/Aylur/ags/service/audio.js';
+import Widget from "resource:///com/github/Aylur/ags/widget.js";
+import Mpris from "resource:///com/github/Aylur/ags/service/mpris.js";
+import Audio from "resource:///com/github/Aylur/ags/service/audio.js";
 import cava from "../../services/cava.js";
-import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-import GLib from 'gi://GLib';
+import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import { AnimatedCircProg } from "../.commonwidgets/cairo_circularprogress.js";
-import { MaterialIcon } from "../.commonwidgets/materialicon.js";
+import Indicator from "../../services/indicator.js";
+import GLib from 'gi://GLib';
 
-const COVER_FALLBACK = 'media-optical-symbolic';
-const getPlayer = () => {
-    const players = Mpris.players;
-    const activePlayer = players.find(p => p.trackTitle);
-    return activePlayer || Mpris.getPlayer('');
+const COVER_FALLBACK = "media-optical-symbolic";
+const getPlayer = () => Mpris.players.find((p) => p.trackTitle) || Mpris.getPlayer("");
+
+const handleScroll = (direction) => {
+  if (!Audio.speaker) return;
+  const step = Audio.speaker.volume <= 0.15 ? 0.01 : 0.05;
+  Audio.speaker.volume += direction * step;
+  Indicator.popup(1);
 };
 
-const TRANSITION_DURATION = 50;
-
-const AppIcon = () => Widget.Icon({
-    className: 'app-icon',
-    size: 40,
-}).hook(Mpris, self => {
-    const player = getPlayer();
-    if (!player) return;
-    
-    const name = player.name || '';
-    const identity = player.identity || '';
-    const busName = player.busName || '';
-    
-    // Try to find an app-specific icon
-    const possibleIcons = [
-        name.toLowerCase(),
-        identity.toLowerCase(),
-        busName.split('.')[3]?.toLowerCase(),
-        'multimedia-player',
-    ];
-    
-    for (const icon of possibleIcons) {
-        if (icon) {
-            self.icon = icon;
-            break;
-        }
-    }
-});
-
 const VolumeIndicator = () => {
-    const player = getPlayer();
-    const defaultVolume = player?.volume || 0;
-    const VOLUME_STEP = 0.02; // 2% per scroll
-    
-    const volumeCircProg = AnimatedCircProg({
-        className: 'volume-progress',
-        vpack: 'center',
-        hpack: 'center',
-        initFrom: defaultVolume * 100,
-        initTo: defaultVolume * 100,
-        initAnimTime: 200,
-        initAnimPoints: 10,
-    });
-    
-    const volumeLabel = Widget.Label({
-        className: 'volume-label txt-norm onSurfaceVariant',
-        label: `${Math.round(defaultVolume * 100)}`,
-    });
-    
-    const updateVolume = () => {
-        const player = getPlayer();
-        if (!player) return;
-        const volume = Math.round(player.volume * 100);
-        volumeLabel.label = `${volume}`;
-        const fontSize = Math.max(1, volume);
-        volumeCircProg.css = `font-size: ${fontSize}px; transition: 200ms linear;`;
-    };
+  const icon = Widget.Icon({
+    className: "app-icon",
+    size: 24,
+    setup: (self) => self.hook(Mpris, () => {
+      const player = getPlayer();
+      self.visible = !!player;
+      self.icon_name = player?.busName?.includes("spotify") ? "spotify-client" 
+        : player?.busName?.includes("mpv") ? "mpv"
+        : player?.busName?.includes("chromium") ? "youtube-music"
+        : player?.busName?.includes("amberol") ? "io.bassi.Amberol"
+        : COVER_FALLBACK;
+    })
+  });
 
-    return Widget.Box({
-        className: 'volume-indicator',
-        children: [
-            Widget.EventBox({
-                onScrollUp: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    const newVolume = Math.min(1, player.volume + VOLUME_STEP);
-                    player.volume = newVolume;
-                },
-                onScrollDown: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    const newVolume = Math.max(0, player.volume - VOLUME_STEP);
-                    player.volume = newVolume;
-                },
-                child: Widget.Box({
-                    className: 'volume-container',
-                    homogeneous: true,
-                    children: [
-                        Widget.Box({
-                            homogeneous: true,
-                            children: [
-                                Widget.Overlay({
-                                    child: Widget.Box({
-                                        vpack: 'center',
-                                        homogeneous: true,
-                                        children: [volumeLabel],
-                                    }),
-                                    overlays: [volumeCircProg],
-                                }),
-                            ],
-                        }),
-                    ],
-                    setup: self => {
-                        self.hook(Mpris, updateVolume);
-                        updateVolume();
-                    },
-                }),
+  const circprog = AnimatedCircProg({
+    className: "volume-circprog",
+    vpack: "center",
+    hpack: "center",
+  });
+
+  return Widget.EventBox({
+    onScrollUp: () => handleScroll(1),
+    onScrollDown: () => handleScroll(-1),
+    child: Widget.Box({
+      className: "spacing-h-4 txt-onSurfaceVariant",
+      children: [
+        Widget.Box({
+          homogeneous: true,
+          children: [
+            Widget.Box({
+              className: "volume-icon",
+              homogeneous: true,
+              child: Widget.Overlay({
+                child: icon,
+                overlays: [circprog],
+              }),
+              setup: self => self.hook(Audio, () => {
+                const vol = Math.round(Audio.speaker?.volume * 100);
+                circprog.css = `font-size: ${vol}px;`;
+              }),
             }),
-        ],
-    });
+          ],
+        }),
+        Widget.Label({
+          className: "txt-norm",
+          setup: self => self.hook(Audio, () => 
+            self.label = `${Math.round(Audio.speaker?.volume * 100)}%`)
+        })
+      ]
+    })
+  });
 };
 
 const MediaControls = () => {
-    const playIcon = Widget.Label({
-        className: 'icon-material',
-        label: 'play_arrow',
-    });
+  const progressCircle = AnimatedCircProg({
+    className: "volume-circprog",
+    vpack: "center",
+    hpack: "center",
+    css: "font-size: 0px;",
+  });
 
-    playIcon.hook(Mpris, () => {
-        const mpris = Mpris.getPlayer('');
-        playIcon.label = mpris?.playBackStatus === 'Playing' ? 'pause' : 'play_arrow';
-    });
+  const playButton = Widget.Button({
+    className: "control-button onSurfaceVariant",
+    child: Widget.Box({
+      className: "volume-icon",
+      homogeneous: true,
+      child: Widget.Overlay({
+        child: Widget.Label({ label: "play_arrow" }),
+        overlays: [progressCircle],
+      }),
+    }),
+    onClicked: () => {
+      const player = getPlayer();
+      if (!player) return;
+      player.playPause();
+    },
+  });
 
-    return Widget.Box({
-        className: 'control-buttons',
-        spacing: 2,
-        children: [
-            Widget.Button({
-                className: 'control-button',
-                child: Widget.Label({
-                    className: 'icon-material',
-                    label: 'shuffle',
-                }),
-                onClicked: self => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    player.shuffle = !player.shuffle;
-                    // Update icon immediately
-                    self.child.label = player.shuffle ? 'shuffle_on' : 'shuffle';
-                    self.toggleClassName('active', player.shuffle);
-                },
-                setup: self => self.hook(Mpris, () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    self.toggleClassName('active', player.shuffle);
-                    self.child.label = player.shuffle ? 'shuffle_on' : 'shuffle';
-                }),
-            }),
-            Widget.Button({
-                className: 'control-button',
-                child: Widget.Label({
-                    className: 'icon-material ',
-                    label: 'skip_previous',
-                }),
-                onClicked: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    player.previous();
-                },
-            }),
-            Widget.Button({
-                className: 'play-button control-button',
-                child: playIcon,
-                onClicked: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    player.playPause();
-                },
-                setup: self => self.hook(Mpris, () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    self.toggleClassName('playing', player.playBackStatus === 'Playing');
-                }),
-            }),
-            Widget.Button({
-                className: 'control-button',
-                child: Widget.Label({
-                    className: 'icon-material txt-2rem',
-                    label: 'skip_next',
-                }),
-                onClicked: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    player.next();
-                },
-            }),
-            Widget.Button({
-                className: 'control-button',
-                child: Widget.Label({
-                    className: 'icon-material txt-2rem',
-                    label: 'repeat',
-                }),
-                onClicked: () => {
-                    const player = getPlayer();
-                    if (!player) return;
-                    
-                    // Simple cycle through states
-                    switch (player.loopStatus) {
-                        case 'None':
-                            player.loopStatus = 'Playlist';
-                            break;
-                        case 'Playlist':
-                            player.loopStatus = 'Track';
-                            break;
-                        case 'Track':
-                        default:
-                            player.loopStatus = 'None';
-                            break;
-                    }
-                },
-                setup: button => {
-                    button.hook(Mpris, () => {
-                        const player = getPlayer();
-                        if (!player) return;
-                        
-                        // Update icon based on status
-                        const label = button.child;
-                        if (player.loopStatus === 'Track') {
-                            label.label = 'repeat_one';
-                        } else if (player.loopStatus === 'Playlist') {
-                            label.label = 'repeat_on';
-                        } else {
-                            label.label = 'repeat';
-                        }
-                        
-                        // Update active state
-                        button.toggleClassName('active', player.loopStatus !== 'None');
-                    });
-                },
-            }),
-        ],
-    });
+  const updateProgress = () => {
+    const player = getPlayer();
+    if (!player) {
+      progressCircle.css = "font-size: 0px;";
+      return;
+    }
+
+    try {
+      const length = player.metadata["mpris:length"] || 0;
+      const position = Math.floor(player.position * 1000000);
+
+      if (length > 0) {
+        const progress = Math.max(0, Math.min(100, Math.floor((position / length) * 100)));
+        progressCircle.css = `font-size: ${progress}px;`;
+        playButton.child.child.child.label = player?.playBackStatus === "Playing" ? "pause" : "play_arrow";
+      } else {
+        progressCircle.css = "font-size: 0px;";
+      }
+    } catch (e) {
+      console.error(e);
+      progressCircle.css = "font-size: 0px;";
+    }
+  };
+
+  // Initial update
+  Utils.timeout(100, updateProgress);
+
+  // Regular updates
+  Utils.interval(1000, () => {
+    if (progressCircle.is_destroyed) return false;
+    if (getPlayer()?.playBackStatus === "Playing") updateProgress();
+    return true;
+  });
+
+  return Widget.Box({
+    className: "control-buttons",
+    children: [
+      Widget.Button({
+        className: "control-button onSurfaceVariant",
+        child: Widget.Label({ label: "skip_previous" }),
+        onClicked: () => getPlayer()?.previous(),
+      }),
+      playButton,
+      Widget.Button({
+        className: "control-button onSurfaceVariant",
+        child: Widget.Label({ label: "skip_next" }),
+        onClicked: () => getPlayer()?.next(),
+      }),
+    ],
+  });
 };
 
-const TrackLabels = () => {
-    const label = (className, type) => Widget.Label({
-        className,
-        xalign: 0,
-        truncate: 'end',
-        maxWidthChars: 100,
-    }).hook(Mpris, self => {
-        const player = getPlayer();
-        self.label = type === 'title'
-            ? player?.track_title || 'Not Playing'
-            : player?.track_artists.join(', ') || 'No Artist';
-    });
-
-    return Widget.Box({
-        vertical: true,
-        vpack: 'center',
-        hexpand: true,
-        children: [
-            label('track-title', 'title'),
-            label('track-artist', 'artist'),
-        ],
-    });
-};
+const TrackLabels = () => Widget.Box({
+  vertical: true,
+  vpack: "center",
+  hexpand: true,
+  children: ["title", "artist"].map(type => Widget.Label({
+    className: `track-${type}`,
+    xalign: 0,
+    truncate: "end",
+    maxWidthChars: 100,
+    setup: self => self.hook(Mpris, () => {
+      const player = getPlayer();
+      self.label = type === "title" 
+        ? player?.track_title || "Not Playing"
+        : player?.track_artists.join(", ") || "No Artist";
+    })
+  }))
+});
 
 const CavaVisualizer = () => {
-    const visualizer = Widget.Box({
-        className: 'cava-visualizer',
-        spacing: 2,
-        hpack: 'center',
-        vpack: 'end',
-        hexpand: true,
-    });
+  const bars = Array(73).fill(0).map(() => Widget.Label({
+    label: "▁",
+    className: "cava-bar",
+    hpack: "center",
+    hexpand: true,
+  }));
 
-    // Create a fixed set of labels that we'll reuse
-    const numBars = 73; // Exact number of bars
-    const bars = Array(numBars).fill(0).map(() => Widget.Label({
-        label: '▁',
-        className: 'cava-bar',
-        hpack: 'center',
-        hexpand: true,
-        css: `
-            margin: 0 0.5px;
-            font-size: 2.1em;
-            background-color: transparent;
-            padding: 0 2px;
-        `
-    }));
-    visualizer.children = bars;
-
-    const updateVisualizer = () => {
-        const output = cava.output;
-        if (!output) {
-            // If no output, reset all bars to base state
-            bars.forEach(bar => {
-                bar.label = '▁';
-                bar.className = 'cava-bar';
-            });
-            return;
+  return Widget.Box({
+    className: "cava-visualizer",
+    spacing: 2,
+    hpack: "center",
+    vpack: "end",
+    hexpand: true,
+    children: bars,
+    setup: self => self.hook(cava, () => {
+      if (self.is_destroyed) return;
+      const chars = cava.output?.split("") || [];
+      bars.forEach((bar, i) => {
+        if (bar.is_destroyed) return;
+        if (i < chars.length) {
+          const height = chars[i].charCodeAt(0) - 9601;
+          bar.className = `cava-bar${
+            height > 4.9 ? " cava-bar-high" :
+            height > 2.8 ? " cava-bar-med" :
+            " cava-bar-low"
+          }`;
+          bar.label = chars[i];
+        } else {
+          bar.label = "▁";
+          bar.className = "cava-bar";
         }
-
-        const chars = output.split('');
-        // Ensure we only process the exact number of bars we have
-        const len = Math.min(chars.length, numBars);
-        
-        for (let i = 0; i < numBars; i++) {
-            const bar = bars[i];
-            if (i < len) {
-                const char = chars[i];
-                const height = char.charCodeAt(0) - 9601;
-                const maxHeight = 7;
-                let className = 'cava-bar';
-                
-                if (height > maxHeight * 0.7) className += ' cava-bar-high';
-                else if (height > maxHeight * 0.4) className += ' cava-bar-med';
-                else className += ' cava-bar-low';
-                
-                bar.className = className;
-                bar.label = char;
-            } else {
-                // Reset any remaining bars
-                bar.label = '▁';
-                bar.className = 'cava-bar';
-            }
-        }
-    };
-
-    visualizer.hook(cava, updateVisualizer, 'output-changed');
-    return visualizer;
+      });
+    }, "output-changed")
+  });
 };
 
+let lastScrollTime = 0;
+const SCROLL_DELAY = 900; // 900ms delay between scroll actions
+
 const CoverArt = () => {
-    const box = Widget.Box({
-        className: 'cover-art',
-        css: `
-            min-width: 160px;
-            min-height: 160px;
-            background-image: url('${COVER_FALLBACK}');
-            background-size: cover;
-            background-position: center;
-            border-radius: 18px;
-            padding: 0 1.6rem;
-                margin:1rem 3rem  1rem 0;
-        `,
+    const box = Widget.EventBox({
+        onScrollUp: (self, event) => {
+            const currentTime = GLib.get_monotonic_time() / 1000;
+            if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
+            
+            const player = getPlayer();
+            if (player) player.next();
+            lastScrollTime = currentTime;
+            return true; // Stop event propagation
+        },
+        onScrollDown: (self, event) => {
+            const currentTime = GLib.get_monotonic_time() / 1000;
+            if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
+            
+            const player = getPlayer();
+            if (player) player.previous();
+            lastScrollTime = currentTime;
+            return true; // Stop event propagation
+        },
+        child: Widget.Box({
+            className: 'cover-art',
+            css: `
+                min-width: 160px;
+                min-height: 160px;
+                background-image: url('${COVER_FALLBACK}');
+                background-size: cover;
+                background-position: center;
+                border-radius: 18px;
+                padding: 0 1.6rem;
+                margin: 1rem 3rem 1rem 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            `,
+        }),
     });
 
-    box.hook(Mpris, self => {
+    box.child.hook(Mpris, self => {
         const player = getPlayer();
         const coverPath = player?.cover_path;
-        const isPlaying = player?.playbackStatus === 'Playing';
         
-        // Hide if no player or no cover
-        self.visible = !!(player && (isPlaying || coverPath));
+        // Show thumbnail if we have a player and cover
+        self.visible = !!(player && coverPath);
         
         if (coverPath) {
             self.css = `
@@ -360,7 +258,8 @@ const CoverArt = () => {
                 background-position: center;
                 border-radius: 18px;
                 padding: 0 1.6rem;
-                margin:1rem 3rem  1rem 0;
+                margin: 1rem 3rem 1rem 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             `;
         } else {
             self.css = `
@@ -371,7 +270,8 @@ const CoverArt = () => {
                 background-position: center;
                 border-radius: 18px;
                 padding: 0 1.6rem;
-                margin:1rem 3rem  1rem 0;
+                margin: 1rem 3rem 1rem 0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             `;
         }
     });
@@ -379,197 +279,132 @@ const CoverArt = () => {
     return box;
 };
 
-// Format time in seconds to M:SS or H:MM:SS
-function formatTime(seconds) {
-    if (seconds <= 0) return '0:00';
-    
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    
-    if (hours > 0) {
-        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-}
-
 const DurationBar = () => {
-    const progressBar = Widget.Slider({
-        className: 'duration-progress',
-        drawValue: false,
-        min: 0,
-        max: 1,
-        value: 0,
-    });
-
-    const totalTimeLabel = Widget.Label({
-        className: 'duration-text',
-        label: '0:00',
-    });
-
-    const currentTimeLabel = Widget.Label({
-        className: 'duration-text',
-        label: '0:00',
-    });
-
-    const box = Widget.Box({
-        className: 'duration-bar',
-        vertical: false,
-        children: [
-            Widget.Box({
-                css: 'margin-right:2px',
-                children: [currentTimeLabel],
-            }),
-            Widget.Box({
-                className: 'duration-bar-container',
-                hexpand: true,
-                children: [progressBar],
-            }),
-            Widget.Box({
-                css: 'margin-right:2px',
-                children: [totalTimeLabel],
-            }),
-        ],
-    });
-
-    // Handle slider change
-    progressBar.connect('change-value', (_, value) => {
+  const [currentTime, totalTime] = ["0:00", "0:00"].map(initial => 
+    Widget.Button({
+      className: "duration-text txt-norm txt-onSurfaceVariant",
+      label: initial,
+      onClicked: () => {
         const player = getPlayer();
-        if (!player || !player.canSeek) return;
-        
-        try {
-            const metadata = player.metadata;
-            const length = metadata['mpris:length'] || 0;
-            const currentPosition = Math.floor(player.position * 1000000); // Convert to microseconds
-            
-            if (length > 0) {
-                const targetMicroseconds = Math.floor(value * length);
-                const offset = targetMicroseconds - currentPosition;
-                
-                console.log('Seeking:', {
-                    current: currentPosition,
-                    target: targetMicroseconds,
-                    offset: offset
-                });
+        if (!player) return;
+        player.playPause();
+      }
+    })
+  );
 
-                // Use GDBus directly
-                Utils.execAsync([
-                    'gdbus',
-                    'call',
-                    '--session',
-                    '--dest', player.busName,
-                    '--object-path', '/org/mpris/MediaPlayer2',
-                    '--method', 'org.mpris.MediaPlayer2.Player.Seek',
-                    offset.toString()
-                ]).catch(e => console.error('Seek error:', e));
-            }
-        } catch (e) {
-            console.error('Error seeking:', e);
-        }
-    });
+  const updateTimer = () => {
+    const player = getPlayer();
+    if (!player) {
+      totalTime.label = currentTime.label = "0:00";
+      return;
+    }
 
-    // Update timer
-    const updateTimer = () => {
-        const player = getPlayer();
-        if (!player) {
-            totalTimeLabel.label = '0:00';
-            currentTimeLabel.label = '0:00';
-            progressBar.value = 0;
-            return;
-        }
+    try {
+      const length = player.metadata["mpris:length"] || 0;
+      const position = Math.floor(player.position * 1000000);
 
-        try {
-            const metadata = player.metadata;
-            const length = metadata['mpris:length'] || 0;
-            const position = Math.floor(player.position * 1000000); // Convert seconds to microseconds
+      if (length > 0) {
+        totalTime.label = formatTime(length / 1000000);
+        currentTime.label = formatTime(position / 1000000);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-            if (length > 0) {
-                const lengthSec = Math.floor(length / 1000000);
-                const positionSec = Math.floor(position / 1000000);
-                const progress = position / length;
-
-                progressBar.value = progress;
-                totalTimeLabel.label = formatTime(lengthSec);
-                currentTimeLabel.label = formatTime(positionSec);
-            }
-        } catch (e) {
-            console.error('Error updating duration:', e);
-        }
-    };
-
-    // Update on player changes
-    box.hook(Mpris, (_, player) => {
-        updateTimer();
-    });
-
-    // Regular updates while playing
-    Utils.interval(1000, () => {
-        if (box.is_destroyed) return false;
-        const player = getPlayer();
-        if (player?.playBackStatus === 'Playing') {
-            updateTimer();
-        }
+  return Widget.Box({
+    className: "spacing-h-4 txt-onSurfaceVariant",
+    children: [
+      Widget.Box({
+        css: "margin-right:4px",
+        children: [currentTime],
+      }),
+      Widget.Box({
+        css: "margin-right:4px",
+        children: [totalTime],
+      }),
+    ],
+    setup: self => {
+      self.hook(Mpris, updateTimer);
+      Utils.interval(1000, () => {
+        if (self.is_destroyed) return false;
+        if (getPlayer()?.playBackStatus === "Playing") updateTimer();
         return true;
-    });
+      });
+      Utils.timeout(100, updateTimer);
+    }
+  });
+};
 
-    // Initial update
-    Utils.timeout(100, updateTimer);
-
-    return box;
+const formatTime = seconds => {
+  if (seconds <= 0) return "0:00";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  return hours > 0
+    ? `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+    : `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
 export default () => Widget.Box({
-    className: 'ipod-widget',
-    css: 'min-height: 260px;',
-    children: [
-        Widget.Box({
-            className: 'ipod-content',
-            children: [
-                Widget.Overlay({
-                    child: Widget.Box({
-                        className: 'cava-container',
-                        children: [CavaVisualizer()],
-                    }),
-                    overlays: [
-                        Widget.Box({
-                            children: [
-                                Widget.Box({
-                                    className: 'left-section',
-                                    children: [CoverArt()],
-                                }),
-                                Widget.Box({
-                                    className: 'volume-indicator-container',
-                                    vpack: 'center',
-                                    vertical: true,
-                                    children: [
-                                        TrackLabels(),
-                                        Widget.Box({hexpand: true}),
-                                        Widget.Box({
-                                            className: 'right-section',
-                                            vpack: 'end',
-                                            hpack: 'start',
-                                            hexpand: true,
-                                            vertical: true,
-                                            children: [
-                                                DurationBar(),
-                                                MediaControls(),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                                Widget.Box({
-                                    vpack: 'start', 
-                                    className: 'app-icon-volume-container',
-                                    children:[ 
-                                        // AppIcon(),
-                                        VolumeIndicator(),
-                                    ] 
-                                }),
-                            ]
-                        }),
-                    ],
+  className: "ipod-widget",
+  css: "min-height: 260px;",
+  setup: self => self.hook(Mpris, () => {
+    const player = getPlayer();
+    self.css = `
+      min-height: 260px;
+      ${player?.cover_path ? `
+        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+          url('${player.cover_path}');
+        background-size: cover;
+        background-position: center;
+      ` : ""}
+      border-radius: 24px;
+    `;
+  }),
+  children: [
+    Widget.Box({
+      className: "ipod-content",
+      children: [
+        Widget.Overlay({
+          child: Widget.Box({
+            className: "cava-container",
+            children: [CavaVisualizer()],
+          }),
+          overlays: [
+            Widget.Box({
+              children: [
+                Widget.Box({
+                  className: "left-section",
+                  children: [CoverArt()],
                 }),
-            ],
+                Widget.Box({
+                  className: "spacing-v-10",
+                  vpack: "center",
+                  vertical: true,
+                  children: [
+                    TrackLabels(),
+                    Widget.Box({
+                      vpack: "end",
+                      hpack: "start",
+                      children: [DurationBar()],
+                    }),
+                    Widget.Box({
+                      vpack: "end",
+                      children: [MediaControls()],
+                    }),
+                  ],
+                }),
+                Widget.Box({
+                  vpack: "start",
+                  className: "app-icon-volume-container",
+                  children: [VolumeIndicator()],
+                }),
+              ],
+            }),
+          ],
         }),
-    ],
+      ],
+    }),
+  ],
 });

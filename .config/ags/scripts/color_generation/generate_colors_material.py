@@ -87,6 +87,8 @@ elif args.color is not None:
     argb = hex_to_argb(args.color)
     hct = Hct.from_int(argb)
 
+source_color_hct = hct
+
 if args.scheme == 'fruitsalad':
     from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad as Scheme
 elif args.scheme == 'expressive':
@@ -115,19 +117,40 @@ elif args.scheme == 'vibrant':
     from materialyoucolor.scheme.scheme_vibrant import SchemeVibrant as Scheme
 elif args.scheme == 'catppuccin-latte':
     from schemes.scheme_predefined import SchemePredefined as Scheme
-    scheme = Scheme(hct, darkmode, 0.0, 'catppuccin', 'latte')
+    scheme = Scheme(source_color_hct, darkmode, 0.0, 'catppuccin', 'latte')
 elif args.scheme == 'catppuccin-mocha':
     from schemes.scheme_predefined import SchemePredefined as Scheme
-    scheme = Scheme(hct, darkmode, 0.0, 'catppuccin', 'mocha')
+    scheme = Scheme(source_color_hct, darkmode, 0.0, 'catppuccin', 'mocha')
 elif args.scheme == 'dracula':
     from schemes.scheme_predefined import SchemePredefined as Scheme
-    scheme = Scheme(hct, darkmode, 0.0, 'dracula')
+    scheme = Scheme(source_color_hct, args.dark, args.contrast, 'dracula')
+elif args.scheme == 'nord':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, args.dark, args.contrast, 'nord')
+elif args.scheme == 'gruvbox-dark':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, True, args.contrast, 'gruvbox', 'dark')
+elif args.scheme == 'gruvbox-light':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, False, args.contrast, 'gruvbox', 'light')
+elif args.scheme == 'tokyo-night':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, True, args.contrast, 'tokyo-night', 'storm')
+elif args.scheme == 'tokyo-day':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, False, args.contrast, 'tokyo-night', 'light')
+elif args.scheme == 'rose-pine':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, True, args.contrast, 'rose-pine', 'main')
+elif args.scheme == 'rose-pine-dawn':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(source_color_hct, False, args.contrast, 'rose-pine', 'dawn')
 else:
     from schemes.scheme_morevibrant import SchemeMoreVibrant as Scheme
 
 # Generate
 if not hasattr(args, 'scheme') or args.scheme not in ['catppuccin-latte', 'catppuccin-mocha', 'dracula']:
-    scheme = Scheme(hct, darkmode, 0.0)
+    scheme = Scheme(source_color_hct, darkmode, 0.0)
 
 material_colors = {}
 term_colors = {}

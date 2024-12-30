@@ -93,7 +93,7 @@ export const SearchAndWindows = () => {
     });
 
     const resultsRevealer = Widget.Revealer({
-        transitionDuration: options.animations.durationLarge,
+        transitionDuration: options.animations.durationSmall || 150,
         revealChild: false,
         transition: 'slide_down',
         hpack: 'center',
@@ -102,18 +102,18 @@ export const SearchAndWindows = () => {
 
     const entryPromptRevealer = Widget.Revealer({
         transition: 'crossfade', 
-        transitionDuration: options.animations.durationLarge,
+        transitionDuration: options.animations.durationSmall,
         revealChild: true,
         hpack: 'center',
         child: Widget.Label({
             className: 'overview-search-prompt txt-small txt',
-            label: getString('Type to search')
+            label: getString('Start The Journey')
         }),
     });
 
     const entryIconRevealer = Widget.Revealer({
         transition: 'crossfade',
-        transitionDuration: options.animations.durationLarge,
+        transitionDuration: options.animations.durationSmall,
         revealChild: false,
         hpack: 'end',
         child: Widget.Label({
@@ -206,6 +206,7 @@ export const SearchAndWindows = () => {
         children: [
             Widget.Box({
                 hpack: 'center',
+                hexpand: true,
                 children: [
                     entry,
                     Widget.Box({
@@ -215,7 +216,7 @@ export const SearchAndWindows = () => {
                     entryIcon,
                 ]
             }),
-            overviewContent,
+            // overviewContent,
             resultsRevealer,
         ],
         setup: (self) => self

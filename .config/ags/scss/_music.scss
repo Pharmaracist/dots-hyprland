@@ -1,7 +1,7 @@
 @import 'material';
 @import 'musicmaterial';
 @import './wal';
-// @import 'musicwal';
+// @import '/musicwal';
 @import './colors';
 @import './lib_mixins';
 $music_transparentize_amount: 0.3;
@@ -188,6 +188,15 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     margin: -0.1rem 0rem;
 }
 
+.osd-ipod {
+    @include large-rounding;
+    background: $layer0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 0.55px solid $outline;
+    margin: 0 1rem 1rem;
+    padding: 0rem 1.023rem;
+}
+
 .track-item {
     color: $onLayer1;
     
@@ -238,4 +247,157 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
             }
         }
     }
+}
+
+.ipod-widget {
+    @include large-rounding;
+    background: linear-gradient(127deg, transparentize($music_gradient1, $music_colorstart_transparentize), transparentize($music_gradient1, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
+        linear-gradient(217deg, transparentize($music_gradient2, $music_colorstart_transparentize), transparentize($music_gradient2, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
+        radial-gradient(circle at 0% 100%, $color4 13%, rgba(0, 0, 0, 0) 100%),
+        linear-gradient(336deg, transparentize($music_gradient3, $music_colorstart_transparentize), transparentize($music_gradient3, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
+        linear-gradient($background, $background);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 0.55px solid $outline;
+    margin: 0 1rem 1rem;
+    .ipod-content {
+        padding: 1rem 2.1rem;
+      
+        .app-icon {
+            background-color: $secondaryContainer;
+            @include full-rounding;
+            margin: 0.5rem;
+            padding: 0.2rem;
+        }
+        .cover-art {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        .track-title {
+            @include mainfont;
+            font-size: 2.8rem;
+            color: $onSecondaryContainer;
+        }
+        
+        .track-artist {
+            @include mainfont;
+            color: $onSecondaryContainer;
+            margin-top: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .right-section {
+            .volume-indicator {
+                .volume-container {
+                    min-width: 1.77rem;
+                    min-height: 1.77rem;
+                    .volume-label {
+                        color: $onSecondaryContainer;
+                        font-size: 0.9rem;
+                        margin: 0;
+                    }
+                    
+                    .volume-progress {
+                        @include full-rounding;
+                        @include element_decel;
+                        min-height: 1.77rem;
+                        min-width: 1.77rem;
+                        background-color: transparentize($onSecondaryContainer, 0.8);
+                        color: $onSecondaryContainer;
+                    }
+                }
+            }
+            
+            .app-icon-volume-container {
+                background-color: $secondaryContainer;
+                @include large-rounding;
+                margin: 0.5rem;
+                padding: 0.5rem;
+            }
+            
+            .play-button {
+                background: $secondaryContainer;
+                padding: 0.7rem;
+            }
+            
+          
+        }
+    }
+}
+
+.cava-visualizer {
+    .cava-bar {
+        font-family: monospace;
+        font-size: 2.1rem;
+        transition: color 200ms linear;
+        color: $onSecondaryContainer;
+        opacity: 0.9;
+        margin: 0 0.5px;
+        padding: 0 2px;
+
+        &.cava-bar-med {
+            color: $primary;
+        }
+        
+        &.cava-bar-high {
+            color: $primary;
+        }
+    }
+}
+
+.app-icon-volume-container {
+    background-color: $secondaryContainer;
+    @include large-rounding;
+    margin-top: 1rem;
+    padding: 0.6rem 0.9rem;
+    border: 0.5px solid $outline;
+}
+
+.control-buttons{
+    @include full-rounding;
+    @include element_decel;
+    color:$battOnLayer2;
+    padding:0.5rem;
+    background-color: $layer0;
+    &:hover{
+       background-color:  mix($secondaryContainer, $onSecondaryContainer, 90%);
+    }
+    &:active{
+        background-color: mix($secondaryContainer, $onSecondaryContainer, 85%);
+    }
+}
+.control-button {
+    @include icon-material;
+    padding: 0.3rem;
+    border-radius: 50%;
+    color:$battOnLayer2;
+    transition: all 200ms ease;
+    font-size: 2rem;
+    &:hover {
+        background: mix($secondaryContainer, $onSecondaryContainer, 90%);
+    }
+    
+    &:active {
+        background: mix($secondaryContainer, $onSecondaryContainer, 85%);
+    }
+    
+    &.active {
+        color:$battOnLayer2;
+    }
+}
+.volume-icon {
+    padding:0 3px;
+    @include full-rounding;
+    @include element_decel;
+    min-height: 3.1rem;
+    min-width: 3.3rem;
+    border-radius: 10rem;
+    color: $battOnLayer2;
+}
+.volume-circprog {
+    border:0.12rem solid $outline;
+    @include fluent_decel_long;
+    min-width: 0.4rem; // line width
+    min-height: 3.1rem;
+    padding: 0rem;
+    background-color: $battLayer2;
+    color: $battOnLayer2;
 }
