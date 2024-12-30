@@ -129,7 +129,7 @@ const WelcomeMessage = () => Box({
         //     vertical: true,
         //     className: 'spacing-v-10',
         //     hpack: 'center',
-        //     css: 'min-width: 300px; max-width: 400px;',
+        //     css: 'min-width: 300px',
         //     children: [
         //         Label({
         //             xalign: 0.5,
@@ -645,8 +645,8 @@ const toggleSidebarWidth = () => {
         const width = isWideSidebar.value ? 500 : 350;
         const contentBox = sideLeft.get_children()[0].get_children()[0];
         const quranBox = contentBox.get_children()[0];
-        contentBox.css = `min-width: ${width}px; max-width: ${width}px;`;
-        quranBox.css = `min-width: ${width}px; max-width: ${width}px;`;
+        contentBox.css = `min-width: ${width}px;`;
+        quranBox.css = `min-width: ${width}px;`;
     }
 };
 

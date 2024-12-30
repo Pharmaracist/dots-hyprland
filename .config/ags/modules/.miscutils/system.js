@@ -79,7 +79,6 @@ async function initializeProfilePhoto() {
             if (photoPath) {
                 const file = Gio.File.new_for_path(photoPath);
                 if (file.query_exists(null)) {
-                    console.log('Profile photo found:', photoPath);
                     profilePhotoVar.value = photoPath;
                     return true;
                 }
@@ -87,19 +86,16 @@ async function initializeProfilePhoto() {
             
             attempts++;
             if (attempts < maxAttempts) {
-                console.log(`Profile photo not found, attempt ${attempts}/${maxAttempts}`);
                 GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeout, () => {
                     tryGetPhoto();
                     return GLib.SOURCE_REMOVE;
                 });
                 return false;
             } else {
-                console.log('Profile photo not found after all attempts');
                 profilePhotoVar.value = '';
                 return true;
             }
         } catch (error) {
-            console.error(`Error getting profile photo:`, error);
             profilePhotoVar.value = '';
             return true;
         }

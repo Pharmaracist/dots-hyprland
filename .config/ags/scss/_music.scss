@@ -251,12 +251,7 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
 
 .ipod-widget {
     @include large-rounding;
-    background: linear-gradient(127deg, transparentize($music_gradient1, $music_colorstart_transparentize), transparentize($music_gradient1, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
-        linear-gradient(217deg, transparentize($music_gradient2, $music_colorstart_transparentize), transparentize($music_gradient2, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
-        radial-gradient(circle at 0% 100%, $color4 13%, rgba(0, 0, 0, 0) 100%),
-        linear-gradient(336deg, transparentize($music_gradient3, $music_colorstart_transparentize), transparentize($music_gradient3, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
-        linear-gradient($background, $background);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    background: $layer0;
     border: 0.55px solid $outline;
     margin: 0 1rem 1rem;
     .ipod-content {

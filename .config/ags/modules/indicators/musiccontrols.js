@@ -20,7 +20,9 @@ var lastCoverPath = '';
 
 function isRealPlayer(player) {
     return (
-        // Remove unecessary native buses from browsers if there's plasma integration
+        // Prefer VLC
+        player.busName.startsWith('org.mpris.MediaPlayer2.vlc') ||
+        // Remove unnecessary native buses from browsers if there's plasma integration
         !(hasPlasmaIntegration && player.busName.startsWith('org.mpris.MediaPlayer2.firefox')) &&
         !(hasPlasmaIntegration && player.busName.startsWith('org.mpris.MediaPlayer2.chromium')) &&
         // playerctld just copies other buses and we don't need duplicates
@@ -385,7 +387,10 @@ const MusicControlsWidget = (player) => Box({
                     setup: (box) => {
                         box.pack_start(TrackControls({ player: player }), false, false, 0);
                         box.pack_end(PlayState({ player: player }), false, false, 0);
-                        if(hasPlasmaIntegration || player.busName.startsWith('org.mpris.MediaPlayer2.chromium')) box.pack_end(TrackTime({ player: player }), false, false, 0)
+                        // Show track time for VLC and supported players
+                        if(player.busName.startsWith('org.mpris.MediaPlayer2.vlc') || hasPlasmaIntegration || player.busName.startsWith('org.mpris.MediaPlayer2.chromium')) {
+                            box.pack_end(TrackTime({ player: player }), false, false, 0);
+                        }
                         // box.pack_end(TrackSource({ vpack: 'center', player: player }), false, false, 0);
                     }
                 })

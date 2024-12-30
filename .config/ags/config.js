@@ -57,7 +57,7 @@ const Windows = () => {
     ...(modules.sideright !== false ? [SideRight()] : []),
     ...(modules.onscreenkeyboard === true ? [forMonitors(Osk)] : []), // Only enable if explicitly true
     ...(modules.session !== false ? [forMonitors(Session)] : []),
-    ...(modules.dock !== false ? [forMonitors(Dock)] : []),
+    // ...(modules.dock !== false ? [forMonitors(Dock)] : []),
     ...(modules.screencorners !== false && userOptions.asyncGet().appearance.fakeScreenRounding !== 0
       ? [
           forMonitors((id) => Corner(id, "top left", true)),

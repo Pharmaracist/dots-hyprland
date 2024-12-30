@@ -56,9 +56,7 @@ const createKeyboardWidget = () => {
                 ) || "unknown";
                 
                 stack.shown = layout;
-                print('Keyboard layout changed to:', layout);
             } catch (error) {
-                console.error('Error updating keyboard layout:', error);
                 stack.shown = "unknown";
             }
         }, "keyboard-layout"),

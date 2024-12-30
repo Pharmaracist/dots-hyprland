@@ -318,11 +318,8 @@ if results and 'tracks' in results:
                         'mpv',
                         '--no-video',
                         '--input-ipc-server=/tmp/mpvsocket',
-                        '--loop-playlist',
                         ...playlist
                     ];
-
-                    console.log('Starting MPV with args:', mpvArgs);
 
                     const mpvProcess = await Utils.execAsync(mpvArgs, {
                         spawn: true,
@@ -429,7 +426,6 @@ if results and 'tracks' in results:
     _setupMprisHandlers() {
         this._mprisPlayer = this._findMprisPlayer();
         if (!this._mprisPlayer) {
-            console.log('No MPV MPRIS player found');
             return;
         }
 

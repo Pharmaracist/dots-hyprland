@@ -7,7 +7,7 @@ const { Box, EventBox, Stack } = Widget;
 
 // Get config values with defaults
 const SCROLL_DURATION = getConfig('bar.animations.scroll.duration', 200);
-const SCROLL_DEBOUNCE = getConfig('bar.animations.scroll.debounce', 150);
+const SCROLL_DEBOUNCE = getConfig('bar.animations.scroll.debounce', 180);
 
 class ModuleSetManager extends Service {
     static {
@@ -71,7 +71,7 @@ const ScrollableContainer = ({ sets, name = 'default' }) => {
         onScrollUp: handleScrollUp,
         onScrollDown: handleScrollDown,
         child: Box({
-            css: 'min-height: 1.5em;',
+            css: 'min-height: 1.5rem;',
             children: [stack],
         }),
     });

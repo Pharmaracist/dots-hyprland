@@ -266,7 +266,7 @@ const PdfItem = (pdf, id) => {
         className: 'pdf-item',
         vertical: true,
         spacing: 4,
-        css: 'min-width: 200px; max-width: 200px; border-radius: 8px; margin: 4px;',
+        css: 'min-width: 200px; border-radius: 8px; margin: 4px;',
         children: [
             Button({
                 className: 'pdf-container',
@@ -643,13 +643,9 @@ export default () => {
                 .then(path => {
                     if (path) {
                         path = path.trim();
-                        console.log('Selected image path:', path);
                         if (Todo.addImage(path)) {
-                            console.log('Image added successfully');
                             Todo.notify('images_json');
                             updateContent();
-                        } else {
-                            console.log('Failed to add image');
                         }
                     }
                 })
@@ -679,13 +675,9 @@ export default () => {
                 .then(path => {
                     if (path) {
                         path = path.trim();
-                        console.log('Selected PDF path:', path);
                         if (Todo.addPdf(path)) {
-                            console.log('PDF added successfully');
                             Todo.notify('pdfs_json');
                             updateContent();
-                        } else {
-                            console.log('Failed to add PDF');
                         }
                     }
                 })
@@ -952,15 +944,12 @@ export default () => {
 
         // Update current tasks
         contentList.children = currentTodos.map((todo, id) => TodoItem(todo, id));
-        console.log('Updated current tasks with', currentTodos.length, 'items');
 
         // Update done tasks
         doneList.children = doneTodos.map((todo, id) => TodoItem(todo, id));
-        console.log('Updated done tasks with', doneTodos.length, 'items');
 
         // Update notes
         noteList.children = notes.map((note, id) => NoteItem(note, id));
-        console.log('Updated notes with', notes.length, 'notes');
 
         // Create rows of 4 images
         const imageRows = [];
@@ -974,7 +963,6 @@ export default () => {
             imageRows.push(row);
         }
         imageList.children = imageRows;
-        console.log('Updated image grid with', images.length, 'images');
 
         // Create rows of 4 PDFs
         const pdfRows = [];
@@ -988,7 +976,6 @@ export default () => {
             pdfRows.push(row);
         }
         pdfList.children = pdfRows;
-        console.log('Updated PDF grid with', pdfs.length, 'PDFs');
 
         // Create rows of 4 Videos
         const videoRows = [];
@@ -1002,41 +989,35 @@ export default () => {
             videoRows.push(row);
         }
         videoList.children = videoRows;
-        console.log('Updated video grid with', videos.length, 'videos');
     };
 
     // Connect to all relevant signals
     Todo.connect('changed', () => {
-        console.log('Todo service changed');
-        Utils.timeout(50, () => {
+        Utils.timeout(10, () => {
             updateContent();
         });
     });
 
     Todo.connect('notify::images_json', () => {
-        console.log('Images updated');
-        Utils.timeout(50, () => {
+        Utils.timeout(10, () => {
             updateContent();
         });
     });
 
     Todo.connect('notify::pdfs_json', () => {
-        console.log('PDFs updated');
-        Utils.timeout(50, () => {
+        Utils.timeout(10, () => {
             updateContent();
         });
     });
 
     Todo.connect('notify::videos_json', () => {
-        console.log('Videos updated');
-        Utils.timeout(50, () => {
+        Utils.timeout(10, () => {
             updateContent();
         });
     });
 
     // Load initial content
-    Utils.timeout(50, () => {
-        console.log('Loading initial content');
+    Utils.timeout(10, () => {
         updateContent();
     });
 

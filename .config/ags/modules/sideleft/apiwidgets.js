@@ -10,17 +10,11 @@ import { checkKeybind } from '../.widgetutils/keybind.js';
 import { widgetContent } from './sideleft.js';
 import { IconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { writable } from '../../modules/.miscutils/store.js';
-import { fileExists } from '../.miscutils/files.js';
-import GLib from 'gi://GLib';
-import { SystemMessage } from './apis/ai_chatmessage.js';
-const TextView = Widget.subclass(Gtk.TextView, "AgsTextView");
+import userOptions from '../../modules/.configuration/user_options.js';
 
-// APIs
+// Import APIs
 import GPTService from '../../services/gpt.js';
 import Gemini from '../../services/gemini.js';
-import YTMusic from '../../services/ytmusic.js';
-import QuranService from '../../services/quran.js';
-import WallpaperService from '../../services/wallpapers.js';
 import { geminiView, geminiCommands, sendMessage as geminiSendMessage, geminiTabIcon } from './apis/gemini.js';
 import { chatGPTView, chatGPTCommands, sendMessage as chatGPTSendMessage, chatGPTTabIcon } from './apis/chatgpt.js';
 import { TranslaterView, translaterCommands, sendMessage as translaterSendMessage, translaterIcon } from './apis/translater.js';
@@ -32,14 +26,6 @@ import { wallpaperView, wallpaperCommands, sendMessage as wallpaperSendMessage, 
 
 const EXPAND_INPUT_THRESHOLD = 30;
 const APILIST = {
-    'wallpapers': {
-        name: 'Wallpapers',
-        sendCommand: wallpaperSendMessage,
-        contentWidget: wallpaperView,
-        commandBar: wallpaperCommands,
-        tabIcon: wallpaperTabIcon,
-        placeholderText: 'Describe your dream wallpaper...',
-    },
     'quran': {
         name: 'Quran',
         sendCommand: quranSendMessage,
@@ -86,7 +72,16 @@ const APILIST = {
 let APIS = writable ([]);
 
 userOptions.subscribe ((n) => {
-    APIS.set(n.sidebar.pages.apis.order.map((apiName) => APILIST[apiName]))
+    try {
+        // Ensure we have a valid order array, default to ['gemini'] if not
+        const order = n?.sidebar?.pages?.apis?.order || ['gemini'];
+        // Map only valid API names that exist in APILIST
+        const validApis = order.filter(apiName => APILIST[apiName]).map(apiName => APILIST[apiName]);
+        APIS.set(validApis.length > 0 ? validApis : [APILIST['gemini']]);
+    } catch (error) {
+        // Set default fallback
+        APIS.set([APILIST['gemini']]);
+    }
 });
 
 let currentApiId = 0;
@@ -109,18 +104,23 @@ function apiSendMessage(textView) {
     chatEntry.set_valign(Gtk.Align.CENTER);
 }
 
+// Create TextView widget
+const TextView = Widget.subclass(Gtk.TextView, 'AgsTextView');
+
 export const chatEntry = TextView({
     hexpand: true,
     wrapMode: Gtk.WrapMode.WORD_CHAR,
     acceptsTab: false,
-    className: 'sidebar-chat-entry txt txt-smallie',
+    className: 'chatentry txt-norm sidebar-chat-entry',
     setup: (self) => self
         .hook(GPTService, (self) => {
-            if (APIS.asyncGet()[currentApiId].name != 'Assistant (GPTs)') return;
+            const apis = APIS.asyncGet();
+            if (!apis || !apis[currentApiId] || apis[currentApiId].name != 'Assistant (GPTs)') return;
             self.placeholderText = (GPTService.key.length > 0 ? 'Message the model...' : 'Enter API Key...');
         }, 'hasKey')
         .hook(Gemini, (self) => {
-            if (APIS.asyncGet()[currentApiId].name != 'Assistant (Gemini Pro)') return;
+            const apis = APIS.asyncGet();
+            if (!apis || !apis[currentApiId] || apis[currentApiId].name != 'Assistant (Gemini Pro)') return;
             self.placeholderText = (Gemini.key.length > 0 ? 'Message Gemini...' : 'Enter Google AI API Key...');
         }, 'hasKey')
         .on("key-press-event", (widget, event) => {

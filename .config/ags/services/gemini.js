@@ -248,7 +248,7 @@ class GeminiService extends Service {
                 return true;
             }
         } catch (error) {
-            console.error('Error loading custom prompt:', error);
+            this.emit('error', 'Error loading custom prompt: ' + error.message);
         }
         this._customPrompt = '';
         return false;
@@ -267,20 +267,7 @@ class GeminiService extends Service {
             this._messages = [];
             
             // Add base system messages
-            const baseMessages = [
-                // { 
-                //     role: "user", 
-                //     parts: [{ 
-                //         text: "You are an assistant on a sidebar of a Wayland Linux desktop. Please always use a casual tone when answering your questions, unless requested otherwise or making writing suggestions. These are the steps you should take to respond to the user's queries:\n1. If it's a writing- or grammar-related question or a sentence in quotation marks, Please point out errors and correct when necessary using underlines, and make the writing more natural where appropriate without making too major changes. If you're given a sentence in quotes but is grammatically correct, explain briefly concepts that are uncommon.\n2. If it's a question about system tasks, give a bash command in a code block with brief explanation.\n3. Otherwise, when asked to summarize information or explaining concepts, you are should use bullet points and headings. For mathematics expressions, you *have to* use LaTeX within a code block with the language set as \"latex\". \nNote: Use casual language, be short, while ensuring the factual correctness of your response. If you are unsure or don't have enough information to provide a confident answer, simply say \"I don't know\" or \"I'm not sure.\"." 
-                //     }]
-                // },
-                // { 
-                //     role: "model", 
-                //     parts: [{ 
-                //         text: "I understand! I'll be a helpful Linux desktop assistant, using casual language and appropriate formatting for different types of queries." 
-                //     }]
-                // }
-            ];
+            const baseMessages = [];
             
             // Add custom prompt
             if (prompt && prompt !== 'default') {
@@ -304,7 +291,7 @@ class GeminiService extends Service {
             this.emit('clear');
             return true;
         } catch (error) {
-            console.error('Error setting custom prompt:', error);
+            this.emit('error', 'Error setting custom prompt: ' + error.message);
             return false;
         }
     }
@@ -340,7 +327,7 @@ class GeminiService extends Service {
             this.emit('clear');
             return true;
         } catch (error) {
-            console.error('Error clearing custom prompt:', error);
+            this.emit('error', 'Error clearing custom prompt: ' + error.message);
             return false;
         }
     }
@@ -391,7 +378,7 @@ class GeminiService extends Service {
             }));
             Utils.writeFile(JSON.stringify(historyData, null, 2), HISTORY_PATH);
         } catch (error) {
-            console.error('Error saving history:', error);
+            this.emit('error', 'Error saving history: ' + error.message);
         }
     }
 
@@ -415,14 +402,11 @@ class GeminiService extends Service {
                     this._messages.push(message);
                     this.emit('newMsg', this._messages.length - 1);
                 });
-
-                console.log('Loaded chat history:', this._messages.length, 'messages');
             } else {
                 this._messages = this.getInitialMessages();
-                console.log('No chat history found, starting fresh');
             }
         } catch (error) {
-            console.error('Error loading history:', error);
+            this.emit('error', 'Error loading history: ' + error.message);
             this._messages = this.getInitialMessages();
         }
     }
@@ -528,7 +512,7 @@ class GeminiService extends Service {
                     const bytes = session.send_and_read_finish(result);
                     this.readResponse(bytes, aiResponse);
                 } catch (error) {
-                    console.error('Error:', error);
+                    this.emit('error', 'Error: ' + error.message);
                     aiResponse.content = `Error: ${error.message}`;
                     aiResponse.thinking = false;
                     aiResponse.done = true;
@@ -567,7 +551,7 @@ class GeminiService extends Service {
 
     async sendWithImage(msg, imagePath) {
         if (!this._key) {
-            console.error('No API key set');
+            this.emit('error', 'No API key set');
             return;
         }
 
@@ -604,113 +588,73 @@ class GeminiService extends Service {
                 }] : [],
                 generationConfig: {
                     temperature: this._temperature,
-                }
+                    candidateCount: 1,
+                    stopSequences: [],
+                    maxOutputTokens: 2048,
+                    topP: 0.8,
+                    topK: 10
+                },
             };
 
             message.request_headers.append('Content-Type', 'application/json');
             message.request_headers.append('x-goog-api-key', this._key);
-            message.set_request_body_from_bytes('application/json', new GLib.Bytes(JSON.stringify(body)));
+            message.set_request_body_from_bytes('application/json',
+                new GLib.Bytes(this._encoder.encode(JSON.stringify(body)))
+            );
 
-            const stream = await session.send_async(message, GLib.DEFAULT_PRIORITY, null);
-            await this.readResponse(stream, aiResponse);
+            session.send_and_read_async(
+                message,
+                GLib.PRIORITY_DEFAULT,
+                null,
+                (sess, result) => {
+                    try {
+                        const bytes = session.send_and_read_finish(result);
+                        this.readResponse(bytes, aiResponse);
+                    } catch (error) {
+                        this.emit('error', 'Error: ' + error.message);
+                        aiResponse.content = `Error: ${error.message}`;
+                        aiResponse.thinking = false;
+                        aiResponse.done = true;
+                    }
+                }
+            );
         } catch (error) {
-            console.error('Error processing image:', error);
-            const aiResponse = new GeminiMessage('assistant', 'Failed to process image: ' + error.message, false, true);
-            this._messages.push(aiResponse);
-            this.emit('newMsg', this._messages.length - 1);
+            this.emit('error', 'Error: ' + error.message);
         }
     }
 
     readResponse(bytes, aiResponse) {
         try {
-            if (!bytes) {
-                throw new Error('No response received');
+            const decoder = new TextDecoder();
+            const response = JSON.parse(decoder.decode(bytes));
+
+            if (!response.candidates || response.candidates.length === 0) {
+                if (response.promptFeedback?.blockReason) {
+                    aiResponse.content = `Response blocked. Reason: ${response.promptFeedback.blockReason}`;
+                } else {
+                    aiResponse.content = 'No response generated.';
+                }
+                aiResponse.thinking = false;
+                aiResponse.done = true;
+                return;
             }
 
-            const text = this._decoder.decode(bytes.get_data());
-            const response = JSON.parse(text);
-
-            if (response.error) {
-                throw new Error(response.error.message || 'Unknown error');
+            const content = response.candidates[0].content;
+            if (!content) {
+                aiResponse.content = 'Empty response received.';
+                aiResponse.thinking = false;
+                aiResponse.done = true;
+                return;
             }
 
-            if (!response.candidates || !response.candidates[0]?.content?.parts?.[0]?.text) {
-                throw new Error('Invalid response format');
-            }
-
-            const messageText = response.candidates[0].content.parts[0].text;
-            
-            // Process commands in the response
-            const lines = messageText.split('\n');
-            const processedLines = [];
-            let isRemembering = false;
-            let rememberedText = [];
-            
-            for (const line of lines) {
-                if (line.startsWith('!remember')) {
-                    isRemembering = true;
-                    continue;
-                }
-                
-                if (line.startsWith('!addtask ')) {
-                    const task = line.substring(9).trim();
-                    Todo.add(task);
-                    processedLines.push(`Added task: ${task}`);
-                }
-                else if (line.startsWith('!addnote ')) {
-                    const note = line.substring(9).trim();
-                    Todo.addNote(note);
-                    processedLines.push(`Added note: ${note}`);
-                }
-                else if (line.startsWith('!done ')) {
-                    const idMatch = line.match(/!done\s+(\d+)/);
-                    if (idMatch) {
-                        const id = parseInt(idMatch[1]);
-                        if (!isNaN(id)) {
-                            Todo.check(id);
-                            processedLines.push(`Marked task ${id} as done`);
-                        }
-                    } else {
-                        processedLines.push("Error: Invalid task number format");
-                    }
-                }
-                else if (line.startsWith('!remove ')) {
-                    const idMatch = line.match(/!remove\s+(\d+)/);
-                    if (idMatch) {
-                        const id = parseInt(idMatch[1]);
-                        if (!isNaN(id)) {
-                            Todo.remove(id);
-                            processedLines.push(`Removed item ${id}`);
-                        }
-                    } else {
-                        processedLines.push("Error: Invalid item number format");
-                    }
-                }
-                else {
-                    processedLines.push(line);
-                    if (isRemembering && line.trim()) {
-                        rememberedText.push(line.trim());
-                    }
-                }
-            }
-
-            // If we were remembering text, save it as a note
-            if (isRemembering && rememberedText.length > 0) {
-                const note = rememberedText.join('\n');
-                Todo.addNote(note);
-                processedLines.push('\nSaved this response as a note!');
-            }
-
-            aiResponse.content = processedLines.join('\n');
+            aiResponse.content = content.parts[0].text;
             aiResponse.thinking = false;
             aiResponse.done = true;
-
-            if (this._usingHistory) {
-                this.saveHistory();
-            }
+            
+            if (this._usingHistory) this.saveHistory();
         } catch (error) {
-            console.error('Error processing response:', error);
-            aiResponse.content = `Error: ${error.message}`;
+            this.emit('error', 'Error parsing response: ' + error.message);
+            aiResponse.content = `Error parsing response: ${error.message}`;
             aiResponse.thinking = false;
             aiResponse.done = true;
         }

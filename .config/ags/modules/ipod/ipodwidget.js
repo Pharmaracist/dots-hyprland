@@ -463,7 +463,6 @@ export default () => {
                     vexpand: true,
                     children: [
                       TrackLabels(),
-                      LyricsDisplay(),
                       Widget.Box({
                         vpack: "end",
                         vexpand: true,
