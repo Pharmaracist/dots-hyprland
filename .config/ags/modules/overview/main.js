@@ -18,8 +18,9 @@ export default (id = '') => PopupWindow({
     child: Widget.Box({
         vertical: true,
         children: [
-            createCloseRegion(false),
+            createCloseRegion(),
             Widget.Box({
+                css:`margin-top: 17.682rem;`,
                 children: [
                     createCloseRegion(),
                     SearchAndWindows(),

@@ -4,11 +4,11 @@
 
 .overview-search-box {
     @include element_decel;
-    @include large-rounding;
+    @include full-rounding;
     @include elevation-border;
     @include elevation2;
-    min-width: 13.636rem;
-    min-height: 3.409rem;
+    min-width: 40.636rem;
+    min-height: 3.609rem;
     padding: 0rem 1.364rem;
     padding-right: 2.864rem;
     background-color: $background;
@@ -23,8 +23,9 @@
 }
 
 .overview-search-box-extended {
-    min-width: 25.909rem;
+    min-width: 34.909rem;
     caret-color: $onSecondaryContainer;
+    
 }
 
 .overview-search-prompt {
@@ -36,12 +37,12 @@
 }
 
 .overview-search-prompt-box {
-    margin-left: -18.545rem;
+    margin-left: -46.1rem;
     margin-right: $elevation_margin + 0.068rem;
 }
 
 .overview-search-icon-box {
-    margin-left: -18.545rem;
+    margin-left: -46.1rem;
     margin-right: $elevation_margin + 0.068rem;
 }
 
@@ -51,7 +52,7 @@
     @include large-rounding;
     @include elevation-border;
     @include elevation2;
-    min-width: 28.773rem;
+    min-width: 35.773rem;
     padding: 0.682rem;
     background-color: $layer0;
     color: $onLayer0;
