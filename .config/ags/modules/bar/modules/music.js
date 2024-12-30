@@ -3,6 +3,7 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import { showMusicControls } from "../../../variables.js";
 import GLib from 'gi://GLib';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import App from 'resource:///com/github/Aylur/ags/app.js';
 
 const { Box, Label, EventBox, Button } = Widget;
 
@@ -51,9 +52,7 @@ const showVolumeIndicator = (volume) => {
 export default () =>
   EventBox({
     onPrimaryClick: () => {
-      const player = findPlayer();
-      if (!player?.trackTitle) return;
-      showMusicControls.setValue(!showMusicControls.value);
+      App.toggleWindow('ipod');
     },
     setup: (self) => self.hook(Mpris, () => {
       const player = findPlayer();
