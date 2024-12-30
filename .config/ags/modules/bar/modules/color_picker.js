@@ -16,6 +16,13 @@ const schemeOptions = [
     { icon: 'contrast', value: 'monochrome', tooltip: 'Monochrome' },
     { icon: 'theater_comedy', value: 'expressive', tooltip: 'Expressive' },
     { icon: 'auto_awesome', value: 'vibrant', tooltip: 'Vibrant' },
+    { icon: 'bolt', value: 'neon', tooltip: 'Neon' },
+    { icon: 'water_drop', value: 'pastel', tooltip: 'Pastel' },
+    { icon: 'terminal', value: 'retro', tooltip: 'Retro' },
+    { icon: 'park', value: 'nature', tooltip: 'Nature' },
+    { icon: 'coffee', value: 'catppuccin-latte', tooltip: 'Catppuccin Latte' },
+    { icon: 'coffee_maker', value: 'catppuccin-mocha', tooltip: 'Catppuccin Mocha' },
+    { icon: 'dark_mode', value: 'dracula', tooltip: 'Dracula' },
 ];
 
 const ColorButton = ({ icon, value, tooltip }) => Widget.Button({

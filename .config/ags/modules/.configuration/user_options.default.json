@@ -102,6 +102,29 @@
         "background": "#2f343f",
         "foreground": "#d3dae3"
       }
+    },
+    "color": {
+        "scheme": {
+            "type": "enum",
+            "default": "tonalspot",
+            "enums": [
+                "tonalspot",
+                "fruitsalad",
+                "fidelity",
+                "rainbow",
+                "neutral",
+                "monochrome",
+                "expressive",
+                "vibrant",
+                "neon",
+                "pastel",
+                "retro",
+                "nature",
+                "catppuccin-latte",
+                "catppuccin-mocha",
+                "dracula"
+            ]
+        }
     }
   },
   "apps": {

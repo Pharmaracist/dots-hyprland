@@ -93,6 +93,14 @@ elif args.scheme == 'expressive':
     from materialyoucolor.scheme.scheme_expressive import SchemeExpressive as Scheme
 elif args.scheme == 'monochrome':
     from materialyoucolor.scheme.scheme_monochrome import SchemeMonochrome as Scheme
+elif args.scheme == 'neon':
+    from schemes.scheme_neon import SchemeNeon as Scheme
+elif args.scheme == 'pastel':
+    from schemes.scheme_pastel import SchemePastel as Scheme
+elif args.scheme == 'retro':
+    from schemes.scheme_retro import SchemeRetro as Scheme
+elif args.scheme == 'nature':
+    from schemes.scheme_nature import SchemeNature as Scheme
 elif args.scheme == 'rainbow':
     from materialyoucolor.scheme.scheme_rainbow import SchemeRainbow as Scheme
 elif args.scheme == 'tonalspot':
@@ -105,11 +113,21 @@ elif args.scheme == 'content':
     from materialyoucolor.scheme.scheme_content import SchemeContent as Scheme
 elif args.scheme == 'vibrant':
     from materialyoucolor.scheme.scheme_vibrant import SchemeVibrant as Scheme
+elif args.scheme == 'catppuccin-latte':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(hct, darkmode, 0.0, 'catppuccin', 'latte')
+elif args.scheme == 'catppuccin-mocha':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(hct, darkmode, 0.0, 'catppuccin', 'mocha')
+elif args.scheme == 'dracula':
+    from schemes.scheme_predefined import SchemePredefined as Scheme
+    scheme = Scheme(hct, darkmode, 0.0, 'dracula')
 else:
     from schemes.scheme_morevibrant import SchemeMoreVibrant as Scheme
 
 # Generate
-scheme = Scheme(hct, darkmode, 0.0)
+if not hasattr(args, 'scheme') or args.scheme not in ['catppuccin-latte', 'catppuccin-mocha', 'dracula']:
+    scheme = Scheme(hct, darkmode, 0.0)
 
 material_colors = {}
 term_colors = {}
