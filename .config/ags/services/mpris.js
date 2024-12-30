@@ -51,23 +51,22 @@ class CustomMediaService extends Service {
             this.#player.disconnect('changed');
         }
 
-        // Find a suitable player
-        this.#player = Mpris.players.find(p => 
-            !p.busName.startsWith('org.mpris.MediaPlayer2.playerctld') &&
-            !(p.busName.endsWith('.mpd') && !p.busName.endsWith('MediaPlayer2.mpd'))
-        ) || null;
-        
-        if (this.#player) {
-            this.notify('player');
-            this.notify('track');
+        // Prefer VLC over other players
+        this.#player = Mpris.getPlayer('vlc') || Mpris.getPlayer();
 
-            // Track position changes
+        if (!this.#player)
+            return;
+
+        this.notify('player');
+        this.notify('track');
+
+        this.#player.connect('changed', () => this.notify('track'));
+
+        if (this.#player.canShowPosition) {
             this.#interval = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 1000, () => {
-                if (!this.#player || !this.#player.busName) {
-                    this.#position = 0;
+                if (!this.#player.canShowPosition)
                     return GLib.SOURCE_REMOVE;
-                }
-                
+
                 try {
                     this.#position = this.#player.position || 0;
                     this.notify('position');
@@ -78,15 +77,6 @@ class CustomMediaService extends Service {
                 
                 return GLib.SOURCE_CONTINUE;
             });
-
-            // Listen for property changes
-            this.#player.connect('changed', () => {
-                this.notify('track');
-            });
-        } else {
-            this.#position = 0;
-            this.notify('player');
-            this.notify('track');
         }
     }
 

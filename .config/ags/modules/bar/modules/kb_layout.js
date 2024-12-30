@@ -66,24 +66,20 @@ const createKeyboardWidget = () => {
     return Widget.Box({
         vertical: true,
         vpack: 'center',
-        className: 'keyboard-layout-box',
+        hpack: 'center',
         homogeneous: false,
-        spacing: 4,
         children: [
-            // Widget.Box({
-            //     hpack: 'center',
-            //     // vpack: 'center',
-            //     child: Widget.Label({
-            //         label: 'keyboard_command_key',
-            //         className: 'txt-norm onSurfaceVariant icon-material',
-            //         // vpack: 'center'
-            //     })
-            // }),
-            Widget.Box({
+            Widget.EventBox({
+                onPrimaryClick: () => {
+                    App.toggleWindow("osk0");
+                },
                 hpack: 'center',
-                vpack: 'center',
-                child: labelStack
-            })
+                child: Widget.Label({
+                    label: 'keyboard',
+                    className: 'txt-norm onSurfaceVariant icon-material',
+                })
+            }),
+            Widget.Box({ child: labelStack })
         ]
     });
 };

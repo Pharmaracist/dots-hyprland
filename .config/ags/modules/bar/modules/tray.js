@@ -3,9 +3,12 @@ import SystemTray from 'resource:///com/github/Aylur/ags/service/systemtray.js';
 const { Box, Icon, Button, Revealer } = Widget;
 const { Gravity } = imports.gi.Gdk;
 
-const SysTrayItem = (item) => item.id !== null ? Button({
+const SysTrayItem = (item, iconSize = 16) => item.id !== null ? Button({
     className: 'bar-systray-item',
-    child: Icon({ hpack: 'center' }).bind('icon', item, 'icon'),
+    child: Icon({
+        hpack: 'center',
+        size: iconSize,
+    }).bind('icon', item, 'icon'),
     setup: (self) => self
         .hook(item, (self) => self.tooltipMarkup = item['tooltip-markup'])
     ,
@@ -13,12 +16,12 @@ const SysTrayItem = (item) => item.id !== null ? Button({
     onSecondaryClick: (btn, event) => item.menu.popup_at_widget(btn, Gravity.SOUTH, Gravity.NORTH, null),
 }) : null;
 
-export const Tray = (props = {}) => {
+export const Tray = ({ iconSize = 26, ...props } = {}) => {
     const trayContent = Box({
         className: 'margin-right-5 spacing-h-15',
         setup: (self) => self
             .hook(SystemTray, (self) => {
-                self.children = SystemTray.items.map(SysTrayItem);
+                self.children = SystemTray.items.map(item => SysTrayItem(item, iconSize));
                 self.show_all();
             })
         ,

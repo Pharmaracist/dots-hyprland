@@ -2,12 +2,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import { SearchAndWindows } from "./windowcontent.js";
 import PopupWindow from '../.widgethacks/popupwindow.js';
 import { clickCloseRegion } from '../.commonwidgets/clickcloseregion.js';
-
-const createCloseRegion = (expand = false) => clickCloseRegion({
-    name: 'overview',
-    multimonitor: false,
-    expand,
-});
+const { Box } = Widget;
 
 export default (id = '') => PopupWindow({
     name: `overview${id}`,
@@ -15,19 +10,15 @@ export default (id = '') => PopupWindow({
     visible: false,
     anchor: ['top', 'bottom', 'left', 'right'],
     layer: 'top',
-    child: Widget.Box({
+    child: Box({
         vertical: true,
         children: [
-            createCloseRegion(),
-            Widget.Box({
-                css:`margin-top: 17.682rem;`,
-                children: [
-                    createCloseRegion(),
-                    SearchAndWindows(),
-                    createCloseRegion(),
-                ]
+            Box({
+                hpack: 'center',
+                css: 'margin-top: 17.682rem',
+                child: SearchAndWindows(),
             }),
-            createCloseRegion(),
+            clickCloseRegion({ name: `overview${id}`, multimonitor: false, fillMonitor: 'both' }),
         ]
     }),
-})
+});

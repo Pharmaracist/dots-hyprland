@@ -3,7 +3,7 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import { Variable } from "resource:///com/github/Aylur/ags/variable.js";
 const timeFormat = userOptions.asyncGet().time.format;
 const dateFormat = userOptions.asyncGet().time.dateFormatLong;
-
+const { EventBox } = Widget;
 const time = new Variable("", {
   poll: [1000, () => GLib.DateTime.new_now_local().format(timeFormat)],
 });

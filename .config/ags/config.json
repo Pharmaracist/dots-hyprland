@@ -151,11 +151,41 @@
     "enabled": true
   },
   "overview": {
-    "scale": 0,
+    "scale": 0.7,
     "numOfRows": 2,
     "numOfCols": 5,
     "wsNumScale": 0.09,
-    "wsNumMarginScale": 0.07
+    "wsNumMarginScale": 0.07,
+    "searchOptions": {
+      "maxResults": {
+        "applications": 6,
+        "directories": 4,
+        "directoryContents": 4
+      },
+      "directorySearch": {
+        "paths": [
+          "~/",
+          "/mnt/Data/"
+        ],
+        "excludePatterns": [
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/__pycache__/**",
+          "**/.*/**"
+        ],
+        "maxDepth": 3,
+        "cacheTTL": 30000,
+        "searchMode": "fuzzy"
+      },
+      "features": {
+        "calculator": true,
+        "applications": true,
+        "directories": true,
+        "commands": true,
+        "aiSearch": true,
+        "webSearch": true
+      }
+    }
   },
   "sidebar": {
     "ai": {

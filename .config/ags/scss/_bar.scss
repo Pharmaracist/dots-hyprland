@@ -53,7 +53,55 @@ $bar_ws_width_focus_active: 6.045rem;
     border: 0.55px solid $outline;
     background-color: $layer0;
     -gtk-outline-radius: 10rem;
+    transition: box-shadow 0.3s ease;
+    
+    &.song-changing {
+        animation: glowPulse 2s ease;
+    }
 }
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: inset 0 0 0 rgba($primary, 0);
+    }
+    50% {
+        box-shadow: inset 0 0 20px rgba($secondary, 1);
+    }
+    100% {
+        box-shadow: inset 0 0 0 rgba($primary, 0);
+    }
+}
+
+@keyframes opacityPulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes bgPulse {
+    0% {
+        background-color: $layer0;
+    }
+    50% {
+        background-color: $primary;
+    }
+    100% {
+        background-color: $layer0;
+    }
+}
+
+scrollable.media {
+    &.song-changing {
+        animation: diagonalSweep 2s ease;
+    }
+}
+
 .bar-floating {
     @include normal-rounding;
     background-color: $layer0;
@@ -396,21 +444,65 @@ $bar_ws_width_focus_active: 6.045rem;
     @include icon-material;
 }
 
+.onSurfaceVariant,
 .bar-music-txt {
-    @include titlefont;
-    color: $musicOnLayer1;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// .bar-music-art {
-//     margin: 0;
-//     padding: 0 0.23rem;
-//     background-image: -gtk-icontheme('audio-x-generic-symbolic');
-//     background-size: 1.8rem;
-//     background-position: center;
-//     background-repeat: no-repeat;
-//     border-radius: 19px;
-//     margin-right: 0.75rem;
-// }
+.bar-music-txt {
+    @include titlefont;
+    color: $onSurfaceVariant;
+    margin: 0;
+    padding: 0;
+}
+
+.song-changing {
+    animation: diagonalSweep 4s ease;
+}
+    
+@keyframes diagonalSweep {
+    0% {
+        background-image: linear-gradient(135deg, 
+            $onSurfaceVariant 0%,
+            $onSurfaceVariant 10%);
+    }
+    15% {
+        background-image: linear-gradient(135deg,
+            $primary 0%,
+            $primary 40%,
+            $onSurfaceVariant 30%,
+            $onSurfaceVariant 0%);
+    }
+    50% {
+        background-image: linear-gradient(135deg,
+            $primary 0%,
+            $primary 100%);
+        text-shadow: 0 0 8px $primary;
+    }
+    85% {
+        background-image: linear-gradient(135deg,
+            $onSurfaceVariant 0%,
+            $onSurfaceVariant 50%,
+            $primary 50%,
+            $primary 100%);
+    }
+    100% {
+        background-image: linear-gradient(135deg,
+            $onSurfaceVariant 0%,
+            $onSurfaceVariant 100%);
+    }
+}
+
+.bar-music-art {
+    margin: 4px;
+    border: 1px solid $surfaceContainerHighest;
+    background-color: $surfaceContainerHighest;
+    border-radius: 8px;
+    padding: 4px;
+    -gtk-icon-style: regular;
+    -gtk-icon-shadow: none;
+}
+
 
 .bar-music-extended-bg {
     border-radius: 1.364rem;
@@ -428,17 +520,6 @@ $bar_ws_width_focus_active: 6.045rem;
     transition-duration: 100ms;
     opacity: 0;
 }
-
-.bar-music-art {
-    margin: 4px;
-    border: 1px solid $surfaceContainerHighest;
-    background-color: $surfaceContainerHighest;
-    border-radius: 8px;
-    padding: 4px;
-    -gtk-icon-style: regular;
-    -gtk-icon-shadow: none;
-}
-
 
 .bar-corner-spacing {
     min-width: 0.882rem;
@@ -832,4 +913,85 @@ revealer {
 }
 .onSurfaceVariant{
     color: $onSurfaceVariant;
+}
+.side-bar-button{
+    @include element_decel;
+    @include icon-nerd;
+    color: $onSurfaceVariant;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:active,
+    &:hover {
+        color: $secondary;
+        text-shadow: 0 0 15px rgba($secondary, 0.8),
+                    0 0 25px rgba($secondaryContainer, 0.6),
+                    0 0 35px rgba($surfaceTint, 0.4);
+        animation: glow-pulse 2s infinite;
+    }
+}
+
+@keyframes glow-pulse {
+    0% {
+        color: $secondary;
+        text-shadow: 0 0 15px rgba($secondary, 0.8),
+                    0 0 25px rgba($secondaryContainer, 0.6),
+                    0 0 35px rgba($surfaceTint, 0.4);
+    }
+    50% {
+        color: $tertiary;
+        text-shadow: 0 0 20px rgba($tertiary, 0.9),
+                    0 0 30px rgba($tertiaryContainer, 0.7),
+                    0 0 40px rgba($surfaceTint, 0.5);
+    }
+    100% {
+        color: $secondary;
+        text-shadow: 0 0 15px rgba($secondary, 0.8),
+                    0 0 25px rgba($secondaryContainer, 0.6),
+                    0 0 35px rgba($surfaceTint, 0.4);
+    }
+}
+.bar-knocks {
+    border: 0.55px solid $outline;
+    background-color: $layer0;
+    -gtk-outline-radius: 10rem;
+    
+    &.song-changing {
+        animation: multiSweep 3s linear;
+        animation-iteration-count: 13;
+    }
+}
+
+@keyframes multiSweep {
+    0% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 35%,
+            $secondary 35%,
+            $secondary 45%,
+            $layer0 45%,
+            $layer0 80%,
+            $secondary 80%,
+            $secondary 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+    }
+    100% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 35%,
+            $secondary 35%,
+            $secondary 45%,
+            $layer0 45%,
+            $layer0 80%,
+            $secondary 80%,
+            $secondary 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: -200% 0%;
+    }
 }

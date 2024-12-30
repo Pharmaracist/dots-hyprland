@@ -24,7 +24,7 @@ import { BrightnessSlider } from "./brightnessslider.js";
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
-// import ModulePowerProfiles from "./centermodules/powerprofiles.js";
+import ModulePowerProfiles from "./centermodules/powerprofiles.js";
 // import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleMusicControls from "./centermodules/musiccontrols.js";
 import ModuleTaskManager from "./centermodules/taskmanager.js";
@@ -43,6 +43,11 @@ const centerWidgets = [
     name: getString("Notifications"),
     materialIcon: "notifications",
     contentWidget: ModuleNotificationList,
+  },
+  {
+    name: getString("Power Profiles"),
+    materialIcon: "power_settings_new",
+    contentWidget: ModulePowerProfiles,
   },
 ];
 

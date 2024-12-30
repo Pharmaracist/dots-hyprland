@@ -27,17 +27,90 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     @include elevation2;
     margin-top: 0.313rem;
     @include normal-rounding;
-    // min-height: 7.159rem;
     min-width: 29.659rem;
     background-color: $layer0;
     padding: 0rem 1.023rem;
-    background: // Inspired by Amberol
+    background: 
         linear-gradient(127deg, transparentize($music_gradient1, $music_colorstart_transparentize), transparentize($music_gradient1, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
         linear-gradient(217deg, transparentize($music_gradient2, $music_colorstart_transparentize), transparentize($music_gradient2, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
         radial-gradient(circle at 0% 100%, $color4 13%, rgba(0, 0, 0, 0) 100%),
         linear-gradient(336deg, transparentize($music_gradient3, $music_colorstart_transparentize), transparentize($music_gradient3, $music_colorstart_transparentize - $music_transparentize_amount + $music_extra_transparentize) 70.71%),
-        linear-gradient($background, $background), // We don't want wallpaper tint, so here's a fully opaque surface
-    ;
+        linear-gradient($background, $background);
+
+    &.song-changing {
+        animation: multiSweep 1.5s linear infinite;
+        animation-iteration-count: 20;
+    }
+}
+
+@keyframes multiSweep {
+    0% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 20%,
+            transparentize($secondary, 0.8) 20%,
+            transparentize($secondary, 0.8) 45%,
+            $layer0 45%,
+            $layer0 65%,
+            transparentize($secondary, 0.8) 65%,
+            transparentize($secondary, 0.8) 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+    }
+    100% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 20%,
+            transparentize($secondary, 0.8) 20%,
+            transparentize($secondary, 0.8) 45%,
+            $layer0 45%,
+            $layer0 65%,
+            transparentize($secondary, 0.8) 65%,
+            transparentize($secondary, 0.8) 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: -200% 0%;
+    }
+}
+
+@keyframes multiSweepIpod {
+    0% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 20%,
+            transparentize($secondary, 0.75) 20%,
+            transparentize($secondary, 0.75) 45%,
+            $layer0 45%,
+            $layer0 65%,
+            transparentize($secondary, 0.75) 65%,
+            transparentize($secondary, 0.75) 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+    }
+    100% {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 20%,
+            transparentize($secondary, 0.75) 20%,
+            transparentize($secondary, 0.75) 45%,
+            $layer0 45%,
+            $layer0 65%,
+            transparentize($secondary, 0.75) 65%,
+            transparentize($secondary, 0.75) 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        background-position: -200% 0%;
+    }
 }
 
 .osd-music-info {
@@ -195,57 +268,10 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     border: 0.55px solid $outline;
     margin: 0 1rem 1rem;
     padding: 0rem 1.023rem;
-}
 
-.track-item {
-    color: $onLayer1;
-    
-    @include titlefont;
-    padding: 4px;
-    margin: 2px 0;
-    transition: background-color 0.2s ease;
-    @include normal-rounding;
-    &:hover {
-        background-color: $hovercolor;
-    }
-
-    .track-item-info {
-        margin: 8px;
-        margin-left: 0;
-        
-        .track-item-title {
-            @include titlefont;
-            color:$onLayer0;
-            // font-weight: bold;
-            font-size: 1.1em;
-        }
-        
-        .track-item-artist {
-            opacity: 0.8;
-            font-size: 0.9em;
-        }
-    }       
-
-.ytm-now-playing-artist{
-    opacity: 0.8;
-    font-size: 1rem;   
-    color:$onLayer0;
-}   
-    .track-item-buttons {
-        margin: 8px;
-        font-size   : 20px;
-        
-        button {
-            padding: 8px;
-            margin: 0 4px;
-            border-radius: 8px;
-            opacity: 0.8;
-            transition: all 0.2s ease;
-            &:hover {
-                opacity: 1;
-                background-color: rgba(255, 255, 255, 0.1);
-            }
-        }
+    &.song-changing {
+        animation: multiSweep 2s linear infinite;
+        animation-iteration-count: 20;
     }
 }
 
@@ -254,6 +280,24 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     background: $layer0;
     border: 0.55px solid $outline;
     margin: 0 1rem 1rem;
+
+    &.song-changing {
+        background: repeating-linear-gradient(135deg,
+            $layer0 0%,
+            $layer0 20%,
+            transparentize($secondary, 0.75) 20%,
+            transparentize($secondary, 0.75) 45%,
+            $layer0 45%,
+            $layer0 65%,
+            transparentize($secondary, 0.75) 65%,
+            transparentize($secondary, 0.75) 90%,
+            $layer0 90%,
+            $layer0 100%
+        );
+        background-size: 200% 100%;
+        animation: ipodSweep 2.5s linear infinite;
+    }
+
     .ipod-content {
         padding: 1rem 2.1rem;
       
@@ -315,6 +359,15 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
             
           
         }
+    }
+}
+
+@keyframes ipodSweep {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: -200% 0%;
     }
 }
 
@@ -395,4 +448,56 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     padding: 0rem;
     background-color: $battLayer2;
     color: $battOnLayer2;
+}
+
+.track-item {
+    color: $onLayer1;
+    
+    @include titlefont;
+    padding: 4px;
+    margin: 2px 0;
+    transition: background-color 0.2s ease;
+    @include normal-rounding;
+    &:hover {
+        background-color: $hovercolor;
+    }
+
+    .track-item-info {
+        margin: 8px;
+        margin-left: 0;
+        
+        .track-item-title {
+            @include titlefont;
+            color:$onLayer0;
+            // font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .track-item-artist {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+    }       
+
+.ytm-now-playing-artist{
+    opacity: 0.8;
+    font-size: 1rem;   
+    color:$onLayer0;
+}   
+    .track-item-buttons {
+        margin: 8px;
+        font-size   : 20px;
+        
+        button {
+            padding: 8px;
+            margin: 0 4px;
+            border-radius: 8px;
+            opacity: 0.8;
+            transition: all 0.2s ease;
+            &:hover {
+                opacity: 1;
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+    }
 }

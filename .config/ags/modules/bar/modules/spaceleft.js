@@ -88,10 +88,10 @@ export default async () => {
             onPrimaryClick: () => App.toggleWindow('sideleft'),
             child: Widget.Box({
                 homogeneous: false,
-                className: 'bar-space-button',
+                // className: 'bar-space-button',
                 spacing: 10,
                 children: [
-                    Widget.Box({ className: 'bar-corner-spacing' }),
+                    // Widget.Box({ className: 'bar-corner-spacing' }),
                     Widget.Box({
                         className: 'bar-wintitle',
                         spacing: 10,

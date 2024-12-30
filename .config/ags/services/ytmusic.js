@@ -282,8 +282,8 @@ if results and 'tracks' in results:
             if (!videoId && !this._currentVideoId) return;
             
             if (videoId) {
-                // Kill any existing MPV instance
-                await this._killAllMpv();
+                // Kill any existing VLC instance
+                await this._killAllVlc();
 
                 this._currentVideoId = videoId;
                 this.loading = true;
@@ -313,25 +313,29 @@ if results and 'tracks' in results:
                     };
                     this.notify('current-track');
 
-                    // Start playback using mpv with minimal arguments
-                    const mpvArgs = [
-                        'mpv',
+                    // Start playback using VLC
+                    const vlcArgs = [
+                        'vlc',
                         '--no-video',
-                        '--input-ipc-server=/tmp/mpvsocket',
+                        '--intf', 'dummy',  // No interface
+                        '--play-and-exit',  // Exit when done playing
+                        '--extraintf', 'mpris2', // Enable MPRIS2 interface
                         ...playlist
                     ];
 
-                    const mpvProcess = await Utils.execAsync(mpvArgs, {
+                    const vlcProcess = await Utils.execAsync(vlcArgs, {
                         spawn: true,
                     });
 
-                    if (!mpvProcess) {
-                        throw new Error('Failed to start MPV');
+                    if (!vlcProcess) {
+                        throw new Error('Failed to start VLC');
                     }
 
                     this.playing = true;
                     this.notify('playing');
 
+                    // Show notification
+                    this._showNotification('Now Playing', trackInfo.title);
                 } catch (error) {
                     console.error('Error during playback:', error);
                     this._showNotification('Playback Error', error.toString());
@@ -353,26 +357,26 @@ if results and 'tracks' in results:
         }
     }
 
-    async _killAllMpv() {
+    async _killAllVlc() {
         try {
-            // Only kill mpv if socket doesn't exist or isn't responding
-            if (Utils.readFile('/tmp/mpvsocket')) {
+            // Only kill VLC if socket doesn't exist or isn't responding
+            if (Utils.readFile('/tmp/vlcsocket')) {
                 try {
                     // Try to communicate with the socket
-                    await Utils.execAsync(['socat', '-', '/tmp/mpvsocket'], {
+                    await Utils.execAsync(['socat', '-', '/tmp/vlcsocket'], {
                         input: 'get_property pid\n',
                         timeout: 1000,
                     });
                     return;
                 } catch (e) {
                     // Socket exists but not responding, clean up
-                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
+                    await Utils.execAsync(['rm', '-f', '/tmp/vlcsocket']).catch(() => {});
                 }
             }
-            // Kill mpv only if no valid socket exists
-            await Utils.execAsync(['pkill', 'mpv']).catch(() => {});
+            // Kill VLC only if no valid socket exists
+            await Utils.execAsync(['pkill', 'vlc']).catch(() => {});
         } catch (error) {
-            console.error('Error killing mpv:', error);
+            console.error('Error killing VLC:', error);
         }
     }
 
@@ -399,7 +403,7 @@ if results and 'tracks' in results:
             if (player) {
                 player.stop();
             }
-            await Utils.execAsync(['pkill', 'mpv']).catch(() => {});
+            await Utils.execAsync(['pkill', 'vlc']).catch(() => {});
             this._playing = false;
             this._position = 0;
             this.notify('playing');
@@ -411,16 +415,9 @@ if results and 'tracks' in results:
     }
 
     _findMprisPlayer() {
+        // Look for VLC MPRIS player
         const players = Mpris.players;
-        
-        // Try to find our MPV player
-        const mpvPlayer = players.find(p => 
-            p.identity === 'mpv' || 
-            p.busName?.includes('mpv') ||
-            p.name?.includes('mpv')
-        );
-
-        return mpvPlayer || null;
+        return players.find(player => player.busName.startsWith('org.mpris.MediaPlayer2.vlc'));
     }
 
     _setupMprisHandlers() {
@@ -1054,7 +1051,7 @@ if results and 'tracks' in results:
             const url = `https://music.youtube.com/watch?v=${videoId}`;
             const musicDir = GLib.get_home_dir() + '/Music';
             
-            await Utils.execAsync(['pkill', 'mpv']).catch(print);
+            await Utils.execAsync(['pkill', 'vlc']).catch(print);
             this._updateCachingStatus(videoId, 'caching');
             this._showNotification('Download Started', `Downloading: ${trackInfo.title}`);
 
@@ -1077,18 +1074,18 @@ if results and 'tracks' in results:
                 // Play the local file directly
                 const localFile = `${musicDir}/${trackInfo.title}.opus`;
                 await Utils.execAsync([
-                    'mpv',
+                    'vlc',
                     '--no-video',
-                    '--loop-playlist',
-                    '--input-ipc-server=/tmp/mpvsocket',
-                    '--script=' + App.configDir + '/scripts/mpv-notify.lua',
+                    '--intf', 'dummy',
+                    '--play-and-exit',
+                    '--extraintf', 'mpris2',
                     '--audio-display=no',
                     '--force-seekable=yes',
                     '--hr-seek=yes',
                     localFile
                 ], {
                     spawn: true,
-                }).catch(print);
+                });
             } catch (error) {
                 this._updateCachingStatus(videoId, 'error');
                 throw error;
@@ -1101,24 +1098,24 @@ if results and 'tracks' in results:
 
     async stopAllInstances() {
         try {
-            // Only kill mpv if socket doesn't exist or isn't responding
-            const socketExists = GLib.file_test('/tmp/mpvsocket', GLib.FileTest.EXISTS);
+            // Only kill VLC if socket doesn't exist or isn't responding
+            const socketExists = GLib.file_test('/tmp/vlcsocket', GLib.FileTest.EXISTS);
             if (socketExists) {
                 try {
-                    await Utils.execAsync(['socat', '-', '/tmp/mpvsocket'], {
+                    await Utils.execAsync(['socat', '-', '/tmp/vlcsocket'], {
                         input: '{ "command": ["get_property", "pid"] }\n'
                     });
-                    // MPV is running and responding, don't kill it
+                    // VLC is running and responding, don't kill it
                     return;
                 } catch (e) {
                     // Socket exists but not responding, clean up
-                    await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
+                    await Utils.execAsync(['rm', '-f', '/tmp/vlcsocket']).catch(() => {});
                 }
             }
-            // Kill mpv only if no valid socket exists
-            await Utils.execAsync(['pkill', '-9', 'mpv']).catch(() => {});
+            // Kill VLC only if no valid socket exists
+            await Utils.execAsync(['pkill', '-9', 'vlc']).catch(() => {});
             // Remove the socket file
-            await Utils.execAsync(['rm', '-f', '/tmp/mpvsocket']).catch(() => {});
+            await Utils.execAsync(['rm', '-f', '/tmp/vlcsocket']).catch(() => {});
             // Reset state
             this._currentTrack = null;
             this._currentVideoId = null;

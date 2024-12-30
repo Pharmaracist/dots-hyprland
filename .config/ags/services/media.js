@@ -18,27 +18,21 @@ class LocalMediaService extends Service {
     #player = null;
     #lastPlayerName = '';
     #lastTitle = '';
-    #mpd = null;
+    #mpvSocket = null;
 
     constructor() {
         super();
-        this._setupMPD();
+        this._setupMPV();
         this._setupPlayerTracking();
         Mpris.connect('changed', () => this._onPlayerChanged());
     }
 
-    async _setupMPD() {
+    async _setupMPV() {
         try {
-            // Start MPD if not running
-            const mpdStatus = await Utils.execAsync(['systemctl', '--user', 'status', 'mpd']);
-            if (!mpdStatus.includes('active (running)')) {
-                await Utils.execAsync(['systemctl', '--user', 'start', 'mpd']);
-            }
-            
-            // Create MPD config directory if it doesn't exist
-            const mpdDir = GLib.build_filenamev([GLib.get_home_dir(), '.config', 'mpd']);
-            if (!GLib.file_test(mpdDir, GLib.FileTest.EXISTS)) {
-                GLib.mkdir_with_parents(mpdDir, 0o755);
+            // Create MPV config directory if it doesn't exist
+            const mpvDir = GLib.build_filenamev([GLib.get_home_dir(), '.config', 'mpv']);
+            if (!GLib.file_test(mpvDir, GLib.FileTest.EXISTS)) {
+                GLib.mkdir_with_parents(mpvDir, 0o755);
             }
 
             // Create music directory if it doesn't exist
@@ -47,16 +41,17 @@ class LocalMediaService extends Service {
                 GLib.mkdir_with_parents(musicDir, 0o755);
             }
 
-            // Update MPD database
-            await Utils.execAsync(['mpc', 'update']);
+            // Set up MPV socket
+            this.#mpvSocket = GLib.build_filenamev([GLib.get_tmp_dir(), 'mpv-socket']);
         } catch (error) {
-            console.error('Error setting up MPD:', error);
+            console.error('Error setting up MPV:', error);
         }
     }
 
     _setupPlayerTracking() {
         try {
-            this.#player = Mpris.getPlayer('mpd') || Mpris.getPlayer();
+            // Prefer MPV over other players
+            this.#player = Mpris.getPlayer('mpv') || Mpris.getPlayer();
             if (this.#player) {
                 this.#lastPlayerName = this.#player.identity;
                 this.#lastTitle = this.#player.trackTitle;
@@ -69,7 +64,8 @@ class LocalMediaService extends Service {
 
     _onPlayerChanged() {
         try {
-            const newPlayer = Mpris.getPlayer('mpd') || Mpris.getPlayer();
+            // Prefer MPV over other players
+            const newPlayer = Mpris.getPlayer('mpv') || Mpris.getPlayer();
             const newTitle = newPlayer?.trackTitle;
             
             if (newPlayer !== this.#player || newTitle !== this.#lastTitle) {
@@ -78,7 +74,7 @@ class LocalMediaService extends Service {
                 this.emit('changed');
             }
         } catch (error) {
-            console.error('Error handling player change:', error);
+            console.error('Error on player change:', error);
         }
     }
 
@@ -97,36 +93,36 @@ class LocalMediaService extends Service {
     async play(uri) {
         try {
             if (uri) {
-                await Utils.execAsync(['mpc', 'clear']);
-                await Utils.execAsync(['mpc', 'add', uri]);
+                await Utils.execAsync(['mpv', '--input-ipc-server=' + this.#mpvSocket, uri]);
+            } else {
+                await Utils.execAsync(['echo', '{"command": ["set_property", "pause", false]}', '|', 'socat', '-', 'UNIX-CONNECT:' + this.#mpvSocket]);
             }
-            await Utils.execAsync(['mpc', 'play']);
         } catch (error) {
-            console.error('Error playing:', error);
+            console.error('Error playing media:', error);
         }
     }
 
     async pause() {
         try {
-            await Utils.execAsync(['mpc', 'pause']);
+            await Utils.execAsync(['echo', '{"command": ["set_property", "pause", true]}', '|', 'socat', '-', 'UNIX-CONNECT:' + this.#mpvSocket]);
         } catch (error) {
-            console.error('Error pausing:', error);
+            console.error('Error pausing media:', error);
         }
     }
 
     async next() {
         try {
-            await Utils.execAsync(['mpc', 'next']);
+            await Utils.execAsync(['echo', '{"command": ["playlist-next"]}', '|', 'socat', '-', 'UNIX-CONNECT:' + this.#mpvSocket]);
         } catch (error) {
-            console.error('Error skipping track:', error);
+            console.error('Error skipping to next:', error);
         }
     }
 
     async previous() {
         try {
-            await Utils.execAsync(['mpc', 'prev']);
+            await Utils.execAsync(['echo', '{"command": ["playlist-prev"]}', '|', 'socat', '-', 'UNIX-CONNECT:' + this.#mpvSocket]);
         } catch (error) {
-            console.error('Error going to previous track:', error);
+            console.error('Error going to previous:', error);
         }
     }
 }

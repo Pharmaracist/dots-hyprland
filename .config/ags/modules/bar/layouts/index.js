@@ -61,7 +61,7 @@ export const BarLayouts = {
                 }),
                 Widget.Box({
                     children: [
-                        modules.StatusModules.tray(),
+                        modules.StatusModules.tray({ iconSize: 20 }),
                     ],
                 }),
                 Widget.Box({
@@ -77,7 +77,41 @@ export const BarLayouts = {
     2: { // Knocks with scrollable modules
         name: 'Knocks',
         layout: (modules) => ({
-            start: [
+            start: [    ScrollableContainer({
+                name: 'tezy',
+                sets: [
+                    [  Widget.EventBox({
+                        setup: self => self.toggleClassName('hover'),
+                        className: "txt-gigantic icon-nerd side-bar-button sec-txt",
+                        child: Widget.Label({
+                          label: " \udb81\udef8 ",
+                        }),
+                        onPrimaryClick: (self) => {
+                          self.toggleClassName('toggled');
+                          App.toggleWindow("sideleft");
+                        },
+                        onSecondaryClick: (self) => {
+                          self.toggleClassName('toggled');
+                          App.toggleWindow("session");
+                        },
+                      }),
+                      Widget.Box({
+                          hpack: 'start',
+                          vpack: 'center',
+                          hexpand: true,
+                          vexpand: true,
+                          css:`margin-left: -0.5rem;`,
+                        children: [
+                            modules.InfoModules.windowTitle(),
+                        ],
+                      })],
+                    [Widget.Box({
+                        className: 'start-widget',
+                        children: [ Widget.Box({  children: [modules.StatusModules.battery()]})],
+                    })],
+                ],
+            }),
+              
             ],
             center: [
                 Widget.Revealer({
@@ -105,27 +139,19 @@ export const BarLayouts = {
                     }),
                 }),
                 ScrollableContainer({
-                    name: 'media',
                     sets: [
                         [Widget.Box({
-                            hpack: 'fill',
                             hexpand: true,
                             className: 'bar-knocks padding-rl-5',
                             children: [modules.MediaModules.musicStuff()],
                         })],
                         [Widget.Box({
                             hexpand: true,
-                            hpack: 'fill',
                             className: 'bar-knocks padding-rl-15',
                             children: [
                                 Widget.Box({ hpack: 'center', children: [modules.AppModules.pinnedApps()]}) ],
                         })],
-                        [Widget.Box({
-                            hpack: 'end',
-                            hexpand: true,
-                            className: 'bar-knocks',
-                            children: [ Widget.Label({ label: "     ",}) , modules.InfoModules.quote()],
-                        })],
+                      
                     ],
                 }),
                 ScrollableContainer({
@@ -158,9 +184,9 @@ export const BarLayouts = {
                             children: [
                                 modules.InfoModules.simpleClock(),
                                 modules.ControlModules.keyboard(),
+                                modules.StatusModules.powerMode(),
                                 modules.InfoModules.indicators(),
                                 modules.StatusModules.resourcesBar(),
-                                modules.StatusModules.battery(),
                             ]
                         })],
                         [Widget.Box({
@@ -199,7 +225,25 @@ export const BarLayouts = {
                 // Second scrollable for media
              
             ],
-            end: [
+            end: [Widget.Box({
+                children: [
+                    modules.StatusModules.tray({ iconSize: 30 }),
+                ],
+            }),
+                Widget.EventBox({
+                className: "txt-gigantic side-bar-button",
+                child: Widget.Label({
+                  label: " \udb81\udef8 ",
+                }),
+                onPrimaryClick: (self) => {
+                  self.toggleClassName('toggled');
+                  App.toggleWindow("sideright");
+                },
+                onSecondaryClick: (self) => {
+                  self.toggleClassName('toggled');
+                  App.toggleWindow("session");
+                },
+              })
             ],
         }),
     },
@@ -295,7 +339,7 @@ export const BarLayouts = {
                     name: 'media',
                     sets: [
                         [Widget.Box({
-                            children: [modules.StatusModules.tray()],
+                            children: [modules.StatusModules.tray({ iconSize: 20 })],
                         })],
                         [Widget.Box({
                             children: [],

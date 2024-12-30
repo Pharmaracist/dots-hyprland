@@ -27,6 +27,7 @@ import { changeWallpaperButton } from "./utils.js";
 import Fetcher from "./fetcher.js";
 import PinnedApps from "./pinned_apps.js";
 import ActiveApps from "./active_apps.js";
+import PowerMode from "./powermode.js";
 // Cache for initialized modules
 const moduleCache = new Map();
 
@@ -111,7 +112,8 @@ export const StatusModules = {
     systemResources() { return SystemResources(); },
     resourcesBar() { return ResourcesBar(); },
     system() { return System(); },
-    tray()  {return Systray();}
+    tray()  {return Systray();},
+    powerMode() { return PowerMode(); },
 };
 
 export const ControlModules = {

@@ -96,7 +96,7 @@
     "browser": "firefox",
     "fileManager": "nautilus",
     "textEditor": "code",
-    "audioPlayer": "spotify",
+    "audioPlayer": "vlc",
     "calculator": "gnome-calculator"
   },
   "battery": {

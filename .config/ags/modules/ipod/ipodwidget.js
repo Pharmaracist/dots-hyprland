@@ -408,6 +408,7 @@ const formatTime = (seconds) => {
 };
 
 export default () => {
+  let lastTitle = '';
   const widget = Widget.Box({
     className: "ipod-widget",
     css: "min-height: 260px;",
@@ -415,9 +416,20 @@ export default () => {
       mainWidget = self;
       self.hook(Mpris, () => {
         const player = getPlayer();
-        self.className = `ipod-widget ${
-          showBackground ? "" : "blur-container"
-        }`;
+        const newTitle = player?.trackTitle || '';
+        
+        // Add animation on track change
+        if (newTitle !== lastTitle && newTitle !== '') {
+            self.toggleClassName('song-changing', true);
+            Utils.timeout(15000, () => {
+                if (!self.is_destroyed) {
+                    self.toggleClassName('song-changing', false);
+                }
+            });
+            lastTitle = newTitle;
+        }
+
+        self.className = `ipod-widget ${showBackground ? "" : "blur-container"}`;
         self.css = `
                     min-height: 260px;
                     background: ${

@@ -4,7 +4,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { execAsync, exec, readFile, writeFile } = Utils;
 import { searchItem } from './searchitem.js';
-import { execAndClose, couldBeMath, launchCustomCommand, expandTilde } from './miscfunctions.js';
+import { execAndClose, couldBeMath, launchCustomCommand, expandTilde, findDirectories } from './miscfunctions.js';
 import GeminiService from '../../services/gemini.js';
 import ChatGPTService from '../../services/gpt.js';
 
@@ -23,6 +23,18 @@ const options = readConfig();
 const animations = options.animations || {};
 const searchConfig = options.search || {};
 const aiConfig = options.ai || {};
+
+let lastOpenTime = 0;
+const DEBOUNCE_DELAY = 300; // ms
+
+function shouldPreventDoubleOpen() {
+    const now = Date.now();
+    if (now - lastOpenTime < DEBOUNCE_DELAY) {
+        return true;
+    }
+    lastOpenTime = now;
+    return false;
+}
 
 export const NoResultButton = () => searchItem({
     materialIconName: 'Error',
@@ -52,6 +64,7 @@ export const DirectoryButton = ({ parentPath, name, type, icon }) => {
     return Widget.Button({
         className: 'overview-search-result-btn',
         onClicked: () => {
+            if (shouldPreventDoubleOpen()) return;
             App.closeWindow('overview');
             execAsync(['xdg-open', `${parentPath}/${name}`]).catch(print);
         },
@@ -89,12 +102,11 @@ export const DirectoryButton = ({ parentPath, name, type, icon }) => {
 
 export const CalculationResultButton = ({ result, text }) => searchItem({
     materialIconName: 'calculate',
-    name: 'Math result',
-    actionName: "Copy",
-    content: `${result}`,
+    name: `= ${result}`,
+    content: text,
     onActivate: () => {
+        Utils.writeText(result.toString());
         App.closeWindow('overview');
-        execAsync(['wl-copy', `${result}`]).catch(print);
     },
 });
 
@@ -201,6 +213,7 @@ export const DesktopEntryButton = (app) => {
                 return false;
             })
             .on('clicked', () => {
+                if (shouldPreventDoubleOpen()) return;
                 App.closeWindow('overview');
                 app.launch();
             }),
@@ -227,30 +240,45 @@ export const CustomCommandButton = ({ text = '' }) => searchItem({
     },
 });
 
-export const SearchButton = ({ text = '' }) => {
-    const search = searchConfig.engineBaseUrl + text + 
-        searchConfig.excludedSites.reduce((acc, site) => site ? acc + ` -site:${site}` : acc, '');
-
-    return searchItem({
-        materialIconName: 'travel_explore',
-        name: 'Search the web',
-        actionName: 'Go',
-        content: text,
-        onActivate: () => {
-            App.closeWindow('overview');
-            execAsync(['xdg-open', search]).catch(print);
-        },
-    });
-}
-
-export const AiButton = ({ text }) => searchItem({
-    materialIconName: 'chat_paste_go',
-    name: aiConfig.onSearch == 'gemini' ? 'Ask Gemini' : 'Ask ChatGPT',
-    actionName: 'Ask',
-    content: text,
+export const SearchButton = ({ text }) => searchItem({
+    materialIconName: 'search',
+    name: "Search",
+    content: `Search the web for "${text}"`,
     onActivate: () => {
-        (aiConfig.onSearch == 'gemini' ? GeminiService : ChatGPTService).send(text);
+        execAsync(['xdg-open', `https://www.google.com/search?q=${encodeURIComponent(text)}`]).catch(print);
         App.closeWindow('overview');
-        App.openWindow('sideleft');
     },
 });
+
+export const AiButton = ({ text }) => searchItem({
+    materialIconName: 'psychology',
+    name: "Ask AI",
+    content: `Ask AI about "${text}"`,
+    onActivate: () => {
+        if (aiConfig.provider === 'gemini') {
+            GeminiService.ask(text);
+        } else {
+            ChatGPTService.ask(text);
+        }
+        App.closeWindow('overview');
+    },
+});
+
+export const GoToDirectoryButton = ({ text }) => {
+    const cleanText = text.replace(/^[/~]/, '').trim();
+    return searchItem({
+        materialIconName: 'folder_open',
+        name: "Go to Directory",
+        content: `Search for directory: "${cleanText}"`,
+        onActivate: () => {
+            if (shouldPreventDoubleOpen()) return;
+            App.closeWindow('overview');
+            findDirectories(cleanText).then(results => {
+                if (results.length > 0) {
+                    const firstResult = results[0];
+                    execAsync(['xdg-open', `${firstResult.parentPath}/${firstResult.name}`]).catch(print);
+                }
+            }).catch(print);
+        },
+    });
+};

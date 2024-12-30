@@ -1,7 +1,7 @@
 const { Gio, GLib } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
-const { execAsync, exec } = Utils;
+const { execAsync, exec, readFile } = Utils;
 import Todo from "../../services/todo.js";
 import { darkMode } from '../.miscutils/system.js';
 import Timer from '../../services/timers.js';
@@ -11,8 +11,24 @@ import { currentShellMode } from '../../variables.js';
 import { config } from '../../variables.js';
 import userOptions from '../.configuration/user_options.js';
 
+let lastOpenTime = 0;
+const DEBOUNCE_DELAY = 300;
+
+export function openDirectory(path) {
+    const now = Date.now();
+    if (now - lastOpenTime < DEBOUNCE_DELAY) {
+        return false;
+    }
+    lastOpenTime = now;
+    execAsync(['xdg-open', path]).catch(console.error);
+    return true;
+}
+
 const USER_CONFIG_FILE = GLib.get_home_dir() + '/.ags/config.json';
 const CONFIG_PATH = GLib.get_home_dir() + '/.ags/config.json';
+
+const CONFIG = JSON.parse(readFile('/home/pharmaracist/.config/ags/config.json'));
+const searchConfig = CONFIG.overview.searchOptions;
 
 export const hasUnterminatedBackslash = str => /\\+$/.test(str);
 
@@ -128,6 +144,9 @@ if results:
         '>skip': () => {
             execAsync(['playerctl', 'next']).catch(print);
             execAsync(['bash', '-c', 'sleep 0.1 && playerctl position 0']).catch(print);
+        },
+        '>stop': () => {
+            execAsync(['bash', '-c', 'killall mpv']).catch(print);
         },
         '>prev': () => {
             execAsync(['playerctl', 'previous']).catch(print);
@@ -929,7 +948,7 @@ export const execAndClose = (command, terminal) => {
     if (terminal) {
         execAsync(['bash', '-c', `${userOptions.value.apps.terminal} fish -C "${command}"`, '&']).catch(print);
     } else {
-        execAsync(command).catch(print);
+        execAsync(['bash', '-c', command]).catch(print);
     }
 };
 
@@ -939,33 +958,453 @@ export const expandTilde = path => path.startsWith('~') ? GLib.get_home_dir() + 
 
 const getFileIcon = fileInfo => fileInfo.get_icon()?.get_names()[0] || 'text-x-generic';
 
+export const specialPaths = {
+    'Downloads': `${GLib.get_home_dir()}/Downloads`,
+    'Documents': `${GLib.get_home_dir()}/Documents`,
+    'Pictures': `${GLib.get_home_dir()}/Pictures`,
+    'Music': `${GLib.get_home_dir()}/Music`,
+    'Videos': `${GLib.get_home_dir()}/Videos`
+};
+
+// Cache for directory listing
+let dirCache = null;
+let lastCacheUpdate = 0;
+const CACHE_TTL = searchConfig.directorySearch.cacheTTL;
+
+async function updateDirCache() {
+    try {
+        dirCache = [];
+        
+        // Get all paths and expand home directory
+        const paths = searchConfig.directorySearch.paths
+            .map(path => path.startsWith('~') ? path.replace('~', GLib.get_home_dir()) : path);
+        
+        // Convert exclude patterns to find arguments
+        const excludeArgs = searchConfig.directorySearch.excludePatterns
+            .map(pattern => {
+                // Convert glob pattern to find -path pattern
+                const findPattern = pattern
+                    .replace(/\*\*\//g, '')  // Remove **/ prefix
+                    .replace(/\/\*\*/g, '')  // Remove /** suffix
+                    .replace(/\*/g, '*');    // Keep single *
+                return ['-not', '-path', `*/${findPattern}/*`];
+            })
+            .flat();
+        
+        const maxDepth = searchConfig.directorySearch.maxDepth;
+        
+        for (const basePath of paths) {
+            try {
+                // Skip if path doesn't exist
+                if (!GLib.file_test(basePath, GLib.FileTest.EXISTS)) {
+                    console.log(`Path does not exist: ${basePath}`);
+                    continue;
+                }
+                
+                const findCmd = [
+                    'find',
+                    basePath,
+                    '-maxdepth', maxDepth.toString(),
+                    '-type', 'd',
+                    ...excludeArgs
+                ];
+
+                const [findOk, findStdout] = GLib.spawn_sync(
+                    basePath,
+                    findCmd,
+                    null,
+                    GLib.SpawnFlags.SEARCH_PATH,
+                    null
+                );
+                
+                if (!findOk) continue;
+                
+                const results = new TextDecoder().decode(findStdout)
+                    .trim()
+                    .split('\n')
+                    .filter(line => line.length > 0)
+                    .map(path => {
+                        try {
+                            const file = Gio.File.new_for_path(path);
+                            const fileInfo = file.query_info('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+                            const name = fileInfo.get_display_name();
+                            return {
+                                path,
+                                parentPath: file.get_parent().get_path(),
+                                name,
+                                type: 'folder',
+                                icon: getFileIcon(fileInfo),
+                                searchName: name.toLowerCase()
+                            };
+                        } catch (e) {
+                            return null;
+                        }
+                    })
+                    .filter(item => item !== null);
+                
+                dirCache.push(...results);
+            } catch (e) {
+                console.log(`Error searching in ${basePath}:`, e);
+            }
+        }
+            
+        lastCacheUpdate = Date.now();
+    } catch (e) {
+        console.log('directory cache update error:', e);
+    }
+}
+
+export function findDirectories(query, currentPath = null) {
+    return new Promise((resolve) => {
+        const doSearch = async () => {
+            try {
+                // Handle subfolder search
+                if (query.includes('/')) {
+                    const parts = query.split('/');
+                    const lastPart = parts.pop(); // Get the search term
+                    const basePath = parts.join('/');
+                    
+                    // If base path starts with ~, expand it
+                    const expandedBase = basePath.startsWith('~') 
+                        ? basePath.replace('~', GLib.get_home_dir())
+                        : basePath;
+                    
+                    // If currentPath is provided, use it as base
+                    const searchBase = currentPath || expandedBase;
+                    
+                    // Check if path exists
+                    if (!GLib.file_test(searchBase, GLib.FileTest.EXISTS)) {
+                        resolve([]);
+                        return;
+                    }
+                    
+                    // Search in the specified directory
+                    const findCmd = [
+                        'find',
+                        searchBase,
+                        '-maxdepth', '2',  // Limit depth for responsiveness
+                        '-type', 'd',
+                        '-not', '-path', '*/\\.*'
+                    ];
+                    
+                    const [findOk, findStdout] = GLib.spawn_sync(
+                        searchBase,
+                        findCmd,
+                        null,
+                        GLib.SpawnFlags.SEARCH_PATH,
+                        null
+                    );
+                    
+                    if (!findOk) {
+                        resolve([]);
+                        return;
+                    }
+                    
+                    const results = new TextDecoder().decode(findStdout)
+                        .trim()
+                        .split('\n')
+                        .filter(path => {
+                            const name = path.split('/').pop().toLowerCase();
+                            return name.includes(lastPart.toLowerCase());
+                        })
+                        .map(path => {
+                            try {
+                                const file = Gio.File.new_for_path(path);
+                                const fileInfo = file.query_info('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+                                const name = fileInfo.get_display_name();
+                                return {
+                                    path,
+                                    parentPath: file.get_parent().get_path(),
+                                    name,
+                                    type: 'folder',
+                                    icon: getFileIcon(fileInfo),
+                                    searchName: name.toLowerCase()
+                                };
+                            } catch (e) {
+                                return null;
+                            }
+                        })
+                        .filter(item => item !== null)
+                        .sort((a, b) => a.name.length - b.name.length);
+                    
+                    // Remove duplicates
+                    const seen = new Set();
+                    const uniqueResults = results.filter(item => {
+                        if (seen.has(item.path)) return false;
+                        seen.add(item.path);
+                        return true;
+                    });
+                    
+                    resolve(uniqueResults.slice(0, searchConfig.maxResults.directories));
+                    return;
+                }
+                
+                // Regular search in cache
+                if (!dirCache || Date.now() - lastCacheUpdate > searchConfig.directorySearch.cacheTTL) {
+                    await updateDirCache();
+                }
+                
+                if (!dirCache) {
+                    resolve([]);
+                    return;
+                }
+                
+                const searchTerm = query.toLowerCase();
+                let results;
+                
+                if (searchConfig.directorySearch.searchMode === 'fuzzy') {
+                    results = dirCache
+                        .map(dir => {
+                            const name = dir.searchName;
+                            let score = 0;
+                            let lastIndex = -1;
+                            
+                            for (const char of searchTerm) {
+                                const index = name.indexOf(char, lastIndex + 1);
+                                if (index === -1) return null;
+                                score += lastIndex + 1 === index ? 2 : 1;
+                                lastIndex = index;
+                            }
+                            
+                            return { ...dir, score };
+                        })
+                        .filter(item => item !== null)
+                        .sort((a, b) => b.score - a.score);
+                } else {
+                    results = dirCache
+                        .filter(dir => dir.searchName.includes(searchTerm))
+                        .sort((a, b) => a.name.length - b.name.length);
+                }
+
+                // Remove duplicates
+                const seen = new Set();
+                results = results.filter(item => {
+                    if (seen.has(item.path)) return false;
+                    seen.add(item.path);
+                    return true;
+                });
+                
+                resolve(results.slice(0, searchConfig.maxResults.directories));
+            } catch (e) {
+                console.log('directory search error:', e);
+                resolve([]);
+            }
+        };
+        
+        doSearch();
+    });
+}
+
+export function findFiles(query, currentPath = null) {
+    return new Promise((resolve) => {
+        const doSearch = async () => {
+            try {
+                // Remove the ' prefix
+                const searchTerm = query.startsWith("'") ? query.slice(1) : query;
+                
+                // Handle path search
+                let searchBase;
+                let searchPattern;
+                
+                if (searchTerm.includes('/')) {
+                    const parts = searchTerm.split('/');
+                    const lastPart = parts.pop();
+                    const basePath = parts.join('/');
+                    
+                    // If base path starts with ~, expand it
+                    const expandedBase = basePath.startsWith('~') 
+                        ? basePath.replace('~', GLib.get_home_dir())
+                        : basePath;
+                    
+                    // If currentPath is provided, use it as base
+                    searchBase = currentPath || expandedBase || GLib.get_home_dir();
+                    searchPattern = lastPart;
+                } else {
+                    searchBase = GLib.get_home_dir();
+                    searchPattern = searchTerm;
+                }
+                
+                // Check if path exists
+                if (!GLib.file_test(searchBase, GLib.FileTest.EXISTS)) {
+                    resolve([]);
+                    return;
+                }
+                
+                // Search in the specified directory
+                const findCmd = [
+                    'find',
+                    searchBase,
+                    '-maxdepth', '3',
+                    '-type', 'f',
+                    '-not', '-path', '*/\\.*',
+                    '-iname', `*${searchPattern}*`
+                ];
+                
+                const [findOk, findStdout] = GLib.spawn_sync(
+                    searchBase,
+                    findCmd,
+                    null,
+                    GLib.SpawnFlags.SEARCH_PATH,
+                    null
+                );
+                
+                if (!findOk) {
+                    resolve([]);
+                    return;
+                }
+                
+                const results = new TextDecoder().decode(findStdout)
+                    .trim()
+                    .split('\n')
+                    .filter(path => path) // Filter out empty lines
+                    .map(path => {
+                        try {
+                            const file = Gio.File.new_for_path(path);
+                            const fileInfo = file.query_info('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+                            const name = fileInfo.get_display_name();
+                            return {
+                                path,
+                                parentPath: file.get_parent().get_path(),
+                                name,
+                                type: name.split('.').pop() || 'file',
+                                icon: fileInfo.get_icon()?.get_names()[0] || 'text-x-generic',
+                                searchName: name.toLowerCase()
+                            };
+                        } catch (e) {
+                            return null;
+                        }
+                    })
+                    .filter(item => item !== null)
+                    .sort((a, b) => {
+                        // First by path length (shorter paths first)
+                        const pathDiff = a.path.length - b.path.length;
+                        if (pathDiff !== 0) return pathDiff;
+                        // Then by name length
+                        return a.name.length - b.name.length;
+                    });
+                
+                // Remove duplicates
+                const seen = new Set();
+                const uniqueResults = results.filter(item => {
+                    if (seen.has(item.path)) return false;
+                    seen.add(item.path);
+                    return true;
+                });
+                
+                resolve(uniqueResults.slice(0, searchConfig.maxResults.directories));
+            } catch (e) {
+                console.log('file search error:', e);
+                resolve([]);
+            }
+        };
+        
+        doSearch();
+    });
+}
+
 export function ls({ path = '~', silent = false }) {
     try {
-        const expandedPath = expandTilde(path).replace(/\/$/, '');
-        const folder = Gio.File.new_for_path(expandedPath);
-        const enumerator = folder.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+        let expandedPath = path;
         
-        const contents = [];
+        // Handle special paths
+        if (path in specialPaths) {
+            expandedPath = specialPaths[path];
+        }
+        
+        // Expand tilde
+        if (expandedPath.startsWith('~')) {
+            expandedPath = expandedPath.replace('~', GLib.get_home_dir());
+        }
+        
+        // List directory contents
+        const dir = Gio.File.new_for_path(expandedPath);
+        if (!dir.query_exists(null)) {
+            if (!silent) console.error(`Directory ${expandedPath} does not exist`);
+            return [];
+        }
+        
+        const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+        const results = [];
+        
         let fileInfo;
-        while ((fileInfo = enumerator.next_file(null))) {
+        while ((fileInfo = enumerator.next_file(null)) !== null) {
             const fileName = fileInfo.get_display_name();
             const isDirectory = fileInfo.get_file_type() === Gio.FileType.DIRECTORY;
             
-            contents.push({
+            // Skip hidden files
+            if (fileName.startsWith('.')) continue;
+            
+            results.push({
+                path: `${expandedPath}/${fileName}`,
                 parentPath: expandedPath,
                 name: fileName,
                 type: isDirectory ? 'folder' : fileName.split('.').pop(),
-                icon: getFileIcon(fileInfo)
+                icon: fileInfo.get_icon()?.get_names()[0] || 'text-x-generic',
+                searchName: fileName.toLowerCase()
             });
         }
         
-        return contents.sort((a, b) => {
-            const aIsFolder = a.type === 'folder';
-            const bIsFolder = b.type === 'folder';
-            return aIsFolder === bIsFolder ? a.name.localeCompare(b.name) : bIsFolder ? 1 : -1;
-        });
+        return results;
     } catch (e) {
-        if (!silent) console.log(e);
+        if (!silent) console.error('Error listing directory:', e);
+        return [];
+    }
+}
+
+export function fzfSearch(query) {
+    try {
+        const home = GLib.get_home_dir();
+        
+        // Create a temporary file to store find results
+        const tmpFile = GLib.build_filenamev([GLib.get_tmp_dir(), 'ags-find-results']);
+        
+        // Run find command and save results to temp file
+        const findCmd = ['find', home, '-type', 'f', '-not', '-path', '*/\\.*'];
+        const [findOk, findStdout] = GLib.spawn_sync(
+            home,
+            findCmd,
+            null,
+            GLib.SpawnFlags.SEARCH_PATH,
+            null
+        );
+        
+        if (!findOk) return [];
+        
+        // Write find results to temp file
+        GLib.file_set_contents(tmpFile, findStdout);
+        
+        // Run fzf on the results file
+        const [fzfOk, fzfStdout] = GLib.spawn_sync(
+            home,
+            ['fzf', '-f', query],
+            ['FZF_DEFAULT_COMMAND=cat ' + tmpFile],
+            GLib.SpawnFlags.SEARCH_PATH,
+            null
+        );
+        
+        // Clean up temp file
+        GLib.unlink(tmpFile);
+        
+        if (!fzfOk) return [];
+        
+        const results = new TextDecoder().decode(fzfStdout)
+            .trim()
+            .split('\n')
+            .filter(line => line.length > 0)
+            .map(path => {
+                const file = Gio.File.new_for_path(path);
+                const fileInfo = file.query_info('standard::*', Gio.FileQueryInfoFlags.NONE, null);
+                return {
+                    parentPath: file.get_parent().get_path(),
+                    name: fileInfo.get_display_name(),
+                    type: fileInfo.get_file_type() === Gio.FileType.DIRECTORY ? 'folder' : file.get_basename().split('.').pop(),
+                    icon: fileInfo.get_icon()?.get_names()[0] || 'text-x-generic'
+                };
+            });
+            
+        return results.slice(0, searchConfig.maxResults.fzf);
+    } catch (e) {
+        console.log('fzf search error:', e);
         return [];
     }
 }

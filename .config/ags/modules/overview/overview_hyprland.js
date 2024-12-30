@@ -16,6 +16,7 @@ import { dumpToWorkspace, swapWorkspace } from "./actions.js";
 import { iconExists, substitute } from "../.miscutils/icons.js";
 import { monitors } from '../.commondata/hyprlanddata.js';
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
+import { clickCloseRegion } from '../.commonwidgets/clickcloseregion.js';
 
 // Cache user options
 const userOpts = userOptions.asyncGet();
@@ -23,6 +24,12 @@ const NUM_OF_WORKSPACES_SHOWN = userOpts.overview.numOfCols * userOpts.overview.
 const TARGET = [Gtk.TargetEntry.new('text/plain', Gtk.TargetFlags.SAME_APP, 0)];
 
 const overviewTick = Variable(false);
+
+const createCloseRegion = (expand = false) => clickCloseRegion({
+    name: 'overview',
+    multimonitor: false,
+    expand,
+});
 
 export default (overviewMonitor = 0) => {
     const clientMap = new Map();
@@ -229,7 +236,7 @@ export default (overviewMonitor = 0) => {
                 },
                 setup: (eventbox) => {
                     eventbox.drag_dest_set(Gtk.DestDefaults.ALL, TARGET, Gdk.DragAction.COPY);
-                    eventbox.connect('drag-data-received', (_w, _c, _x, _y, data) => {
+                    eventbox.connect('drag-data-received', (_w, _c, data) => {
                         const offset = Math.floor((Hyprland.active.workspace.id - 1) / NUM_OF_WORKSPACES_SHOWN) * NUM_OF_WORKSPACES_SHOWN;
                         Hyprland.messageAsync(`dispatch movetoworkspacesilent ${index + offset},address:${data.get_text()}`)
                         overviewTick.setValue(!overviewTick.value);
@@ -388,13 +395,24 @@ export default (overviewMonitor = 0) => {
         transitionDuration: userOpts.animations.durationLarge,
         child: Widget.Box({
             vertical: true,
-            className: 'overview-tasks',
-            children: Array.from({ length: userOpts.overview.numOfRows }, (_, index) =>
-                OverviewRow({
-                    startWorkspace: 1 + index * userOpts.overview.numOfCols,
-                    workspaces: userOpts.overview.numOfCols,
-                })
-            )
+            children: [
+                createCloseRegion(),
+                Widget.Box({
+                    vertical: true,
+                    className: 'overview-tasks',
+                    children: [
+                        createCloseRegion(),
+                        ...Array.from({ length: userOpts.overview.numOfRows }, (_, index) =>
+                            OverviewRow({
+                                startWorkspace: 1 + index * userOpts.overview.numOfCols,
+                                workspaces: userOpts.overview.numOfCols,
+                            })
+                        ),
+                        createCloseRegion(),
+                    ]
+                }),
+                createCloseRegion(),
+            ]
         }),
     });
 }
