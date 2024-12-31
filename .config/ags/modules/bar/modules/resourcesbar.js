@@ -53,10 +53,15 @@ const ResourcesWidget = () => Box({
             'database',
             'free | grep Mem | awk \'{print ($3/$2 * 100)}\''
         ),
+        // Resource(
+        //     'Disk',
+        //     'storage',
+        //     'df -h / | awk \'NR==2 {print substr($5, 1, length($5)-1)}\''
+        // ),
         Resource(
-            'Disk',
-            'storage',
-            'df -h / | awk \'NR==2 {print substr($5, 1, length($5)-1)}\''
+            'Battery',
+            'battery_full',
+            'upower -i $(upower -e | grep BAT) | grep percentage | awk \'{print $2}\' | tr -d "%"'
         ),
     ],
 });

@@ -3,18 +3,19 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import WallpaperImage from "./wallpaper.js";
 import TimeAndLaunchesWidget from "./timeandlaunches.js";
 import SystemWidget from "./system.js";
-
+import BigTimeAndLaunchesWidget from "./bigClock.js";
 export default (monitor) =>
   Widget.Window({
     name: `desktopbackground`,
     keymode: "on-demand",
     layer: "background",
     exclusivity: "ignore",
-    visible: false,
+    visible: true,
     child: Widget.Overlay({
       child: WallpaperImage(monitor),
       overlays: [
-        TimeAndLaunchesWidget(), 
+        // TimeAndLaunchesWidget(), 
+        BigTimeAndLaunchesWidget(),
         // SystemWidget(),
      
       ],

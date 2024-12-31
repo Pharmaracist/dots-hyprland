@@ -566,6 +566,9 @@ class TodoService extends Service {
         monitor.connect('changed', (_, file, otherFile, eventType) => {
             if (eventType === Gio.FileMonitorEvent.CREATED) {
                 callback(file);
+            } else if (eventType === Gio.FileMonitorEvent.DELETED) {
+                // When a file is deleted, rescan the directory to update the state
+                this.rescan();
             }
         });
     }
@@ -595,6 +598,12 @@ class TodoService extends Service {
         // Scan PDFs
         try {
             console.log('Scanning PDF directory:', this.#pdfsDir);
+            // Remove entries for files that no longer exist
+            this.#pdfsJson = this.#pdfsJson.filter(pdf => {
+                const file = Gio.File.new_for_path(pdf.path);
+                return file.query_exists(null);
+            });
+            
             const dir = Gio.File.new_for_path(this.#pdfsDir);
             const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
             let fileInfo;
@@ -608,6 +617,8 @@ class TodoService extends Service {
                     }
                 }
             }
+            Utils.writeFile(JSON.stringify(this.#pdfsJson, null, 2), this.#pdfsFile)
+                .catch(console.error);
         } catch (e) {
             console.error('Error scanning PDF directory:', e);
         }
@@ -615,6 +626,12 @@ class TodoService extends Service {
         // Scan Images
         try {
             console.log('Scanning Images directory:', this.#imagesDir);
+            // Remove entries for files that no longer exist
+            this.#imagesJson = this.#imagesJson.filter(img => {
+                const file = Gio.File.new_for_path(img.path);
+                return file.query_exists(null);
+            });
+            
             const dir = Gio.File.new_for_path(this.#imagesDir);
             const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
             let fileInfo;
@@ -630,6 +647,8 @@ class TodoService extends Service {
                     }
                 }
             }
+            Utils.writeFile(JSON.stringify(this.#imagesJson || []), this.#imagesFile)
+                .catch(print);
         } catch (e) {
             console.error('Error scanning Images directory:', e);
         }
@@ -637,6 +656,12 @@ class TodoService extends Service {
         // Scan Videos
         try {
             console.log('Scanning Videos directory:', this.#videosDir);
+            // Remove entries for files that no longer exist
+            this.#videosJson = this.#videosJson.filter(video => {
+                const file = Gio.File.new_for_path(video.path);
+                return file.query_exists(null);
+            });
+            
             const dir = Gio.File.new_for_path(this.#videosDir);
             const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
             let fileInfo;
@@ -652,6 +677,8 @@ class TodoService extends Service {
                     }
                 }
             }
+            Utils.writeFile(JSON.stringify(this.#videosJson, null, 2), this.#videosFile)
+                .catch(console.error);
         } catch (e) {
             console.error('Error scanning Videos directory:', e);
         }
@@ -659,6 +686,12 @@ class TodoService extends Service {
         // Scan Music
         try {
             console.log('Scanning Music directory:', this.#musicDir);
+            // Remove entries for files that no longer exist
+            this.#musicJson = this.#musicJson.filter(music => {
+                const file = Gio.File.new_for_path(music.path);
+                return file.query_exists(null);
+            });
+            
             const dir = Gio.File.new_for_path(this.#musicDir);
             const enumerator = dir.enumerate_children('standard::*', Gio.FileQueryInfoFlags.NONE, null);
             let fileInfo;
@@ -674,9 +707,18 @@ class TodoService extends Service {
                     }
                 }
             }
+            Utils.writeFile(JSON.stringify(this.#musicJson || []), this.#musicFile)
+                .catch(print);
         } catch (e) {
             console.error('Error scanning Music directory:', e);
         }
+
+        // Notify all changes
+        this.notify('pdfs_json');
+        this.notify('images_json');
+        this.notify('videos_json');
+        this.notify('music_json');
+        this.emit('changed');
     }
 
     async addMusic(sourcePath) {
