@@ -8,11 +8,12 @@ import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 const Resource = (name, icon, command) => {
     return Box({
         className: 'bar-resources',
+        css:`margin:-1.3px 0`,
         vpack: 'center',
         children: [
-            MaterialIcon(icon, 'smallie', {
+            MaterialIcon(icon, 'small', {
                 className: 'onSurfaceVariant icon-material',
-                css: 'margin-right: 0.35rem;',
+                css: 'margin-right: 0.5rem;font-size:1.15rem',
                 vpack: 'center',
             }),
             Box({

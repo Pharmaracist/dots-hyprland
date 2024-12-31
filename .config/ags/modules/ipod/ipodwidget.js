@@ -167,7 +167,17 @@ const MediaControls = () => {
       className: "volume-icon",
       homogeneous: true,
       child: Widget.Overlay({
-        child: Widget.Label({ label: "play_arrow" }),
+        child: Widget.Label({
+          label: "󰐊",
+          setup: (self) => {
+            const update = () => {
+              const player = getPlayer();
+              self.label = player?.playBackStatus === "Playing" ? '󰏤' : '󰐊';
+            };
+            self.hook(Mpris, update, 'player-changed');
+            update();
+          },
+        }),
         overlays: [progressCircle],
       }),
     }),
@@ -195,8 +205,6 @@ const MediaControls = () => {
           Math.min(100, Math.floor((position / length) * 100))
         );
         progressCircle.css = `font-size: ${progress}px;`;
-        playButton.child.child.child.label =
-          player?.playBackStatus === "Playing" ? "pause" : "play_arrow";
       } else {
         progressCircle.css = "font-size: 0px;";
       }
@@ -234,13 +242,13 @@ const MediaControls = () => {
     children: [
       Widget.Button({
         className: "control-button onSurfaceVariant",
-        child: Widget.Label({ label: "skip_previous" }),
+        child: Widget.Label({ label: '󰒮' }),
         onClicked: () => getPlayer()?.previous(),
       }),
       playButton,
       Widget.Button({
         className: "control-button onSurfaceVariant",
-        child: Widget.Label({ label: "skip_next" }),
+        child: Widget.Label({ label: '󰒭' }),
         onClicked: () => getPlayer()?.next(),
       }),
       wallpaperButton,
@@ -329,18 +337,38 @@ const CoverArt = () => {
       if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
 
       const player = getPlayer();
-      if (player) player.next();
+      if (player) {
+        const widget = self.get_parent().get_parent().get_parent().get_parent();
+        widget.toggleClassName('track-changing', true);
+        self.child.toggleClassName('thumbnail-change', true);
+
+        Utils.timeout(2000, () => {
+          player.next();
+          self.child.toggleClassName('thumbnail-change', false);
+          widget.toggleClassName('track-changing', false);
+        });
+      }
       lastScrollTime = currentTime;
-      return true; // Stop event propagation
+      return true;
     },
     onScrollDown: (self, event) => {
       const currentTime = GLib.get_monotonic_time() / 1000;
       if (currentTime - lastScrollTime < SCROLL_DELAY) return true;
 
       const player = getPlayer();
-      if (player) player.previous();
+      if (player) {
+        const widget = self.get_parent().get_parent().get_parent().get_parent();
+        widget.toggleClassName('track-changing', true);
+        self.child.toggleClassName('thumbnail-change', true);
+
+        Utils.timeout(2000, () => {
+          player.previous();
+          self.child.toggleClassName('thumbnail-change', false);
+          widget.toggleClassName('track-changing', false);
+        });
+      }
       lastScrollTime = currentTime;
-      return true; // Stop event propagation
+      return true;
     },
     child: Widget.Box({
       className: "cover-art",
@@ -421,7 +449,7 @@ export default () => {
         // Add animation on track change
         if (newTitle !== lastTitle && newTitle !== '') {
             self.toggleClassName('song-changing', true);
-            Utils.timeout(15000, () => {
+            Utils.timeout(2000, () => {
                 if (!self.is_destroyed) {
                     self.toggleClassName('song-changing', false);
                 }
@@ -472,12 +500,10 @@ export default () => {
                     className: "spacing-v-10",
                     vpack: "center",
                     vertical: true,
-                    vexpand: true,
                     children: [
                       TrackLabels(),
                       Widget.Box({
-                        vpack: "end",
-                        vexpand: true,
+                        css:`margin-top: 2rem;`,
                         children: [MediaControls()],
                       }),
                     ],

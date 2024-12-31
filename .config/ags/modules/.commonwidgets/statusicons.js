@@ -30,7 +30,10 @@ export const NotificationIndicator = (notifCenterName = "sideright") => {
         }),
     child: Widget.Box({
       children: [
-        MaterialIcon("notifications", "large"),
+       Widget.Label({
+          className: "txt-large onSurfaceVariant   icon-material",
+          label: "notifications",
+        }),
         Widget.Label({
           className: "txt-small onSurfaceVariant titlefont",
           attribute: {
@@ -243,7 +246,6 @@ export const StatusIcons = (props = {}, monitor = 0) =>
     className: "statusicons spacing-h-15",
     css: "padding:0 10px; ",
     children: [
-      NotificationIndicator(),
       Widget.Box({
         className: "statusicons-network",
         children: [NetworkIndicator()],

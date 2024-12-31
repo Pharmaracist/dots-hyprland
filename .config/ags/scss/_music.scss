@@ -43,76 +43,6 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     }
 }
 
-@keyframes multiSweep {
-    0% {
-        background: repeating-linear-gradient(135deg,
-            $layer0 0%,
-            $layer0 20%,
-            transparentize($secondary, 0.8) 20%,
-            transparentize($secondary, 0.8) 45%,
-            $layer0 45%,
-            $layer0 65%,
-            transparentize($secondary, 0.8) 65%,
-            transparentize($secondary, 0.8) 90%,
-            $layer0 90%,
-            $layer0 100%
-        );
-        background-size: 200% 100%;
-        background-position: 0% 0%;
-    }
-    100% {
-        background: repeating-linear-gradient(135deg,
-            $layer0 0%,
-            $layer0 20%,
-            transparentize($secondary, 0.8) 20%,
-            transparentize($secondary, 0.8) 45%,
-            $layer0 45%,
-            $layer0 65%,
-            transparentize($secondary, 0.8) 65%,
-            transparentize($secondary, 0.8) 90%,
-            $layer0 90%,
-            $layer0 100%
-        );
-        background-size: 200% 100%;
-        background-position: -200% 0%;
-    }
-}
-
-@keyframes multiSweepIpod {
-    0% {
-        background: repeating-linear-gradient(135deg,
-            $layer0 0%,
-            $layer0 20%,
-            transparentize($secondary, 0.75) 20%,
-            transparentize($secondary, 0.75) 45%,
-            $layer0 45%,
-            $layer0 65%,
-            transparentize($secondary, 0.75) 65%,
-            transparentize($secondary, 0.75) 90%,
-            $layer0 90%,
-            $layer0 100%
-        );
-        background-size: 200% 100%;
-        background-position: 0% 0%;
-    }
-    100% {
-        background: repeating-linear-gradient(135deg,
-            $layer0 0%,
-            $layer0 20%,
-            transparentize($secondary, 0.75) 20%,
-            transparentize($secondary, 0.75) 45%,
-            $layer0 45%,
-            $layer0 65%,
-            transparentize($secondary, 0.75) 65%,
-            transparentize($secondary, 0.75) 90%,
-            $layer0 90%,
-            $layer0 100%
-        );
-        background-size: 200% 100%;
-        background-position: -200% 0%;
-    }
-}
-
 .osd-music-info {
     margin: 1.023rem 0rem;
     padding: 1rem;
@@ -264,14 +194,13 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
 .osd-ipod {
     @include large-rounding;
     background: $layer0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 2px 8px $surfaceContainerLowest(0, 0, 0, 0.5);
     border: 0.55px solid $outline;
     margin: 0 1rem 1rem;
     padding: 0rem 1.023rem;
 
     &.song-changing {
-        animation: multiSweep 2s linear infinite;
-        animation-iteration-count: 20;
+        animation: ipodSweep 2s linear infinite;
     }
 }
 
@@ -282,22 +211,23 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     margin: 0 1rem 1rem;
 
     &.song-changing {
-        background: repeating-linear-gradient(135deg,
-            $layer0 0%,
-            $layer0 20%,
-            transparentize($secondary, 0.75) 20%,
-            transparentize($secondary, 0.75) 45%,
-            $layer0 45%,
-            $layer0 65%,
-            transparentize($secondary, 0.75) 65%,
-            transparentize($secondary, 0.75) 90%,
-            $layer0 90%,
-            $layer0 100%
-        );
-        background-size: 200% 100%;
         animation: ipodSweep 2.5s linear infinite;
     }
 
+    &.track-changing {
+        .cover-art {
+            transition: opacity 1200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .ipod-content {
+            animation: pulse-spread 1200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+    }
+    
+    .cover-art {
+        transition: opacity 1200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
     .ipod-content {
         padding: 1rem 2.1rem;
       
@@ -308,12 +238,14 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
             padding: 0.2rem;
         }
         .cover-art {
+            transition: opacity 800ms cubic-bezier(0.4, 0.0, 0.2, 1);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
         .track-title {
             @include mainfont;
             font-size: 2.8rem;
             color: $onSecondaryContainer;
+            transition: opacity 200ms ease;
         }
         
         .track-artist {
@@ -321,6 +253,7 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
             color: $onSecondaryContainer;
             margin-top: 0.5rem;
             font-size: 1.8rem;
+            transition: opacity 200ms ease;
         }
 
         .right-section {
@@ -362,13 +295,12 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     }
 }
 
-@keyframes ipodSweep {
-    0% {
-        background-position: 0% 0%;
-    }
-    100% {
-        background-position: -200% 0%;
-    }
+.thumbnail-change {
+    opacity: 0;
+}
+
+.slide-change {
+    opacity: 0;
 }
 
 .cava-visualizer {
@@ -402,21 +334,45 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
 .control-buttons{
     @include full-rounding;
     @include element_decel;
-    color:$battOnLayer2;
-    padding:0.5rem;
-    background-color: $layer0;
-    &:hover{
-       background-color:  mix($secondaryContainer, $onSecondaryContainer, 90%);
+    // color: $battOnLayer2;
+    padding: 0.5rem;
+    background-color: transparentize($layer0,0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1),
+                0 2px 4px rgba(0, 0, 0, 0.08),
+                0 4px 8px rgba(0, 0, 0, 0.06),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+
+    &:hover {
+        background-color: mix($secondaryContainer, $onSecondaryContainer, 90%);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12),
+                   0 4px 8px rgba(0, 0, 0, 0.1),
+                   0 8px 16px rgba(0, 0, 0, 0.08),
+                   inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     }
-    &:active{
+
+    &:active {
         background-color: mix($secondaryContainer, $onSecondaryContainer, 85%);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15),
+                   inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    button {
+        transition: all 200ms cubic-bezier(0.1, 0.7, 0.1, 1);
+        &:hover {
+        }
+        &:active {
+        }
     }
 }
+
 .control-button {
     @include icon-material;
-    padding: 0.3rem;
-    border-radius: 50%;
-    color:$battOnLayer2;
+    @include full-rounding;
+    padding:0 0.1rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    color:$onLayer0;
     transition: all 200ms ease;
     font-size: 2rem;
     &:hover {

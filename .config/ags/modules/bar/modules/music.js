@@ -51,6 +51,7 @@ const showVolumeIndicator = (volume) => {
 // Music Widget
 export default () =>
   EventBox({
+    className: "sec-txt",
     onPrimaryClick: () => {
       App.toggleWindow('ipod');
     },
@@ -69,7 +70,10 @@ export default () =>
         self.child.children[2].revealChild = false;
       },
       child: Box({
-        css: `padding: 0.5rem;`,
+        css: `
+          padding: 0.5rem;
+          position: relative;
+        `,
         hexpand: true,
         className: 'spacing-h-15',
         children: [
@@ -93,7 +97,7 @@ export default () =>
               return true; // Stop event propagation
             },
             child: Box({
-              className: 'bar-music-art',
+              // className: 'bar-music-art',
               setup: (self) => {
                 let lastCoverPath = '';
                 
@@ -101,15 +105,13 @@ export default () =>
                   const mpris = findPlayer();
                   if (!mpris) {
                     self.css = `
+                      margin:0  0.9rem 0 0.7rem;
                       min-width: 2.8rem;
-                      margin: 0;
-                      padding: 0 0.23rem;
                       background-image: -gtk-icontheme('audio-x-generic-symbolic');
                       background-size: 1.8rem;
                       background-position: center;
                       background-repeat: no-repeat;
-                      border-radius: 19px;
-                      margin-right: 0.75rem;
+                      border-radius: 16px;
                       opacity: 0.7;
                     `;
                     self.className = "sec-txt";
@@ -118,15 +120,14 @@ export default () =>
                   const coverPath = mpris?.coverPath;
                   lastCoverPath = coverPath;
                   const defaultCSS = `
-                    min-width: 2.8rem;
-                    margin: 0;
-                    padding: 0 0.23rem;
-                    background-image: -gtk-icontheme('audio-x-generic-symbolic');
-                    background-size: 1.8rem;
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    border-radius: 19px;
-                    margin-right: 0.75rem;
+                       margin:0  0.9rem 0 0.7rem;
+                      min-width: 2.8rem;
+                      background-image: -gtk-icontheme('audio-x-generic-symbolic');
+                      background-size: 1.8rem;
+                      background-position: center;
+                      background-repeat: no-repeat;
+                      border-radius: 16px;
+                      opacity: 0.7;
                   `;
 
                   if (coverPath) {
@@ -136,13 +137,18 @@ export default () =>
                           const tmpPath = `/tmp/ags-music-cover-${Date.now()}.png`;
                           Utils.writeFile(arr, tmpPath);
                           self.css = `
-                            min-width: 2.8rem;
-                            margin-right: 0.75rem;
-                            background-image: url("file://${tmpPath}");
-                            background-size: cover;
-                            background-position: center;
-                            border-radius: 19px;
-                          `;
+                          min-width: 3.4rem;
+                          background-image: url("file://${coverPath}");
+                          background-size: 1rem;
+                          background-position: center;
+                          background-repeat: no-repeat;
+                          background-size: cover;
+                          border-radius: 16px;
+                          margin:0.3rem 0.6rem 0.3rem 0.3rem;
+                          box-shadow: 0 1px 2px rgba(0,0,0,0.1), 
+                                      0 1.5px 2.5px rgba(0,0,0,0.1), 
+                                      0 2px 4px rgba(0,0,0,0.1);
+                      `;
                           // Cleanup old cover files
                           Utils.execAsync(['sh', '-c', 'rm -f /tmp/ags-music-cover-*.png']);
                         })
@@ -151,17 +157,19 @@ export default () =>
                         });
                     } else {
                       self.css = `
-                    min-width: 2.5rem;
-                    margin: 0;
-                    background-image: url("file://${coverPath}");
-                    background-size: 1.8rem;
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    border-radius: 18px;
-                    margin-right: 0.75rem;
+                      min-width: 3.4rem;
+                      background-image: url("file://${coverPath}");
+                      background-size: 1rem;
+                      background-position: center;
+                      background-repeat: no-repeat;
+                      background-size: cover;
+                      border-radius: 19px;
+                      margin:0.3rem 0.6rem 0.3rem 0.3rem;
+                      box-shadow: 0 1px 2px rgba(0,0,0,0.1), 
+                                  0 1.5px 2.5px rgba(0,0,0,0.1), 
+                                  0 2px 4px rgba(0,0,0,0.1);
                   `;
-                    }
+                }
                   } else {
                     self.css = defaultCSS;
                   }
@@ -186,6 +194,8 @@ export default () =>
             vertical: true,
             setup: (self) => {
             },
+            vpack: "center",
+            vexpand: true,
             children: [
               Label({
                 className: "onSurfaceVariant txt-large",
@@ -213,7 +223,7 @@ export default () =>
                       }
                       if (current) {
                           current.toggleClassName('song-changing', true);
-                          Utils.timeout(15000, () => {
+                          Utils.timeout(3000, () => {
                               current.toggleClassName('song-changing', false);
                           });
                       }
@@ -226,16 +236,17 @@ export default () =>
               Label({
                 className: "bar-music-txt txt-smallie",
                 truncate: "end",
+                css:`opacity:0.6`,
                 xalign: 0,
                 justification: "left",
-                maxWidthChars: 25,
+                maxWidthChars: 12,
                 setup: (self) => {
                   let lastArtist = '';
                   const update = () => {
                     const mpris = findPlayer();
                     if (!mpris?.trackArtists) {
                       self.label = "Not playing";
-                      self.className = "bar-music-txt txt-smallie txt-norm";
+                      self.className = "bar-music-txt txt-smallie onSurfaceVariant";
                       return;
                     }
                     const newArtist = mpris.trackArtists.join(', ') || "Unknown artist";
@@ -252,15 +263,16 @@ export default () =>
           Revealer({
             revealChild: false,
             transition: 'slide_right',
-            transitionDuration: 300,
+            transitionDuration: 500,
             child: Box({
+              className: 'bar-music-controls-overlay spacing-h-15',
+              css: `
+              margin-right:1.1rem
+              `,
               hpack: "end",
               children: [
-                Widget.Box({
-                 css:`min-width:2rem`     
-                }), 
                 Button({
-                  className: 'txt-norm sec-txt bar-music-button',
+                  className: 'txt-larger sec-txt',
                   label: '󰒮',
                   onClicked: () => {
                     const player = findPlayer();
@@ -268,7 +280,7 @@ export default () =>
                   },
                 }),
                 Button({
-                  className: 'txt-norm  sec-txt bar-music-button',
+                  className: 'txt-larger  sec-txt',
                   setup: (self) => {
                     const update = () => {
                       const player = findPlayer();
@@ -283,7 +295,7 @@ export default () =>
                   },
                 }),
                 Button({
-                  className: 'txt-norm sec-txt bar-music-button',
+                  className: 'txt-larger sec-txt ',
                   label: '󰒭',
                   onClicked: () => {
                     const player = findPlayer();

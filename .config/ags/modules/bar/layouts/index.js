@@ -5,6 +5,7 @@ import App from 'resource:///com/github/Aylur/ags/app.js';
 import Variable from 'resource:///com/github/Aylur/ags/variable.js';
 import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
+import * as modules from '../modules/registry.js';
 
 // Create variables to track sidebar visibility
 const sideleftVisible = Variable(false);
@@ -80,11 +81,10 @@ export const BarLayouts = {
         name: 'Knocks',
         layout: (modules) => ({
             start: [    ScrollableContainer({
-                name: 'tezy',
                 sets: [
                     [  Widget.EventBox({
                         setup: self => self.toggleClassName('hover'),
-                        className: "txt-gigantic icon-nerd side-bar-button sec-txt",
+                        className: "side-bar-button",
                         child: Widget.Label({
                           label: " \udb81\udef8 ",
                         }),
@@ -144,12 +144,13 @@ export const BarLayouts = {
                     sets: [
                         [Widget.Box({
                             hexpand: true,
-                            css:`min-width:20rem;`,
+                            css:`min-width:26rem;`,
                             className: 'bar-knocks padding-rl-5',
                             children: [modules.MediaModules.musicStuff()],
                         })],
                         [Widget.Box({
                             hexpand: true,
+                            css:`min-width:26rem;`,
                             className: 'bar-knocks padding-rl-15',
                             children: [
                                 Widget.Box({ hpack: 'center', children: [modules.AppModules.pinnedApps()]}) ],
@@ -180,7 +181,7 @@ export const BarLayouts = {
                     name: 'tezy',
                     sets: [
                         [Widget.Box({
-                            css:`min-width:20rem;`,
+                            css:`min-width:26rem;`,
                             hexpand: true,
                             hpack: 'fill',
                             className: ' bar-knocks padding-rl-15',
@@ -191,6 +192,13 @@ export const BarLayouts = {
                                 modules.InfoModules.indicators(),
                                 modules.StatusModules.resourcesBar(),
                             ]
+                        })], 
+                        [Widget.Box({
+                            hexpand: true,
+                            className: 'bar-knocks padding-rl-15',
+                            children: [
+                                modules.InfoModules.weather()
+                            ],
                         })],
                         [Widget.Box({
                             hpack: 'fill',
@@ -230,11 +238,11 @@ export const BarLayouts = {
             ],
             end: [Widget.Box({
                 children: [
-                    modules.StatusModules.tray({ iconSize: 30 }),
+                    modules.StatusModules.tray(),
                 ],
             }),
                 Widget.EventBox({
-                className: "txt-gigantic side-bar-button",
+                className: "side-bar-button end-widget",
                 child: Widget.Label({
                   label: " \udb81\udef8 ",
                 }),
