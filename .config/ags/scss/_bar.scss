@@ -118,10 +118,19 @@ scrollable.media {
     margin: $elevation_margin;
     @include large-rounding;
     margin: 8px 120px;
-    // border-radius: 1.37rem;
     padding: 3px;
     border: 0.55px solid $outline;
     -gtk-outline-radius: 10rem;
+
+    box {
+        &.has-notifications {
+            border-color: $secondary;
+        }
+        
+        &.notification-sweep {
+            animation: diagonalSweep 4s ease;
+        }
+    }
 }
 .bar-notch {
     background-color: $layer0;

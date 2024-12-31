@@ -56,11 +56,14 @@ export default () =>
     },
     setup: (self) => self.hook(Mpris, () => {
       const player = findPlayer();
-      self.visible = player?.trackTitle ? true : false;
+      self.visible = true; // Always show the widget
     }),
     child: EventBox({
       onHover: (self) => {
-        self.child.children[2].revealChild = true;
+        const player = findPlayer();
+        if (player?.trackTitle) {
+          self.child.children[2].revealChild = true;
+        }
       },
       onHoverLost: (self) => {
         self.child.children[2].revealChild = false;
@@ -96,8 +99,22 @@ export default () =>
                 
                 const update = () => {
                   const mpris = findPlayer();
-                  if (!mpris) return;
-
+                  if (!mpris) {
+                    self.css = `
+                      min-width: 2.8rem;
+                      margin: 0;
+                      padding: 0 0.23rem;
+                      background-image: -gtk-icontheme('audio-x-generic-symbolic');
+                      background-size: 1.8rem;
+                      background-position: center;
+                      background-repeat: no-repeat;
+                      border-radius: 19px;
+                      margin-right: 0.75rem;
+                      opacity: 0.7;
+                    `;
+                    self.className = "sec-txt";
+                    return;
+                  }
                   const coverPath = mpris?.coverPath;
                   lastCoverPath = coverPath;
                   const defaultCSS = `
@@ -175,14 +192,18 @@ export default () =>
                 truncate: "end",
                 xalign: 0,
                 justification: "left",
-                css:`min-width:15rem;`,
                 hexpand: true,
                 setup: (self) => {
                   let lastTitle = '';
                   const update = () => {
                     const mpris = findPlayer();
-                    if (!mpris) return;
-                    const newTitle = mpris.trackTitle || "";
+                    if (!mpris?.trackTitle) {
+                      self.label = "No media playing";
+                      self.className = "onSurfaceVariant txt-norm";
+                      return;
+                    }
+                    self.className = "onSurfaceVariant txt-large";
+                    const newTitle = mpris.trackTitle;
                     if (newTitle !== lastTitle) {
                       self.label = newTitle;
                       // Walk up the widget tree to find the knocks container
@@ -212,8 +233,12 @@ export default () =>
                   let lastArtist = '';
                   const update = () => {
                     const mpris = findPlayer();
-                    if (!mpris) return;
-                    const newArtist = mpris.trackArtists.join(", ") || "";
+                    if (!mpris?.trackArtists) {
+                      self.label = "Not playing";
+                      self.className = "bar-music-txt txt-smallie txt-norm";
+                      return;
+                    }
+                    const newArtist = mpris.trackArtists.join(', ') || "Unknown artist";
                     if (newArtist !== lastArtist) {
                       self.label = newArtist;
                       lastArtist = newArtist;

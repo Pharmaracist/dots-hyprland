@@ -3,6 +3,8 @@ import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import ScrollableContainer from '../modules/scrollable.js';
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Variable from 'resource:///com/github/Aylur/ags/variable.js';
+import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
+import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 
 // Create variables to track sidebar visibility
 const sideleftVisible = Variable(false);
@@ -142,6 +144,7 @@ export const BarLayouts = {
                     sets: [
                         [Widget.Box({
                             hexpand: true,
+                            css:`min-width:20rem;`,
                             className: 'bar-knocks padding-rl-5',
                             children: [modules.MediaModules.musicStuff()],
                         })],
@@ -270,8 +273,39 @@ export const BarLayouts = {
         className: 'bar-floating-short',
         css:"min-height:2.71rem",
         layout: (modules) => ({
-            start: [    ScrollableContainer({
+            start: [ScrollableContainer({
                 name: 'media',
+                setup: (self) => {
+                    // Connect to notification signals
+                    self.hook(Notifications, self => {
+                        const hasNotifications = Notifications.notifications.length > 0;
+                        console.log('Notifications changed:', hasNotifications ? 'yes' : 'no', Notifications.notifications.length);
+                        self.toggleClassName('has-notifications', hasNotifications);
+                        if (hasNotifications) {
+                            self.toggleClassName('notification-sweep', true);
+                            Utils.timeout(4000, () => {
+                                self.toggleClassName('notification-sweep', false);
+                            });
+                        }
+                    }, 'notified');
+
+                    self.hook(Notifications, self => {
+                        const hasNotifications = Notifications.notifications.length > 0;
+                        console.log('Notification closed:', hasNotifications ? 'yes' : 'no', Notifications.notifications.length);
+                        self.toggleClassName('has-notifications', hasNotifications);
+                    }, 'closed');
+
+                    // Initial check
+                    const hasNotifications = Notifications.notifications.length > 0;
+                    console.log('Initial notifications:', hasNotifications ? 'yes' : 'no', Notifications.notifications.length);
+                    self.toggleClassName('has-notifications', hasNotifications);
+                    if (hasNotifications) {
+                        self.toggleClassName('notification-sweep', true);
+                        Utils.timeout(4000, () => {
+                            self.toggleClassName('notification-sweep', false);
+                        });
+                    }
+                },
                 sets: [
                     [Widget.Box({
                         hexpand: true,

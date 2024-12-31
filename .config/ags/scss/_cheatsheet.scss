@@ -180,6 +180,88 @@
                 background-color: $layer2Hover;
             }
         }
+        
+        .refresh-button {
+            background: $surfaceVariant;
+            color: $onSurfaceVariant;
+            margin-left: 8px;
+
+            &:hover {
+                background: mix($surfaceVariant, $onSurfaceVariant, 90%);
+            }
+        }
+        
+        .music-controls {
+            padding: 8px;
+            background: $surfaceVariant;
+            border-radius: 16px;
+            margin: 8px;
+
+            button {
+                background: $surface;
+                color: $onSurfaceVariant;
+
+                &:hover {
+                    background: mix($surface, $onSurfaceVariant, 90%);
+                }
+            }
+        }
+
+        .music-grid {
+            padding: 8px;
+        }
+
+        .music-row {
+            margin-bottom: 8px;
+        }
+
+        .music-item {
+            background: $surfaceVariant;
+            border-radius: 12px;
+            padding: 8px;
+            transition: all 200ms ease;
+
+            &:hover {
+                background: mix($surfaceVariant, $onSurfaceVariant, 90%);
+            }
+
+            .music-container {
+                padding: 0;
+                background: none;
+
+                &:hover {
+                    background: none;
+                }
+            }
+
+            .music-preview {
+                background: $surface;
+                border-radius: 8px;
+            }
+
+            .music-fallback {
+                min-width: 200px;
+                min-height: 112px;
+                border-radius: 8px;
+                background: $surface;
+                color: $onSurfaceVariant;
+            }
+
+            .music-info {
+                margin-top: 4px;
+                padding: 0 4px;
+            }
+
+            .music-action-btn {
+                background: none;
+                padding: 4px;
+                border-radius: 12px;
+
+                &:hover {
+                    background: mix($surfaceVariant, $onSurfaceVariant, 80%);
+                }
+            }
+        }
     }
 }
 
@@ -440,3 +522,62 @@ $coloractinium: $term7;
 //         }
 //     }
 // }
+// .media-controls {
+//     padding: 4px;
+//     border-radius: 20px;
+//     background: $bg-alt;
+
+//     button {
+//         min-width: 32px;
+//         min-height: 32px;
+//         padding: 4px;
+//         border-radius: 16px;
+//         background: transparent;
+//         transition: all 0.2s ease;
+
+//         &:hover {
+//             background: $hover;
+//         }
+
+//         &:active {
+//             background: $active;
+//         }
+
+//         label {
+//             font-size: 18px;
+//             color: $fg;
+//         }
+//     }
+// }
+
+// .media-actions {
+//     button {
+//         min-width: 32px;
+//         min-height: 32px;
+//         padding: 4px;
+//         border-radius: 16px;
+//         background: $bg-alt;
+//         transition: all 0.2s ease;
+
+//         &:hover {
+//             background: $hover;
+//         }
+
+//         &:active {
+//             background: $active;
+//         }
+
+//         label {
+//             font-size: 18px;
+//             color: $fg;
+//         }
+//     }
+// }
+
+.add-button{
+    @include full-rounding;
+    @include element_decel;
+    background-color: $layer2;
+    color: $onLayer2;
+    margin: 0.341rem;
+}

@@ -2,10 +2,11 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 import Todo from '../../services/todo.js';
 import Variable from 'resource:///com/github/Aylur/ags/variable.js';
-import Gtk from 'gi://Gtk';
+import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import GdkPixbuf from 'gi://GdkPixbuf';
 import Gdk from 'gi://Gdk';
 import Pango from 'gi://Pango';
+import Gtk from 'gi://Gtk';
 
 const { Box, Button, Entry, EventBox, Label, Revealer, Stack, Scrollable, Overlay } = Widget;
 const { Gravity } = imports.gi.Gdk;
@@ -512,6 +513,138 @@ const VideoItem = (video, id) => {
     });
 };
 
+const MusicItem = (music, id) => {
+    let pixbuf;
+    try {
+        if (music.thumbnail) {
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                music.thumbnail,
+                200,  // width
+                112,  // height
+                true  // preserve aspect ratio
+            );
+        }
+    } catch (e) {
+        print(`Error loading music thumbnail: ${e}`);
+    }
+
+    return Box({
+        className: 'music-item onSurfaceVariant',
+        vertical: true,
+        spacing: 4,
+        children: [
+            Button({
+                className: 'music-container',
+                onClicked: () => {
+                    Utils.execAsync(['xdg-open', music.path]);
+                    App.closeWindow('cheatsheet');
+                },
+                child: Widget.DrawingArea({
+                    className: 'music-preview',
+                    css: 'min-width: 200px; min-height: 112px; border-radius: 8px;',
+                    setup: area => {
+                        if (pixbuf) {
+                            area.set_size_request(200, 112);
+                            area.connect('draw', (widget, cr) => {
+                                const scale = widget.get_scale_factor();
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw the thumbnail
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+
+                                if (pixbuf) {
+                                    cr.scale(width / pixbuf.get_width(), height / pixbuf.get_height());
+                                    Gdk.cairo_set_source_pixbuf(cr, pixbuf, 0, 0);
+                                    cr.paint();
+                                }
+                            });
+                        } else {
+                            // Fallback to play icon if no thumbnail
+                            area.set_size_request(200, 112);
+                            area.connect('draw', (widget, cr) => {
+                                const width = widget.get_allocated_width();
+                                const height = widget.get_allocated_height();
+
+                                // Draw rounded corners
+                                cr.arc(8, 8, 8, Math.PI, 1.5 * Math.PI);
+                                cr.arc(width - 8, 8, 8, 1.5 * Math.PI, 2 * Math.PI);
+                                cr.arc(width - 8, height - 8, 8, 0, 0.5 * Math.PI);
+                                cr.arc(8, height - 8, 8, 0.5 * Math.PI, Math.PI);
+                                cr.closePath();
+                                cr.clip();
+
+                                // Draw background
+                                Gtk.render_background(
+                                    widget.get_style_context(),
+                                    cr,
+                                    0,
+                                    0,
+                                    width,
+                                    height,
+                                );
+                            });
+
+                            return Box({
+                                className: 'music-fallback',
+                                children: [
+                                    Label({
+                                        className: 'icon-material onSurfaceVariant txt-norm',
+                                        label: 'music_note',
+                                        css: 'font-size: 48px;',
+                                    }),
+                                ],
+                            });
+                        }
+                    },
+                }),
+            }),
+            Box({
+                className: 'music-info',
+                children: [
+                    Button({
+                        className: 'music-action-btn',
+                        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+                        onClicked: () => {
+                            Todo.deleteMusic(id);
+                            updateContent();
+                        },
+                        child: Label({
+                            className: 'icon-material onSurfaceVariant txt-norm',
+                            label: 'delete',
+                            css: 'font-size: 16px;',
+                        }),
+                    }),
+                    Label({
+                        label: music.name || 'Untitled Music',
+                        xalign: 0,
+                        justification: 'left',
+                        truncate: 'end',
+                        maxWidthChars: 25,
+                        className: 'onSurfaceVariant txt-norm',
+                        css: 'margin-left: 4px; font-size: 14px;',
+                    }),
+                ],
+            }),
+        ],
+    });
+};
+
 const CategoryButton = (label, icon, onClicked, expanded = false) => {
     const revealer = Revealer({
         revealChild: expanded,
@@ -554,45 +687,48 @@ const CategoryButton = (label, icon, onClicked, expanded = false) => {
 };
 
 export default () => {
-    const contentEntry = Entry({
+    const todoEntry = Entry({
         className: 'content-entry',
-        placeholderText: 'New Todo',
-        hpack: 'center',
-        halign: '',
         hexpand: true,
+        hpack:'center',
+        placeholderText: 'New Todo',
         onAccept: ({ text }) => {
-            if (!text) return;
-            
-            if (contentStack.shown === 'current' || contentStack.shown === 'done') {
-                Todo.add(text);
-            } else if (contentStack.shown === 'notes') {
-                Todo.addNote(text);
+            if (text.length > 0) {
+                Todo.addTodo(text);
+                todoEntry.text = '';
             }
-            
-            contentEntry.text = '';
+        },
+    });
+
+    const noteEntry = Entry({
+        className: 'content-entry',
+        hexpand: true,
+        hpack:'center',
+        placeholderText: 'New Note',
+        onAccept: ({ text }) => {
+            if (text.length > 0) {
+                Todo.addNote(text);
+                noteEntry.text = '';
+            }
         },
     });
 
     const todoAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        css: 'padding: 0.8rem; border-radius: 25px',
         child: Box({
             children: [
                 Label({
-                    className: 'icon-material',
+                    className: 'icon-material txt-large',
                     label: 'add',
-                    css: 'font-size: 16px;',
-                }),
-                Label({
-                    label: 'Add Task',
                 }),
             ],
         }),
         onClicked: () => {
-            const text = contentEntry.text.trim();
+            const text = todoEntry.text.trim();
             if (text) {
-                Todo.add(text);
-                contentEntry.text = '';
+                Todo.addTodo(text);
+                todoEntry.text = '';
                 updateContent();
             }
         },
@@ -600,24 +736,20 @@ export default () => {
 
     const noteAddButton = Button({
         className: 'add-button',
-        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        css: 'padding: 0.8rem; border-radius: 25px',
         child: Box({
             children: [
                 Label({
-                    className: 'icon-material',
+                    className: 'icon-material txt-large',
                     label: 'add',
-                    css: 'font-size: 16px;',
-                }),
-                Label({
-                    label: 'Add Note',
                 }),
             ],
         }),
         onClicked: () => {
-            const text = contentEntry.text.trim();
+            const text = noteEntry.text.trim();
             if (text) {
                 Todo.addNote(text);
-                contentEntry.text = '';
+                noteEntry.text = '';
                 updateContent();
             }
         },
@@ -626,20 +758,13 @@ export default () => {
     const imageAddButton = Button({
         className: 'add-button',
         css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
-        child: Box({
-            children: [
-                Label({
-                    className: 'icon-material',
-                    label: 'add',
-                    css: 'font-size: 16px;',
-                }),
-                Label({
-                    label: 'Add Image',
-                }),
-            ],
+        child: Label({
+            className: 'icon-material',
+            label: 'add',
         }),
         onClicked: () => {
-            Utils.execAsync(['zenity', '--file-selection', '--title=Select Image', '--file-filter=Images | *.png *.jpg *.jpeg *.gif *.webp'])
+            const defaultPath = GLib.build_filenamev([GLib.get_home_dir(), 'ags', 'Dashboard', 'images']);
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select Image', '--file-filter=Images | *.png *.jpg *.jpeg *.gif *.webp', `--filename=${defaultPath}/`])
                 .then(path => {
                     if (path) {
                         path = path.trim();
@@ -655,28 +780,31 @@ export default () => {
         },
     });
 
+    const imageRefreshButton = Button({
+        className: 'refresh-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Label({
+            className: 'icon-material',
+            label: 'refresh',
+        }),
+        onClicked: () => Todo.rescan(),
+    });
+
     const pdfAddButton = Button({
         className: 'add-button',
         css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
-        child: Box({
-            children: [
-                Label({
-                    className: 'icon-material',
-                    label: 'add',
-                    css: 'font-size: 16px;',
-                }),
-                Label({
-                    label: 'Add PDF',
-                }),
-            ],
+        child: Label({
+            className: 'icon-material',
+            label: 'add',
         }),
         onClicked: () => {
-            Utils.execAsync(['zenity', '--file-selection', '--title=Select PDF', '--file-filter=PDF Files | *.pdf'])
-                .then(path => {
+            const defaultPath = GLib.build_filenamev([GLib.get_home_dir(), 'ags', 'Dashboard', 'pdf']);
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select PDF', '--file-filter=PDF Files | *.pdf', `--filename=${defaultPath}/`])
+                .then(async path => {
                     if (path) {
                         path = path.trim();
-                        if (Todo.addPdf(path)) {
-                            Todo.notify('pdfs_json');
+                        const id = await Todo.addPdf(path);
+                        if (id >= 0) {
                             updateContent();
                         }
                     }
@@ -687,65 +815,258 @@ export default () => {
         },
     });
 
+    const pdfRefreshButton = Button({
+        className: 'refresh-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Label({
+            className: 'icon-material',
+            label: 'refresh',
+        }),
+        onClicked: () => Todo.rescan(),
+    });
+
     const videoAddButton = Button({
         className: 'add-button',
         css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
-        child: Box({
-            children: [
-                Label({
-                    className: 'icon-material onSurfaceVariant txt-norm',
-                    label: 'add',
-                    css: 'font-size: 16px;',
-                }),
-                Label({
-                    label: 'Add Video',
-                    className: 'onSurfaceVariant txt-norm',
-                }),
-            ],
+        child: Label({
+            className: 'icon-material onSurfaceVariant txt-norm',
+            label: 'add',
+            css: 'font-size: 16px;',
         }),
         onClicked: () => {
-            Utils.execAsync(['bash', '-c', 'zenity --file-selection --title="Select a Video"']).then((path) => {
-                if (path) {
-                    path = path.trim();
-                    const name = path.split('/').pop();
-                    Todo.addVideo(path, name);
-                    updateContent();
-                }
-            });
+            const defaultPath = GLib.build_filenamev([GLib.get_home_dir(), 'ags', 'Dashboard', 'videos']);
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select Video', '--file-filter=Video Files | *.mp4 *.mkv *.webm *.avi *.mov', `--filename=${defaultPath}/`])
+                .then(path => {
+                    if (path) {
+                        path = path.trim();
+                        if (Todo.addVideo(path)) {
+                            Todo.notify('videos_json');
+                            updateContent();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error selecting video:', error);
+                });
         },
+    });
+
+    const videoRefreshButton = Button({
+        className: 'refresh-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Label({
+            className: 'icon-material',
+            label: 'refresh',
+        }),
+        onClicked: () => Todo.rescan(),
+    });
+
+    const musicAddButton = Button({
+        className: 'add-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Label({
+            className: 'icon-material',
+            label: 'add',
+        }),
+        onClicked: () => {
+            const defaultPath = GLib.build_filenamev([GLib.get_home_dir(), 'ags', 'Dashboard', 'music']);
+            Utils.execAsync(['zenity', '--file-selection', '--title=Select Music File', '--filename=' + defaultPath + '/', '--file-filter=*.mp3 *.m4a *.ogg *.flac *.wav'])
+                .then(path => {
+                    if (path) {
+                        Todo.addMusic?.(path.trim());
+                    }
+                })
+                .catch(print);
+        },
+    });
+
+    const musicRefreshButton = Button({
+        className: 'refresh-button',
+        css: 'min-width: 24px; min-height: 24px; padding: 4px; border-radius: 12px;',
+        child: Label({
+            className: 'icon-material',
+            label: 'refresh',
+        }),
+        onClicked: () => Todo.rescan(),
+    });
+
+    const musicControls = Box({
+        className: 'music-controls',
+        spacing: 8,
+        children: [
+            Button({
+                className: 'music-control-button',
+                css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                child: Label({
+                    className: 'icon-material',
+                    label: 'skip_previous',
+                }),
+                onClicked: () => {
+                    const player = Mpris.getPlayer();
+                    if (player) player.previous();
+                },
+            }),
+            Button({
+                className: 'music-control-button',
+                css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                child: Label({
+                    className: 'icon-material',
+                    label: 'play_arrow',
+                }),
+                onClicked: () => {
+                    const player = Mpris.getPlayer();
+                    if (player) player.playPause();
+                },
+            }),
+            Button({
+                className: 'music-control-button',
+                css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                child: Label({
+                    className: 'icon-material',
+                    label: 'skip_next',
+                }),
+                onClicked: () => {
+                    const player = Mpris.getPlayer();
+                    if (player) player.next();
+                },
+            }),
+        ],
     });
 
     const entryBox = Box({
         className: 'entry-box',
         spacing: 8,
         children: [
-            contentEntry,
             Stack({
-                transition: 'slide_up_down',
-                transitionDuration: 200,
+                transition: 'slide_left_right',
                 items: [
-                    ['current', todoAddButton],
-                    ['done', todoAddButton],
-                    ['notes', noteAddButton],
-                    ['images', imageAddButton],
-                    ['pdfs', pdfAddButton],
-                    ['videos', videoAddButton]
+                    ['todo', Box({
+                        className: 'entry-box-content',
+                        children: [todoEntry, todoAddButton],
+                    })],
+                    ['notes', Box({
+                        className: 'entry-box-content',
+                        children: [noteEntry, noteAddButton],
+                    })],
+                    ['images', Box({
+                        className: 'entry-box-content',
+                        spacing: 4,
+                        children: [imageAddButton, imageRefreshButton],
+                    })],
+                    ['pdfs', Box({
+                        className: 'entry-box-content',
+                        spacing: 4,
+                        children: [pdfAddButton, pdfRefreshButton],
+                    })],
+                    ['videos', Box({
+                        className: 'entry-box-content',
+                        spacing: 8,
+                        children: [
+                            Box({
+                                className: 'media-controls',
+                                spacing: 4,
+                                children: [
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'skip_previous',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.previous();
+                                        },
+                                    }),
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'play_arrow',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.playPause();
+                                        },
+                                    }),
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'skip_next',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.next();
+                                        },
+                                    }),
+                                ],
+                            }),
+                            Box({
+                                className: 'media-actions',
+                                spacing: 4,
+                                children: [videoAddButton, videoRefreshButton],
+                            }),
+                        ],
+                    })],
+                    ['music', Box({
+                        className: 'entry-box-content',
+                        spacing: 8,
+                        children: [
+                            Box({
+                                className: 'media-controls',
+                                spacing: 4,
+                                children: [
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'skip_previous',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.previous();
+                                        },
+                                    }),
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'play_arrow',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.playPause();
+                                        },
+                                    }),
+                                    Button({
+                                        className: 'media-control-button',
+                                        css: 'min-width: 32px; min-height: 32px; padding: 4px; border-radius: 16px;',
+                                        child: Label({
+                                            className: 'icon-material',
+                                            label: 'skip_next',
+                                        }),
+                                        onClicked: () => {
+                                            const player = Mpris.getPlayer();
+                                            if (player) player.next();
+                                        },
+                                    }),
+                                ],
+                            }),
+                            Box({
+                                className: 'media-actions',
+                                spacing: 4,
+                                children: [musicAddButton, musicRefreshButton],
+                            }),
+                        ],
+                    })],
                 ],
                 setup: self => {
-                    self.shown = 'current';
-                    self.connect('notify::shown', () => {
-                        if (self.shown === 'current' || self.shown === 'done') {
-                            contentEntry.placeholderText = 'New Todo';
-                        } else if (self.shown === 'notes') {
-                            contentEntry.placeholderText = 'New Note';
-                        } else if (self.shown === 'images') {
-                            contentEntry.placeholderText = 'Select Image';
-                        } else if (self.shown === 'pdfs') {
-                            contentEntry.placeholderText = 'Select PDF';
-                        } else if (self.shown === 'videos') {
-                            contentEntry.placeholderText = 'Select Video';
-                        }
-                    });
+                    self.shown = 'todo';
                 },
             }),
         ],
@@ -820,6 +1141,22 @@ export default () => {
         children: [videoList],
     });
 
+    const musicList = Box({
+        className: 'music-grid',
+        vertical: true,
+        spacing: 8,
+        css: 'min-height: 400px;',
+    });
+
+    const musicGrid = Box({
+        className: 'music-grid-container',
+        vertical: true,
+        vexpand: true,
+        spacing: 8,
+        css: 'padding: 12px;',
+        children: [musicList],
+    });
+
     const contentStack = Stack({
         transition: 'slide_up_down',
         transitionDuration: 200,
@@ -854,23 +1191,33 @@ export default () => {
                 vexpand: true,
                 children: [videoGrid],
             })],
+            ['music', Box({
+                vertical: true,
+                vexpand: true,
+                children: [
+                    musicControls,
+                    musicGrid,
+                ],
+            })],
         ],
         setup: stack => {
             stack.shown = 'current';
             stack.connect('notify::shown', () => {
                 const name = stack.shown;
                 if (name === 'current') {
-                    contentEntry.placeholderText = 'New Todo';
+                    todoEntry.placeholderText = 'New Todo';
                 } else if (name === 'done') {
-                    contentEntry.placeholderText = 'New Todo';
+                    todoEntry.placeholderText = 'New Todo';
                 } else if (name === 'notes') {
-                    contentEntry.placeholderText = 'New Note';
+                    noteEntry.placeholderText = 'New Note';
                 } else if (name === 'images') {
-                    contentEntry.placeholderText = 'Select Image';
+                    todoEntry.placeholderText = 'Select Image';
                 } else if (name === 'pdfs') {
-                    contentEntry.placeholderText = 'Select PDF';
+                    todoEntry.placeholderText = 'Select PDF';
                 } else if (name === 'videos') {
-                    contentEntry.placeholderText = 'Select Video';
+                    todoEntry.placeholderText = 'Select Video';
+                } else if (name === 'music') {
+                    todoEntry.placeholderText = 'Select Music File';
                 }
             });
         },
@@ -884,7 +1231,7 @@ export default () => {
                 className: 'category-button active',
                 onClicked: function(button) {
                     contentStack.shown = 'current';
-                    entryBox.get_children()[1].shown = 'current';
+                    entryBox.get_children()[0].shown = 'todo';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -907,7 +1254,7 @@ export default () => {
                 className: 'category-button',
                 onClicked: function(button) {
                     contentStack.shown = 'done';
-                    entryBox.get_children()[1].shown = 'done';
+                    entryBox.get_children()[0].shown = 'done';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -937,6 +1284,7 @@ export default () => {
         const images = Todo.images_json;
         const pdfs = Todo.pdfs_json;
         const videos = Todo.videos_json;
+        const music = Todo.music_json;
 
         // Filter tasks and notes
         const currentTodos = todos.filter(todo => !todo.done);
@@ -989,6 +1337,19 @@ export default () => {
             videoRows.push(row);
         }
         videoList.children = videoRows;
+
+        // Create rows of 4 Music
+        const musicRows = [];
+        for (let i = 0; i < music.length; i += 4) {
+            const rowMusic = music.slice(i, i + 4);
+            const row = Box({
+                className: 'music-row',
+                spacing: 8,
+                children: rowMusic.map((music, idx) => MusicItem(music, i + idx)),
+            });
+            musicRows.push(row);
+        }
+        musicList.children = musicRows;
     };
 
     // Connect to all relevant signals
@@ -1016,6 +1377,12 @@ export default () => {
         });
     });
 
+    Todo.connect('notify::music_json', () => {
+        Utils.timeout(10, () => {
+            updateContent();
+        });
+    });
+
     // Load initial content
     Utils.timeout(10, () => {
         updateContent();
@@ -1029,7 +1396,7 @@ export default () => {
                 className: 'category-button',
                 onClicked: function(button) {
                     contentStack.shown = 'notes';
-                    entryBox.get_children()[1].shown = 'notes';
+                    entryBox.children[0].shown = 'notes';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -1058,7 +1425,7 @@ export default () => {
                 className: 'category-button',
                 onClicked: function(button) {
                     contentStack.shown = 'images';
-                    entryBox.get_children()[1].shown = 'images';
+                    entryBox.children[0].shown = 'images';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -1087,7 +1454,7 @@ export default () => {
                 className: 'category-button',
                 onClicked: function(button) {
                     contentStack.shown = 'pdfs';
-                    entryBox.get_children()[1].shown = 'pdfs';
+                    entryBox.children[0].shown = 'pdfs';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -1116,7 +1483,7 @@ export default () => {
                 className: 'category-button',
                 onClicked: function(button) {
                     contentStack.shown = 'videos';
-                    entryBox.get_children()[1].shown = 'videos';
+                    entryBox.children[0].shown = 'videos';
                     if (activeButton) activeButton.toggleClassName('active', false);
                     button.toggleClassName('active', true);
                     activeButton = button;
@@ -1137,11 +1504,179 @@ export default () => {
         ],
     });
 
+    const musicSubcategories = Box({
+        vertical: true,
+        className: 'sidebar-subcategories',
+        children: [
+            Button({
+                className: 'category-button',
+                onClicked: function(button) {
+                    contentStack.shown = 'music';
+                    entryBox.children[0].shown = 'music';
+                    if (activeButton) activeButton.toggleClassName('active', false);
+                    button.toggleClassName('active', true);
+                    activeButton = button;
+                },
+                child: Box({
+                    children: [
+                        Label({
+                            className: 'category-icon icon-material onSurfaceVariant txt-norm',
+                            label: 'library_music',
+                        }),
+                        Label({
+                            className: 'category-label',
+                            label: 'All Music',
+                        }),
+                    ],
+                }),
+            }),
+        ],
+    });
+
+    const todoButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'task_alt',
+                }),
+                Label({
+                    label: 'Tasks',
+                }),
+            ],
+        }),
+        className: 'category-button active',
+        onClicked: function(button) {
+            contentStack.shown = 'current';
+            entryBox.children[0].shown = 'todo';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
+    const notesButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'description',
+                }),
+                Label({
+                    label: 'Notes',
+                }),
+            ],
+        }),
+        className: 'category-button',
+        onClicked: function(button) {
+            contentStack.shown = 'notes';
+            entryBox.children[0].shown = 'notes';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
+    const imagesButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'image',
+                }),
+                Label({
+                    label: 'Images',
+                }),
+            ],
+        }),
+        className: 'category-button',
+        onClicked: function(button) {
+            contentStack.shown = 'images';
+            entryBox.children[0].shown = 'images';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
+    const pdfsButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'picture_as_pdf',
+                }),
+                Label({
+                    label: 'PDFs',
+                }),
+            ],
+        }),
+        className: 'category-button',
+        onClicked: function(button) {
+            contentStack.shown = 'pdfs';
+            entryBox.children[0].shown = 'pdfs';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
+    const videosButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'movie',
+                }),
+                Label({
+                    label: 'Videos',
+                }),
+            ],
+        }),
+        className: 'category-button',
+        onClicked: function(button) {
+            contentStack.shown = 'videos';
+            entryBox.children[0].shown = 'videos';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
+    const musicButton = Button({
+        child: Box({
+            children: [
+                Label({
+                    className: 'icon-material',
+                    label: 'library_music',
+                }),
+                Label({
+                    label: 'Music',
+                }),
+            ],
+        }),
+        className: 'category-button',
+        onClicked: function(button) {
+            contentStack.shown = 'music';
+            entryBox.children[0].shown = 'music';
+            if (activeButton) activeButton.toggleClassName('active', false);
+            button.toggleClassName('active', true);
+            activeButton = button;
+            updateContent();
+        },
+    });
+
     const todoCategories = CategoryButton('Tasks', 'task_alt', null, true);
     const noteCategories = CategoryButton('Notes', 'note', null);
     const imageCategories = CategoryButton('Images', 'image', null);
     const pdfCategories = CategoryButton('PDFs', 'picture_as_pdf', null);
     const videoCategories = CategoryButton('Videos', 'video_library', null);
+    const musicCategories = CategoryButton('Music', 'library_music', null);
 
     todoCategories.children[1].child = todoSubcategories;
 
@@ -1153,68 +1688,99 @@ export default () => {
 
     videoCategories.children[1].child = videoSubcategories;
 
-    const categorySidebar = Box({
-        className: 'category-sidebar',
-        vertical: true,
-        children: [
-            todoCategories,
-            noteCategories,
-            imageCategories,
-            pdfCategories,
-            videoCategories,
-        ],
+    musicCategories.children[1].child = musicSubcategories;
+
+    const toggleIcon = Label({
+        className: 'icon-material txt-large',
+        label: 'toggle_on',
     });
 
     const sidebarWidth = Variable(200);
+    const sidebarRevealer = Revealer({
+        revealChild: true,
+        transition: 'slide_right',
+        transitionDuration: 200,
+        child: Box({
+            className: 'category-sidebar',
+            css: `min-width: ${sidebarWidth.value}px;`,
+            child: Box({
+                className: 'category-sidebar',
+                vertical: true,
+                children: [
+                    todoCategories,
+                    noteCategories,
+                    imageCategories,
+                    pdfCategories,
+                    videoCategories,
+                    musicCategories,
+                ],
+            }),
+        }),
+        setup: self => {
+            self.connect('notify::reveal-child', () => {
+                toggleIcon.label = self.revealChild ? 'toggle_on' : 'toggle_off';
+            });
+        },
+    });
 
     const sidebarContainer = Box({
         className: 'sidebar-container',
         children: [
+            sidebarRevealer,
             Box({
-                className: 'category-sidebar',
-                css: `min-width: ${sidebarWidth.value}px;`,
-                child: categorySidebar,
-            }),
-            Button({
-                className: 'resize-handle',
-                cursor: 'col-resize',
-                setup: self => {
-                    let dragging = false;
-                    
-                    self.connect('button-press-event', () => {
-                        dragging = true;
-                        self.toggleClassName('dragging', true);
-                        return true;
-                    });
-                    
-                    self.connect('button-release-event', () => {
-                        dragging = false;
-                        self.toggleClassName('dragging', false);
-                        return true;
-                    });
-                    
-                    self.connect('motion-notify-event', (_, event) => {
-                        if (dragging) {
-                            const [x] = event.get_coords();
-                            sidebarWidth.value = Math.max(150, Math.min(300, x));
-                        }
-                        return true;
-                    });
-                    
-                    self.connect('enter-notify-event', () => {
-                        if (!dragging) {
-                            self.toggleClassName('hover', true);
-                        }
-                        return true;
-                    });
-                    
-                    self.connect('leave-notify-event', () => {
-                        if (!dragging) {
-                            self.toggleClassName('hover', false);
-                        }
-                        return true;
-                    });
-                },
+                className: 'sidebar-controls',
+                vpack: 'end',
+                children: [
+                    Button({
+                        className: 'add-button',
+                        css: 'padding: 0.8rem; border-radius: 25px',
+                        child: toggleIcon,
+                        onClicked: () => {
+                            sidebarRevealer.revealChild = !sidebarRevealer.revealChild;
+                        },
+                    }),
+                    Button({
+                        className: 'resize-handle',
+                        cursor: 'col-resize',
+                        setup: self => {
+                            let dragging = false;
+                            
+                            self.connect('button-press-event', () => {
+                                dragging = true;
+                                self.toggleClassName('dragging', true);
+                                return true;
+                            });
+                            
+                            self.connect('button-release-event', () => {
+                                dragging = false;
+                                self.toggleClassName('dragging', false);
+                                return true;
+                            });
+                            
+                            self.connect('motion-notify-event', (_, event) => {
+                                if (dragging) {
+                                    const [x] = event.get_coords();
+                                    sidebarWidth.value = Math.max(150, Math.min(300, x));
+                                }
+                                return true;
+                            });
+                            
+                            self.connect('enter-notify-event', () => {
+                                if (!dragging) {
+                                    self.toggleClassName('hover', true);
+                                }
+                                return true;
+                            });
+                            
+                            self.connect('leave-notify-event', () => {
+                                if (!dragging) {
+                                    self.toggleClassName('hover', false);
+                                }
+                                return true;
+                            });
+                        },
+                    }),
+                ],
             }),
         ],
     });

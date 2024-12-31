@@ -1,5 +1,6 @@
 .session-bg {
-    background-color: transparentize($color: $layer0, $amount: 0.4);
+    // background-color: transparentize($color: $layer0, $amount: 0.8);
+    background-color: $layer0;
 }
 
 .session-button {
