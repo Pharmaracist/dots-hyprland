@@ -26,7 +26,7 @@ switch() {
     swww img "$imgpath" \
         --transition-fps 144 \
         --transition-type wipe \
-        --transition-duration 0.8 \
+        --transition-duration 0.9 \
         --transition-bezier .16,0,.84,.99 \
         --transition-pos "$cursorposx,$cursorposy_inverted" \
         --transition-step 255 \
@@ -40,7 +40,7 @@ generate_colors() {
 
     # Silent execution of color generation commands
     "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$imgpath" --apply --smart >/dev/null 2>&1
-    wal -s -i"$imgpath" --backend [material] --saturate 0.8 >/dev/null 2>&1
+    wal -s -i"$imgpath" --backend [material] --saturate 0 >/dev/null 2>&1
 
     # Refresh applications asynchronously, ensuring all output is suppressed
     (pywal-discord -p ~/.config/vesktop/themes >/dev/null 2>&1 &)

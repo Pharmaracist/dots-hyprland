@@ -6,7 +6,6 @@ const { Box, Button, EventBox, Label, Overlay, Revealer, Scrollable } = Widget;
 const { execAsync, exec } = Utils;
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
-import { showMusicControls } from "../../../variables.js";
 
 const CUSTOM_MODULE_CONTENT_INTERVAL_FILE = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-interval.txt`;
 const CUSTOM_MODULE_CONTENT_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-poll.sh`;
@@ -260,8 +259,13 @@ export default () => {
         SystemResourcesOrCustomModule(),
         EventBox({
           child: BarGroup({ child: musicStuff }),
-          onPrimaryClick: () =>
-            showMusicControls.setValue(!showMusicControls.value),
+          onPrimaryClick: () => {
+            try {
+              App.toggleWindow('ipod');
+            } catch (error) {
+              print('Error toggling ipod window:', error);
+            }
+          },
           onSecondaryClick: () =>
             execAsync([
               "bash",

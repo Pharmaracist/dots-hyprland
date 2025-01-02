@@ -47,17 +47,6 @@ const initializeConfig = () => {
                     // Additional Features
                     onscreenkeyboard: true,
                     crosshair: true,
-                    notifications: true,
-                    weather: true,
-                    system: true,
-                    media: true,
-                    clock: true,
-                    workspaces: true,
-                    tray: true,
-                    battery: true,
-                    network: true,
-                    volume: true,
-                    keyboard: true,
                 };
                 Utils.writeFile(JSON.stringify(config, null, 2), CONFIG_PATH).catch(print);
             }
@@ -294,8 +283,8 @@ export const PRESETS = {
         description: 'Only essential modules',
         modules: {
             bar: true,
-            sideleft: false,
-            sideright: false,
+            sideleft: true,
+            sideright: true,
             dock: false,
             overview: true,
             indicators: false,
@@ -306,7 +295,7 @@ export const PRESETS = {
             wallselect: false,
             onscreenkeyboard: false,
             crosshair: false,
-            ipod: false,
+            ipod: true,
         },
     },
     'waybar': {
