@@ -15,11 +15,11 @@ const cheatsheets = [
         materialIcon: 'task_alt',
         contentWidget: Todo,
     },
-    {
-        name: getString('Keybinds'),
-        materialIcon: 'keyboard',
-        contentWidget: Keybinds,
-    },
+    // {
+    //     name: getString('Keybinds'),
+    //     materialIcon: 'keyboard',
+    //     contentWidget: Keybinds,
+    // },
     {
         name: getString('Quran'),
         materialIcon: 'book',
@@ -106,7 +106,7 @@ export default (id) => {
     const widgetContent = Widget.Box({
         vertical: true,
         className: "cheatsheet-bg spacing-v-5",
-        css: 'min-width: 800px; min-height: 600px;',
+        css: 'min-width: 1600px; min-height: 900px;',
         children: [
             CheatsheetHeader(),
             sheets,

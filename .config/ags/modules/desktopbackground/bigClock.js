@@ -84,7 +84,7 @@ const BigTimeAndDate = () =>
                 className: "spacing-h-5",
                 hpack: "start",
                 vpack: "center",
-                css:`margin: 0 0 -0.25rem-0.3rem;`,
+                css:`margin: 0 0 -0.25rem 0.3rem;`,
                 children: [
                   powerMode(),
                 ]

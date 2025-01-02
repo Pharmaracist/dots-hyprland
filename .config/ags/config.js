@@ -49,13 +49,13 @@ const Windows = () => {
   const modules = config.value.modules || {};
   return [
     ...(modules.desktopbackground !== false ? [DesktopBackground()] : []),
-    ...(modules.crosshair === true ? [forMonitors(Crosshair)] : []), // Only enable if explicitly true
+    // ...(modules.crosshair === true ? [forMonitors(Crosshair)] : []), // Only enable if explicitly true
     ...(modules.overview !== false ? [Overview()] : []),
     ...(modules.indicators !== false ? [forMonitors(Indicator)] : []),
     ...(modules.cheatsheet !== false ? [forMonitors(Cheatsheet)] : []),
     ...(modules.sideleft !== false ? [SideLeft()] : []),
     ...(modules.sideright !== false ? [SideRight()] : []),
-    ...(modules.onscreenkeyboard === true ? [forMonitors(Osk)] : []), // Only enable if explicitly true
+    // ...(modules.onscreenkeyboard === true ? [forMonitors(Osk)] : []), // Only enable if explicitly true
     ...(modules.session !== false ? [forMonitors(Session)] : []),
     // ...(modules.dock !== false ? [forMonitors(Dock)] : []),
     ...(modules.screencorners !== false && userOptions.asyncGet().appearance.fakeScreenRounding !== 0
@@ -66,12 +66,12 @@ const Windows = () => {
           forMonitors((id) => Corner(id, "bottom right", true)),
         ]
       : []),
-      Ipod(),
+      ...(modules.ipod !== false ? [Ipod()] : []),
     ...(modules.wallselect !== false ? [Wallselect()] : []),
   ];
 };
 
-const CLOSE_ANIM_TIME = 120; // Longer than actual anim time to make sure widgets animate fully
+const CLOSE_ANIM_TIME = 0; // Longer than actual anim time to make sure widgets animate fully
 const closeWindowDelays = {}; // For animations
 for (let i = 0; i < (Gdk.Display.get_default()?.get_n_monitors() || 1); i++) {
   closeWindowDelays[`osk${i}`] = CLOSE_ANIM_TIME;
@@ -79,8 +79,8 @@ for (let i = 0; i < (Gdk.Display.get_default()?.get_n_monitors() || 1); i++) {
 
 App.config({
   css: `${COMPILED_STYLE_DIR}/style.css`,
-  stackTraceOnError: true, // Enable stack trace for debugging
-  closeWindowDelay: closeWindowDelays,
+  // stackTraceOnError: true, // Enable stack trace for debugging
+  // closeWindowDelay: closeWindowDelays,
   windows: Windows().flat(1),
 });
 

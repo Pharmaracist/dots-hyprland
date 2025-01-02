@@ -1,0 +1,131 @@
+#!/bin/bash
+
+# Get the preset name from argument
+preset="$1"
+
+if [ -z "$preset" ]; then
+    echo "Usage: set-preset <preset-name>"
+    echo "Available presets:"
+    echo "- minimal"
+    echo "- waybar"
+    echo "- focus"
+    echo "- full"
+    exit 1
+fi
+
+CONFIG_FILE="$HOME/.ags/config.json"
+
+# Read the current config
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "Config file not found: $CONFIG_FILE"
+    exit 1
+fi
+
+# Function to get preset configuration
+get_preset_config() {
+    case "$1" in
+        "minimal")
+            echo '{
+                "bar": false,
+                "sideleft": false,
+                "sideright": false,
+                "dock": false,
+                "overview": true,
+                "indicators": false,
+                "cheatsheet": false,
+                "session": false,
+                "screencorners": false,
+                "desktopbackground": false,
+                "wallselect": false,
+                "onscreenkeyboard": false,
+                "crosshair": false,
+                "ipod": false
+            }'
+            ;;
+        "waybar")
+            echo '{
+                "bar": false,
+                "sideleft": false,
+                "sideright": false,
+                "dock": false,
+                "overview": true,
+                "indicators": false,
+                "cheatsheet": false,
+                "session": false,
+                "screencorners": false,
+                "desktopbackground": false,
+                "wallselect": false,
+                "onscreenkeyboard": false,
+                "crosshair": false,
+                "ipod": false
+            }'
+            ;;
+        "focus")
+            echo '{
+                "bar": false,
+                "sideleft": false,
+                "sideright": false,
+                "dock": false,
+                "overview": false,
+                "indicators": false,
+                "cheatsheet": false,
+                "session": false,
+                "screencorners": false,
+                "desktopbackground": false,
+                "wallselect": false,
+                "onscreenkeyboard": false,
+                "crosshair": false,
+                "ipod": false
+            }'
+            ;;
+        "full")
+            echo '{
+                "bar": true,
+                "sideleft": true,
+                "sideright": true,
+                "dock": true,
+                "overview": true,
+                "indicators": true,
+                "cheatsheet": true,
+                "session": true,
+                "screencorners": true,
+                "desktopbackground": true,
+                "wallselect": true,
+                "onscreenkeyboard": true,
+                "crosshair": true,
+                "ipod": true
+            }'
+            ;;
+        *)
+            echo "Invalid preset: $1"
+            exit 1
+            ;;
+    esac
+}
+
+# Get the preset config
+PRESET_CONFIG=$(get_preset_config "$preset")
+
+if [ $? -ne 0 ]; then
+    echo "$PRESET_CONFIG"
+    exit 1
+fi
+
+# Update the config file
+jq --arg preset "$preset" \
+   --argjson modules "$PRESET_CONFIG" \
+   '.modules = $modules' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+
+# Handle waybar specifically
+if [ "$preset" = "waybar" ]; then
+    killall waybar
+    waybar &
+    ags -q
+    ags &
+else
+    killall waybar 2>/dev/null
+    ags -q
+    ags &
+fi
+
+echo "Preset '$preset' applied successfully"

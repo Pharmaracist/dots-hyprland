@@ -10,17 +10,7 @@ const { Box, Label, EventBox, Button, Revealer } = Widget;
 const findPlayer = () => {
   const players = Mpris.players;
   
-  // Try to find YouTube Music player
-  const ytPlayer = players.find(p => 
-    (p.identity?.toLowerCase().includes('youtube') || 
-     p.busName?.toLowerCase().includes('youtube') ||
-     p.name?.toLowerCase().includes('youtube')) &&
-    p.trackTitle
-  );
-
-  if (ytPlayer) return ytPlayer;
-
-  // Fallback to any active player
+  // Find any active player
   const activePlayer = players.find(p => p.trackTitle);
   if (activePlayer) return activePlayer;
 
@@ -201,6 +191,7 @@ export default () =>
                 className: "onSurfaceVariant txt-large",
                 truncate: "end",
                 xalign: 0,
+                maxWidthChars: 25,
                 justification: "left",
                 hexpand: true,
                 setup: (self) => {

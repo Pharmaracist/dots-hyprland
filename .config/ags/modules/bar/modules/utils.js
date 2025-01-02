@@ -9,7 +9,7 @@ const createUtilButton = ({ name, icon, onClicked, onSecondaryClick }) => {
     vpack: "center",
     tooltipText: name,
     onClicked,
-    className: "icon-material sec-txt txt-larger",
+    className: "icon-material onSurfaceVariant txt-larger",
     label: icon, // No need for template literal here
   };
   
@@ -25,7 +25,7 @@ const createNerdButton = ({ name, icon, onClicked, onSecondaryClick }) => {
     vpack: "center",
     tooltipText: name,
     onClicked,
-    className: "icon-nerd sec-txt txt-norm",
+    className: "icon-nerd onSurfaceVariant txt-norm",
     label: icon, // No need for template literal here
   };
   

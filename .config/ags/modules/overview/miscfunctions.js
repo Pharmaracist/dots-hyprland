@@ -10,6 +10,9 @@ import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import { currentShellMode } from '../../variables.js';
 import { config } from '../../variables.js';
 import userOptions from '../.configuration/user_options.js';
+import { PRESETS } from '../../variables.js';
+
+const CONFIG_PATH = GLib.get_home_dir() + '/.ags/config.json';
 
 let lastOpenTime = 0;
 const DEBOUNCE_DELAY = 300;
@@ -23,9 +26,6 @@ export function openDirectory(path) {
     execAsync(['xdg-open', path]).catch(console.error);
     return true;
 }
-
-const USER_CONFIG_FILE = GLib.get_home_dir() + '/.ags/config.json';
-const CONFIG_PATH = GLib.get_home_dir() + '/.ags/config.json';
 
 const CONFIG = JSON.parse(readFile('/home/pharmaracist/.config/ags/config.json'));
 const searchConfig = CONFIG.overview.searchOptions;
@@ -937,6 +937,59 @@ if results:
                 console.error('Error toggling bar position:', error);
                 execAsync(['notify-send', 'Error', 'Failed to toggle bar position']).catch(print);
             }
+        },
+        '>p': () => {
+            if (!args[0]) {
+                // List available presets
+                const presetList = Object.entries(PRESETS)
+                    .map(([key, preset]) => `${preset.name} (${key})\n${preset.description}`)
+                    .join('\n\n');
+                execAsync(['notify-send', 'Available Presets', presetList])
+                    .catch(print);
+                return;
+            }
+            const presetName = args[0].toLowerCase();
+            if (!(presetName in PRESETS)) {
+                execAsync(['notify-send', 'Error', `Preset "${presetName}" not found`])
+                    .catch(print);
+                return;
+            }
+            
+            const preset = PRESETS[presetName];
+            config.value = {
+                ...config.value,
+                modules: {
+                    ...config.value.modules,
+                    ...preset.modules
+                }
+            };
+            
+            // Special handling for waybar preset
+            if (presetName === 'waybar') {
+                execAsync(['bash', '-c', `killall waybar; waybar &
+                    ags -q;
+                    ags &
+                `]).catch(print);
+            } else {
+                // For non-waybar presets, kill waybar if it's running
+                execAsync(['bash', '-c', `killall waybar;
+                    ags -q;
+                    ags &
+                `]).catch(print);
+            }
+            
+            // Save configuration
+            Utils.writeFile(JSON.stringify(config.value, null, 2), CONFIG_PATH)
+                .then(() => {
+                    if (presetName !== 'waybar') {
+                        App.resetWidgets();
+                    }
+                })
+                .catch(print);
+            
+            execAsync(['notify-send', `Preset: ${presetName}`, 
+                `Applying ${preset.name} preset (${preset.description})`])
+                .catch(print);
         },
     };
 

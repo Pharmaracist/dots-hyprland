@@ -73,7 +73,7 @@ const initializeConfig = () => {
 export const config = Variable(initializeConfig(), {});
 
 // Save configuration and reload AGS
-const saveConfig = () => {
+export const saveConfig = () => {
     Utils.writeFile(JSON.stringify(config.value, null, 2), CONFIG_PATH)
         .then(() => {
             // Reload widgets
@@ -222,6 +222,32 @@ globalThis["closeEverything"] = () => {
 };
 
 // Function to apply a preset
+globalThis["togglePreset"] = (presetName) => {
+    if (!presetName || !(presetName in PRESETS)) {
+        execAsync(['notify-send', 'Error', `Preset "${presetName}" not found`])
+            .catch(print);
+        return;
+    }
+    
+    const preset = PRESETS[presetName];
+    config.value = {
+        ...config.value,
+        modules: {
+            ...config.value.modules,
+            ...preset.modules
+        }
+    };
+    
+    execAsync(['notify-send', `Preset: ${presetName}`, 
+        `Applying ${preset.name} preset (${preset.description})`])
+        .catch(print);
+    
+    // Save and reload
+    saveConfig();
+    App.resetWidgets();
+};
+
+// Function to apply a preset
 globalThis["applyPreset"] = (presetName) => {
     if (!config.value.presets || !(presetName in config.value.presets)) {
         execAsync(['notify-send', 'Error', `Preset "${presetName}" not found`])
@@ -247,8 +273,22 @@ globalThis["applyPreset"] = (presetName) => {
     App.resetWidgets();
 };
 
+// Add preset command handler
+globalThis["p"] = (args) => {
+    if (!args[0]) {
+        // List available presets
+        const presetList = Object.entries(PRESETS)
+            .map(([key, preset]) => `${preset.name} (${key})\n${preset.description}`)
+            .join('\n\n');
+        execAsync(['notify-send', 'Available Presets', presetList])
+            .catch(print);
+        return;
+    }
+    togglePreset(args[0].toLowerCase());
+};
+
 // Module presets
-const PRESETS = {
+export const PRESETS = {
     'minimal': {
         name: 'Minimal',
         description: 'Only essential modules',
@@ -258,33 +298,55 @@ const PRESETS = {
             sideright: false,
             dock: false,
             overview: true,
+            indicators: false,
+            cheatsheet: true,
+            session: true,
+            screencorners: false,
+            desktopbackground: false,
+            wallselect: false,
+            onscreenkeyboard: false,
+            crosshair: false,
+            ipod: false,
+        },
+    },
+    'waybar': {
+        name: 'waybar',
+        description: 'Other Bar Mode',
+        modules: {
+            bar: false,
+            sideleft: true,
+            sideright: true,
+            dock: false,
+            overview: true,
             indicators: true,
-            cheatsheet: false,
+            cheatsheet: true,
             session: true,
             screencorners: false,
             desktopbackground: true,
             wallselect: false,
             onscreenkeyboard: false,
             crosshair: false,
+            ipod: true,
         },
     },
-    'gaming': {
-        name: 'Gaming',
-        description: 'Optimized for gaming sessions',
+    'focus': {
+        name: 'Focus',
+        description: 'Focus Mode',
         modules: {
             bar: true,
             sideleft: false,
             sideright: false,
-            dock: false,
-            overview: false,
-            indicators: true,
-            cheatsheet: false,
-            session: true,
+            dock: true,
+            overview: true,
+            indicators: false,
+            cheatsheet: true,
+            session: false,
             screencorners: false,
-            desktopbackground: true,
+            desktopbackground: false,
             wallselect: false,
             onscreenkeyboard: false,
-            crosshair: true,
+            crosshair: false,
+            ipod: false,
         },
     },
     'full': {

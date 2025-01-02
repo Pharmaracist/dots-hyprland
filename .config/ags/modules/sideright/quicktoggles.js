@@ -335,9 +335,15 @@ export const SecondaryButton = ({ icon, label, tooltip, onClicked }) => Widget.B
 });
 
 export const MinimalPreset = () => SecondaryButton({
-    icon: "filter_1",
-    tooltip: "Minimal preset - Only essential modules",
-    onClicked: () => globalThis.applyPreset("minimal"),
+    icon: "mindfulness",
+    tooltip: "Focus Mode - Productive environment",
+    onClicked: () => globalThis.applyPreset("focus"),
+});
+
+export const FocusPreset = () => SecondaryButton({
+  icon: "filter_1",
+  tooltip: "Minimal preset - Only essential modules",
+  onClicked: () => globalThis.applyPreset("minimal"),
 });
 
 export const GamingPreset = () => SecondaryButton({
