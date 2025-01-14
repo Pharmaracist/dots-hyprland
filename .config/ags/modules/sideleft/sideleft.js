@@ -47,16 +47,13 @@ const pinButton = Button({
             self.toggleClassName('sidebar-pin-enabled', self.attribute.enabled);
 
             const sideleftWindow = App.getWindow('sideleft');
-            const sideleftContent = sideleftWindow.get_children()[0].get_children()[0].get_children()[1];
+            if (!sideleftWindow) return;
+            
+            const sideleftContent = sideleftWindow.get_children()[0];
+            if (!sideleftContent) return;
 
             sideleftContent.toggleClassName('sidebar-pinned', self.attribute.enabled);
-
-            if (self.attribute.enabled) {
-                sideleftWindow.exclusivity = 'on-demad';
-            }
-            else {
-                sideleftWindow.exclusivity = 'normal';
-            }
+            sideleftWindow.exclusivity = self.attribute.enabled ? 'exclusive' : 'normal';
         },
     },
     vpack: 'start',
@@ -68,9 +65,10 @@ const pinButton = Button({
         setupCursorHover(self);
         self.hook(App, (self, currentName, visible) => {
             if (currentName === 'sideleft' && visible) self.grab_focus();
-        })
+        });
     },
-})
+});
+
 
 export const WidgetContent = (ORDER) => {
     const CONTENTS = ORDER.map((tabName) => SIDEBARTABS[tabName]);
@@ -92,12 +90,11 @@ export default () => {
     let unsubscribe = () => {};
 
     const box = Box({
-        // vertical: true,
+        vertical: true,
         vexpand: true,
         children: [
-            widgetContent
+            widgetContent,
         ],
-        css: 'min-width: 2px;',
         setup: (self) => self
             .on('key-press-event', (widget, event) => { // Handle keybinds
                 if (checkKeybind(event, userOptions.asyncGet().keybinds.sidebar.pin))

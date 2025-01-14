@@ -11,7 +11,7 @@ const Resource = (name, icon, command) => {
         css:`margin:-2px 0`,
         vpack: 'center',
         children: [
-            MaterialIcon(icon, 'small', {
+            MaterialIcon(icon, 'smallie', {
                 className: 'onSurfaceVariant icon-material',
                 css: 'margin-right: 0.5rem;font-size:1.15rem',
                 vpack: 'center',
@@ -39,9 +39,10 @@ const Resource = (name, icon, command) => {
 };
 
 const ResourcesWidget = () => Box({
-    // className: 'resourcebar-box',
+    className: 'resourcebar-box',
+    css:`margin:0px 15px;`,
+    homogeneous: true,
     vertical: true,
-    css:`margin:0 10px 0 0`,
     vpack: 'center',
     children: [
         Resource(

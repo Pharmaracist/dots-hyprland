@@ -60,10 +60,6 @@ export default () =>
         self.child.children[2].revealChild = false;
       },
       child: Box({
-        css: `
-          padding: 0.5rem;
-          position: relative;
-        `,
         hexpand: true,
         className: 'spacing-h-15',
         children: [
@@ -191,7 +187,7 @@ export default () =>
                 className: "onSurfaceVariant txt-large",
                 truncate: "end",
                 xalign: 0,
-                maxWidthChars: 25,
+                maxWidthChars: 12,
                 justification: "left",
                 hexpand: true,
                 setup: (self) => {
@@ -230,7 +226,7 @@ export default () =>
                 css:`opacity:0.6`,
                 xalign: 0,
                 justification: "left",
-                maxWidthChars: 12,
+                maxWidthChars: 8,
                 setup: (self) => {
                   let lastArtist = '';
                   const update = () => {

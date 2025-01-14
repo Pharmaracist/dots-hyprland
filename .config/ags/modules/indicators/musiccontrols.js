@@ -329,7 +329,7 @@ const TrackTime = ({ player, ...rest }) => {
                 }),
             ],
         }),
-        setup: (self) => self.hook(Mpris, (self) => {
+       setup : (self) => self.hook(Mpris, (self) => {
             if (!player) self.revealChild = false;
             else self.revealChild = true;
         }),
@@ -401,8 +401,5 @@ export default () => Revealer({
     child: Box({
         children: Mpris.bind("players")
             .as(players => players.map((player) => (isRealPlayer(player) ? MusicControlsWidget(player) : null)))
-    }),
-    setup: (self) => self.hook(showMusicControls, (revealer) => {
-        revealer.revealChild = showMusicControls.value;
     }),
 })

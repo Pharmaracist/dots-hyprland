@@ -1,5 +1,5 @@
 import App from "resource:///com/github/Aylur/ags/app.js";
-// import Audio from "resource:///com/github/Aylur/ags/service/audio.js";
+import Audio from "resource:///com/github/Aylur/ags/service/audio.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 // import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import Bluetooth from "resource:///com/github/Aylur/ags/service/bluetooth.js";

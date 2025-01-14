@@ -60,8 +60,11 @@ export default (overviewMonitor = 0) => {
         if (screenCoords.y != 0) y -= screenCoords.y;
         if (x + w <= 0) x += (Math.floor(x / monitors[monitor].width) * monitors[monitor].width);
         else if (x < 0) { w = x + w; x = 0; }
-        if (y + h <= 0) x += (Math.floor(y / monitors[monitor].height) * monitors[monitor].height);
+        else if (y + h <= 0) x += (Math.floor(y / monitors[monitor].height) * monitors[monitor].height);
         else if (y < 0) { h = y + h; y = 0; }
+        if (monitors.length - 1 < monitor) {
+            monitor = monitors.length - 1;
+        }
         if (x + w > monitors[monitor].width) w = monitors[monitor].width - x;
         if (y + h > monitors[monitor].height) h = monitors[monitor].height - y;
 

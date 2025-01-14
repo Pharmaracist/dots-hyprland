@@ -5,7 +5,7 @@ const { execAsync, exec } = Utils;
 
 export const distroID = exec(`bash -c 'cat /etc/os-release | grep "^ID=" | cut -d "=" -f 2 | sed "s/\\"//g"'`).trim();
 export const isDebianDistro = (distroID == 'linuxmint' || distroID == 'ubuntu' || distroID == 'debian' || distroID == 'zorin' || distroID == 'popos' || distroID == 'raspbian' || distroID == 'kali');
-export const isArchDistro = (distroID == 'arch' || distroID == 'endeavouros' || distroID == 'cachyos');
+export const isArchDistro = (distroID == 'arch' || distroID == 'endeavouros' || distroID == 'cachyos' || distroID == 'arcolinux');
 export const hasFlatpak = !!exec(`bash -c 'command -v flatpak'`);
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
@@ -59,6 +59,7 @@ export const getDistroIcon = () => {
     if(distroID == 'arch') return 'arch-symbolic';
     if(distroID == 'endeavouros') return 'endeavouros-symbolic';
     if(distroID == 'cachyos') return 'cachyos-symbolic';
+    if(distroID == 'arcolinux') return 'arcolinux-symbolic';
     // Funny flake
     if(distroID == 'nixos') return 'nixos-symbolic';
     // Cool thing
@@ -79,6 +80,7 @@ export const getDistroName = () => {
     if(distroID == 'arch') return 'Arch Linux';
     if(distroID == 'endeavouros') return 'EndeavourOS';
     if(distroID == 'cachyos') return 'CachyOS';
+    if(distroID == 'arcolinux') return 'ArcoLinux';
     // Funny flake
     if(distroID == 'nixos') return 'NixOS';
     // Cool thing

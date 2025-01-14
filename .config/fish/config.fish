@@ -11,14 +11,17 @@ if status is-interactive
     set fish_greeting
 
 end
-
 starship init fish | source
 if test -f ~/.cache/ags/user/generated/terminal/sequences.txt
     cat ~/.cache/ags/user/generated/terminal/sequences.txt
 end
 
 alias pamcan=pacman
+alias settings="gjs ~/.config/ags/assets/settings.js"
+alias bar="$EDITOR ~/.config/ags/modules/bar/main.js"
+alias config="$EDITOR ~/.ags/config.json"
 
+export EDITOR=windsurf
 # function fish_prompt
 #   set_color cyan; echo (pwd)
 #   set_color green; echo '> '

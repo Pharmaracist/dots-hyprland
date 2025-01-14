@@ -4,7 +4,7 @@ const { execAsync, exec } = Utils;
 const { Box, EventBox, Label, Revealer, Overlay } = Widget;
 import { AnimatedCircProg } from "../.commonwidgets/cairo_circularprogress.js";
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
-
+import { getDistroName, getDistroIcon } from '../.miscutils/system.js';
 const ResourceValue = (name, icon, interval, valueUpdateCmd, displayFunc, props = {}) => Box({
     ...props,
     className: 'bg-system-bg txt',
@@ -94,12 +94,7 @@ const distroAndVersion = Box({
                 Label({
                     className: 'bg-distro-name',
                     xalign: 0,
-                    label: '<distro>',
-                    setup: (label) => {
-                        execAsync([`grep`, `-oP`, `PRETTY_NAME="\\K[^"]+`, `/etc/os-release`]).then(distro => {
-                            label.label = distro;
-                        }).catch(print);
-                    },
+                    label: getDistroName(),
                 }),
             ]
         }),

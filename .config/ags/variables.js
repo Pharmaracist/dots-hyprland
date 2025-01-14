@@ -19,6 +19,13 @@ globalThis['mpris'] = Mpris;
 globalThis['getString'] = getString
 
 // Initialize bar modes from config
+globalThis['cycleMode'] = () => {
+    const monitor = Hyprland.active.monitor.id || 0;
+    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
+    const nextMode = (currentNum + 1) % 5;
+    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
+}
+
 const initializeBarModes = () => {
     const configPath = GLib.get_home_dir() + '/.ags/config.json';
     const monitors = Hyprland.monitors;
@@ -52,7 +59,7 @@ Hyprland.connect('notify::monitors', () => {
     
     // Keep existing modes for current monitors
     Hyprland.monitors.forEach((_, index) => {
-        newModes[index] = currentModes[index] || "0";
+        newModes[index] = currentModes[index];
     });
     
     currentShellMode.value = newModes;
@@ -65,12 +72,29 @@ export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
     monitorShellModes.value = newValue;
 }
 globalThis['currentMode'] = currentShellMode;
-globalThis['cycleMode'] = () => {
-    const monitor = Hyprland.active.monitor.id || 0;
-    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
-    const nextMode = (currentNum + 1) % 4;
-    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
-}
+
+// Sidebar width control
+export const sidebarWidth = Variable({
+    left: 350,
+    right: 350,
+});
+
+export const setSidebarWidth = (side, width) => {
+    const validSides = ['left', 'right'];
+    if (!validSides.includes(side)) return;
+    
+    const window = App.getWindow(`side${side}`);
+    if (!window) return;
+
+    sidebarWidth.value = {
+        ...sidebarWidth.value,
+        [side]: width
+    };
+};
+
+// Make functions available globally
+globalThis['sidebarWidth'] = sidebarWidth;
+globalThis['setSidebarWidth'] = setSidebarWidth;
 
 // Window controls
 const range = (length, start = 1) => Array.from({ length }, (_, i) => i + start);

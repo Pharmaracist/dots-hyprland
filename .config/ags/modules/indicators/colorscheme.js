@@ -90,11 +90,11 @@ const schemeOptionsArr = [
         { name: getString('Vibrant'), value: 'vibrant' },
     ],
     [
-        { name: getString('Vibrant+'), value: 'morevibrant' },
+        // { name: getString('Vibrant+'), value: 'morevibrant' },
     ],
-    //[
-    //  { name: getString('Content'), value: 'content' },
-    //]
+    [
+     { name: getString('Content'), value: 'content' },
+    ]
 ];
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;

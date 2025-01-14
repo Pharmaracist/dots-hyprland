@@ -84,11 +84,8 @@ const createKeyboardWidget = () => {
     });
 };
 
-/**
- * Main widget export.
- */
 export default () => Widget.Box({
-    className: "spacing-h-10",
     vpack: 'center',
+    hpack: 'center',
     children: [createKeyboardWidget()],
 });

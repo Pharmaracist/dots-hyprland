@@ -180,11 +180,11 @@ const BatteryContent = () => {
 };
 
 export default () => Widget.EventBox({
-    onPrimaryClick: (self) => {
-        execAsync(["bash", "-c", userOptions.apps.power]).catch(print);
-    },
+    // onPrimaryClick: (self) => {
+    //     execAsync(["bash", "-c", userOptions.asyncGet().apps.taskManager]).catch(print);
+    // },
     onSecondaryClick: () => {
-        execAsync(["bash", "-c", userOptions.apps.power]).catch(print);
+        execAsync(["bash", "-c", userOptions.asyncGet().apps.taskManager]);
     },
     onMiddleClick: () => {},
     child: BatteryContent(),

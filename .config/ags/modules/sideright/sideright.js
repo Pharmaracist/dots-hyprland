@@ -17,51 +17,82 @@ import {
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
-// import ModulePowerProfiles from './centermodules/powerprofiles.js';
+import ModulePowerProfiles from './centermodules/powerprofiles.js';
 import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleConfigure from "./centermodules/configure.js";
 import { ModuleCalendar } from "./calendar.js";
+import ModulePrayerTimes from './centermodules/prayertimes.js';
 import { getDistroIcon } from '../.miscutils/system.js';
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { ExpandingIconTabContainer } from '../.commonwidgets/tabcontainer.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 // import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../.commondata/weather.js';
 import GLib from 'gi://GLib';
-import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
+// import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
+import VPN from './centermodules/vpn.js'; 
+import taskmanager from './centermodules/taskmanager.js';
 
-const centerWidgets = [
-    {
+const modulesList = {
+    vpnGate: {
+        name: 'VPN Gate',
+        materialIcon: 'vpn_key',
+        contentWidget: VPN, // Renamed vpn to VPN
+    },
+    notifications: {
         name: getString('Notifications'),
         materialIcon: 'notifications',
         contentWidget: ModuleNotificationList,
     },
-    {
+    audioControls: {
         name: getString('Audio controls'),
         materialIcon: 'volume_up',
         contentWidget: ModuleAudioControls,
     },
-    // ...(Battery.available ? [{
-    //     name: 'Power Profiles',
-    //     materialIcon: 'speed',
-    //     contentWidget: ModulePowerProfiles,
-    // }] : []),
-    {
+    powerProfiles: {
+        name: 'Power Profiles',
+        materialIcon: 'speed',
+        contentWidget: ModulePowerProfiles,
+    },
+    taskManager: {
+        name: getString('Tasks Manager'),
+        materialIcon: 'check',
+        contentWidget: taskmanager,
+    },
+    bluetooth: {
         name: getString('Bluetooth'),
         materialIcon: 'bluetooth',
         contentWidget: ModuleBluetooth,
     },
-    {
+    wifiNetworks: {
         name: getString('Wifi networks'),
         materialIcon: 'wifi',
         contentWidget: ModuleWifiNetworks,
         onFocus: () => execAsync('nmcli dev wifi list').catch(print),
     },
-    {
+    liveConfig: {
         name: getString('Live config'),
         materialIcon: 'tune',
         contentWidget: ModuleConfigure,
     },
-];
+    prayerTimes: {
+        name: 'Prayer Times',
+        materialIcon: 'mosque',
+        contentWidget: ModulePrayerTimes,
+    },
+};
+
+// Get enabled modules from config
+const getEnabledModules = () => {
+    const config = userOptions.asyncGet();
+    const enabledModules = config.sidebar.centerModules.enabled || [];
+    return enabledModules
+        .filter(moduleId => {
+            const moduleConfig = config.sidebar.centerModules[moduleId];
+            return moduleConfig && moduleConfig.enabled;
+        })
+        .map(moduleId => modulesList[moduleId])
+        .filter(module => module !== undefined);
+};
 
 const timeRow = Box({
     className: 'spacing-h-10 sidebar-group-invisible-morehorizpad',
@@ -117,7 +148,7 @@ const timeRow = Box({
             },
         }),
         Widget.Box({ hexpand: true }),
-        ModuleReloadIcon({ hpack: 'end' }),
+        // ModuleReloadIcon({ hpack: 'end' }),
         ModuleSettingsIcon({ hpack: 'end' }),
         ModulePowerIcon({ hpack: 'end' }),
     ]
@@ -140,15 +171,14 @@ const togglesBox = Widget.Box({
 export const sidebarOptionsStack = ExpandingIconTabContainer({
     tabsHpack: 'center',
     tabSwitcherClassName: 'sidebar-icontabswitcher',
-    icons: centerWidgets.map((api) => api.materialIcon),
-    names: centerWidgets.map((api) => api.name),
-    children: centerWidgets.map((api) => api.contentWidget()),
+    icons: getEnabledModules().map((api) => api.materialIcon),
+    names: getEnabledModules().map((api) => api.name),
+    children: getEnabledModules().map((api) => api.contentWidget()),
     onChange: (self, id) => {
-        self.shown = centerWidgets[id].name;
-        if (centerWidgets[id].onFocus) centerWidgets[id].onFocus();
+        self.shown = getEnabledModules()[id].name;
+        if (getEnabledModules()[id].onFocus) getEnabledModules()[id].onFocus();
     }
 });
-
 
 export default () => Box({
     vexpand: true,

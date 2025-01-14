@@ -2,6 +2,10 @@
   "wallselect": {
     "enabled": true
   },
+  "desktopBackground": {
+    "enabled": true,
+    "visible": false
+  },
   "ai": {
     "defaultGPTProvider": "openrouter",
     "onSearch": "gemini",
@@ -30,12 +34,19 @@
     "choreographyDelay": 25,
     "durationSmall": 110,
     "durationLarge": 180
+   
   },
   "appearance": {
+    "avatar":"avatar.png",
     "autoDarkMode": {
       "enabled": false,
       "from": "18:10",
       "to": "6:10"
+    },
+    "Scroll":{
+      "debounce": 300,
+      "transition": "slide_up_down",
+      "mode": "scroll"
     },
     "keyboardUseFlag": false,
     "layerSmoke": false,
@@ -81,12 +92,6 @@
       "configPath": ""
     }
   },
-  "gaming": {
-    "crosshair": {
-      "size": 20,
-      "color": "rgba(113,227,32,0.9)"
-    }
-  },
   "i18n": {
     "langCode": "",
     "extraLogs": false
@@ -97,9 +102,6 @@
   "music": {
     "preferredPlayer": "plasma-browser-integration"
   },
-  "onScreenKeyboard": {
-    "layout": "qwerty_full"
-  },
   "overview": {
     "scale": 0.18,
     "numOfRows": 2,
@@ -108,6 +110,51 @@
     "wsNumMarginScale": 0.07
   },
   "sidebar": {
+    "adhan":{
+      "default": "adhan_default.mp3",
+      "fajr": "adhan_fajr.mp3"
+    },
+    "centerModules": {
+      "enabled": [
+        "vpnGate",
+        "notifications",
+        "audioControls",
+        "powerProfiles",
+        "taskManager",
+        "bluetooth",
+        "wifiNetworks",
+        "liveConfig",
+        "prayerTimes"
+      ],
+      "vpnGate": {
+        "enabled": true
+      },
+      "notifications": {
+        "enabled": true
+      },
+      "audioControls": {
+        "enabled": true
+      },
+      "powerProfiles": {
+        "enabled": true
+      },
+      "taskManager": {
+        "enabled": true,
+        "pollingRate": 5000
+      },
+      "bluetooth": {
+        "enabled": true
+      },
+      "wifiNetworks": {
+        "enabled": true
+      },
+      "liveConfig": {
+        "enabled": true
+      },
+      "prayerTimes": {
+        "enabled": true
+      }
+    },
     "github": {
       "repoOwner": "pharmaracist",
       "repoName": "dots-hyprland"
@@ -194,8 +241,8 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 10,
-    "style": "arabic"
+    "shown": 9,
+    "style": "japanese"
   },
   "dock": {
     "enabled": true,
@@ -292,8 +339,20 @@
     }
   },
   "bar": {
-    "modes": "0",
+    "modes": "2",
     "wallpaper_folder": "~/Pictures/Wallpapers",
-    "position": "top"
+    "position": "top",
+    "elements": {
+      "showWindowTitle": true,
+      "showWorkspaces": true,
+      "showClock": true,
+      "showIndicators": true,
+      "showUtils": true,
+      "showWeather": true,
+      "showResources": true,
+      "showMusic": true,
+      "showBattery": true,
+      "showAvatar": true
+    }
   }
 }

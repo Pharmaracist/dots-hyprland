@@ -10,12 +10,10 @@ import { startAutoDarkModeService } from './services/darkmode.js';
 // Widgets
 import { Bar, BarCornerTopleft, BarCornerTopright } from './modules/bar/main.js';
 import Cheatsheet from './modules/cheatsheet/main.js';
-// import DesktopBackground from './modules/desktopbackground/main.js';
+import DesktopBackground from './modules/desktopbackground/main.js';
 import Dock from './modules/dock/main.js';
 import Corner from './modules/screencorners/main.js';
-import Crosshair from './modules/crosshair/main.js';
 import Indicator from './modules/indicators/main.js';
-import Osk from './modules/onscreenkeyboard/main.js';
 import Overview from './modules/overview/main.js';
 import Session from './modules/session/main.js';
 import SideLeft from './modules/sideleft/main.js';
@@ -49,15 +47,13 @@ for (let i = 0; i < monitors; i++) {
 }
 
 const Windows = () => [
-    // forMonitors(DesktopBackground),
-    forMonitors(Crosshair),
     Overview(),
     forMonitors(Indicator),
     forMonitors(Cheatsheet),
     SideLeft(),
     SideRight(),
-    forMonitors(Osk),
     forMonitors(Session),
+    ...(userOptions.asyncGet().desktopBackground.enabled !== false ? [forMonitors(DesktopBackground)] : []),
     ...(userOptions.asyncGet().wallselect.enabled !== false ? [Wallselect()] : []),
     ...(userOptions.asyncGet().dock.enabled ? [forMonitors(Dock)] : []),
     ...(userOptions.asyncGet().appearance.fakeScreenRounding !== 0 ? [
@@ -81,4 +77,3 @@ App.config({
     windows: Windows().flat(1)
 });
 
-Wallselect();

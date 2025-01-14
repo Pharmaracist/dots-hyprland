@@ -8,6 +8,8 @@ import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../../.commondata/weather.js';
 import WeatherWidget from '../modules/weather.js';
+import scrolledmodule from '../../.commonwidgets/scrolledmodule.js';
+import BatteryScaleModule from './battery_scale.js';
 const options = userOptions.asyncGet();
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + '/wttr.in.txt';
@@ -187,26 +189,31 @@ const BarGroup = ({ child }) => Widget.Box({
 const BatteryModule = () => Box({
     className: 'spacing-h-4',
     children: [
-        BarGroup({   child:BarClock() }),
-        // BarGroup({   child:WeatherWidget()}),
-        BarGroup({   child: Utilities()}),
-        Stack({
-            transitionDuration: userOptions.asyncGet().animations.durationLarge,
-            transition: 'slide_up_down',
-            children: {
-                'laptop': BarGroup({ child: BarBattery() }),
-                'hidden': Widget.Box({}),
-            },
-            setup: (stack) => {
-                stack.hook(globalThis.devMode, () => {
-                    if (globalThis.devMode.value) {
-                        stack.shown = 'laptop';
-                    } else {
-                        if (!Battery.available) stack.shown = 'hidden';
-                        else stack.shown = 'laptop';
+        ...(userOptions.asyncGet().bar.elements.showClock ? [BarGroup({ child: BarClock() })] : []),
+        ...(userOptions.asyncGet().bar.elements.showWeather ? [BarGroup({ child: WeatherWidget() })] : []),
+        ...(userOptions.asyncGet().bar.elements.showUtils ? [BarGroup({ child: Utilities() })] : []),
+        scrolledmodule({
+            children:[
+                Stack({
+                    transitionDuration: userOptions.asyncGet().animations.durationLarge,
+                    transition: 'slide_up_down',
+                    children: {
+                        'hidden': Widget.Box({}),
+                        'laptop': Widget.Box({children:[...(userOptions.asyncGet().bar.elements.showBattery ? [Widget.Box({ vexpand: true, children:[ BarGroup({ child: BarBattery() })] })] : [])]}),
+                    },
+                    setup: (stack) => {
+                        stack.hook(globalThis.devMode, () => {
+                            if (globalThis.devMode.value) {
+                                stack.shown = 'laptop';
+                            } else {
+                                if (!Battery.available) stack.shown = 'hidden';
+                                else stack.shown = 'laptop';
+                            }
+                        });
                     }
-                });
-            }
+                }),
+                BatteryScaleModule(),
+            ]
         })
     ]
 });
@@ -221,9 +228,9 @@ const switchToRelativeWorkspace = async (self, num) => {
 }
 
 export default () => Widget.EventBox({
-    onScrollUp: (self) => switchToRelativeWorkspace(self, -1),
-    onScrollDown: (self) => switchToRelativeWorkspace(self, +1),
-    onPrimaryClick: () => App.toggleWindow('sideright'),
+    // onScrollUp: (self) => switchToRelativeWorkspace(self, -1),
+    // onScrollDown: (self) => switchToRelativeWorkspace(self, +1),
+    // onPrimaryClick: () => App.toggleWindow('sideright'),
     child: Widget.Box({
         className: 'spacing-h-4',
         children: [

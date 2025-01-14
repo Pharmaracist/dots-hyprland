@@ -9,7 +9,8 @@ export default (monitor) => Widget.Window({
     // anchor: ['top', 'bottom', 'left', 'right'],
     layer: 'background',
     exclusivity: 'ignore',
-    visible: true,
+    keymode: 'on-demand',
+    visible: userOptions.asyncGet().desktopBackground.visible,
     child: Widget.Overlay({
         child: WallpaperImage(monitor),
         // child: Widget.Box({}),

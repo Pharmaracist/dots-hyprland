@@ -23,9 +23,9 @@ switch() {
     [ -z "$imgpath" ] && exit 1
 
     # Set wallpaper with adjusted animation parameters
-    swww img "$imgpath" --transition-step 100 --transition-fps 120 \
-        --transition-type grow --transition-angle 30 --transition-duration 0.5 \
-        --transition-pos "$cursorposx,$cursorposy_inverted" >/dev/null 2>&1
+    swww img "$imgpath" --transition-step 100 --transition-fps 190 \
+        --transition-type wipe --transition-angle 30 --transition-duration 0.9 \
+        # --transition-pos "$cursorposx,$cursorposy_inverted" >/dev/null 2>&1
 }
 
 # Function to generate and apply colors
@@ -34,31 +34,14 @@ generate_colors() {
     [ -z "$imgpath" ] && return 1
 
     # Silent execution of color generation commands
-    "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$imgpath" --apply --smart >/dev/null 2>&1
-    wal -s -i"$imgpath" --saturate 0.8 >/dev/null 2>&1
-
+    "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$imgpath" --apply >/dev/null 2>&1
+    # wal -s -i"$imgpath" --saturate 0.8 --backend [material] >/dev/null 2>&1
+    (matugen image "$imgpath" >/dev/null 2>&1 &)
     # Refresh applications asynchronously, ensuring all output is suppressed
-    (pywal-discord -p ~/.config/vesktop/themes >/dev/null 2>&1 &)
-    (wal-telegram >/dev/null 2>&1 &)
-    (pywalfox update >/dev/null 2>&1 &)
-    (pywal-spicetify "default" >/dev/null 2>&1 &)
-}
-
-# Execute the custom script in /home/pharmaracist/zed-theme-wal
-execute_custom_script() {
-    local script_path="/home/pharmaracist/zed-theme-wal/apply_theme.sh"
-    if [ -f "$script_path" ]; then
-        bash "$script_path" >/dev/null 2>&1
-    else
-        echo "Script $script_path not found."
-    fi
-}
-
-# Function to remove old symbolic link if it exists
-remove_old_link() {
-    if [ -L "$LINK_PATH" ]; then
-        rm -f "$LINK_PATH" >/dev/null 2>&1
-    fi
+    # (pywal-discord -p ~/.config/vesktop/themes >/dev/null 2>&1 &)
+    # (wal-telegram >/dev/null 2>&1 &)
+    # (pywalfox update >/dev/null 2>&1 &)
+    # (pywal-spicetify "default" >/dev/null 2>&1 &)
 }
 
 # Main Script Logic

@@ -6,6 +6,19 @@ $bar_ws_width_focus_active: 6.045rem;
 @mixin bar-group-rounding {
     @include small-rounding;
 }
+.bar-module-box {
+    background-color: $layer0;
+    color: $onLayer0;
+    @include full-rounding;
+    padding:0.5rem 1.5rem;
+}
+.bar-icon {
+    @include icon-material;
+    @include full-rounding;
+    background-color: $layer0;
+    color: $onLayer0;
+    font-size: 2.032rem;
+  }
 
 .bar-resources {
     progressbar {
@@ -45,7 +58,7 @@ $bar_ws_width_focus_active: 6.045rem;
     min-height: 3.8rem;
     padding: 0.2rem 0rem;
     background-color: $layer0;
-    padding: 0rem 1.4rem;
+    padding: 0rem 1.1rem;
     &.song-changing {
         animation: multiSweep 2.2s linear;
         animation-iteration-count: 13;
@@ -53,11 +66,11 @@ $bar_ws_width_focus_active: 6.045rem;
 }
 
 .bar-floating {
-    background-color: transparentize($background, 0.8);
+    background-color:$layer0;
     @include elevation2;
     border: 0.5px solid rgba($outline, 0.6);
     @include anim-enter;
-    @include full-rounding;
+    @include large-rounding;
     margin: 8px 80px;
 }
 .bar-height {
@@ -70,7 +83,10 @@ $bar_ws_width_focus_active: 6.045rem;
     background-color: $layer0;
     min-height: 2.827rem;
 }
-
+.bar-pads {
+    background-color: $layer0;
+    @include large-rounding;
+}
 .bar-bg-focus {
     background-color: $layer0;
     min-height: 1.364rem;
@@ -181,7 +197,7 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-ws-focus-active {
     min-width: $bar_ws_width_focus_active;
-    background-color: $onLayer0;
+    background-color: $primary;
 }
 
 .bar-ws-focus-occupied {
@@ -207,6 +223,37 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-date {
     color: $dateOnLayer1;
 }
+
+.bar-bat {
+    padding:0 3px;
+    @include full-rounding;
+    @include element_decel;
+    min-height: 1.99rem;
+    min-width: 2.3rem;
+    border-radius: 10rem;
+    color: $battOnLayer2;
+}
+.bar-bat-circprog {
+    border:0.12rem solid $outline;
+    @include fluent_decel_long;
+    min-width: 0.23rem; // line width
+    min-height: 2.1rem;
+    padding: 0rem;
+    background-color: $battLayer2;
+    color: $battOnLayer2;
+}
+
+ 
+.bar-music-art {
+    margin: 4px;
+    border: 1px solid $surfaceContainerHighest;
+    background-color: $surfaceContainerHighest;
+    border-radius: 8px;
+    padding: 4px;
+    -gtk-icon-style: regular;
+    -gtk-icon-shadow: none;
+}
+
 
 .bar-batt {
     @include full-rounding;
@@ -484,3 +531,100 @@ $bar_ws_width_focus_active: 6.045rem;
 .bar-wintitle-icon-spacer {
     min-width: 0.714rem;
 }
+
+.battery-scale-container {
+    @include element_decel;
+    @include small-rounding;
+    padding: 0 6px;
+    background: $layer1;
+}
+
+.battery-scale-box {
+    min-width: 100px;
+}
+
+.battery-icon-box {
+    padding: 0 2px;
+    &.bar-batt-charging {
+        color: $primary;
+    }
+    &.bar-batt-low {
+        color: $error;
+    }
+}
+
+.battery-scale-bar {
+    min-width: 50px;
+    min-height: 3px;
+    margin: 0 4px;
+    background-color: $onSurfaceVariant;
+    border-radius: 25px;
+
+    
+    &.bar-batt-charging trough progress {
+        background-color: $primary;
+        // background: linear-gradient(to right, $layer2 0%, $primary 100%) ;
+        border-radius: 25px;
+        min-height: 12px;
+    }
+    
+    &.bar-batt-low trough progress {
+        background-color: $error;
+        border-radius: 2px;
+    }
+    
+    trough progress {
+        background-color: $onSurfaceVariant;
+        border-radius: 25px;
+        min-height: 4px;
+    }
+}
+
+.avatar-widget {
+    @include normal-rounding;
+    padding: 3px 6px;
+    margin: 3px;
+    background-color: $layer2;
+}
+
+.avatar-box {
+    @include element_decel;
+    box-shadow: inset 0 0 0 1px $layer1;
+}
+
+.avatar-eventbox:hover {
+    .avatar-widget {
+        background-color: $hovercolor;
+    }
+}
+
+.avatar-eventbox:active {
+    .avatar-widget {
+        background-color: $activecolor;
+    }
+}
+
+// // Module switcher styles
+// .module-switcher {
+//     min-width: 2.5rem;
+//     min-height: 2.5rem;
+
+//     stack {
+//         min-height: 2.5rem;
+//         padding: 0;
+//         margin: 0;
+//     }
+
+//     .module-box {
+//         min-height: 2.5rem;
+//         padding: 0.25rem;
+//         margin: 0;
+//         border-radius: $rounding-small;
+//         background-color: $layer2;
+//         transition: $transition;
+
+//         &:hover {
+//             background-color: $hovercolor;
+//         }
+//     }
+// }

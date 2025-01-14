@@ -184,44 +184,44 @@ const WeatherWidget = () => {
     }
   };
 
-  const weatherIcon = MaterialIcon('device_thermostat', 'large weather-icon txt-norm sec-txt');
-  const prayerIcon = MaterialIcon('mosque', 'large weather-icon txt-norm sec-txt');
-  const mediaIcon = MaterialIcon('music_note', 'large weather-icon txt-norm sec-txt');
-  const notificationIcon = MaterialIcon('notifications', 'large weather-icon txt-norm sec-txt');
+  const weatherIcon = MaterialIcon('device_thermostat', 'large weather-icon txt-norm txt-onLayer1');
+  const prayerIcon = MaterialIcon('mosque', 'large weather-icon txt-norm txt-onLayer1');
+  const mediaIcon = MaterialIcon('music_note', 'large weather-icon txt-norm txt-onLayer1');
+  const notificationIcon = MaterialIcon('notifications', 'large weather-icon txt-norm txt-onLayer1');
 
   const tempLabel = Label({
-    className: "txt-norm  sec-txt",
+    className: "txt-norm txt-onLayer1",
     label: "",
   });
 
   const feelsLikeTextLabel = Label({
-    className: "txt-norm  sec-txt",
+    className: "txt-norm  txt-onLayer1",
     label: " feels",
   });
 
   const feelsLikeLabel = Label({
-    className: "txt-norm  sec-txt",
+    className: "txt-norm  txt-onLayer1",
     label: "",
   });
 
   const prayerNameLabel = Label({
-    className: "txt-norm  sec-txt",
+    className: "txt-norm  txt-onLayer1",
     visible: false,
     label: "",
   });
 
   const prayerTimeLabel = Label({
-    className: "txt-norm  sec-txt",
+    className: "txt-norm  txt-onLayer1",
     visible: false,
     label: "",
   });
 
   const mediaTitleLabel = Label({
-    className: 'txt-norm sec-txt',
+    className: 'txt-norm txt-onLayer1',
   });
 
   const notificationLabel = Label({
-    className: 'txt-norm sec-txt',
+    className: 'txt-norm txt-onLayer1',
   });
 
   const weatherContent = Box({
@@ -300,10 +300,8 @@ const WeatherWidget = () => {
   });
 
   const weatherBox = Box({
-    hpack: 'center',
-    vpack: 'center',
-    css: `padding:4.55px 30px`,
-    className: "txt-onSurfaceVariant bar-group-margin bar-group bar-group-standalone bar-group-pad",
+    // css: `padding:4.55px 30px`,
+    // className: "txt-onSurfaceVariant bar-group-margin bar-group bar-group-standalone bar-group-pad",
     children: [contentStack],
   });
 
@@ -424,7 +422,6 @@ const WeatherWidget = () => {
     onPrimaryClick: toggleDisplay,
     child: weatherBox,
     setup: self => {
-      print('Setting up weather widget');
       // Initial updates
       updateWidget();
       updateMediaInfo();

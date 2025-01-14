@@ -7,7 +7,8 @@ const { execAsync, exec } = Utils;
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { showMusicControls } from '../../../variables.js';
-
+import scrolledmodule from '../../.commonwidgets/scrolledmodule.js';
+import NetworkSpeed from '../modules/networkspeed.js';
 const CUSTOM_MODULE_CONTENT_INTERVAL_FILE = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-interval.txt`;
 const CUSTOM_MODULE_CONTENT_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-poll.sh`;
 const CUSTOM_MODULE_LEFTCLICK_SCRIPT = `${GLib.get_user_cache_dir()}/ags/user/scripts/custom-module-leftclick.sh`;
@@ -154,6 +155,7 @@ export default () => {
     const musicStuff = Box({
         className: 'spacing-h-10',
         hexpand: true,
+        css:`min-width:12rem`,
         children: [playingState, trackTitle]
     });
 
@@ -183,42 +185,48 @@ export default () => {
                     onPrimaryClickRelease: () => Utils.execAsync(CUSTOM_MODULE_LEFTCLICK_SCRIPT),
                     onSecondaryClickRelease: () => Utils.execAsync(CUSTOM_MODULE_RIGHTCLICK_SCRIPT),
                     onMiddleClickRelease: () => Utils.execAsync(CUSTOM_MODULE_MIDDLECLICK_SCRIPT),
-                    onScrollUp: () => Utils.execAsync(CUSTOM_MODULE_SCROLLUP_SCRIPT),
-                    onScrollDown: () => Utils.execAsync(CUSTOM_MODULE_SCROLLDOWN_SCRIPT),
+                    // onScrollUp: () => Utils.execAsync(CUSTOM_MODULE_SCROLLUP_SCRIPT),
+                    // onScrollDown: () => Utils.execAsync(CUSTOM_MODULE_SCROLLDOWN_SCRIPT),
                 })
             });
         }
 
         return BarGroup({
             child: Box({
+                spacing: 4,
+                hpack: 'end',
+                css:`padding:0 0.8rem`,
+                // hexpand: true,
                 children: [
                     BarResource(getString('RAM Usage'), 'memory', 
                         `LANG=C free | awk '/^Mem/ {printf("%.2f\\n", ($3/$2) * 100)}'`,
                         'bar-ram-circprog', 'bar-ram-txt', 'bar-ram-icon'),
-                    Box({
-                        className: 'spacing-h-10 margin-left-10',
-                        children: [
-                            BarResource(getString('Swap Usage'), 'swap_horiz',
-                                `LANG=C free | awk '/^Swap/ {if ($2 > 0) printf("%.2f\\n", ($3/$2) * 100); else print "0";}'`,
-                                'bar-swap-circprog', 'bar-swap-txt', 'bar-swap-icon'),
-                            BarResource(getString('CPU Usage'), 'settings_motion_mode',
-                                `LANG=C top -bn1 | grep Cpu | sed 's/\\,/\\./g' | awk '{print $2}'`,
-                                'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon'),
-                        ]
-                    })
+                    BarResource('GPU Temperature', 'thermostat',
+                            `sensors | grep -i 'gpu' | awk '{print $2}' | sed 's/+//;s/°C//'`,
+                            'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon'),
+                    BarResource(getString('CPU Usage'), 'settings_motion_mode',
+                        `LANG=C top -bn1 | grep Cpu | sed 's/\\,/\\./g' | awk '{print $2}'`,
+                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon'),
                 ],
             })
         });
     };
 
     return EventBox({
-        onScrollUp: (self) => switchToRelativeWorkspace(self, -1),
-        onScrollDown: (self) => switchToRelativeWorkspace(self, +1),
+        // onScrollUp: (self) => switchToRelativeWorkspace(self, -1),
+        // onScrollDown: (self) => switchToRelativeWorkspace(self, +1),
         child: Box({
-            className: 'spacing-h-4',
+            spacing: 4,
             children: [
-                SystemResourcesOrCustomModule(),
-                EventBox({
+                ...(userOptions.asyncGet().bar.elements.showResources? [
+                scrolledmodule({
+                    children: [
+                        Widget.Box({hexpand:true, hpack:'end',children:[SystemResourcesOrCustomModule(),]}),
+                        Widget.Box({hexpand:true,hpack:"end",children:[BarGroup({hpack:"center",hexpand:true,child:NetworkSpeed()})]}),
+                    ]
+                })]:[]),
+                ...(userOptions.asyncGet().bar.elements.showMusic? [BarGroup({ 
+                    child: EventBox({
                     child: BarGroup({ child: musicStuff }),
                     onPrimaryClick: () => showMusicControls.setValue(!showMusicControls.value),
                     onSecondaryClick: () => execAsync(['bash', '-c', 'playerctl next || playerctl position `bc <<< "100 * $(playerctl metadata mpris:length) / 1000000 / 100"` &']).catch(print),
@@ -228,6 +236,7 @@ export default () => {
                             execAsync('playerctl previous').catch(print);
                     }),
                 })
+            })] : []),
             ]
         })
     });

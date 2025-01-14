@@ -682,23 +682,6 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     background-color: $surfaceVariant;
 }
 
-.btn {
-    @include element_decel;
-    background-color: $utilsLayer2;
-    padding: 5px;
-    color: $utilsOnLayer2;
-    border-radius: 10px;
-    -gtk-outline-radius: 10px;
-}
-
-.btn:hover,
-.btn:focus {
-    background-color: $layer2Hover;
-}
-.btn:active {
-    background-color: $layer2Active;
-}
-
 .sidebar-chat-codeblock-code {
     @include techfont;
     padding: 0.682rem;
@@ -954,6 +937,7 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-module-box {
     padding: 0.341rem 0.682rem;
 }
+
 .sidebar-prayertime-top {
     @include normal-rounding;
     background: linear-gradient(
@@ -1003,8 +987,9 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .sidebar-prayertime-time {
     @include mainfont;
-    font-weight: 700;
     color: $primary;
+    font-weight: bold;
+    font-size: 1.1rem;
     min-width: 45px;
     margin: 0.273rem 0;
 }
@@ -1059,6 +1044,109 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
     color: mix($onSecondaryContainer, $secondaryContainer, 60%);
     margin: 0.273rem 0;
 }
+
+// Prayer Times Module Styles
+.prayer-times-box {
+    @include normal-rounding;
+    background-color: $surfaceContainerLow;
+    padding: 0.682rem;
+    margin: 0.341rem 0;
+}
+
+.prayer-times-header {
+    @include titlefont;
+    padding: 0.341rem;
+    margin-bottom: 0.682rem;
+    color: $onSurface;
+
+    label {
+        font-size: 1.2rem;
+    }
+}
+
+.prayer-times-next {
+    @include normal-rounding;
+    background: linear-gradient(
+        135deg,
+        $primary 0%,
+        mix($primary, $surfaceContainerHighest, 85%) 100%
+    );
+    color: $onPrimary;
+    padding: 1.2rem 0.682rem;
+    margin-bottom: 0.682rem;
+
+    &:hover {
+        background: linear-gradient(
+            135deg,
+            $primary 0%,
+            mix($primary, $surfaceContainerHighest, 75%) 100%
+        );
+    }
+}
+
+.prayer-times-item {
+    @include normal-rounding;
+    padding: 1.2rem 0.682rem;
+    background-color: $surfaceContainerHigh;
+    margin: 0.341rem 0;
+    transition: all 200ms ease;
+    border: 1px solid transparent;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+        border-color: $outlineVariant;
+    }
+}
+
+.prayer-times-name {
+    @include mainfont;
+    color: $onSurface;
+    font-size: 1.1rem;
+}
+
+.prayer-times-time {
+    @include mainfont;
+    color: $primary;
+    font-weight: bold;
+    font-size: 1.1rem;
+    min-width: 5.5rem;
+}
+
+.prayer-times-date {
+    @include small-rounding;
+    padding: 0.341rem 0.682rem;
+    background: linear-gradient(
+        to right,
+        $surfaceContainerHigh 0%,
+        mix($surfaceContainerHigh, $primary, 95%) 100%
+    );
+    color: $onSurfaceVariant;
+    margin-bottom: 0.682rem;
+    border-left: 3px solid $primary;
+
+    label {
+        font-size: 0.95rem;
+    }
+}
+
+.prayer-times-remaining {
+    @include small-rounding;
+    color: mix($onSurface, $surface, 65%);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+}
+
+.prayer-times-icon {
+    @include icon-material;
+    color: mix($onSurface, $surface, 75%);
+    margin-right: 0.5rem;
+    
+    &-next {
+        color: $onPrimary;
+        margin-right: 0.5rem;
+    }
+}
+
 // Timer Module Styles
 .sidebar-timer {
     @include normal-rounding;
@@ -1121,4 +1209,137 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
         margin: 0.2em;
         padding: 0.3em;
     }
+}
+
+.quran-surah-name {
+    font-family: "TE HAFS2 Tharwat Emara", "Noto Naskh Arabic",
+        "Noto Sans Arabic", serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: $primary;
+    margin: 1rem 0;
+}
+
+.quran-loading {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.quran-message {
+    background-color: $layer1;
+    border-radius: $rounding_medium;
+    padding: 0.682rem;
+    margin: 0.341rem 0
+}
+
+.quran-message-container {
+    padding: 1rem;
+    background-color: $surfaceContainerLow;
+    border-radius: $rounding_large;
+    margin: 1rem;
+}
+
+.welcome-message {
+    padding: 2rem;
+
+    .welcome-title {
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: $onSurface;
+    }
+
+    .welcome-subtitle {
+        opacity: 0.8;
+        color: $onSurfaceVariant;
+    }
+
+    .welcome-examples {
+        margin: 1rem 0;
+        min-width: 300px;
+
+        .welcome-example-btn {
+            // padding: 0.7 5rem 1rem;
+            border-radius: $rounding_large;
+            background-color: $surfaceContainerLow;
+            border: 1px solid $surfaceContainerHighest;
+            transition: all 0.2s ease;
+            min-width: 300px;
+            color: $onSurface;
+
+            &:hover {
+                background-color: $surfaceContainerHigh;
+                border-color: $primary;
+            }
+        }
+    }
+
+    .capability-item {
+        opacity: 0.8;
+        color: $onSurfaceVariant;
+        margin: 0.25rem 0;
+    }
+}
+
+.sidebar-collapsed {
+    min-width: 350px;
+}
+
+.sidebar-expanded {
+    min-width: 500px;
+}
+
+// Task Manager styles
+.task-manager-widget {
+    @include normal-rounding;
+    background-color: $surfaceContainerLow;
+    padding: 0.682rem;
+}
+
+.task-manager-header {
+    padding: 0.341rem;
+    margin-bottom: 0.682rem;
+}
+
+.task-manager-box {
+    padding: 0.341rem;
+}
+
+.task-manager-item {
+    @include normal-rounding;
+    padding: 0.682rem;
+    background-color: $surfaceContainerHigh;
+    // transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+    }
+}
+
+.task-manager-button {
+    @include full-rounding;
+    padding: 0.341rem;
+    background-color: transparent;
+    color: $error;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: mix($error, transparent, 10%);
+    }
+}
+
+.task-manager-refresh-button {
+    @include full-rounding;
+    padding: 0.341rem;
+    background-color: transparent;
+    color: $onSurface;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+    }
+}
+
+.task-manager-scrollable {
+    min-height: 20.455rem;
 }

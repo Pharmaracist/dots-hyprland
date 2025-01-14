@@ -1,92 +1,104 @@
 const { GLib } = imports.gi;
 import App from "resource:///com/github/Aylur/ags/app.js";
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-//import { exec_sh_sync } from "resource:///com/github/Aylur/ags/service/exec.js"; // Assuming exec.sh sync is available for executing commands
 import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
-import Network from "resource:///com/github/Aylur/ags/service/network.js";
+import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 
-const { exec, execAsync } = Utils;
+const REFRESH_INTERVAL = 1000;
 
-let lastDownload = 0;
-let lastUpload = 0;
-let lastTimestamp = GLib.get_real_time();
+const formatSpeed = (bytesPerSec) => {
+    if (bytesPerSec === 0) return '0 Mb/s';
+    if (!bytesPerSec || isNaN(bytesPerSec)) return '0 Mb/s';
+    
+    // Convert bytes to bits and then to megabits
+    const bitsPerSec = bytesPerSec * 8;
+    const mbps = bitsPerSec / 1000000;
+    
+    return `${mbps.toFixed(1)} Mb/s`;
+};
 
-const networkSpeedIndicator = () =>
-  Widget.Stack({
-    transition: "slide_up_down",
-    transitionDuration: userOptions.asyncGet().animations.durationSmall,
-    children: {
-      icon: Widget.Icon({
-        className: "txt-norm sec-txt icon-material",
-        iconName: "network_wifi_1_bar", // Use `iconName` instead of `label`
-      }),
-      stats: Widget.Box({
-        className: "txt-small sec-txt",
-        visible: false,
+const getNetworkBytes = () => {
+    try {
+        const activeIface = Utils.exec('ip route get 1.1.1.1').split('dev ')[1]?.split(' ')[0];
+        if (!activeIface) {
+            return { rxBytes: 0, txBytes: 0 };
+        }
+
+        const stats = Utils.exec(`ip -s link show ${activeIface}`);
+        const lines = stats.split('\n');
+        
+        const rxLine = lines[3]?.trim().split(/\s+/);
+        const txLine = lines[5]?.trim().split(/\s+/);
+        
+        const rxBytes = parseInt(rxLine?.[0]) || 0;
+        const txBytes = parseInt(txLine?.[0]) || 0;
+        
+        return { rxBytes, txBytes };
+    } catch (error) {
+        return { rxBytes: 0, txBytes: 0 };
+    }
+};
+
+const NetworkSpeedIndicator = () => {
+    let lastRx = 0;
+    let lastTx = 0;
+    let lastTime = GLib.get_monotonic_time() / 1000000;
+
+    const downloadLabel = Widget.Label({
+        className: 'bar-cpu-txt onSurfaceVariant',
+        label: '0 Mb/s',
+    });
+
+    const uploadLabel = Widget.Label({
+        className: 'bar-cpu-txt onSurfaceVariant',
+        label: '0 Mb/s',
+    });
+
+    const downloadIcon = Widget.Box({ className: 'sec-txt', child: MaterialIcon('download', 'larger') });
+    const uploadIcon = Widget.Box({ className: 'sec-txt', child: MaterialIcon('upload', 'larger') });
+    const download = Widget.Box({ hexpand:true, children: [downloadIcon, downloadLabel] });
+    const upload = Widget.Box({ hexpand:true, children: [uploadIcon, uploadLabel] });
+    const content = Widget.Box({
+        className: 'spacing-h-10',
+        css: 'min-width: 15rem;',
+        hpack:'center',
         children: [
-          Widget.Label({
-            className: "txt-small",
-            label: "Download: 0 KB/s",
-            attribute: {
-              update: (self) =>
-                (self.label = `Download: ${self.attribute.downloadSpeed}`),
-            },
-          }),
-          Widget.Label({
-            className: "txt-small",
-            label: "Upload: 0 KB/s",
-            attribute: {
-              update: (self) =>
-                (self.label = `Upload: ${self.attribute.uploadSpeed}`),
-            },
-          }),
+            Widget.Box({
+                spacing: 6,
+                hpack: 'center',
+                hexpand:true,
+                children: [ download, Widget.Label({ className: 'sec-txt', label: ' ' }), upload],
+            }),
         ],
-      }),
-    },
-    setup: (self) => {
-      self.hook(Network, (stack) => {
-        // Use a shell command to get network stats via `ifstat` or `nload` or similar
-        const stats = Utils.execAsync("ifstat -i eth0 1 1"); // Example, replace with your network interface
+    });
 
-        if (!stats) {
-          log("No network stats available");
-          return;
+    const update = () => {
+        const currentTime = GLib.get_monotonic_time() / 1000000;
+        const timeDelta = currentTime - lastTime;
+        const { rxBytes, txBytes } = getNetworkBytes();
+
+        if (timeDelta > 0 && lastRx !== 0) {
+            const rxSpeed = Math.max(0, (rxBytes - lastRx) / timeDelta);
+            const txSpeed = Math.max(0, (txBytes - lastTx) / timeDelta);
+            downloadLabel.label = `${formatSpeed(rxSpeed)}`;
+            uploadLabel.label = `${formatSpeed(txSpeed)}`;
         }
 
-        const currentTimestamp = GLib.get_real_time();
-        const elapsed = (currentTimestamp - lastTimestamp) / 1000000; // Convert to seconds
+        lastRx = rxBytes;
+        lastTx = txBytes;
+        lastTime = currentTime;
 
-        if (elapsed <= 0) {
-          log("Elapsed time is too small:", elapsed);
-          return;
-        }
+        return true;
+    };
 
-        // Process the stats output and calculate speeds
-        const lines = stats.split("\n");
-        const speeds = lines[2].split(/\s+/); // Assuming output is in "KB/s" format
+    const updateTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, REFRESH_INTERVAL, update);
 
-        const downloadSpeed = parseFloat(speeds[1]); // Assuming download speed is at index 1
-        const uploadSpeed = parseFloat(speeds[2]); // Assuming upload speed is at index 2
+    content.connect('destroy', () => {
+        if (updateTimeout) GLib.source_remove(updateTimeout);
+    });
 
-        // Log speed calculation for debugging
-        log("Download Speed:", downloadSpeed, "Upload Speed:", uploadSpeed);
+    update();
+    return content;
+};
 
-        // Update stats
-        self.children.stats.children[0].attribute.downloadSpeed = `${Math.round(downloadSpeed)} KB/s`;
-        self.children.stats.children[1].attribute.uploadSpeed = `${Math.round(uploadSpeed)} KB/s`;
-
-        // Update last values
-        lastDownload = downloadSpeed;
-        lastUpload = uploadSpeed;
-        lastTimestamp = currentTimestamp;
-      });
-
-      // Handle click/reveal action
-      self.on_click = () => {
-        self.children.stats.visible = !self.children.stats.visible;
-      };
-    },
-  });
-
-export default (props = {}, monitor = 0) =>
-  networkSpeedIndicator(props, monitor);
+export default () => NetworkSpeedIndicator();

@@ -1,0 +1,30 @@
+[config.wallpaper]
+command = "swww"
+arguments = ["img", "--transition-type", "center"]
+set = true
+
+[templates.spicetify]
+input_path = '~/.config/matugen/templates/colors.ini'
+output_path = '~/.config/spicetify/Themes/Comfy/color.ini'
+post_hook = 'spicetify watch -q -s &'
+[templates.telegram]
+input_path = '~/.config/matugen/templates/telegram-colors.tdesktop-theme'
+output_path = '~/.local/share/TelegramDesktop/tdata/tthemes/material-you.tdesktop-theme'
+
+[templates.obsidian]
+input_path = '~/.config/matugen/templates/obsidian.css'
+output_path = '~/Obsidian Vault/.obsidian/snippets/material-you.css'
+
+[templates.rofi]
+input_path = '~/.config/matugen/templates/rofi-colors.rasi'
+output_path = '~/.local/share/rofi/themes/colors.rasi'
+
+[templates.vscode]
+input_path = '~/.config/matugen/templates/vscode-color-theme.json'
+output_path = '~/.vscode/extensions/theme-material-you/themes/vscode.json'
+
+[templates.pywalfox]
+input_path = '~/.config/matugen/templates/pywalfox-colors.json'
+output_path = '~/.cache/wal/colors.json'
+post_hook = 'pywalfox update'
+
