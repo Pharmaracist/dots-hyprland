@@ -45,7 +45,7 @@ const WindowTitle = async () => {
 
         const appIcon = Widget.Icon({
             className: 'app-icon',
-            size: 16,
+            size: 20,
             setup: (self) => self.hook(Hyprland.active.client, () => {
                 const classname = Hyprland.active.client.class;
                 const icon = findAppIcon(classname);
@@ -81,6 +81,7 @@ const WindowTitle = async () => {
         });
 
         return Widget.Box({
+            spacing: 3,
             children: [
                 appIcon,
                 Widget.Box({ className: 'bar-wintitle-icon-spacer' }),

@@ -54,15 +54,10 @@ const BarBattery = () => {
     child: Label({
       className: "bar-batt-percent",
       css: "margin-left: 8px;",
-      connections: [
-        [
-          Battery,
-          (label) => {
-            const chargingText = Battery.charging ? "" : " ";
-            label.label = `${Battery.percent}% ${chargingText} `;
-          },
-        ],
-      ],
+      setup: (self) => self.hook(Battery, () => {
+        const chargingText = Battery.charging ? "" : " ";
+        self.label = `${Battery.percent}% ${chargingText} `;
+      }),
     }),
   });
 

@@ -954,3 +954,171 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 .sidebar-module-box {
     padding: 0.341rem 0.682rem;
 }
+.sidebar-prayertime-top {
+    @include normal-rounding;
+    background: linear-gradient(
+        270deg,
+        $primary 0%,
+        lighten($surfaceContainerHighest, 30%) 100%
+    );
+    padding: 0.82rem;
+    // margin-top:0.7rem;
+    margin-bottom: 1rem;
+    color: $onSecondaryContainer;
+    // border:0.2rem solid $outline;
+}
+
+.sidebar-prayertime-next {
+    margin: 1.682rem 0;
+    margin-top: 0.341rem;
+    margin-right: 1.5rem;
+    @include titlefont;
+    color: $onSecondaryContainer;
+}
+
+.sidebar-prayertime-item {
+    @include small-rounding;
+    @include titlefont;
+    color: $onSecondaryContainer;
+
+    @include element_decel;
+    padding: 0.682rem;
+    background-color: mix($surfaceContainer, $primary, 96%);
+}
+
+.sidebar-prayertime-item:hover {
+    background-color: mix($surfaceContainerLow, $primary, 85%);
+}
+
+.sidebar-prayertime-item:active {
+    background-color: mix($surfaceContainerLow, $primary, 70%);
+}
+
+.sidebar-prayertime-name {
+    @include mainfont;
+    color: $onSurface;
+    margin: 0.273rem 0;
+    font-weight: 500;
+}
+
+.sidebar-prayertime-time {
+    @include mainfont;
+    font-weight: 700;
+    color: $primary;
+    min-width: 45px;
+    margin: 0.273rem 0;
+}
+
+.sidebar-prayertimes {
+    @include menu_decel;
+    @include elevation2;
+    @include normal-rounding;
+    min-width: 29.659rem;
+    padding: 1.023rem;
+    margin: 0.273rem 0;
+}
+
+.sidebar-prayertimes-header {
+    @include titlefont;
+    font-size: 1.364rem;
+    color: $onSecondaryContainer;
+}
+
+.sidebar-prayertimes-header-icon {
+    margin-right: 0.682rem;
+    color: $onSecondaryContainer;
+}
+
+.sidebar-prayertimes-time {
+    @include mainfont;
+    font-size: 1.023rem;
+    color: mix($onSecondaryContainer, $secondaryContainer, 80%);
+}
+
+.sidebar-prayertimes-time-icon {
+    margin-right: 0.682rem;
+    color: mix($onSecondaryContainer, $secondaryContainer, 80%);
+}
+
+.sidebar-prayertimes-time-text {
+    @include mainfont;
+    font-size: 1.023rem;
+    color: mix($onSecondaryContainer, $secondaryContainer, 80%);
+}
+
+.sidebar-prayertimes-time-remaining {
+    @include mainfont;
+    font-size: 0.818rem;
+    color: mix($onSecondaryContainer, $secondaryContainer, 60%);
+    margin: 0.273rem 0;
+}
+
+.sidebar-prayertimes-time-remaining-text {
+    @include mainfont;
+    font-size: 0.818rem;
+    color: mix($onSecondaryContainer, $secondaryContainer, 60%);
+    margin: 0.273rem 0;
+}
+// Timer Module Styles
+.sidebar-timer {
+    @include normal-rounding;
+    @include titlefont;
+    color: $onSurface;
+
+    &-btn {
+        @include normal-rounding;
+        padding: 0.2em;
+        min-width: 1.8em;
+        min-height: 1.8em;
+
+        &-start {
+            background-color: $primary;
+            color: $onPrimary;
+
+            &:hover {
+                background-color: mix($primary, $surfaceContainerHighest, 85%);
+            }
+        }
+    }
+    &-item {
+        @include normal-rounding;
+        @include titlefont;
+        color: $onSurface;
+    }
+    &-icon {
+        @include icon-material;
+        // font-size: 1.1em;
+    }
+}
+
+.sidebar-todo-add {
+    @include normal-rounding;
+    background-color: $layer2;
+    padding: 0.3em 0.5em;
+    margin: 0 0.5em;
+
+    &:focus {
+        background-color: mix($primary, $surfaceContainerHighest, 15%);
+    }
+}
+
+.sidebar-todo-new {
+    padding: 0.3em;
+    margin: 0 0.5em;
+
+    &:hover {
+        background-color: mix($primary, $surfaceContainerHighest, 15%);
+    }
+}
+
+.sidebar-timer-presets {
+    @include normal-rounding;
+    background-color: $layer1;
+    padding: 0.5em;
+    margin: 0 0.5em;
+
+    .sidebar-timer-btn {
+        margin: 0.2em;
+        padding: 0.3em;
+    }
+}

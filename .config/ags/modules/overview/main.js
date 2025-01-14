@@ -1,5 +1,6 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import { SearchAndWindows } from "./windowcontent.js";
+import { launchCustomCommand } from "./miscfunctions.js";
 import PopupWindow from '../.widgethacks/popupwindow.js';
 import { clickCloseRegion } from '../.commonwidgets/clickcloseregion.js';
 
@@ -7,6 +8,17 @@ const createCloseRegion = (expand = false) => clickCloseRegion({
     name: 'overview',
     multimonitor: false,
     expand,
+});
+
+const searchPrompt = Widget.Entry({
+    on_accept: ({ text }) => {
+        if (text.startsWith('>')) {
+            launchCustomCommand(text);
+            App.closeWindow('overview');
+            return;
+        }
+        // ... rest of the code ...
+    },
 });
 
 export default (id = '') => PopupWindow({

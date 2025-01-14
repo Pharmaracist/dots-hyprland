@@ -4,8 +4,8 @@ import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 
 const { Box, Label, Scrollable } = Widget;
 
-const REPO_OWNER = 'sh1zicus';
-const REPO_NAME = 'dots-hyprland';
+const REPO_OWNER = `${userOptions.asyncGet().sidebar.github.repoOwner}`;
+const REPO_NAME = `${userOptions.asyncGet().sidebar.github.repoName}`;
 
 const fetchGithubUpdates = async () => {
     try {

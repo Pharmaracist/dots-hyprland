@@ -4,10 +4,10 @@ import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { Box, Button, Label } = Widget;
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { setupCursorHover } from '../.widgetutils/cursorhover.js';
-
+// import { TimerWidget } from './timers.js';
 import { TodoWidget } from "./todolist.js";
 import { getCalendarLayout } from "./calendar_layout.js";
-
+// import  AudioFiles  from "./media.js";
 // Кэшируем часто используемые значения
 let calendarJson = getCalendarLayout(undefined, true);
 let monthshift = 0;
@@ -140,6 +140,8 @@ const contentStack = Widget.Stack({
     children: {
         'calendar': CalendarWidget(),
         'todo': TodoWidget(),
+        // 'media': AudioFiles(),
+        // 'timers': TimerWidget(),
     },
     transition: 'slide_up_down',
     transitionDuration: userOpts.animations.durationLarge,
@@ -185,6 +187,8 @@ export const ModuleCalendar = () => Box({
             children: [
                 StackButton('calendar', 'calendar_month', getString('Calendar')),
                 StackButton('todo', 'done_outline', getString('To Do')),
+                // StackButton('media', 'music_note', getString('Media')),
+                // StackButton('timers', 'access_time', getString('Timers')),
             ]
         }), false, false, 0);
         box.pack_end(contentStack, false, false, 0);

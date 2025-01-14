@@ -12,6 +12,7 @@ import { setupCursorHover } from '../.widgetutils/cursorhover.js';
 import { getAllFiles, searchIcons } from './icons.js'
 import { MaterialIcon } from '../.commonwidgets/materialicon.js';
 import { substitute } from '../.miscutils/icons.js';
+import { getValidIcon } from '../.miscutils/icon_handling.js';
 
 const icon_files = userOptions.asyncGet().icons.searchPaths.map(e => getAllFiles(e)).flat(1)
 
@@ -39,6 +40,10 @@ function ExclusiveWindow(client) {
 }
 
 const focus = ({ address }) => Utils.execAsync(`hyprctl dispatch focuswindow address:${address}`).catch(print);
+
+const getIconPath = (appClass, fromCache = true) => {
+    return getValidIcon(appClass, icon_files, fromCache, cachePath);
+};
 
 const DockSeparator = (props = {}) => Box({
     ...props,
@@ -119,18 +124,7 @@ const Taskbar = (monitor) => Widget.Box({
                 const client = Hyprland.clients[i];
                 if (client["pid"] == -1) return;
                 const appClass = substitute(client.class);
-                // for (const appName of userOptions.asyncGet().dock.pinnedApps) {
-                //     if (appClass.includes(appName.toLowerCase()))
-                //         return null;
-                // }
-                let appClassLower = appClass.toLowerCase()
-                let path = ''
-                if (cachePath[appClassLower]) { path = cachePath[appClassLower] }
-                else {
-                    path = searchIcons(appClass.toLowerCase(), icon_files)
-                    cachePath[appClassLower] = path
-                }
-                if (path === '') { path = substitute(appClass) }
+                const path = getIconPath(appClass);
                 const newButton = AppButton({
                     icon: path,
                     tooltipText: `${client.title} (${appClass})`,
@@ -143,7 +137,7 @@ const Taskbar = (monitor) => Widget.Box({
             box.children = Array.from(box.attribute.map.values());
         },
         'add': (box, address, monitor) => {
-            if (!address) { // First active emit is undefined
+            if (!address) {
                 box.attribute.update(box);
                 return;
             }
@@ -151,15 +145,8 @@ const Taskbar = (monitor) => Widget.Box({
                 return client.address == address;
             });
             if (ExclusiveWindow(newClient)) { return }
-            let appClass = newClient.class
-            let appClassLower = appClass.toLowerCase()
-            let path = ''
-            if (cachePath[appClassLower]) { path = cachePath[appClassLower] }
-            else {
-                path = searchIcons(appClassLower, icon_files)
-                cachePath[appClassLower] = path
-            }
-            if (path === '') { path = substitute(appClass) }
+            const appClass = newClient.class;
+            const path = getIconPath(appClass);
             const newButton = AppButton({
                 icon: path,
                 tooltipText: `${newClient.title} (${appClass})`,
@@ -198,17 +185,17 @@ const PinnedApps = () => Widget.Box({
         .map(term => ({ app: Applications.query(term)?.[0], term }))
         .filter(({ app }) => app)
         .map(({ app, term = true }) => {
+            const icon = userOptions.asyncGet().dock.searchPinnedAppIcons
+                ? getIconPath(app.name, false)  // Don't use cache for pinned apps
+                : app.icon_name || getIconPath(app.name, false);
+                
             const newButton = AppButton({
-                // different icon, emm...
-                icon: userOptions.asyncGet().dock.searchPinnedAppIcons ?
-                    searchIcons(app.name, icon_files) :
-                    app.icon_name,
+                icon: icon,
                 onClicked: () => {
                     for (const client of Hyprland.clients) {
                         if (client.class.toLowerCase().includes(term))
                             return focus(client);
                     }
-
                     app.launch();
                 },
                 onMiddleClick: () => app.launch(),
@@ -220,11 +207,11 @@ const PinnedApps = () => Widget.Box({
                             .find(client => client.class.toLowerCase().includes(term)) || false;
 
                         button.toggleClassName('notrunning', !running);
-                        button.toggleClassName('focused', Hyprland.active.client.address == running.address);
+                        button.toggleClassName('focused', Hyprland.active.client.address == running?.address);
                         button.set_tooltip_text(running ? running.title : app.name);
                     }, 'notify::clients')
                 },
-            })
+            });
             newButton.revealChild = true;
             return newButton;
         }),
@@ -234,10 +221,10 @@ export default (monitor = 0) => {
     const dockContent = Box({
         className: 'dock-bg spacing-h-5',
         children: [
-            // PinButton(),
+            PinButton(),
             PinnedApps(),
-            // DockSeparator(),
-            // Taskbar(),
+            DockSeparator(),
+            Taskbar(),
             // LauncherButton(),
         ]
     })

@@ -512,3 +512,6 @@
 .element-accel {
     @include element_accel;
 }
+.sec-txt {
+    color:$secondary;
+}

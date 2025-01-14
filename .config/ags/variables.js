@@ -1,4 +1,4 @@
-const { Gdk, Gtk } = imports.gi;
+const { Gdk, Gtk, GLib } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
@@ -17,41 +17,59 @@ globalThis['openMusicControls'] = showMusicControls;
 globalThis['openColorScheme'] = showColorScheme;
 globalThis['mpris'] = Mpris;
 globalThis['getString'] = getString
-// load monitor shell modes from userOptions
-const initialMonitorShellModes = () => {
-    const numberOfMonitors = Gdk.Display.get_default()?.get_n_monitors() || 1;
-    const monitorBarConfigs = [];
-    for (let i = 0; i < numberOfMonitors; i++) {
-        if (userOptions.asyncGet().bar.modes[i]) {
-            monitorBarConfigs.push(userOptions.asyncGet().bar.modes[i])
-        } else {
-            monitorBarConfigs.push('normal')
-        }
-    }
-    return monitorBarConfigs;
 
-}
-export const currentShellMode = Variable(initialMonitorShellModes(), {}) // normal, focus
+// Initialize bar modes from config
+const initializeBarModes = () => {
+    const configPath = GLib.get_home_dir() + '/.ags/config.json';
+    const monitors = Hyprland.monitors;
+    const modes = {};
+    
+    // Get default mode from config or use "0"
+    let defaultMode = "0";
+    try {
+        if (GLib.file_test(configPath, GLib.FileTest.EXISTS)) {
+            const config = JSON.parse(Utils.readFile(configPath));
+            defaultMode = config.bar?.modes || "0";
+        }
+    } catch (error) {
+        console.error('Error reading config:', error);
+    }
+
+    // Initialize modes for each monitor
+    monitors.forEach((_, index) => {
+        modes[index] = defaultMode;
+    });
+    
+    return modes;
+};
+
+export const currentShellMode = Variable(initializeBarModes());
+
+// Watch for monitor changes and update modes
+Hyprland.connect('notify::monitors', () => {
+    const currentModes = currentShellMode.value;
+    const newModes = {};
+    
+    // Keep existing modes for current monitors
+    Hyprland.monitors.forEach((_, index) => {
+        newModes[index] = currentModes[index] || "0";
+    });
+    
+    currentShellMode.value = newModes;
+});
 
 // Mode switching
-const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
-    const newValue = [...monitorShellModes.value];
+export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
+    const newValue = { ...monitorShellModes.value };
     newValue[monitor] = mode;
     monitorShellModes.value = newValue;
 }
 globalThis['currentMode'] = currentShellMode;
 globalThis['cycleMode'] = () => {
     const monitor = Hyprland.active.monitor.id || 0;
-
-    if (currentShellMode.value[monitor] === 'normal') {
-        updateMonitorShellMode(currentShellMode, monitor, 'focus')
-    }
-    else if (currentShellMode.value[monitor] === 'focus') {
-        updateMonitorShellMode(currentShellMode, monitor, 'nothing')
-    }
-    else {
-        updateMonitorShellMode(currentShellMode, monitor, 'normal')
-    }
+    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
+    const nextMode = (currentNum + 1) % 4;
+    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
 }
 
 // Window controls

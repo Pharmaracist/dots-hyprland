@@ -10,12 +10,43 @@ export const hasFlatpak = !!exec(`bash -c 'command -v flatpak'`);
 
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
 export const darkMode = Variable(!(Utils.readFile(LIGHTDARK_FILE_LOCATION).split('\n')[0].trim() == 'light'));
-darkMode.connect('changed', ({ value }) => {
-    let lightdark = value ? "dark" : "light";
-    execAsync([`bash`, `-c`, `mkdir -p ${GLib.get_user_state_dir()}/ags/user && sed -i "1s/.*/${lightdark}/"  ${GLib.get_user_state_dir()}/ags/user/colormode.txt`])
-        .then(execAsync(['bash', '-c', `${App.configDir}/scripts/color_generation/switchcolor.sh`]))
-        .then(execAsync(['bash', '-c', `command -v darkman && darkman set ${lightdark}`])) // Optional darkman integration
-        .catch(print);
+darkMode.connect('changed', async ({ value }) => {
+    try {
+        const lightdark = value ? "dark" : "light";
+        const userDir = GLib.get_user_state_dir();
+        const configDir = App.configDir;
+        
+        // Create directory and update color mode
+        await execAsync([
+            'bash', 
+            '-c', 
+            `mkdir -p "${userDir}/ags/user" && sed -i "1s/.*/${lightdark}/" "${userDir}/ags/user/colormode.txt"`
+        ]);
+
+        // Run color switch script
+        const switchColorResult = await execAsync([
+            'bash',
+            '-c',
+            `${configDir}/scripts/color_generation/switchcolor.sh`
+        ]);
+        
+        // Try to set darkman if available (optional)
+        try {
+            await execAsync([
+                'bash',
+                '-c',
+                `command -v darkman && darkman set ${lightdark}`
+            ]);
+        } catch (darkmanError) {
+            // Ignore darkman errors as it's optional
+            console.debug('Darkman not available or failed:', darkmanError);
+        }
+    } catch (error) {
+        console.error('Error changing dark mode:', error.message || error);
+        if (error instanceof Error) {
+            console.error(error.stack);
+        }
+    }
 });
 globalThis['darkMode'] = darkMode;
 export const hasPlasmaIntegration = !!Utils.exec('bash -c "command -v plasma-browser-integration-host"');

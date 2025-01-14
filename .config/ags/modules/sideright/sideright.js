@@ -17,7 +17,7 @@ import {
 import ModuleNotificationList from "./centermodules/notificationlist.js";
 import ModuleAudioControls from "./centermodules/audiocontrols.js";
 import ModuleWifiNetworks from "./centermodules/wifinetworks.js";
-import ModulePowerProfiles from './centermodules/powerprofiles.js';
+// import ModulePowerProfiles from './centermodules/powerprofiles.js';
 import ModuleBluetooth from "./centermodules/bluetooth.js";
 import ModuleConfigure from "./centermodules/configure.js";
 import { ModuleCalendar } from "./calendar.js";
@@ -40,11 +40,11 @@ const centerWidgets = [
         materialIcon: 'volume_up',
         contentWidget: ModuleAudioControls,
     },
-    ...(Battery.available ? [{
-        name: 'Power Profiles',
-        materialIcon: 'speed',
-        contentWidget: ModulePowerProfiles,
-    }] : []),
+    // ...(Battery.available ? [{
+    //     name: 'Power Profiles',
+    //     materialIcon: 'speed',
+    //     contentWidget: ModulePowerProfiles,
+    // }] : []),
     {
         name: getString('Bluetooth'),
         materialIcon: 'bluetooth',

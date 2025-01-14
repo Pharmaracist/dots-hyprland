@@ -38,6 +38,16 @@ startAutoDarkModeService().catch(print);
 firstRunWelcome().catch(print);
 startBatteryWarningService().catch(print)
 
+// Create bars and corners
+const monitors = Gdk.Display.get_default()?.get_n_monitors() || 1;
+for (let i = 0; i < monitors; i++) {
+    Bar(i).then(([mainBar, leftCorner, rightCorner]) => {
+        App.addWindow(mainBar);
+        App.addWindow(leftCorner);
+        App.addWindow(rightCorner);
+    }).catch(print);
+}
+
 const Windows = () => [
     // forMonitors(DesktopBackground),
     forMonitors(Crosshair),
@@ -48,6 +58,7 @@ const Windows = () => [
     SideRight(),
     forMonitors(Osk),
     forMonitors(Session),
+    ...(userOptions.asyncGet().wallselect.enabled !== false ? [Wallselect()] : []),
     ...(userOptions.asyncGet().dock.enabled ? [forMonitors(Dock)] : []),
     ...(userOptions.asyncGet().appearance.fakeScreenRounding !== 0 ? [
         forMonitors((id) => Corner(id, 'top left', true)),
@@ -55,11 +66,6 @@ const Windows = () => [
         forMonitors((id) => Corner(id, 'bottom left', true)),
         forMonitors((id) => Corner(id, 'bottom right', true)),
     ] : []),
-    ...(userOptions.asyncGet().appearance.barRoundCorners ? [
-        forMonitors(BarCornerTopleft),
-        forMonitors(BarCornerTopright),
-    ] : []),
-    Wallselect(),
 ];
 
 const CLOSE_ANIM_TIME = 180; // Longer than actual anim time to make sure widgets animate fully
@@ -75,7 +81,4 @@ App.config({
     windows: Windows().flat(1)
 });
 
-// Stuff that don't need to be toggled. And they're async so ugh...
-forMonitorsAsync(Bar);
-// Bar().catch(print); // Use this to debug the bar. Single monitor only.
-
+Wallselect();

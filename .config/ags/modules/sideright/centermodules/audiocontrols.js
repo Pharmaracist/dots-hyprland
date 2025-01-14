@@ -15,8 +15,26 @@ const AppVolume = (stream) => Box({
             tooltipText: stream.stream.name,
             setup: (self) => {
                 self.hook(stream, (self) => {
-                    self.icon = stream.stream.name.toLowerCase();
-                })
+                    const name = stream.stream.name.toLowerCase();
+                    // Try different icon variations
+                    const iconVariations = [
+                        name,
+                        `audio-${name}`,
+                        'audio-x-generic',  // Fallback audio icon
+                        'application-x-executable'  // Final fallback
+                    ];
+                    
+                    // Find first existing icon
+                    for (const icon of iconVariations) {
+                        if (iconExists(icon)) {
+                            self.icon = icon;
+                            return;
+                        }
+                    }
+                    
+                    // If no icon found, use final fallback
+                    self.icon = 'application-x-executable';
+                });
             },
         }),
         Box({

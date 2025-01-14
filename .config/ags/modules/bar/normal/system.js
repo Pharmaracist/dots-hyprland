@@ -7,7 +7,7 @@ import Battery from 'resource:///com/github/Aylur/ags/service/battery.js';
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
 import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 import { WWO_CODE, WEATHER_SYMBOL, NIGHT_WEATHER_SYMBOL } from '../../.commondata/weather.js';
-
+import WeatherWidget from '../modules/weather.js';
 const options = userOptions.asyncGet();
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + '/wttr.in.txt';
@@ -103,6 +103,7 @@ const Utilities = () => {
         hpack: 'center',
         className: 'spacing-h-4',
         children: [
+            change_wallpaper_btn,
             UtilButton({
                 name: getString('Screen snip'), icon: 'screenshot_region', onClicked: () => {
                     Utils.execAsync(`${App.configDir}/scripts/grimblast.sh copy area`)
@@ -114,12 +115,6 @@ const Utilities = () => {
                     Utils.execAsync(['hyprpicker', '-a']).catch(print)
                 }
             }),
-            UtilButton({
-                name: getString('Toggle on-screen keyboard'), icon: 'keyboard', onClicked: () => {
-                    toggleWindowOnAllMonitors('osk');
-                }
-            }),
-            change_wallpaper_btn
         ]
     });
     unsubscriber = userOptions.subscribe ((userOptions) => {
@@ -182,6 +177,7 @@ const BarGroup = ({ child }) => Widget.Box({
     className: 'bar-group-margin bar-sides',
     children: [
         Widget.Box({
+            css:`padding: 0 12px`,
             className: 'bar-group bar-group-standalone bar-group-pad-system',
             children: [child],
         }),
@@ -192,7 +188,8 @@ const BatteryModule = () => Box({
     className: 'spacing-h-4',
     children: [
         BarGroup({   child:BarClock() }),
-        BarGroup({child: Utilities()}),
+        // BarGroup({   child:WeatherWidget()}),
+        BarGroup({   child: Utilities()}),
         Stack({
             transitionDuration: userOptions.asyncGet().animations.durationLarge,
             transition: 'slide_up_down',

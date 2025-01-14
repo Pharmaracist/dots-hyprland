@@ -36,6 +36,22 @@ const getFontWeightName = (weight) => {
     }
 }
 
+// Number style conversion functions
+const numberStyles = {
+    'arabic': (n) => n.toString(),
+    'thai': (n) => n.toString().replace(/[0-9]/g, d => '๐๑๒๓๔๕๖๗๘๙'[d]),
+    'japanese': (n) => n.toString().replace(/[0-9]/g, d => '〇一二三四五六七八九'[d]),
+    'chinese': (n) => n.toString().replace(/[0-9]/g, d => '零一二三四五六七八九'[d]),
+    'korean': (n) => n.toString().replace(/[0-9]/g, d => '영일이삼사오육칠팔구'[d]),
+    'devanagari': (n) => n.toString().replace(/[0-9]/g, d => '०१२३४५६७८९'[d]),
+    'bengali': (n) => n.toString().replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d])
+};
+
+const convertNumber = (number, style = 'arabic') => {
+    const converter = numberStyles[style] || numberStyles.arabic;
+    return converter(number);
+};
+
 // Font size = workspace id
 const WorkspaceContents = (count = 10) => {
     return DrawingArea({
@@ -165,7 +181,11 @@ const WorkspaceContents = (count = 10) => {
                     else
                         cr.setSourceRGBA(inactivecolors.red, inactivecolors.green, inactivecolors.blue, inactivecolors.alpha);
 
-                    layout.set_text(`${i + offset}`, -1);
+                    // Convert number to selected style
+                    const numberStyle = userOptions.asyncGet().workspaces.style || 'arabic';
+                    const displayNumber = convertNumber(i + offset, numberStyle);
+                    layout.set_text(displayNumber, -1);
+                    
                     const [layoutWidth, layoutHeight] = layout.get_pixel_size();
                     const x = -workspaceRadius + (workspaceDiameter * i) - (layoutWidth / 2);
                     const y = (height - layoutHeight) / 2;
@@ -191,7 +211,7 @@ export default () => EventBox({
         homogeneous: true,
         className: 'bar-group-margin',
         children: [Box({
-            className: 'bar-group bar-group-standalone bar-group-pad',
+            // className: 'bar-group bar-group-standalone bar-group-pad',
             css: 'min-width: 2px;',
             children: [WorkspaceContents(userOptions.asyncGet().workspaces.shown)],
         })]

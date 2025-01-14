@@ -135,11 +135,14 @@ const ColorSchemeSettings = () => Widget.Box({
                     name: getString('Transparency'),
                     desc: getString('Make shell elements transparent'),
                     initValue: initTransparencyVal,
-                    onChange: (self, newValue) => {
-                        let transparency = newValue == 0 ? "opaque" : "transparent";
-                        execAsync([`bash`, `-c`, `mkdir -p ${GLib.get_user_state_dir()}/ags/user && sed -i "2s/.*/${transparency}/"  ${GLib.get_user_state_dir()}/ags/user/colormode.txt`])
-                            .then(execAsync(['bash', '-c', `${App.configDir}/scripts/color_generation/switchcolor.sh`]))
-                            .catch(print);
+                    onChange: async (self, newValue) => {
+                        try {
+                            const transparency = newValue == 0 ? "opaque" : "transparent";
+                            await execAsync([`bash`, `-c`, `mkdir -p ${GLib.get_user_state_dir()}/ags/user && sed -i "2s/.*/${transparency}/"  ${GLib.get_user_state_dir()}/ags/user/colormode.txt`]);
+                            await execAsync(['bash', '-c', `${App.configDir}/scripts/color_generation/switchcolor.sh`]);
+                        } catch (error) {
+                            console.error('Error changing transparency:', error);
+                        }
                     },
                 }),
                 Widget.Box({

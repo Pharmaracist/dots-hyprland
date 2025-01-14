@@ -1,4 +1,7 @@
 {
+  "wallselect": {
+    "enabled": true
+  },
   "ai": {
     "defaultGPTProvider": "openrouter",
     "onSearch": "gemini",
@@ -7,7 +10,21 @@
     "useHistory": true,
     "safety": true,
     "writingCursor": " ...",
-    "proxyUrl": ""
+    "proxyUrl": "",
+    "__custom": [
+      "extraGptModels"
+    ],
+    "extraGptModels": {
+      "deepseek-deepseek-chat": {
+        "name": "deepseek/deepseek-chat",
+        "logo_name": "openrouter-symbolic",
+        "description": "deepseek/deepseek-chat via OpenRouter",
+        "base_url": "https://openrouter.ai/api/v1/chat/completions",
+        "key_get_url": "https://openrouter.ai/keys",
+        "key_file": "openrouter_key.txt",
+        "model": "deepseek/deepseek-chat"
+      }
+    }
   },
   "animations": {
     "choreographyDelay": 25,
@@ -37,8 +54,16 @@
   "battery": {
     "low": 20,
     "critical": 10,
-    "warnLevels": [20, 15, 5],
-    "warnTitles": ["Low battery", "Very low battery", "Critical Battery"],
+    "warnLevels": [
+      20,
+      15,
+      5
+    ],
+    "warnTitles": [
+      "Low battery",
+      "Very low battery",
+      "Critical Battery"
+    ],
     "warnMessages": [
       "Plug in the charger",
       "You there?",
@@ -83,19 +108,27 @@
     "wsNumMarginScale": 0.07
   },
   "sidebar": {
+    "github": {
+      "repoOwner": "pharmaracist",
+      "repoName": "dots-hyprland"
+    },
     "ai": {
-      "__custom": ["extraGptModels"],
+      "__custom": [
+        "extraGptModels"
+      ],
       "extraGptModels": {
-        "openrouter": {
-          "name": "Llama 3 8B",
+        "deepseek": {
+          "name": "deepseek/deepseek-chat",
           "logo_name": "openrouter-symbolic",
-          "description": "A unified interface for LLMs",
+          "description": "deepseek/deepseek-chat via OpenRouter",
           "base_url": "https://openrouter.ai/api/v1/chat/completions",
           "key_get_url": "https://openrouter.ai/keys",
           "key_file": "openrouter_key.txt",
-          "model": "meta-llama/llama-3-8b-instruct:free"
+          "model": "deepseek/deepseek-chat"
         }
       },
+      "defaultGPTProvider": "openrouter",
+      "onSearch": "gemini",
       "initMessages": []
     },
     "image": {
@@ -105,13 +138,22 @@
       "saveInFolderByTags": false
     },
     "pages": {
-      "order": ["apis", "tools", "github"],
+      "order": [
+        "apis",
+        "tools",
+        "github"
+      ],
       "apis": {
-        "order": ["gpt", "translater"]
+        "order": [
+          "gpt",
+          "translater"
+        ]
       }
     },
     "translater": {
-      "__custom": ["languages"],
+      "__custom": [
+        "languages"
+      ],
       "from": "auto",
       "to": "ar",
       "languages": {
@@ -136,7 +178,9 @@
       "webSearch": true
     },
     "engineBaseUrl": "https://www.google.com/search?q=",
-    "excludedSites": ["quora.com"]
+    "excludedSites": [
+      "quora.com"
+    ]
   },
   "time": {
     "format": "%I:%M",
@@ -150,7 +194,8 @@
     "preferredUnit": "C"
   },
   "workspaces": {
-    "shown": 8
+    "shown": 10,
+    "style": "arabic"
   },
   "dock": {
     "enabled": true,
@@ -171,7 +216,10 @@
     "layer": "top",
     "monitorExclusivity": true,
     "searchPinnedAppIcons": false,
-    "trigger": ["client-added", "client-removed"],
+    "trigger": [
+      "client-added",
+      "client-removed"
+    ],
     "autoHide": [
       {
         "trigger": "client-added",
@@ -184,8 +232,13 @@
     ]
   },
   "icons": {
-    "__custom": ["substitutions", "regexSubstitutions"],
-    "searchPaths": [""],
+    "__custom": [
+      "substitutions",
+      "regexSubstitutions"
+    ],
+    "searchPaths": [
+      ""
+    ],
     "symbolicIconTheme": {
       "dark": "Adwaita",
       "light": "Adwaita"
@@ -239,7 +292,7 @@
     }
   },
   "bar": {
-    "modes": ["nothing"],
+    "modes": "0",
     "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top"
   }

@@ -4,6 +4,9 @@ import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { execAsync, exec } = Utils;
 import Todo from "../../services/todo.js";
 import { darkMode } from '../.miscutils/system.js';
+import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
+import userOptions from '../.configuration/user_options.js';
+import { currentShellMode, updateMonitorShellMode } from '../../variables.js';
 
 export const hasUnterminatedBackslash = str => /\\+$/.test(str);
 
@@ -21,6 +24,39 @@ export function launchCustomCommand(command) {
                         `hyprctl keyword input:accel_profile '${value != "[[EMPTY]]" && value != "" ? "[[EMPTY]]" : "flat"}'`
                     ]).catch(print);
                 });
+        },
+        '>bar': () => {
+            if (!args[0]) return;
+            const mode = parseInt(args[0]);
+            if (isNaN(mode)) return;
+            
+            const monitor = Hyprland.active.monitor.id || 0;
+            updateMonitorShellMode(currentShellMode, monitor, mode.toString());
+        },
+        '>bard': () => {
+            if (!args[0]) return;
+            const mode = parseInt(args[0]);
+            if (isNaN(mode)) return;
+            
+            const configPath = GLib.get_home_dir() + '/.ags/config.json';
+            
+            // Update all monitors
+            const monitors = Hyprland.monitors;
+            monitors.forEach((_, index) => {
+                updateMonitorShellMode(currentShellMode, index, mode.toString());
+            });
+
+            // Update config.json for persistence
+            execAsync(['bash', '-c', `
+                if [ -f "${configPath}" ]; then
+                    # Update existing config
+                    jq '.bar.modes = "${mode}"' "${configPath}" > "${configPath}.tmp" && mv "${configPath}.tmp" "${configPath}"
+                else
+                    # Create new config
+                    mkdir -p "$(dirname "${configPath}")" &&
+                    echo '{"bar":{"position":"top","modes":"${mode}"}}' > "${configPath}"
+                fi
+            `]).catch(print);
         },
         '>img': () => execScript('color_generation/switchwall.sh', '&'),
         '>color': () => {
@@ -63,7 +99,53 @@ export function launchCustomCommand(command) {
         '>shutdown': () => execAsync(['bash', '-c', 'systemctl poweroff || loginctl poweroff']).catch(print),
         '>reboot': () => execAsync(['bash', '-c', 'systemctl reboot || loginctl reboot']).catch(print),
         '>sleep': () => execAsync(['bash', '-c', 'systemctl suspend || loginctl suspend']).catch(print),
-        '>logout': () => execAsync(['bash', '-c', 'pkill Hyprland || pkill sway']).catch(print)
+        '>logout': () => execAsync(['bash', '-c', 'pkill Hyprland || pkill sway']).catch(print),
+        '>addgpt': () => {
+            if (!args || args.length < 1) {
+                print("Usage: >addgpt <model_name> [provider]");
+                return;
+            }
+
+            const modelName = args[0];
+            // If provider not provided, use model name as provider (lowercase)
+            const provider = args[1] || modelName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+            // Always use OpenRouter settings
+            const baseUrl = "https://openrouter.ai/api/v1/chat/completions";
+            const keyGetUrl = "https://openrouter.ai/keys";
+
+            // Prepare model config
+            const modelConfig = {
+                name: modelName,
+                logo_name: "openrouter-symbolic",
+                description: `${modelName} via OpenRouter`,
+                base_url: baseUrl,
+                key_get_url: keyGetUrl,
+                key_file: "openrouter_key.txt",  // Always use OpenRouter key
+                model: modelName
+            };
+
+            try {
+                // Update user_options.default.json
+                const defaultConfigPath = GLib.get_home_dir() + '/.ags/config.json';
+                let defaultConfig = JSON.parse(Utils.readFile(defaultConfigPath));
+                
+                // Ensure the path exists
+                if (!defaultConfig.sidebar) defaultConfig.sidebar = {};
+                if (!defaultConfig.sidebar.ai) defaultConfig.sidebar.ai = {};
+                if (!defaultConfig.sidebar.ai.__custom) defaultConfig.sidebar.ai.__custom = ["extraGptModels"];
+                if (!defaultConfig.sidebar.ai.extraGptModels) defaultConfig.sidebar.ai.extraGptModels = {};
+                
+                // Add the model
+                defaultConfig.sidebar.ai.extraGptModels[provider] = modelConfig;
+                Utils.writeFile(JSON.stringify(defaultConfig, null, 2), defaultConfigPath);
+
+                print(`Added OpenRouter model: ${modelName} (provider: ${provider})`);
+            } catch (error) {
+                print(`Error adding GPT model: ${error.message}`);
+            }
+        },
+        '>': () => {}
     };
 
     commands[cmd]?.();
@@ -72,7 +154,7 @@ export function launchCustomCommand(command) {
 export const execAndClose = (command, terminal) => {
     App.closeWindow('overview');
     if (terminal) {
-        execAsync(['bash', '-c', `${userOptions.asyncGet().apps.terminal} fish -C "${command}"`, '&']).catch(print);
+        execAsync(['bash', '-c', `${userOptions.value.apps.terminal} fish -C "${command}"`, '&']).catch(print);
     } else {
         execAsync(command).catch(print);
     }
