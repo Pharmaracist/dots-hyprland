@@ -13,7 +13,6 @@ const fetchGithubUpdates = async () => {
         const result = await Utils.execAsync(cmd);
         return JSON.parse(result);
     } catch (error) {
-        console.error('Error fetching GitHub updates:', error);
         return null;
     }
 };

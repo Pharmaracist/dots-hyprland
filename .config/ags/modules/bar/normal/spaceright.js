@@ -5,7 +5,7 @@ import Audio from 'resource:///com/github/Aylur/ags/service/audio.js';
 const { execAsync } = Utils;
 import Indicator from "../../../services/indicator.js";
 import { StatusIcons } from "../../.commonwidgets/statusicons.js";
-import { Tray } from "./tray.js";
+import { Tray } from "../modules/tray.js";
 
 // Volume constants
 const VOLUME_STEP = 0.02;

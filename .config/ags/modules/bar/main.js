@@ -9,18 +9,38 @@ import { FloatingBar } from "./modes/floating.js";
 import { MinimalBar } from "./modes/minimal.js";
 import { AnoonBar } from "./modes/anoon.js";
 import { DwmBar } from "./modes/dwm.js";
-
-const modes = new Map([
-  ["0", [NormalBar, true]],
-  ["1", [FocusBar, true]],
-  ["2", [FloatingBar, false]],
-  ["3", [MinimalBar, true]],
-  ["4", [AnoonBar, false]],
-  ["5", [DwmBar, false]],
+import { VerticalBar } from "./modes/vertical.js";
+import { VerticalBarPinned } from "./modes/verticalPinned.js";
+// Mode configuration:
+// [Component, ShowCorners, Description]
+const horizontalModes = new Map([
+  // Normal bar with corners
+  ["0", [NormalBar, true, "Normal"]],
+  // Focus mode with corners
+  ["1", [FocusBar, true, "Focus"]],
+  // Floating bar without corners
+  ["2", [FloatingBar, false, "Floating"]],
+  // Minimal bar with corners
+  ["3", [MinimalBar, true, "Minimal"]],
+  // Anoon mode without corners
+  ["4", [AnoonBar, false, "Anoon"]],
+  // DWM mode WIP 🥲
+  ["5", [DwmBar, false, "DWM"]],	
 ]);
 
+const verticalModes = new Map([
+   // Floating Vertical bar
+  ["6", [VerticalBar, false, "Vertical Bar"]],
+   // Pinned Corners Vertical bar
+  ["7", [VerticalBarPinned, false, "Vertical Bar Pinned"]],
+ 
+]);
+
+// Combined modes for easy lookup
+const modes = new Map([...horizontalModes, ...verticalModes]);
+
 const shouldShowCorners = (monitor) => {
-  const mode = currentShellMode.value[monitor] || "0";
+  const mode = currentShellMode.value[monitor] || "1";
   return modes.get(mode)?.[1] ?? false;
 };
 
@@ -37,7 +57,7 @@ const createCorner = (monitor, side) => {
       `${opts.bar.position === "top" ? "top" : "bottom"}${side}`,
       { className: "corner" },
     ),
-    setup: self => {
+    setup: (self) => {
       enableClickthrough(self);
       self.hook(currentShellMode, () => {
         self.visible = shouldShowCorners(monitor);
@@ -46,36 +66,66 @@ const createCorner = (monitor, side) => {
   });
 };
 
+const getAnchor = (monitor, mode, barPosition) => {
+  // Vertical modes (6-10)
+  if (verticalModes.has(mode)) {
+    return [
+      userOptions.asyncGet().bar.verticalBar?.position || "left",
+      "top",
+      "bottom",
+    ];
+  }
+  // Default horizontal modes
+  return [barPosition, "left", "right"];
+};
+
 export const BarCornerTopleft = (monitor = 0) => createCorner(monitor, "left");
-export const BarCornerTopright = (monitor = 0) => createCorner(monitor, "right");
+export const BarCornerTopright = (monitor = 0) =>
+  createCorner(monitor, "right");
 
 export const Bar = async (monitor = 0) => {
   const opts = userOptions.asyncGet();
-  const mode = currentShellMode.value[monitor] || "0";
+  const mode = currentShellMode.value[monitor] || "1";
   const barPosition = opts.bar.position;
-  const showCorners = shouldShowCorners(monitor);
-  
-  const corners = ["left", "right"].map(side => createCorner(monitor, side));
-  
+
+  const corners = ["left", "right"].map((side) => createCorner(monitor, side));
+
+  const children = {};
+  for (const [key, [component]] of modes) {
+    try {
+      children[key] = component;
+    } catch (error) {
+      console.error(`Failed to add mode ${key}:`, error);
+    }
+  }
+
   const stack = Widget.Stack({
     homogeneous: false,
     transition: "slide_up_down",
     transitionDuration: opts.animations.durationSmall,
-    shown: mode,
-    children: Object.fromEntries([...modes].map(([k, [component]]) => [k, component])),
-    setup: self => self.hook(currentShellMode, () => {
-      const mode = currentShellMode.value[monitor] || "0";
+    children: children,
+    setup: (self) => {
+      self.hook(currentShellMode, () => {
+        const newMode = currentShellMode.value[monitor] || "1";
+        self.shown = newMode;
+      });
       self.shown = mode;
-    }),
+    },
   });
 
   const bar = Widget.Window({
     monitor,
     name: `bar${monitor}`,
-    anchor: [barPosition, "right", "left"],
+    anchor: getAnchor(monitor, mode, barPosition),
     exclusivity: "exclusive",
     visible: true,
     child: stack,
+    setup: (self) => {
+      self.hook(currentShellMode, (w) => {
+        const newMode = currentShellMode.value[monitor] || "1";
+        w.anchor = getAnchor(monitor, newMode, barPosition);
+      });
+    },
   });
 
   return [bar, ...corners];

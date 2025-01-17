@@ -246,6 +246,21 @@ noise_reduction = ${this.#config.noise_reduction}
         }
         super.destroy()
     }
+
+    start() {
+        if (!this.#proc) {
+            this.#initCava()
+        }
+    }
+
+    stop() {
+        if (this.#proc) {
+            this.#proc.force_exit();
+            this.#proc = null;
+            this.#output = "▁".repeat(60);
+            // Don't emit on stop, just update the output
+        }
+    }
 }
 
 const service = new AudioVisualizerService();

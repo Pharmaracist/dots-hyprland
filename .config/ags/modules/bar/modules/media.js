@@ -1,38 +1,49 @@
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
 import Mpris from "resource:///com/github/Aylur/ags/service/mpris.js";
+import { showMusicControls } from "../../../variables.js";
 
 const MediaIndicator = () => Widget.Box({
     className: 'bar-media-indicator',
+    visible: false,
+    homogeneous: false,
     setup: self => {
-        const icon = Widget.Icon({
-            icon: 'audio-x-generic-symbolic',
-            size: 16,
+        const label = Widget.Label({
+            className: 'onSurfaceVariant txt-smallie',
         });
 
-        const label = Widget.Label({
-            className: 'bar-media-title',
+        const icon = Widget.Icon({
+            className: 'onSurfaceVariant txt-smallie',
+            icon: '', // Default icon
         });
 
         self.children = [icon, label];
-
+        self.spacing = 8;
         const updateWidget = () => {
-            const player = Mpris.getPlayer();
-            const trackInfo = Mpris.trackInfo;
-            
+            const player = Mpris.players.find(p => p.identity === 'spotify') || Mpris.getPlayer();
+            const trackInfo = player?.trackTitle;
+            const playbackStatus = player?.playBackStatus;
+
             if (!player || !trackInfo) {
                 self.visible = false;
                 return;
             }
 
             self.visible = true;
-            const { title, artist } = trackInfo;
-            label.label = artist ? `${title} - ${artist}` : title;
+            label.label = trackInfo;
+
+            // Update the icon based on playback status
+            if (playbackStatus === 'Playing') {
+                icon.icon = 'media-playback-pause-symbolic';
+            } else if (playbackStatus === 'Paused') {
+                icon.icon = 'media-playback-start-symbolic';
+            } else {
+                icon.icon = 'media-playback-start-symbolic'; // Default icon
+            }
         };
 
-        // Connect to property changes
         const handlers = [
-            Mpris.connect('notify::player', updateWidget),
-            Mpris.connect('notify::track', updateWidget),
+            Mpris.connect('player-changed', updateWidget),
+            Mpris.connect('changed', updateWidget),
         ];
 
         self.connect('destroy', () => {
@@ -49,7 +60,16 @@ const MediaIndicator = () => Widget.Box({
     },
 });
 
-export default () => Widget.Button({
-    className: "media-button",
+export default () => Widget.EventBox({
+    className: 'onSurfaceVariant txt-smallie',
+    hpack: "center",
+    hexpand: true,
+    onPrimaryClick: () => {
+        const player = Mpris.players.find(p => p.identity === 'spotify') || Mpris.getPlayer();
+        if (player) {
+            player.playPause();
+        }
+    },
+    onSecondaryClick: () =>  showMusicControls.setValue(!showMusicControls.value),
     child: MediaIndicator(),
 });

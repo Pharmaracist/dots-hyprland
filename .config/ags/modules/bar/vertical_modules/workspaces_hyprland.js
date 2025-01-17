@@ -1,4 +1,4 @@
-const { GLib, Gdk, Gtk } = imports.gi;
+const { Gdk, Gtk } = imports.gi;
 const Lang = imports.lang;
 const Cairo = imports.cairo;
 const Pango = imports.gi.Pango;
@@ -56,6 +56,8 @@ const convertNumber = (number, style = 'arabic') => {
 const WorkspaceContents = (count = 10) => {
     return DrawingArea({
         className: 'bar-ws-container',
+        hexpand: true,
+        hpack: "center",
         attribute: {
             initialized: false,
             workspaceMask: 0,
@@ -115,12 +117,14 @@ const WorkspaceContents = (count = 10) => {
                 const activeWorkspaceStyleContext = dummyActiveWs.get_style_context();
                 const activebg = activeWorkspaceStyleContext.get_property('background-color', Gtk.StateFlags.NORMAL);
                 const activefg = activeWorkspaceStyleContext.get_property('color', Gtk.StateFlags.NORMAL);
-                area.set_size_request(workspaceDiameter * count, -1);
+                
+                // Set minimum width and height
+                area.set_size_request(workspaceDiameter, workspaceDiameter * count);
                 const widgetStyleContext = area.get_style_context();
                 const activeWs = widgetStyleContext.get_property('font-size', Gtk.StateFlags.NORMAL);
 
-                const activeWsCenterX = -(workspaceDiameter / 2) + (workspaceDiameter * activeWs);
-                const activeWsCenterY = height / 2;
+                const activeWsCenterX = width / 2;
+                const activeWsCenterY = -(workspaceDiameter / 2) + (workspaceDiameter * activeWs);
 
                 // Font
                 const layout = PangoCairo.create_layout(cr);
@@ -137,22 +141,22 @@ const WorkspaceContents = (count = 10) => {
                     if (area.attribute.workspaceMask & (1 << i)) {
                         // Draw bg highlight
                         cr.setSourceRGBA(occupiedbg.red, occupiedbg.green, occupiedbg.blue, occupiedbg.alpha);
-                        const wsCenterX = -(workspaceRadius) + (workspaceDiameter * i);
-                        const wsCenterY = height / 2;
-                        if (!(area.attribute.workspaceMask & (1 << (i - 1)))) { // Left
-                            cr.arc(wsCenterX, wsCenterY, workspaceRadius, 0.5 * Math.PI, 1.5 * Math.PI);
+                        const wsCenterX = width / 2;
+                        const wsCenterY = -(workspaceRadius) + (workspaceDiameter * i);
+                        if (!(area.attribute.workspaceMask & (1 << (i - 1)))) { // Top
+                            cr.arc(wsCenterX, wsCenterY, workspaceRadius, Math.PI, 2 * Math.PI);
                             cr.fill();
                         }
                         else {
-                            cr.rectangle(wsCenterX - workspaceRadius, wsCenterY - workspaceRadius, workspaceRadius, workspaceRadius * 2)
+                            cr.rectangle(wsCenterX - workspaceRadius, wsCenterY - workspaceRadius, workspaceRadius * 2, workspaceRadius)
                             cr.fill();
                         }
-                        if (!(area.attribute.workspaceMask & (1 << (i + 1)))) { // Right
-                            cr.arc(wsCenterX, wsCenterY, workspaceRadius, -0.5 * Math.PI, 0.5 * Math.PI);
+                        if (!(area.attribute.workspaceMask & (1 << (i + 1)))) { // Bottom
+                            cr.arc(wsCenterX, wsCenterY, workspaceRadius, 0, Math.PI);
                             cr.fill();
                         }
                         else {
-                            cr.rectangle(wsCenterX, wsCenterY - workspaceRadius, workspaceRadius, workspaceRadius * 2)
+                            cr.rectangle(wsCenterX - workspaceRadius, wsCenterY, workspaceRadius * 2, workspaceRadius)
                             cr.fill();
                         }
                     }
@@ -187,8 +191,8 @@ const WorkspaceContents = (count = 10) => {
                     layout.set_text(displayNumber, -1);
                     
                     const [layoutWidth, layoutHeight] = layout.get_pixel_size();
-                    const x = -workspaceRadius + (workspaceDiameter * i) - (layoutWidth / 2);
-                    const y = (height - layoutHeight) / 2;
+                    const x = (width - layoutWidth) / 2;
+                    const y = -workspaceRadius + (workspaceDiameter * i) - (layoutHeight / 2);
                     cr.moveTo(x, y);
                     PangoCairo.show_layout(cr, layout);
                     cr.stroke();
@@ -203,29 +207,28 @@ export default () => EventBox({
     // onScrollDown: () => Hyprland.messageAsync(`dispatch workspace +1`).catch(print),
     onMiddleClick: () => toggleWindowOnAllMonitors('osk'),
     onSecondaryClick: () => App.toggleWindow('overview'),
-    hexpand:true,
+    vexpand: true,
     attribute: {
         clicked: false,
         ws_group: 0,
     },
     child: Box({
         homogeneous: true,
-        className: 'bar-group-margin',
-        hexpand:true,
-        children: [Box({
-            // className: 'bar-group bar-group-standalone bar-group-pad',
-            css: 'min-width: 2px;',
-            hexpand:true,
-            children: [WorkspaceContents(userOptions.asyncGet().workspaces.shown)],
-        })]
+        vexpand: true,
+        children: [
+            Box({
+                vexpand: true,
+                children: [WorkspaceContents(userOptions.asyncGet().workspaces.shown)],
+            })
+        ]
     }),
     setup: (self) => {
         self.add_events(Gdk.EventMask.POINTER_MOTION_MASK);
         self.on('motion-notify-event', (self, event) => {
             if (!self.attribute.clicked) return;
             const [_, cursorX, cursorY] = event.get_coords();
-            const widgetWidth = self.get_allocation().width;
-            const wsId = Math.ceil(cursorX * userOptions.asyncGet().workspaces.shown / widgetWidth);
+            const widgetHeight = self.get_allocation().height;
+            const wsId = Math.ceil(cursorY * userOptions.asyncGet().workspaces.shown / widgetHeight);
             Utils.execAsync([`${App.configDir}/scripts/hyprland/workspace_action.sh`, 'workspace', `${wsId}`])
                 .catch(print);
         })
@@ -233,8 +236,8 @@ export default () => EventBox({
             if (event.get_button()[1] === 1) {
                 self.attribute.clicked = true;
                 const [_, cursorX, cursorY] = event.get_coords();
-                const widgetWidth = self.get_allocation().width;
-                const wsId = Math.ceil(cursorX * userOptions.asyncGet().workspaces.shown / widgetWidth);
+                const widgetHeight = self.get_allocation().height;
+                const wsId = Math.ceil(cursorY * userOptions.asyncGet().workspaces.shown / widgetHeight);
                 Utils.execAsync([`${App.configDir}/scripts/hyprland/workspace_action.sh`, 'workspace', `${wsId}`])
                     .catch(print);
             }

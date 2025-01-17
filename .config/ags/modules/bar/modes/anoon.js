@@ -11,7 +11,7 @@ import NormalOptionalWorkspaces from "./../normal/workspaces_hyprland.js";
 import kb_layout from "../modules/kb_layout.js";
 import Fetcher from "../modules/fetcher.js";
 import IconWidget from "../modules/icon.js";
-import { Tray } from "../normal/tray.js";
+import { Tray } from "../modules/tray.js";
 import ColorPicker from "../modules/color_picker.js";
 import scrolledmodule from "../../.commonwidgets/scrolledmodule.js";
 import PinnedApps from "../modules/pinned_apps.js";

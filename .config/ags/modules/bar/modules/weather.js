@@ -420,6 +420,8 @@ const WeatherWidget = () => {
 
   return Widget.EventBox({
     onPrimaryClick: toggleDisplay,
+    hexpand:true,
+    hpack: 'center',
     child: weatherBox,
     setup: self => {
       // Initial updates

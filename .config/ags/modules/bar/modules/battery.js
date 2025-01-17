@@ -51,7 +51,6 @@ const fetchPowerDraw = async () => {
         powerDrawCache.timestamp = now;
         return powerDrawCache.value;
     } catch (error) {
-        console.error('Error fetching power draw:', error);
         return 'N/A';
     }
 };
@@ -146,7 +145,6 @@ const BatteryContent = () => {
             }
             timeToEmptyFullLabel.label = timeToEmptyFull;
         } catch (error) {
-            console.error("Error getting battery info with upower:", error);
             timeToEmptyFullLabel.label = "Error";
         }
     };

@@ -6,6 +6,10 @@ import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 
 const AppButton = ({ client }) => {
+    // Gracefully handle invalid icon names
+    const iconName = client.class ? `${client.class.toLowerCase()}` : 'application-default';
+    const isValidIcon = Gtk.IconTheme.get_default().has_icon(iconName);
+
     return Button({
         className: `bar-active-app ${client.class === Hyprland.active.client.class ? 'focused' : ''}`,
         onClicked: () => {
@@ -15,7 +19,7 @@ const AppButton = ({ client }) => {
             className: 'spacing-h-5 txt-norm',
             children: [
                 Widget.Icon({
-                    icon: client.class ? `${client.class.toLowerCase()}` : 'application-default',
+                    icon: isValidIcon ? iconName : 'applications-all', 
                     size: 22,
                 }),
             ],
@@ -26,13 +30,22 @@ const AppButton = ({ client }) => {
 };
 
 export default () => {
-    return Box({
+    const box = Box({
         className: 'bar-active-apps spacing-h-5',
-        connections: [[Hyprland, box => {
-            const clients = Hyprland.clients;
-            box.children = clients
-                .filter(client => !client.class?.includes('unset'))
-                .map(client => AppButton({ client }));
-        }]],
     });
+
+    const updateApps = () => {
+        const clients = Hyprland.clients;
+        box.children = clients
+            .filter(client => !client.class?.includes('unset'))
+            .map(client => AppButton({ client }));
+    };
+
+    // Update the list of apps every second
+    Utils.interval(1000, updateApps);
+
+    // Initial update
+    updateApps();
+
+    return box;
 };

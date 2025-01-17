@@ -8,6 +8,7 @@ CACHE_DIR="$XDG_CACHE_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
 
 COLORMODE_FILE_DIR="$STATE_DIR/user/colormode.txt"
+firstline=$(sed -n '1p' "$COLORMODE_FILE_DIR")
 
 if [ "$1" == "--pick" ]; then
   color=$(hyprpicker --no-fancy)
@@ -35,5 +36,34 @@ elif [ "$2" == "--yes-gradience" ]; then
   fi
 fi
 
+# Get the color mode
+colormode=$(sed -n '1p' "$COLORMODE_FILE_DIR")
+if [[ "$colormode" == "light" ]]; then
+    colormode="-m light"
+else
+    colormode="-m dark"
+fi
+
+# Get the color mode
+firstline=$(sed -n '1p' "$COLORMODE_FILE_DIR")
+
 # Generate colors for ags n stuff
-"$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${color}" --apply
+if [[ "$1" = "#"* ]]; then
+  "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${color}" --apply &
+else
+  # Get the stored image path
+  image_source=$(cat "$STATE_DIR/user/current_wallpaper.txt")
+  "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${image_source}" --apply &
+fi
+
+# Wait for all background processes
+wait
+
+if [[ "$1" = "#"* ]]; then
+  "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${color}" --apply
+else
+  # Use the stored image path
+  image_source=$(cat "$STATE_DIR/user/current_wallpaper.txt")
+  "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${image_source}" --apply
+fi
+

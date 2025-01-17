@@ -18,6 +18,7 @@ import Overview from './modules/overview/main.js';
 import Session from './modules/session/main.js';
 import SideLeft from './modules/sideleft/main.js';
 import SideRight from './modules/sideright/main.js';
+import Ipod from './modules/ipod/main.js';
 import { COMPILED_STYLE_DIR } from './init.js';
 
 const range = (length, start = 1) => Array.from({ length }, (_, i) => i + start);
@@ -25,10 +26,10 @@ function forMonitors(widget) {
     const n = Gdk.Display.get_default()?.get_n_monitors() || 1;
     return range(n, 0).map(widget).flat(1);
 }
-function forMonitorsAsync(widget) {
-    const n = Gdk.Display.get_default()?.get_n_monitors() || 1;
-    return range(n, 0).forEach((n) => widget(n).catch(print))
-}
+// function forMonitorsAsync(widget) {
+//     const n = Gdk.Display.get_default()?.get_n_monitors() || 1;
+//     return range(n, 0).forEach((n) => widget(n).catch(print))
+// }
 
 // Start stuff
 handleStyles(true);
@@ -47,14 +48,15 @@ for (let i = 0; i < monitors; i++) {
 }
 
 const Windows = () => [
-    Overview(),
-    forMonitors(Indicator),
-    forMonitors(Cheatsheet),
     SideLeft(),
     SideRight(),
-    forMonitors(Session),
+    ...(userOptions.asyncGet().indicators.enabled !== false ? [forMonitors(Indicator)]:[]),
+    ...(userOptions.asyncGet().session.enabled !== false ? [forMonitors(Session)]:[]),
+    ...(userOptions.asyncGet().overview.enabled !== false ? [Overview()]:[]),
+    ...(userOptions.asyncGet().cheatsheet.enabled !== false ? [forMonitors(Cheatsheet)] : []),
     ...(userOptions.asyncGet().desktopBackground.enabled !== false ? [forMonitors(DesktopBackground)] : []),
     ...(userOptions.asyncGet().wallselect.enabled !== false ? [Wallselect()] : []),
+    ...(userOptions.asyncGet().ipod.enabled !== false ? [forMonitors(Ipod)] : []),
     ...(userOptions.asyncGet().dock.enabled ? [forMonitors(Dock)] : []),
     ...(userOptions.asyncGet().appearance.fakeScreenRounding !== 0 ? [
         forMonitors((id) => Corner(id, 'top left', true)),

@@ -5,7 +5,7 @@ export default (monitor = 0) => Widget.Window({
     monitor,
     name: `dock${monitor}`,
     layer: userOptions.asyncGet().dock.layer,
-    anchor: ['bottom'],
+    anchor: [userOptions.asyncGet().bar.position === "top" ? 'bottom' : 'top'],
     exclusivity: 'normal',
     visible: true,
     child: Dock(monitor),

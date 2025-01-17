@@ -8,7 +8,6 @@ export default () => PopupWindow({
     keymode: 'on-demand',
     anchor: ['left', 'top', 'bottom'],
     name: 'sideleft',
-    layer: 'top',
     child: Box({
         children: [
             SidebarLeft(),
