@@ -16,7 +16,7 @@ const schemeOptions = [
     { icon: 'contrast', value: 'monochrome', tooltip: 'Monochrome' },
     { icon: 'theater_comedy', value: 'expressive', tooltip: 'Expressive' },
     { icon: 'auto_awesome', value: 'vibrant', tooltip: 'Vibrant' },
-    { icon: 'coffee_maker', value: 'catppuccin-mocha', tooltip: 'Catppuccin Mocha' },
+    { icon: 'favorite', value: 'content', tooltip: 'Content' },
 ];
 
 const ColorButton = ({ icon, value, tooltip }) => Widget.Button({
@@ -36,11 +36,11 @@ const ColorButton = ({ icon, value, tooltip }) => Widget.Button({
 const DarkModeToggle = () => {
     const stack = Widget.Stack({
         transition: 'slide_left_right',
-        transitionDuration: 200,
-        items: [
-            ['light', MaterialIcon('light_mode', 'large')],
-            ['dark', MaterialIcon('dark_mode', 'large')],
-        ],
+        transitionDuration: userOptions.asyncGet().animations.durationSmall,
+        children: {
+            'light': MaterialIcon('light_mode', 'large'),
+            'dark': MaterialIcon('dark_mode', 'large'),
+        },
     });
     
     return Widget.Button({
@@ -65,11 +65,11 @@ const TransparencyToggle = () => {
     
     const stack = Widget.Stack({
         transition: 'slide_left_right',
-        transitionDuration: 200,
-        items: [
-            ['opaque', MaterialIcon('blur_off', 'large')],
-            ['transparent', MaterialIcon('blur_on', 'large')],
-        ],
+        transitionDuration: userOptions.asyncGet().animations.durationSmall,
+        children: {
+            'opaque': MaterialIcon('blur_off', 'large'),
+            'transparent': MaterialIcon('blur_on', 'large'),
+        },
     });
 
     return Widget.Button({
@@ -97,10 +97,13 @@ const TransparencyToggle = () => {
 
 export default () => Widget.Box({
     className: 'spacing-h-5 bar-group-margin onSurfaceVariant bar-colorscheme',
-    children: [
-        DarkModeToggle(),
-        TransparencyToggle(),
-        Widget.Separator({ className: 'bar-separator-line' }),
-        ...schemeOptions.map(opt => ColorButton(opt)),
-    ],
+    child: Widget.Box({
+        spacing: 5,
+        children: [
+            DarkModeToggle(),
+            TransparencyToggle(),
+            Widget.Separator({ className: 'bar-separator-line' }),
+            ...schemeOptions.map(opt => ColorButton(opt)),
+        ],
+    }),
 });

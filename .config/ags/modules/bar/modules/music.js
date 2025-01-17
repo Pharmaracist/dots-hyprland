@@ -41,7 +41,7 @@ const showVolumeIndicator = (volume) => {
 // Music Widget
 export default () =>
   EventBox({
-    className: "sec-txt",
+    className: "onSurface",
     onPrimaryClick: () => {
       App.toggleWindow('ipod');
     },
@@ -100,7 +100,7 @@ export default () =>
                       border-radius: 16px;
                       opacity: 0.7;
                     `;
-                    self.className = "sec-txt";
+                    self.className = "onSurfaceVariant";
                     return;
                   }
                   const coverPath = mpris?.coverPath;
@@ -259,7 +259,7 @@ export default () =>
               hpack: "end",
               children: [
                 Button({
-                  className: 'txt-larger sec-txt',
+                  className: 'txt-larger onSurfaceVariant',
                   label: '󰒮',
                   onClicked: () => {
                     const player = findPlayer();
@@ -267,7 +267,7 @@ export default () =>
                   },
                 }),
                 Button({
-                  className: 'txt-larger  sec-txt',
+                  className: 'txt-larger  onSurfaceVariant',
                   setup: (self) => {
                     const update = () => {
                       const player = findPlayer();
@@ -282,7 +282,7 @@ export default () =>
                   },
                 }),
                 Button({
-                  className: 'txt-larger sec-txt ',
+                  className: 'txt-larger onSurfaceVariant ',
                   label: '󰒭',
                   onClicked: () => {
                     const player = findPlayer();

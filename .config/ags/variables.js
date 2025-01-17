@@ -1,4 +1,4 @@
-const { Gdk, Gtk, GLib } = imports.gi;
+const { Gdk, Gtk, GLib, Gio } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js';
@@ -18,39 +18,29 @@ globalThis['openColorScheme'] = showColorScheme;
 globalThis['mpris'] = Mpris;
 globalThis['getString'] = getString
 
-// Initialize bar modes from config
-globalThis['cycleMode'] = () => {
-    const monitor = Hyprland.active.monitor.id || 0;
-    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
-    const nextMode = (currentNum + 1) % 5;
-    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
-}
+// Read initial mode from gsettings
+const SCHEMA_ID = 'org.gnome.shell.extensions.ags';
+const KEY_BAR_MODE = 'bar-mode';
+const settings = new Gio.Settings({ schema_id: SCHEMA_ID });
 
-const initializeBarModes = () => {
-    const configPath = GLib.get_home_dir() + '/.ags/config.json';
+const getInitialMode = () => {
     const monitors = Hyprland.monitors;
     const modes = {};
-    
-    // Get default mode from config or use "0"
-    let defaultMode = "0";
-    try {
-        if (GLib.file_test(configPath, GLib.FileTest.EXISTS)) {
-            const config = JSON.parse(Utils.readFile(configPath));
-            defaultMode = config.bar?.modes || "0";
-        }
-    } catch (error) {
-        console.error('Error reading config:', error);
-    }
-
-    // Initialize modes for each monitor
-    monitors.forEach((_, index) => {
-        modes[index] = defaultMode;
-    });
-    
+    const currentMode = settings.get_string(KEY_BAR_MODE) || "0";
+    monitors.forEach((_, index) => modes[index] = currentMode);
     return modes;
 };
 
-export const currentShellMode = Variable(initializeBarModes());
+// Initialize bar modes directly
+export const currentShellMode = Variable(getInitialMode());
+
+// Mode switching
+export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
+    const newValue = { ...monitorShellModes.value };
+    newValue[monitor] = mode;
+    monitorShellModes.value = newValue;
+    settings.set_string(KEY_BAR_MODE, mode);
+}
 
 // Watch for monitor changes and update modes
 Hyprland.connect('notify::monitors', () => {
@@ -65,12 +55,13 @@ Hyprland.connect('notify::monitors', () => {
     currentShellMode.value = newModes;
 });
 
-// Mode switching
-export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
-    const newValue = { ...monitorShellModes.value };
-    newValue[monitor] = mode;
-    monitorShellModes.value = newValue;
-}
+globalThis['cycleMode'] = () => {
+    const monitor = Hyprland.active.monitor.id || 0;
+    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
+    const nextMode = (currentNum + 1) % 5;
+    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
+};
+
 globalThis['currentMode'] = currentShellMode;
 
 // Sidebar width control
@@ -124,3 +115,9 @@ globalThis['closeEverything'] = () => {
     App.closeWindow('sideright');
     App.closeWindow('overview');
 };
+
+// Force immediate update to ensure mode is set
+Utils.timeout(0, () => {
+    const modes = currentShellMode.value;
+    currentShellMode.value = { ...modes };
+});
