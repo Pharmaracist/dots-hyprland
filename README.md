@@ -27,7 +27,6 @@
   <img src="https://img.shields.io/badge/Made%20with-AGS-blue?style=flat-square&logo=linux&logoColor=white&color=7AA2F7">
 </p>
 
-<details open> 
 <summary>✨ Features</summary>
 
 <details>
