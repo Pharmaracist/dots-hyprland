@@ -104,28 +104,6 @@ apply_hyprland() {
     cp "$CACHE_DIR"/user/generated/hypr/hyprland/colors.conf "$XDG_CONFIG_HOME"/hypr/hyprland/colors.conf
 }
 
-apply_hyprlock() {
-    # Check if scripts/templates/hypr/hyprlock.conf exists
-    if [[ ! -f "scripts/templates/hypr/hyprlock.conf" ]] then
-        echo "Template file not found for hyprlock. Skipping that."
-        return
-    fi
-    # Copy template
-    mkdir -p "$CACHE_DIR"/user/generated/hypr/
-    if [[ -f "$HOME/.ags/templates/hypr/hyprlock.conf" ]] then
-        cp "$HOME/.ags/templates/hypr/hyprlock.conf" "$CACHE_DIR"/user/generated/hypr/hyprlock.conf
-    else
-        cp "scripts/templates/hypr/hyprlock.conf" "$CACHE_DIR"/user/generated/hypr/hyprlock.conf
-    fi
-    # Apply colors
-    # sed -i "s/{{ SWWW_WALL }}/${wallpath_png}/g" "$CACHE_DIR"/user/generated/hypr/hyprlock.conf
-    for i in "${!colorlist[@]}"; do
-        sed -i "s/{{ ${colorlist[$i]} }}/${colorvalues[$i]#\#}/g" "$CACHE_DIR"/user/generated/hypr/hyprlock.conf
-    done
-
-    cp "$CACHE_DIR"/user/generated/hypr/hyprlock.conf "$XDG_CONFIG_HOME"/hypr/hyprlock.conf
-}
-
 apply_lightdark() {
     lightdark=$(get_light_dark)
     if [ "$lightdark" = "light" ]; then
@@ -179,7 +157,6 @@ colorvalues=( $colorstrings ) # Array of color values
 
 apply_ags &
 apply_hyprland &
-apply_hyprlock &
 apply_lightdark &
 apply_gtk &
 apply_fuzzel &

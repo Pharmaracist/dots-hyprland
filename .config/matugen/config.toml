@@ -2,6 +2,11 @@
 command = "swww"
 set = false
 
+[templates.hyprlock]
+input_path = '~/.config/matugen/templates/hyprlock.conf'
+output_path = '~/.config/hypr/hyprlock.conf'
+post_hook = 'hyprctl reload'
+
 [templates.spicetify]
 input_path = '~/.config/matugen/templates/colors.ini'
 output_path = '~/.config/spicetify/Themes/Comfy/color.ini'
