@@ -13,17 +13,12 @@
 [![License](https://img.shields.io/github/license/pharmaracist/dots-hyprland?style=for-the-badge&logo=github&color=8CABD9&logoColor=D9E0EE&labelColor=292324)](https://github.com/pharmaracist/dots-hyprland/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/pharmaracist/dots-hyprland?style=for-the-badge&logo=github&color=F5A97F&logoColor=D9E0EE&labelColor=292324)](https://github.com/pharmaracist/dots-hyprland/issues)
 [![Required Arch](https://img.shields.io/badge/Supports-Arch%20Linux-blue?style=for-the-badge&logo=arch-linux&logoColor=D9E0EE&labelColor=292324&color=7DC4E4)](https://archlinux.org/)
-[![Required Fedora](https://img.shields.io/badge/Supports-Fedora-blue?style=for-the-badge&logo=fedora&logoColor=D9E0EE&labelColor=292324&color=51A2DA)](https://getfedora.org/)
 [![Hyprland](https://img.shields.io/badge/Made%20for-Hyprland-pink?style=for-the-badge&logo=linux&logoColor=D9E0EE&labelColor=292324&color=C6A0F6)](https://hyprland.org/)
-
-<a href="https://discord.gg/your-discord-link">
-    <img src="https://img.shields.io/discord/YOUR_SERVER_ID?style=for-the-badge&logo=discord&logoColor=D9E0EE&labelColor=292324&color=A39EC4" alt="Join our Discord">
-</a>
 
 </div>
 
 <div align="center">
-    <h2>🌟 A Modern, Beautiful & Feature-rich Hyprland Configuration 🌟</h2>
+    <h2>🌟 My Personal Spaghetti Coded Dotfiles on Hyprland/AGS 🌟</h2>
 </div>
 
 <p align="center">
@@ -35,26 +30,8 @@
 <details open> 
 <summary>✨ Features</summary>
 
-### 🎮 Core Features
-- **Smart Desktop**: Overview widget, AI assistants (ChatGPT/Gemini), dynamic workspaces
-- **Fallback UI**: fallback to waybar mode
-- **Dynamic Icon**:Dynmic Icon theme using papirus
-- **Beautiful UI**: Material You design, fluid animations, custom widgets
-- **Rich Media**: Spotify with Spicetify, MPV, MPD, YouTube Music
-- **Productivity**: Todo list, calendar, timers, multi-monitor support
-- **Development**: Full dev environment with VSCode, Git, Python setup
-- **System Tools**: Resource monitoring, package management, auto-updates
-<!-- - **Security**: Custom screen locking, privacy features, secure sharing -->
-</details>
-
 <details>
 <summary>🚀 Installation</summary>
-
-### 🐧 For Arch Linux Users:
-```bash
-curl -s https://raw.githubusercontent.com/pharmaracist/dots-hyprland/main/install.sh | bash
-```
-
 ### 💻 Manual Installation:
 If you prefer to see what's being installed, you can manually clone and run the installation script:
 
@@ -69,37 +46,12 @@ cd dots-hyprland
 chmod +x install.sh
 ./install.sh
 
-# For Fedora
+# For Fedora WIP ⏱️
 chmod +x install-fedora.sh
 ./install-fedora.sh
 ```
 
-### 🔧 System Requirements
-
-#### For Arch Linux:
-- Base Arch Linux installation
-- Internet connection
-- Basic terminal knowledge
-
-#### For Fedora:
-- Fedora Workstation 38 or newer
-- Internet connection
-- Basic terminal knowledge
-
-### 🎨 Features
-</details>
-
-<details>
-<summary>📋 Requirements</summary>
-
-- Arch Linux or Arch-based distro
-- X86_64 architecture
-- Internet connection
-- Basic terminal knowledge
-- A Brain 🙂🧠
-</details>
-
-## 🖼️ Gallery
+## 🖼️ Pics
 
 <div align="center">
   <details open>
@@ -107,28 +59,23 @@ chmod +x install-fedora.sh
     <br/>
     
   <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-    <img src="pics/Pasted%20image.png" alt="Screenshot 1" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(2).png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(3).png" alt="Screenshot 3" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(4).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(5).png" alt="Screenshot 4" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(6).png" alt="Screenshot 5" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(7).png" alt="Screenshot 6" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(8).png" alt="Screenshot 7" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(9).png" alt="Screenshot 8" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(10).png" alt="Screenshot 9" style="width: 100%; border-radius: 10px;">
-    <img src="pics/Pasted%20image%20(11).png" alt="Screenshot 10" style="width: 100%; border-radius: 10px;">
-
-
+    <img src="pics/1.png" alt="Screenshot 1" style="width: 100%; border-radius: 10px;">
+    <img src="pics/2.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+    <img src="pics/3.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+    <img src="pics/4.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+    <img src="pics/5.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+<!--     <img src="pics/6.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;"> -->
+<!--     <img src="pics/7.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;"> -->
   </div>
 
   </details>
 </div>
 
 ## 🙏 Credits
+- My GF for the support hehe !!
+- Claude 3.5 sonnet for the Help in Development
 - End-4 for the original Hyprland rice
 - Sh1zicus for the help to make this work and the awesome kickstart 
-- My GF for the support hehe !!
 - Hyprland community
 - All the amazing ricers at Unixporn
 - osu!lazer, Novelknocks , Hybrid , AvdanOS (concept), Old End4 Configs
