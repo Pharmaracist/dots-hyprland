@@ -8,7 +8,6 @@ import BarToggles from "../vertical_modules/bar_toggles.js"
 import KbLayout from "../modules/kb_layout.js";
 import VerticalOptionalWorkspace from "../vertical_modules/workspaces_hyprland.js"
 import ScrolledModule from "../../.commonwidgets/scrolledmodule.js";
-import Shortcuts from "./../vertical_modules/utils.js";
 import { MediaControls } from "../vertical_modules/bar_toggles.js";
 export const VerticalBarPinned = Widget.CenterBox({
   className: "bar-bg",
@@ -35,7 +34,6 @@ export const VerticalBarPinned = Widget.CenterBox({
     children:[
       Widget.Box({className:"bar-group-pad-vertical bar-group",child:VerticalOptionalWorkspace()}),
       Widget.Box({className:"bar-group-pad-vertical bar-group",child:VerticalPinnedApps()}),
-      Widget.Box({className:"bar-group-pad-vertical bar-group",child:Shortcuts()}),
     ]
   }),
   endWidget:

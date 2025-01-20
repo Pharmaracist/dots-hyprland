@@ -119,6 +119,9 @@ const BatteryContent = () => {
 };
 
 export default () => EventBox({
+    onPrimaryClick: () => {
+      App.toggleWindow("sideleft");
+    },
     onSecondaryClick: () => {
         execAsync(["bash", "-c", userOptions.asyncGet().apps.taskManager]);
     },

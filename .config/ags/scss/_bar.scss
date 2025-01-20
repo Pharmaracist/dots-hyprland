@@ -72,6 +72,14 @@ $bar_ws_width_focus_active: 6.045rem;
     @include anim-enter;
     @include normal-rounding;
 }
+
+.bar-floating-outline {
+    background-color:$layer0;
+    @include elevation2;
+    border: 0.5px solid rgba($onSurfaceVariant, 0.5);
+    @include anim-enter;
+    @include small-rounding;
+}
 .bar-height {
     min-height: 2.827rem;
 }
@@ -233,7 +241,7 @@ $bar_ws_width_focus_active: 6.045rem;
     padding:0 3px;
     @include full-rounding;
     @include element_decel;
-    min-height: 1.99rem;
+    min-height: 2.3rem;
     min-width: 2.3rem;
     border-radius: 10rem;
     color: $battOnLayer2;

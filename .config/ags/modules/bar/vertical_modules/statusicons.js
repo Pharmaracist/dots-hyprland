@@ -4,6 +4,7 @@ import Bluetooth from "resource:///com/github/Aylur/ags/service/bluetooth.js";
 import Network from "resource:///com/github/Aylur/ags/service/network.js";
 import Notifications from "resource:///com/github/Aylur/ags/service/notifications.js";
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
+import { AnimatedCircProg } from "../../.commonwidgets/cairo_circularprogress.js";
 const { GLib,Gtk } = imports.gi;
 import { Tray } from "./tray.js";
 export const NotificationIndicator = (notifCenterName = "sideright") => {
@@ -92,15 +93,17 @@ const BluetoothDevices = () =>
         (self) => {
           self.children = Bluetooth.connected_devices.map((device) => {
             return Widget.Box({
-              className: "bar-bluetooth-device",
+              className: "bar-bluetooth-device onSurfaceVariant",
               vpack: "center",
               tooltipText: device.name,
+              vertical: true,
+              spacing: 8,
               children: [
                 Widget.Icon(`${device.iconName}-symbolic`),
                 ...(device.batteryPercentage
                   ? [
                       Widget.Label({
-                        className: "txt-small onSurfaceVariantie",
+                        className: "txt-small onSurfaceVariant",
                         label: `${device.batteryPercentage}`,
                         setup: (self) => {
                           self.hook(

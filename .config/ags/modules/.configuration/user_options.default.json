@@ -1,5 +1,5 @@
 {
-  "roundingsCss NOT AN OPTION!!":{
+  "roundingsCss NOT AN OPTION!!": {
     "rounding_verysmall": "8",
     "rounding_small": "13",
     "rounding_mediumsmall": "15",
@@ -7,100 +7,100 @@
     "rounding_mediumlarge": "22",
     "rounding_large": "27"
   },
-  "indicators":{
-    "enabled":true
+  "indicators": {
+    "enabled": true
   },
   "wallselect": {
     "enabled": true,
-    "wallpaperFolder":"/Pictures/wallpapers",
-    "wallpaperLimit":100
+    "wallpaperFolder": "/Pictures/Wallpapers",
+    "wallpaperLimit": 100
   },
-  "session":{
-    "enabled":true
+  "session": {
+    "enabled": true
   },
   "ipod": {
     "enabled": false,
     "widget": {
-        "margin": "8",
-        "minHeight": 270,
-        "borderRadius": 22,
-        "padding": "0",
-        "borderWidth": 0,
-        "borderOpacity": 0,
-        "extraCss": ""
+      "margin": "8",
+      "minHeight": 270,
+      "borderRadius": 22,
+      "padding": "0",
+      "borderWidth": 0,
+      "borderOpacity": 0,
+      "extraCss": ""
     },
     "background": {
-        "defaultOpacity": 0.2,
-        "hiddenOpacity": 1,
-        "blurAmount": "0x3",
-        "imageQuality": 80,
-        "imageResize": 60,
-        "transitionMs": 400,
-        "enableBlur": true
+      "defaultOpacity": 0.2,
+      "hiddenOpacity": 1,
+      "blurAmount": "0x3",
+      "imageQuality": 80,
+      "imageResize": 60,
+      "transitionMs": 400,
+      "enableBlur": true
     },
     "coverArt": {
-        "size": 230,
-        "borderRadius": 12
+      "size": 230,
+      "borderRadius": 12
     },
     "visualizer": {
-        "margin": "0",
-        "mode": "end",
-        "padding": "0",
-        "barSpacing": 2.5,
-        "barMinWidth": 20,
-        "barMaxHeight": 40,
-        "barNumber": 63,
-        "heightMultiplier": 2,
-        "transitionMs": 80,
-        "colors": {
-            "low": "rgba(255,255,255,0)",
-            "medium": "rgba(255,255,255,0.6)",
-            "high": "rgba(255,255,255,1)",
-            "heightThresholds": {
-                "low": 1,
-                "medium": 2.2,
-                "high": 4
-            }
+      "margin": "0",
+      "mode": "end",
+      "padding": "0",
+      "barSpacing": 2.5,
+      "barMinWidth": 20,
+      "barMaxHeight": 40,
+      "barNumber": 63,
+      "heightMultiplier": 2,
+      "transitionMs": 80,
+      "colors": {
+        "low": "rgba(255,255,255,0)",
+        "medium": "rgba(255,255,255,0.6)",
+        "high": "rgba(255,255,255,1)",
+        "heightThresholds": {
+          "low": 1,
+          "medium": 2.2,
+          "high": 4
         }
+      }
     },
     "trackInfo": {
-        "titleSize": "3rem",
-        "artistSize": "2rem",
-        "titleOpacity": 0.9,
-        "artistOpacity": 0.8,
-        "maxChars": 100
+      "titleSize": "3rem",
+      "artistSize": "2rem",
+      "titleOpacity": 0.9,
+      "artistOpacity": 0.8,
+      "maxChars": 100
     },
     "controls": {
-        "buttonSize": "1.8rem",
-        "otherButtonSize": "1.4rem",
-        "spacing": 10,
-        "iconOpacity": 0.8
+      "buttonSize": "1.8rem",
+      "otherButtonSize": "1.4rem",
+      "spacing": 10,
+      "iconOpacity": 0.8
     },
     "volume": {
-        "iconSize": 36,
-        "progressSize": 40,
-        "textSize": "1rem"
+      "iconSize": 36,
+      "progressSize": 40,
+      "textSize": "1rem"
     },
     "animations": {
-        "showHideMs": 200,
-        "updateDelay": 200
+      "showHideMs": 200,
+      "updateDelay": 200
     }
-},
-  "cheatshhet":{
-  "enabled":true,
-  "modules":{
-    "periodicTable":"true",
-    "cheats":"true"
   },
-  "note":"todo Cheatsheet"
+  "cheatshhet": {
+    "enabled": true,
+    "modules": {
+      "periodicTable": "true",
+      "cheats": "true"
+    },
+    "note": "todo Cheatsheet"
   },
   "desktopBackground": {
     "enabled": true,
     "visible": false
   },
   "ai": {
-    "defaultGPTProvider": "openrouter",
-    "onSearch": "gemini",
+    "defaultGPTProvider": "microsoft-phi-4",
+    "onSearch": "microsoft-phi-4",
     "defaultTemperature": 0.9,
     "enhancements": true,
     "useHistory": true,
@@ -109,33 +109,21 @@
     "proxyUrl": "",
     "__custom": [
       "extraGptModels"
-    ],
-    "extraGptModels": {
-      "deepseek-deepseek-chat": {
-        "name": "deepseek/deepseek-chat",
-        "logo_name": "openrouter-symbolic",
-        "description": "deepseek/deepseek-chat via OpenRouter",
-        "base_url": "https://openrouter.ai/api/v1/chat/completions",
-        "key_get_url": "https://openrouter.ai/keys",
-        "key_file": "openrouter_key.txt",
-        "model": "deepseek/deepseek-chat"
-      }
-    }
+    ]
   },
   "animations": {
     "choreographyDelay": 25,
     "durationSmall": 110,
     "durationLarge": 180
-   
   },
   "appearance": {
-    "avatar":"avatar.png",
+    "avatar": "avatar.png",
     "autoDarkMode": {
       "enabled": false,
       "from": "18:10",
       "to": "6:10"
     },
-    "Scroll":{
+    "Scroll": {
       "debounce": 300,
       "transition": "slide_up_down",
       "mode": "scroll"
@@ -203,7 +191,7 @@
     "wsNumMarginScale": 0.07
   },
   "sidebar": {
-    "adhan":{
+    "adhan": {
       "default": "adhan_default.mp3",
       "fajr": "adhan_fajr.mp3"
     },
@@ -220,7 +208,7 @@
         "prayerTimes"
       ],
       "vpnGate": {
-        "enabled": true
+        "enabled": false
       },
       "notifications": {
         "enabled": true
@@ -229,10 +217,10 @@
         "enabled": true
       },
       "powerProfiles": {
-        "enabled": true
+        "enabled": false
       },
       "taskManager": {
-        "enabled": true,
+        "enabled": false,
         "pollingRate": 5000
       },
       "bluetooth": {
@@ -242,10 +230,10 @@
         "enabled": true
       },
       "liveConfig": {
-        "enabled": true
+        "enabled": false
       },
       "prayerTimes": {
-        "enabled": true
+        "enabled": false
       }
     },
     "github": {
@@ -266,10 +254,17 @@
           "key_get_url": "https://openrouter.ai/keys",
           "key_file": "openrouter_key.txt",
           "model": "deepseek/deepseek-chat"
+        },
+        "microsoft-phi-4": {
+          "name": "microsoft/phi-4",
+          "logo_name": "openrouter-symbolic",
+          "description": "microsoft/phi-4 via OpenRouter",
+          "base_url": "https://openrouter.ai/api/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "openrouter_key.txt",
+          "model": "microsoft/phi-4"
         }
       },
-      "defaultGPTProvider": "openrouter",
-      "onSearch": "gemini",
       "initMessages": []
     },
     "pages": {
@@ -324,11 +319,11 @@
     "dateFormatLong": "%A, %d/%m",
     "dateInterval": 5000,
     "dateFormat": "%d/%m",
-    "verticalCLock":{
-      "hours":"%I",
-      "minutes":"%M",
-      "seconds":"%S",
-      "dayTime":"%p"
+    "verticalCLock": {
+      "hours": "%I",
+      "minutes": "%M",
+      "seconds": "%S",
+      "dayTime": "%p"
     }
   },
   "weather": {
@@ -434,13 +429,12 @@
     }
   },
   "bar": {
-    "modes": "2",
     "position": "top",
-    "traySize": 32,
-    "floatingWidth": 50 ,
-    "floatingElevation":1,
-    "verticalBar":{
-      "position":"right"
+    "traySize": 16,
+    "floatingWidth": 14,
+    "floatingElevation": 1,
+    "verticalBar": {
+      "position": "left"
     },
     "pinnedApps": [
       "windsurf",

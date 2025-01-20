@@ -208,6 +208,7 @@ export default () => EventBox({
     onMiddleClick: () => toggleWindowOnAllMonitors('osk'),
     onSecondaryClick: () => App.toggleWindow('overview'),
     vexpand: true,
+    vpack: 'center',
     attribute: {
         clicked: false,
         ws_group: 0,

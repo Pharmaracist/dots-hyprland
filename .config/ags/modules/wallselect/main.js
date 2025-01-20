@@ -6,9 +6,8 @@ import GLib from 'gi://GLib';
 const { Box, Label, EventBox, Scrollable, Button } = Widget;
 import ColorPicker from "../bar/modules/color_picker.js";
 // Constants
-const HOME_DIR = GLib.get_home_dir();
-const CONFIG_DIR = `${HOME_DIR}/.config/ags`;
-const WALLPAPER_DIR = HOME_DIR + (userOptions.asyncGet().wallselect.wallpaperFolder || '/Pictures/wallpapers');
+const CONFIG_DIR = GLib.get_home_dir() + '/.config/ags';
+const WALLPAPER_DIR = GLib.get_home_dir() + (userOptions.asyncGet().wallselect.wallpaperFolder || '/Pictures/wallpapers');
 const THUMBNAIL_DIR = GLib.build_filenamev([WALLPAPER_DIR, "thumbnails"]);
 
 // Cached Variables
