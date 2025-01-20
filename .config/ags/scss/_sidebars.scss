@@ -1155,9 +1155,9 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
     &-btn {
         @include normal-rounding;
-        padding: 0.2em;
-        min-width: 1.8em;
-        min-height: 1.8em;
+        padding: 0.2rem;
+        min-width: 1.8rem;
+        min-height: 1.8rem;
 
         &-start {
             background-color: $primary;
@@ -1166,6 +1166,18 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
             &:hover {
                 background-color: mix($primary, $surfaceContainerHighest, 85%);
             }
+        }
+    }
+    &-delete {
+        @include normal-rounding;
+        padding: 0.2rem;
+        min-width: 1.8rem;
+        min-height: 1.8rem;
+        background-color: $error;
+        color: $onError;
+
+        &:hover {
+            background-color: mix($error, $surfaceContainerHighest, 85%);
         }
     }
     &-item {
@@ -1342,4 +1354,39 @@ $skeleton-accent: mix($secondary, $onSecondary, 50%);
 
 .task-manager-scrollable {
     min-height: 20.455rem;
+}
+.audio-files-widget {
+    background-color: $surfaceContainerLow;
+    padding: 1rem;
+    border-radius: 12px;
+    min-width: 50px;
+}
+
+.audio-files-list {
+    padding: 8px;
+}
+
+.audio-files-scrollable {
+    min-height: 100px;
+}
+
+.audio-files-button {
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 6px;
+    background-color: $surfaceContainerHigh;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: $surfaceContainerHighest;
+    }
+}
+
+.audio-files-icon {
+    color: $primary;
+}
+
+.audio-files-label {
+    margin-left: 8px;
+    color: $onSurface;
 }

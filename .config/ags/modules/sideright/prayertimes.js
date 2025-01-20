@@ -76,10 +76,58 @@ const PrayerTimeItem = (name, time) => {
     });
 };
 
+const updateContent = (widget, times, nextPrayer, hijriDate) => {
+    // Clear existing children
+    widget.children = [
+        TopSection(nextPrayer, hijriDate),
+        Box({
+            vertical: true,
+            className: 'spacing-v-5',
+            children: times.map(prayer => {
+                if (!nextPrayer || prayer.name !== nextPrayer.name) {
+                    return PrayerTimeItem(prayer.name, prayer.time);
+                }
+                return null;
+            }).filter(item => item !== null)
+        })
+    ];
+};
+
 export const PrayerTimesWidget = () => {
     const prayersList = Box({
         vertical: true,
         className: 'spacing-v-5',
+    });
+
+    const header = Box({
+        className: 'spacing-h-5',
+        children: [
+            Label({
+                hexpand: true,
+                xalign: 0,
+                css: "margin-top:0.7rem",
+                className: 'txt-large txt-bold',
+                label: getString('Prayer Times'),
+            }),
+            Button({
+                className: 'txt-large icon-material',
+                label: 'refresh',
+                hpack: "end",
+                setup: setupCursorHover,
+                onClicked: () => {
+                    PrayerTimesService.refresh();
+                },
+            }),
+        ],
+    });
+
+    const scrollArea = Scrollable({
+        vexpand: true,
+        child: prayersList,
+        setup: (scrollable) => {
+            const vScrollbar = scrollable.get_vscrollbar();
+            vScrollbar.get_style_context().add_class('sidebar-scrollbar');
+        },
     });
 
     const update = () => {
@@ -91,21 +139,10 @@ export const PrayerTimesWidget = () => {
             { name: 'Isha', time: PrayerTimesService.isha }
         ];
 
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-        let nextPrayer = null;
-
-        for (const prayer of prayers) {
-            if (!prayer.time) continue;
-            const [hours, minutes] = prayer.time.split(':').map(Number);
-            const prayerTime = hours * 60 + minutes;
-            if (prayerTime > currentTime) {
-                nextPrayer = prayer;
-                break;
-            }
-        }
-
-        if (!nextPrayer) nextPrayer = prayers[0];
+        const nextPrayer = {
+            name: PrayerTimesService.nextPrayerName,
+            time: PrayerTimesService.nextPrayerTime
+        };
         
         // Create items array
         const items = [];
@@ -126,46 +163,27 @@ export const PrayerTimesWidget = () => {
         prayersList.children = items;
     };
 
-    const header = Box({
-        className: 'spacing-h-5',
-        children: [
-            Label({
-                hexpand: true,
-                xalign: 0,
-                css:"margin-top:0.7rem",
-                className: 'txt-large txt-bold',
-                label: getString('Prayer Times'),
-            }),
-            Button({
-                className: 'txt-large icon-material',
-                label: 'refresh',
-                hpack:"end",
-                setup: setupCursorHover,
-                onClicked: () => {
-                    PrayerTimesService.refresh();
-                },
-            }),
-        ],
-    });
-
-    const scrollArea = Scrollable({
-        vexpand: true,
-        child: prayersList,
-        setup: (scrollable) => {
-            const vScrollbar = scrollable.get_vscrollbar();
-            vScrollbar.get_style_context().add_class('sidebar-scrollbar');
-        },
-    });
-
     return Box({
         vertical: true,
         className: 'spacing-v-10',
         setup: (box) => {
-            const hook = box.hook(PrayerTimesService, update, 'updated');
-            box.connect('destroy', () => box.unhook(hook));
+            // Add cleanup handler
+            box.connect('destroy', () => {
+                box.get_children().forEach(child => {
+                    if (child.destroy) child.destroy();
+                });
+            });
+
+            const updateHandler = PrayerTimesService.connect('updated', update);
+            box.connect('destroy', () => {
+                PrayerTimesService.disconnect(updateHandler);
+            });
             
-            box.children = [ scrollArea];
+            box.children = [header, scrollArea];
+            
+            // Initial update and trigger refresh
             update();
+            PrayerTimesService.refresh();
         },
     });
 };

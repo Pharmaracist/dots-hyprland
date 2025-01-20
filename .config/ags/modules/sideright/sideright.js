@@ -205,11 +205,12 @@ export default () => Box({
                 }),
                 Box({
                     className: 'sidebar-group',
+                    vexpand: true,
                     children: [
                         sidebarOptionsStack,
                     ],
                 }),
-                ModuleCalendar(),
+                Box({child:ModuleCalendar()})
             ]
         }),
     ],

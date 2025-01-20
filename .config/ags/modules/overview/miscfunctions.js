@@ -3,6 +3,7 @@ import App from 'resource:///com/github/Aylur/ags/app.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
 const { execAsync, exec } = Utils;
 import Todo from "../../services/todo.js";
+import timers from "../../services/timers.js";
 import { darkMode } from '../.miscutils/system.js';
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js';
 import userOptions from '../.configuration/user_options.js';
@@ -144,6 +145,95 @@ export function launchCustomCommand(command) {
             } catch (error) {
                 print(`Error adding GPT model: ${error.message}`);
             }
+        },
+        '>lofi': () => {
+            const musicDir = GLib.get_home_dir() + userOptions.asyncGet().music.musicDir || GLib.get_home_dir() + "/Music";
+            const supportedFormats = /\.(mp3|wav|ogg|m4a|flac|opus)$/i;
+            
+            try {
+                // Get all audio files
+                const dir = Gio.File.new_for_path(musicDir);
+                const enumerator = dir.enumerate_children(
+                    "standard::*",
+                    Gio.FileQueryInfoFlags.NONE,
+                    null
+                );
+                
+                const audioFiles = [];
+                let fileInfo;
+                while ((fileInfo = enumerator.next_file(null))) {
+                    const filename = fileInfo.get_name();
+                    if (filename.match(supportedFormats)) {
+                        audioFiles.push(filename);
+                    }
+                }
+                
+                if (audioFiles.length > 0) {
+                    // Pick a random file
+                    const randomFile = audioFiles[Math.floor(Math.random() * audioFiles.length)];
+                    const fullPath = `${musicDir}/${randomFile}`;
+                    
+                    // Play using mpv (or fallback to xdg-open)
+                    execAsync(['bash', '-c',`xdg-open "${fullPath}"` || `mpv "${fullPath}"` ])
+                        .catch(error => {
+                            print(`Error playing file: ${error}`);
+                            // Try fallback player
+                            execAsync(['xdg-open', fullPath]).catch(print);
+                        });
+                } else {
+                    print("No audio files found in Music directory");
+                }
+            } catch (error) {
+                print(`Error accessing Music directory: ${error}`);
+            }
+        },
+        '>tm': () => {
+            // Parse the time string
+            const timeStr = args[0].toLowerCase();
+            let seconds = 0;
+            
+            // Handle different time formats
+            if (timeStr.includes('h')) {
+                const hours = parseFloat(timeStr);
+                seconds = Math.floor(hours * 3600);
+            }
+            else if (timeStr.includes('m')) {
+                const minutes = parseFloat(timeStr);
+                seconds = Math.floor(minutes * 60);
+            }
+            else if (timeStr.includes('s')) {
+                seconds = Math.floor(parseFloat(timeStr));
+            }
+            else {
+                // Assume minutes if no unit specified
+                seconds = Math.floor(parseFloat(timeStr) * 60);
+            }
+
+            if (isNaN(seconds) || seconds <= 0) {
+                print("Invalid time format");
+                return;
+            }
+
+            // Get timer name (rest of arguments after time)
+            const name = args.slice(1).join(' ') || `${Math.floor(seconds / 60)}min Timer`;
+            
+            // Create and start the timer
+            const timerId = timers.addTimer(name, seconds);
+            timers.startTimer(timerId);
+
+            // Send notification
+            const endTime = new Date(Date.now() + seconds * 1000).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            execAsync([
+                'notify-send',
+                `Timer Started: ${name}`,
+                `Will complete at ${endTime}`,
+                '-t',
+                '3000'  // Show for 3 seconds
+            ]).catch(print);
         },
         '>': () => {}
     };

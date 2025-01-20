@@ -180,6 +180,7 @@
     "scaleMethod": "division"
   },
   "music": {
+    "musicDir": "/Music",
     "preferredPlayer": "plasma-browser-integration"
   },
   "overview": {
@@ -311,6 +312,25 @@
     "engineBaseUrl": "https://www.google.com/search?q=",
     "excludedSites": [
       "quora.com"
+    ]
+  },
+  "timers": {
+    "presets": [
+      {
+        "name": "Pomodoro",
+        "duration": 1500,
+        "icon": "timer"
+      },
+      {
+        "name": "Short Break",
+        "duration": 300,
+        "icon": "coffee"
+      },
+      {
+        "name": "Long Break",
+        "duration": 900,
+        "icon": "self_improvement"
+      }
     ]
   },
   "time": {
