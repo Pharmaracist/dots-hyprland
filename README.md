@@ -50,7 +50,7 @@ chmod +x install.sh
 chmod +x install-fedora.sh
 ./install-fedora.sh
 ```
-
+</details>
 ## 🖼️ Pics
 
 <div align="center">
