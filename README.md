@@ -29,7 +29,7 @@
 
 <summary>✨ Features</summary>
 
-<details>
+
 <summary>🚀 Installation</summary>
 ### 💻 Manual Installation:
 If you prefer to see what's being installed, you can manually clone and run the installation script:
