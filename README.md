@@ -27,10 +27,21 @@
   <img src="https://img.shields.io/badge/Made%20with-AGS-blue?style=flat-square&logo=linux&logoColor=white&color=7AA2F7">
 </p>
 
-<summary>✨ Features</summary>
+## 📚 Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [Screenshots](#-screenshots)
+- [Credits](#-credits)
+- [Contributing](#-contributing)
+- [License](#-license)
 
+## ✨ Features
+- **Aim**: The main focus is to provide a Flexible Experience While using it its for your imagination.
+- **User-Friendly**: Designed for ease of use, ensuring a smooth experience for all users.
+- **Feature-Rich**: Packed with functionalities to enhance your desktop environment.
+- **Resource-Friendly**: Optimized to use minimal system resources while providing maximum performance.
 
-<summary>🚀 Installation</summary>
+## 🚀 Installation
 ### 💻 Manual Installation:
 If you prefer to see what's being installed, you can manually clone and run the installation script:
 
@@ -45,11 +56,11 @@ cd dots-hyprland
 chmod +x install.sh
 ./install.sh
 
-# For Fedora WIP ⏱️
+# For Fedora (Work in Progress)
 chmod +x install-fedora.sh
 ./install-fedora.sh
 ```
-</details>
+
 ## 🖼️ Pics
 
 <div align="center">
@@ -71,12 +82,17 @@ chmod +x install-fedora.sh
 </div>
 
 ## 🙏 Credits
-- My GF for the support hehe !!
-- Claude 3.5 sonnet for the Help in Development
-- End-4 for the original Hyprland rice
-- Sh1zicus for the help to make this work and the awesome kickstart 
-- Hyprland community
-- All the amazing ricers at Unixporn
-- osu!lazer, Novelknocks , Hybrid , AvdanOS (concept), Old End4 Configs
+- Special thanks to my girlfriend for the support!
+- Thanks to Claude 3.5 sonnet for development assistance.
+- Acknowledgements to End-4 for the original Hyprland rice.
+- Thanks to Sh1zicus for the help and the awesome kickstart.
+- Shoutout to the Hyprland community and all the amazing ricers at Unixporn.
+- Inspiration from osu!lazer, Novelknocks, Hybrid, AvdanOS (concept), and Old End4 Configs.
+
+## 🤝 Contributing
+We welcome contributions! Please feel free to submit a pull request or open an issue if you have suggestions or improvements.
+
+## 📜 License
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/pharmaracist/dots-hyprland/blob/main/LICENSE) file for details.
 
 *Note: This README was made by AI cuz im too lazy to write it myself! ..Pharmaracist*
