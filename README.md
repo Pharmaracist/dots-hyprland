@@ -63,8 +63,8 @@ chmod +x install-fedora.sh
     <img src="pics/3.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
     <img src="pics/4.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
     <img src="pics/5.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
-<!--     <img src="pics/6.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;"> -->
-<!--     <img src="pics/7.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;"> -->
+    <img src="pics/6.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
+    <img src="pics/7.png" alt="Screenshot 2" style="width: 100%; border-radius: 10px;">
   </div>
 
   </details>
