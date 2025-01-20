@@ -37,14 +37,14 @@ const BatteryScale = () => {
     };
 
     const updateBatteryInfo = () => {
-        const percent = Battery.percent;
+        const percent = Math.max(0, Math.min(100, Battery.percent));
         const isCharging = Battery.charging;
         const isLow = percent <= userOptions.asyncGet().battery.low;
         
         batteryIcon.toggleClassName("bar-batt-low", isLow);
         batteryIcon.toggleClassName("bar-batt-charging", isCharging);
         
-        batteryProgress.fraction = percent / 100;
+        batteryProgress.fraction = Math.max(0, Math.min(1, percent / 100));
         batteryProgress.tooltipText = `${percent}%${isCharging ? " Charging" : ""}`;
         batteryProgress.toggleClassName("bar-batt-low", isLow);
         batteryProgress.toggleClassName("bar-batt-charging", isCharging);

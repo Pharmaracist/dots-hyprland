@@ -3,7 +3,7 @@ import * as Utils from "resource:///com/github/Aylur/ags/utils.js";
 import { showMusicControls } from "../../../variables.js";
 const { Box, Label, EventBox } = Widget;
 const { GLib } = imports.gi;
-import MusicStuff from "./music.js";
+import fetcher from "./fetcher.js";
 const options = userOptions.asyncGet();
 const timeFormat = options.time.format;
 const dateFormat = options.time.dateFormatLong;
@@ -49,15 +49,16 @@ const BarClock = () =>
     }),
   });
 
-// const musicRevealer = RevealerState.register(Revealer({
-//   transitionDuration: options.animations.durationLarge,
-//   transition: "slide_right",
-//   revealChild: false,
-//   child: MusicStuff(),
-// }));
+const musicRevealer = RevealerState.register(Revealer({
+  transitionDuration: options.animations.durationLarge,
+  transition: "slide_right",
+  revealChild: false,
+  child:  fetcher(),
+}));
 
 export default () =>
   Widget.EventBox({
+    onPrimaryClick: () => musicRevealer.revealChild = !musicRevealer.revealChild,
     onSecondaryClick: () => App.toggleWindow("wallselect"),
     onMiddleClick: () => {
       Utils.execAsync(["hyprpicker", "-a"]).catch(print);

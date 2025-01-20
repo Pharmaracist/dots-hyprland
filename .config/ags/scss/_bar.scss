@@ -70,8 +70,7 @@ $bar_ws_width_focus_active: 6.045rem;
     @include elevation2;
     border: 0.5px solid rgba($outline, 0.6);
     @include anim-enter;
-    @include large-rounding;
-    margin: 8px 80px;
+    @include normal-rounding;
 }
 .bar-height {
     min-height: 2.827rem;
@@ -123,6 +122,12 @@ $bar_ws_width_focus_active: 6.045rem;
 
 .bar-group-pad-system {
     padding: 0rem 0.341rem;
+}
+.bar-group-pad-vertical {
+    @include bar-group-rounding;
+    -gtk-outline-radius: 1.364rem;
+    padding: 1rem 0rem;
+    margin: 0rem 0.5rem;
 }
 
 .bar-group-pad-music {
@@ -552,7 +557,6 @@ $bar_ws_width_focus_active: 6.045rem;
         color: $error;
     }
 }
-
 .battery-scale-bar {
     min-width: 50px;
     min-height: 3px;
@@ -560,12 +564,17 @@ $bar_ws_width_focus_active: 6.045rem;
     background-color: $onSurfaceVariant;
     border-radius: 25px;
 
-    
-    &.bar-batt-charging trough progress {
-        background-color: $primary;
-        // background: linear-gradient(to right, $layer2 0%, $primary 100%) ;
+    trough progress {
+        background: linear-gradient(90deg, $surfaceContainerLowest, $primary);
+        animation: chargeAnimation 5s linear infinite;
         border-radius: 25px;
         min-height: 12px;
+    }
+    &.bar-batt-charging trough progress {
+        background: linear-gradient(90deg, $black, $primary);
+        border-radius: 25px;
+        min-height: 25px;
+        animation: chargeAnimation 2s linear infinite;
     }
     
     &.bar-batt-low trough progress {
@@ -573,13 +582,16 @@ $bar_ws_width_focus_active: 6.045rem;
         border-radius: 2px;
     }
     
-    trough progress {
-        background-color: $onSurfaceVariant;
-        border-radius: 25px;
-        min-height: 4px;
-    }
 }
 
+@keyframes chargeAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
 .avatar-widget {
     @include normal-rounding;
     padding: 3px 6px;

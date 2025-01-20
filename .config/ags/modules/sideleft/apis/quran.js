@@ -235,7 +235,6 @@ export const quranContent = Box({
                                             wrap: true,
                                             justify: Gtk.Justification.CENTER,
                                             label: data.verses,
-                                            css: 'line-height: 2.0; letter-spacing: 0.5px;',
                                             selectable: true,
                                         }),
                                         Box({
@@ -329,7 +328,6 @@ export const quranContent = Box({
                                         wrap: true,
                                         justify: Gtk.Justification.CENTER,
                                         label: verse.text_uthmani || '',
-                                        css: 'line-height: 2.0; letter-spacing: 0.5px;',
                                         selectable: true,
                                     }),
                                     Label({

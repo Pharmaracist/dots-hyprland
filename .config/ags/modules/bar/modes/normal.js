@@ -6,18 +6,13 @@ import System from "../normal/system.js";
 import Indicators from "../normal/spaceright.js";
 import avatar from "../modules/avatar.js";
 import { SideModule } from "./../../.commonwidgets/sidemodule.js";
-
-const NormalOptionalWorkspaces = async () => {
-  try {
-    return (await import("../normal/workspaces_hyprland.js")).default();
-  } catch {
-    try {
-      return (await import("../normal/workspaces_sway.js")).default();
-    } catch {
-      return null;
-    }
-  }
-};
+import NormalOptionalWorkspaces  from "../normal/workspaces_hyprland.js";
+import ScrolledModule from "../../.commonwidgets/scrolledmodule.js";
+import PinnedApps from "../modules/pinned_apps.js";
+import { BarGroup } from "../../.commonwidgets/bargroup.js";
+const opts = userOptions.asyncGet();
+  const workspaces = opts.bar.elements.showWorkspaces;
+  const indicators = opts.bar.elements.showIndicators;
 
 export const NormalBar = Widget.CenterBox({
   className: "bar-bg",
@@ -29,20 +24,26 @@ export const NormalBar = Widget.CenterBox({
     ]
   }),
   centerWidget: Widget.Box({
+    // spacing: 3,
     children: [
-      SideModule([...(userOptions.asyncGet().bar.elements.showMusic ? [await Music(
-)] : [])]),
-      Widget.Box({
-        css: `padding:0 8px;margin: 4px 5px`,
-        className: "bar-group bar-group-standalone",
-        children: [...(userOptions.asyncGet().bar.elements.showWorkspaces ? [await NormalOptionalWorkspaces()] : [])]
-      }),
+      SideModule([...(userOptions.asyncGet().bar.elements.showMusic ? [Music()] : [])]),
+      ScrolledModule({
+        hexpand:true,
+        children:[
+        Widget.Box({
+          hexpand:true,
+          className: "bar-group bar-group-standalone",
+          css: `padding:0 12px;margin: 4px 5px`,
+          children: [...(workspaces ? [NormalOptionalWorkspaces()] : []),]
+        }),
+          BarGroup({child:PinnedApps()})
+      ]}),
       SideModule([System()]),
     ],
   }),
   endWidget: Widget.Box({
     children: [
-      await Indicators(),
+      ...(indicators ? [Indicators()] : []),
       ...(userOptions.asyncGet().bar.elements.showAvatar ? [avatar()] : [])
     ]
   }),

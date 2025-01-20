@@ -1,4 +1,4 @@
-const { GLib } = imports.gi;
+const { GLib,Gtk,GdkPixbuf,Gdk } = imports.gi;
 import App from 'resource:///com/github/Aylur/ags/app.js';
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import * as Utils from 'resource:///com/github/Aylur/ags/utils.js';
@@ -10,6 +10,7 @@ import { fileExists } from '../.miscutils/files.js';
 import { AnimatedCircProg } from "../.commonwidgets/cairo_circularprogress.js";
 import { showMusicControls } from '../../variables.js';
 import { darkMode, hasPlasmaIntegration } from '../.miscutils/system.js';
+import CavaService from '../../services/cava.js';
 
 const COMPILED_STYLE_DIR = `${GLib.get_user_cache_dir()}/ags/user/generated`
 const LIGHTDARK_FILE_LOCATION = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
@@ -117,6 +118,9 @@ const TrackArtists = ({ player, ...rest }) => Label({
 })
 
 const CoverArt = ({ player, ...rest }) => {
+    const coverArtDrawingArea = Widget.DrawingArea({ className: 'osd-music-cover-art' });
+    const coverArtDrawingAreaStyleContext = coverArtDrawingArea.get_style_context();
+    
     const fallbackCoverArt = Box({ // Fallback
         className: 'osd-music-cover-fallback',
         homogeneous: true,
@@ -125,107 +129,96 @@ const CoverArt = ({ player, ...rest }) => {
             label: 'music_note',
         })]
     });
-    // const coverArtDrawingArea = Widget.DrawingArea({ className: 'osd-music-cover-art' });
-    // const coverArtDrawingAreaStyleContext = coverArtDrawingArea.get_style_context();
+
     const realCoverArt = Box({
         className: 'osd-music-cover-art',
         homogeneous: true,
-        // children: [coverArtDrawingArea],
+        children: [coverArtDrawingArea],
         attribute: {
             'pixbuf': null,
-            // 'showImage': (self, imagePath) => {
-            //     const borderRadius = coverArtDrawingAreaStyleContext.get_property('border-radius', Gtk.StateFlags.NORMAL);
-            //     const frameHeight = coverArtDrawingAreaStyleContext.get_property('min-height', Gtk.StateFlags.NORMAL);
-            //     const frameWidth = coverArtDrawingAreaStyleContext.get_property('min-width', Gtk.StateFlags.NORMAL);
-            //     let imageHeight = frameHeight;
-            //     let imageWidth = frameWidth;
-            //     // Get image dimensions
-            //     execAsync(['identify', '-format', '{"w":%w,"h":%h}', imagePath])
-            //         .then((output) => {
-            //             const imageDimensions = JSON.parse(output);
-            //             const imageAspectRatio = imageDimensions.w / imageDimensions.h;
-            //             const displayedAspectRatio = imageWidth / imageHeight;
-            //             if (imageAspectRatio >= displayedAspectRatio) {
-            //                 imageWidth = imageHeight * imageAspectRatio;
-            //             } else {
-            //                 imageHeight = imageWidth / imageAspectRatio;
-            //             }
-            //             // Real stuff
-            //             // TODO: fix memory leak(?)
-            //             // if (self.attribute.pixbuf) {
-            //             //     self.attribute.pixbuf.unref();
-            //             //     self.attribute.pixbuf = null;
-            //             // }
-            //             self.attribute.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(imagePath, imageWidth, imageHeight);
+            'showImage': (self, imagePath) => {
+                const borderRadius = coverArtDrawingAreaStyleContext.get_property('border-radius', Gtk.StateFlags.NORMAL);
+                const frameHeight = coverArtDrawingAreaStyleContext.get_property('min-height', Gtk.StateFlags.NORMAL);
+                const frameWidth = coverArtDrawingAreaStyleContext.get_property('min-width', Gtk.StateFlags.NORMAL);
+                let imageHeight = frameHeight;
+                let imageWidth = frameWidth;
+                
+                execAsync(['identify', '-format', '{"w":%w,"h":%h}', imagePath])
+                    .then((output) => {
+                        const imageDimensions = JSON.parse(output);
+                        const imageAspectRatio = imageDimensions.w / imageDimensions.h;
+                        const displayedAspectRatio = imageWidth / imageHeight;
+                        if (imageAspectRatio >= displayedAspectRatio) {
+                            imageWidth = imageHeight * imageAspectRatio;
+                        } else {
+                            imageHeight = imageWidth / imageAspectRatio;
+                        }
+                        
+                        self.attribute.pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(imagePath, imageWidth, imageHeight);
 
-            //             coverArtDrawingArea.set_size_request(frameWidth, frameHeight);
-            //             coverArtDrawingArea.connect("draw", (widget, cr) => {
-            //                 // Clip a rounded rectangle area
-            //                 cr.arc(borderRadius, borderRadius, borderRadius, Math.PI, 1.5 * Math.PI);
-            //                 cr.arc(frameWidth - borderRadius, borderRadius, borderRadius, 1.5 * Math.PI, 2 * Math.PI);
-            //                 cr.arc(frameWidth - borderRadius, frameHeight - borderRadius, borderRadius, 0, 0.5 * Math.PI);
-            //                 cr.arc(borderRadius, frameHeight - borderRadius, borderRadius, 0.5 * Math.PI, Math.PI);
-            //                 cr.closePath();
-            //                 cr.clip();
-            //                 // Paint image as bg, centered
-            //                 Gdk.cairo_set_source_pixbuf(cr, self.attribute.pixbuf,
-            //                     frameWidth / 2 - imageWidth / 2,
-            //                     frameHeight / 2 - imageHeight / 2
-            //                 );
-            //                 cr.paint();
-            //             });
-            //         }).catch(print)
-            // },
+                        coverArtDrawingArea.set_size_request(frameWidth, frameHeight);
+                        coverArtDrawingArea.connect("draw", (widget, cr) => {
+                            cr.arc(borderRadius, borderRadius, borderRadius, Math.PI, 1.5 * Math.PI);
+                            cr.arc(frameWidth - borderRadius, borderRadius, borderRadius, 1.5 * Math.PI, 2 * Math.PI);
+                            cr.arc(frameWidth - borderRadius, frameHeight - borderRadius, borderRadius, 0, 0.5 * Math.PI);
+                            cr.arc(borderRadius, frameHeight - borderRadius, borderRadius, 0.5 * Math.PI, Math.PI);
+                            cr.closePath();
+                            cr.clip();
+                            
+                            Gdk.cairo_set_source_pixbuf(cr, self.attribute.pixbuf,
+                                frameWidth / 2 - imageWidth / 2,
+                                frameHeight / 2 - imageHeight / 2
+                            );
+                            cr.paint();
+                            return false;
+                        });
+                        coverArtDrawingArea.queue_draw();
+                    }).catch(print)
+            },
             'updateCover': (self) => {
-                // const player = Mpris.getPlayer(); // Maybe no need to re-get player.. can't remember why I had this
-                // Player closed
-                // Note that cover path still remains, so we're checking title
                 if (!player || player.trackTitle == "" || !player.coverPath) {
-                    self.css = `background-image: none;`; // CSS image
+                    self.css = `background-image: none;`;
                     App.applyCss(`${COMPILED_STYLE_DIR}/style.css`);
                     return;
                 }
 
                 const coverPath = player.coverPath;
                 const stylePath = `${player.coverPath}${darkMode.value ? '' : '-l'}${COVER_COLORSCHEME_SUFFIX}`;
-                if (player.coverPath == lastCoverPath) { // Since 'notify::cover-path' emits on cover download complete
+                if (player.coverPath == lastCoverPath) {
                     Utils.timeout(200, () => {
-                        // self.attribute.showImage(self, coverPath);
-                        self.css = `background-image: url('${coverPath}');`; // CSS image
+                        self.attribute.showImage(self, coverPath);
+                        self.css = `background-image: url('${coverPath}');`;
                     });
                 }
                 lastCoverPath = player.coverPath;
 
-                // If a colorscheme has already been generated, skip generation
                 if (fileExists(stylePath)) {
-                    // self.attribute.showImage(self, coverPath)
-                    self.css = `background-image: url('${coverPath}');`; // CSS image
+                    self.attribute.showImage(self, coverPath)
+                    self.css = `background-image: url('${coverPath}');`;
                     App.applyCss(stylePath);
                     return;
                 }
 
-                // Generate colors
                 execAsync(['bash', '-c',
                     `${App.configDir}/scripts/color_generation/generate_colors_material.py --path '${coverPath}' --mode ${darkMode.value ? 'dark' : 'light'} > ${GLib.get_user_state_dir()}/ags/scss/_musicmaterial.scss`])
                     .then(() => {
-                        exec(`wal -i "${player.coverPath}" -n -t -s -e -q ${darkMode.value ? '' : '-l'}`)
+                        exec(`wal -i "${player.coverPath}" -n -t -s -e -q ${darkMode.value ? '' : '-l'}`);
                         exec(`cp ${GLib.get_user_cache_dir()}/wal/colors.scss ${GLib.get_user_state_dir()}/ags/scss/_musicwal.scss`);
                         exec(`sass -I "${GLib.get_user_state_dir()}/ags/scss" -I "${App.configDir}/scss/fallback" "${App.configDir}/scss/_music.scss" "${stylePath}"`);
                         Utils.timeout(200, () => {
-                            // self.attribute.showImage(self, coverPath)
-                            self.css = `background-image: url('${coverPath}');`; // CSS image
+                            self.attribute.showImage(self, coverPath);
+                            self.css = `background-image: url('${coverPath}');`;
                         });
                         App.applyCss(`${stylePath}`);
                     })
                     .catch(print);
             },
         },
-        setup: (self) => self
-            .hook(player, (self) => {
-                self.attribute.updateCover(self);
-            }, 'notify::cover-path')
-        ,
+        setup: (self) => self.hook(player, (self) => {
+            self.attribute.updateCover(self);
+        }, 'notify::cover-path'),
     });
+
     return Box({
         ...rest,
         className: 'osd-music-cover',
@@ -235,8 +228,8 @@ const CoverArt = ({ player, ...rest }) => {
                 overlays: [realCoverArt],
             })
         ],
-    })
-}
+    });
+};
 
 const TrackControls = ({ player, ...rest }) => Widget.Revealer({
     revealChild: false,
@@ -362,34 +355,147 @@ const PlayState = ({ player }) => {
     });
 }
 
+const CavaVisualizer = () => {
+    const bars = Array(20).fill(0).map(() => Widget.Box({
+        className: 'cava-bar cava-bar-low',
+        hpack: 'center',
+        vpack: userOptions.asyncGet().ipod.visualizer.mode || 'center',
+        hexpand: true,
+    }));
+
+    let cavaHook = null;
+    let visualizer = null;
+
+    const startCava = () => {
+        if (cavaHook || !visualizer) return;
+        CavaService.start();
+        
+        const updateBars = () => {
+            const output = CavaService.output;
+            if (!output || typeof output !== 'string') return;
+            
+            const values = output.split('');
+            const step = Math.floor(values.length / bars.length);
+            
+            bars.forEach((bar, i) => {
+                const value = values[i * step]?.charCodeAt(0) - 9601 || 0;
+                const height = Math.max(1, value * 10);
+                
+                const intensity = value > 2 ? 'high' : value > 0.5 ? 'med' : 'low';
+                bar.className = `cava-bar cava-bar-${intensity}`;
+                bar.css = `
+                    min-height: ${height}px;
+                    min-width: 8px;
+                    border-radius: 4px;
+                `;
+            });
+        };
+        
+        cavaHook = CavaService.connect('output-changed', updateBars);
+    };
+
+    const stopCava = () => {
+        if (!cavaHook) return;
+        
+        try {
+            CavaService.stop();
+            if (cavaHook > 0) {
+                CavaService.disconnect(cavaHook);
+            }
+        } catch (e) {}
+        
+        cavaHook = null;
+        
+        bars.forEach(bar => {
+            bar.className = 'cava-bar cava-bar-low';
+            bar.css = `
+                min-height: 1px;
+                min-width: 8px;
+                border-radius: 4px;
+            `;
+        });
+    };
+
+    const checkAndUpdateCava = () => {
+        const player = Mpris.getPlayer();
+        const shouldRun = showMusicControls.value && player?.playBackStatus === 'Playing';
+        
+        if (shouldRun) {
+            startCava();
+        } else {
+            stopCava();
+        }
+    };
+
+    return Widget.Box({
+        className: 'cava-visualizer',
+        spacing: 4,
+        children: bars,
+        setup: (self) => {
+            visualizer = self;
+            
+            self.hook(showMusicControls, checkAndUpdateCava);
+            self.hook(Mpris, checkAndUpdateCava);
+            
+            Utils.timeout(1000, checkAndUpdateCava);
+            
+            self.connect('destroy', () => {
+                stopCava();
+                visualizer = null;
+            });
+            
+            self.connect('unrealize', () => {
+                stopCava();
+                visualizer = null;
+            });
+        },
+    });
+};
 const MusicControlsWidget = (player) => Box({
-    className: 'osd-music spacing-h-20 test',
+    className: 'osd-music spacing-h-20 ',
+    css:`min-height: 9.5rem;`,
     children: [
-        // CoverArt({ player: player, vpack: 'center' }),
-        Box({
-            vertical: true,
-            className: 'spacing-v-5 osd-music-info',
-            children: [
+        Widget.Overlay({
+            child: Box({
+                className: 'cava-container',
+                hexpand: true,
+                vexpand: true,
+                children: [CavaVisualizer()],
+            }),
+            overlays: [
                 Box({
-                    vertical: true,
-                    vpack: 'center',
-                    hexpand: true,
+                    spacing: 10,
                     children: [
-                        TrackTitle({ player: player }),
-                        TrackArtists({ player: player }),
-                    ]
+                        CoverArt({ player: player }),
+                        Box({
+                            vertical: true,
+                            className: 'spacing-v-5 osd-music-info',
+                            children: [
+                                Box({
+                                    vertical: true,
+                                    vpack: 'center',
+                                    hexpand: true,
+                                    children: [
+                                        TrackTitle({ player: player }),
+                                        TrackArtists({ player: player }),
+                                    ]
+                                }),
+                                Box({ vexpand: true }),
+                                Box({
+                                    className: 'spacing-h-10',
+                                    setup: (box) => {
+                                        box.pack_start(TrackControls({ player: player }), false, false, 0);
+                                        box.pack_end(PlayState({ player: player }), false, false, 0);
+                                        if(hasPlasmaIntegration || player.busName.startsWith('org.mpris.MediaPlayer2.chromium')) 
+                                            box.pack_end(TrackTime({ player: player }), false, false, 0)
+                                    }
+                                })
+                            ]
+                        })
+                    ],
                 }),
-                Box({ vexpand: true }),
-                Box({
-                    className: 'spacing-h-10',
-                    setup: (box) => {
-                        box.pack_start(TrackControls({ player: player }), false, false, 0);
-                        box.pack_end(PlayState({ player: player }), false, false, 0);
-                        if(hasPlasmaIntegration || player.busName.startsWith('org.mpris.MediaPlayer2.chromium')) box.pack_end(TrackTime({ player: player }), false, false, 0)
-                        // box.pack_end(TrackSource({ vpack: 'center', player: player }), false, false, 0);
-                    }
-                })
-            ]
+              
+            ],
         })
     ]
 })
@@ -398,6 +504,9 @@ export default () => Revealer({
     transition: 'slide_down',
     transitionDuration: userOptions.asyncGet().animations.durationLarge,
     revealChild: false,
+    setup: (self) => self.hook(showMusicControls, () => {
+        self.revealChild = showMusicControls.value;
+    }),
     child: Box({
         children: Mpris.bind("players")
             .as(players => players.map((player) => (isRealPlayer(player) ? MusicControlsWidget(player) : null)))

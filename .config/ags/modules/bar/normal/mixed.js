@@ -133,25 +133,33 @@ export default () => {
         })]
     });
 
-    const trackTitle = Label({
-        hexpand: true,
-        className: 'txt-smallie bar-music-txt',
-        truncate: 'end',
-        maxWidthChars: 1,
-        setup: (self) => {
-            const update = () => {
-                const mpris = Mpris.getPlayer('');
-                if (mpris) {
-                    self.label = `${trimTrackTitle(mpris.trackTitle)} • ${mpris.trackArtists.join(', ')}`;
-                } else {
-                    self.label = getString('No media');
-                }
-            };
-            self.hook(Mpris, update, 'player-changed');
-            self.hook(Mpris, update, 'changed');
-        },
-    });
-
+   const trackTitle = Label({
+       hexpand: true,
+       className: 'txt-smallie bar-music-txt',
+       truncate: 'end',
+       maxWidthChars: 12,
+       setup: (self) => {
+           const update = () => {
+               const mpris = Mpris.getPlayer('');
+               if (mpris) {
+                   const trackTitle = mpris.trackTitle;
+                   const trackArtists = mpris.trackArtists || [];
+                   
+                   // Ensure we handle empty or undefined track titles and artists gracefully
+                   const title = trimTrackTitle(trackTitle) || getString('');
+                   const artists = trackArtists.length ? trackArtists.join(', ') : getString('Unknown artist');
+   
+                   self.label = `${title}`;
+               } else {
+                   self.label = getString('No media');
+               }
+           };
+   
+           // Hook into MPRIS signals to update the track title when necessary
+           self.hook(Mpris, update, 'player-changed');
+           self.hook(Mpris, update, 'changed');
+       },
+   });
     const musicStuff = Box({
         className: 'spacing-h-10',
         hexpand: true,

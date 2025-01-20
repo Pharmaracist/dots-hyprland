@@ -3,7 +3,7 @@ import SystemTray from 'resource:///com/github/Aylur/ags/service/systemtray.js';
 const { Box, Icon, Button, Revealer } = Widget;
 const { Gravity } = imports.gi.Gdk;
 
-const SysTrayItem = (item, iconSize = 16) => item.id !== null ? Button({
+const SysTrayItem = (item, iconSize = userOptions.asyncGet().bar.traySize) => item.id !== null ? Button({
     className: 'bar-systray-item',
     child: Icon({
         hpack: 'center',
@@ -12,11 +12,17 @@ const SysTrayItem = (item, iconSize = 16) => item.id !== null ? Button({
     setup: (self) => self
         .hook(item, (self) => self.tooltipMarkup = item['tooltip-markup'])
     ,
-    onPrimaryClick: (_, event) => item.activate(event),
+    onPrimaryClick: async (_, event) => {
+        try {
+            await item.activate(event); // Assuming activate returns a promise
+        } catch (error) {
+            console.error('Error activating tray item:', error);
+        }
+    },
     onSecondaryClick: (btn, event) => item.menu.popup_at_widget(btn, Gravity.SOUTH, Gravity.NORTH, null),
 }) : null;
 
-export const Tray = ({ iconSize = 26, ...props } = {}) => {
+export const Tray = ({ iconSize = userOptions.asyncGet().bar.traySize, ...props } = {}) => {
     const trayContent = Box({
         className: 'margin-right-5 spacing-h-15',
         setup: (self) => self

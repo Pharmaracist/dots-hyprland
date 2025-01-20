@@ -1,23 +1,12 @@
 const { Gtk } = imports.gi;
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import { SideModule } from "./../../.commonwidgets/sidemodule.js";
 import Battery from "resource:///com/github/Aylur/ags/service/battery.js";
-export const FocusOptionalWorkspaces = async () => {
-  try {
-    return (await import("../focus/workspaces_hyprland.js")).default();
-  } catch {
-    try {
-      return (await import("../focus/workspaces_sway.js")).default();
-    } catch {
-      return null;
-    }
-  }
-};
-export const FocusBar = Widget.CenterBox({ //focus mode
+import FocusOptionalWorkspaces from "../focus/workspaces_hyprland.js";
+export const FocusBar = Widget.CenterBox({
   className: "bar-bg-focus",
-  css:`min-height:1.8rem`,
+  css: `min-height:1.8rem`,
   startWidget: Widget.EventBox({
-    css:`min-width:5rem`,
+    css: `min-width:5rem`,
     onPrimaryClick: () => {
       App.toggleWindow("sideleft");
     },
@@ -25,12 +14,9 @@ export const FocusBar = Widget.CenterBox({ //focus mode
   centerWidget: Widget.Box({
     className: "spacing-h-4",
     children: [
-      SideModule([]),
       Widget.Box({
-        homogeneous: true,
         children: [await FocusOptionalWorkspaces()],
       }),
-      SideModule([]),
     ],
   }),
   endWidget: Widget.EventBox({

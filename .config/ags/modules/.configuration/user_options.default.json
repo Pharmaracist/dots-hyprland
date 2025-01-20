@@ -1,6 +1,98 @@
 {
+  "roundingsCss NOT AN OPTION!!":{
+    "rounding_verysmall": "8",
+    "rounding_small": "13",
+    "rounding_mediumsmall": "15",
+    "rounding_medium": "19",
+    "rounding_mediumlarge": "22",
+    "rounding_large": "27"
+  },
+  "indicators":{
+    "enabled":true
+  },
   "wallselect": {
-    "enabled": true
+    "enabled": true,
+    "wallpaperFolder":"/Pictures/wallpapers",
+    "wallpaperLimit":100
+  },
+  "session":{
+    "enabled":true
+  },
+  "ipod": {
+    "enabled": false,
+    "widget": {
+        "margin": "8",
+        "minHeight": 270,
+        "borderRadius": 22,
+        "padding": "0",
+        "borderWidth": 0,
+        "borderOpacity": 0,
+        "extraCss": ""
+    },
+    "background": {
+        "defaultOpacity": 0.2,
+        "hiddenOpacity": 1,
+        "blurAmount": "0x3",
+        "imageQuality": 80,
+        "imageResize": 60,
+        "transitionMs": 400,
+        "enableBlur": true
+    },
+    "coverArt": {
+        "size": 230,
+        "borderRadius": 12
+    },
+    "visualizer": {
+        "margin": "0",
+        "mode": "end",
+        "padding": "0",
+        "barSpacing": 2.5,
+        "barMinWidth": 20,
+        "barMaxHeight": 40,
+        "barNumber": 63,
+        "heightMultiplier": 2,
+        "transitionMs": 80,
+        "colors": {
+            "low": "rgba(255,255,255,0)",
+            "medium": "rgba(255,255,255,0.6)",
+            "high": "rgba(255,255,255,1)",
+            "heightThresholds": {
+                "low": 1,
+                "medium": 2.2,
+                "high": 4
+            }
+        }
+    },
+    "trackInfo": {
+        "titleSize": "3rem",
+        "artistSize": "2rem",
+        "titleOpacity": 0.9,
+        "artistOpacity": 0.8,
+        "maxChars": 100
+    },
+    "controls": {
+        "buttonSize": "1.8rem",
+        "otherButtonSize": "1.4rem",
+        "spacing": 10,
+        "iconOpacity": 0.8
+    },
+    "volume": {
+        "iconSize": 36,
+        "progressSize": 40,
+        "textSize": "1rem"
+    },
+    "animations": {
+        "showHideMs": 200,
+        "updateDelay": 200
+    }
+},
+  "cheatshhet":{
+  "enabled":true,
+  "modules":{
+    "periodicTable":"true",
+    "cheats":"true"
+  },
+  "note":"todo Cheatsheet"
   },
   "desktopBackground": {
     "enabled": true,
@@ -103,6 +195,7 @@
     "preferredPlayer": "plasma-browser-integration"
   },
   "overview": {
+    "enabled": true,
     "scale": 0.18,
     "numOfRows": 2,
     "numOfCols": 5,
@@ -160,6 +253,7 @@
       "repoName": "dots-hyprland"
     },
     "ai": {
+      "logo": "openai-symbolic",
       "__custom": [
         "extraGptModels"
       ],
@@ -178,12 +272,6 @@
       "onSearch": "gemini",
       "initMessages": []
     },
-    "image": {
-      "columns": 2,
-      "batchCount": 20,
-      "allowNsfw": false,
-      "saveInFolderByTags": false
-    },
     "pages": {
       "order": [
         "apis",
@@ -193,6 +281,7 @@
       "apis": {
         "order": [
           "gpt",
+          "quran",
           "translater"
         ]
       }
@@ -234,7 +323,13 @@
     "interval": 5000,
     "dateFormatLong": "%A, %d/%m",
     "dateInterval": 5000,
-    "dateFormat": "%d/%m"
+    "dateFormat": "%d/%m",
+    "verticalCLock":{
+      "hours":"%I",
+      "minutes":"%M",
+      "seconds":"%S",
+      "dayTime":"%p"
+    }
   },
   "weather": {
     "city": "Cairo",
@@ -340,8 +435,22 @@
   },
   "bar": {
     "modes": "2",
-    "wallpaper_folder": "~/Pictures/Wallpapers",
     "position": "top",
+    "traySize": 32,
+    "floatingWidth": 50 ,
+    "floatingElevation":1,
+    "verticalBar":{
+      "position":"right"
+    },
+    "pinnedApps": [
+      "windsurf",
+      "heroic",
+      "io.bassi.Amberol",
+      "nwg-look",
+      "org.gnome.Nautilus",
+      "spotify-launcher",
+      "steam"
+    ],
     "elements": {
       "showWindowTitle": true,
       "showWorkspaces": true,

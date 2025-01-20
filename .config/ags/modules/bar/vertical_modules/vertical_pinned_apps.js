@@ -13,7 +13,7 @@ const AppButton = ({ icon, name, ...rest }) => {
             children: [
                 Widget.Icon({
                     icon: icon || '',
-                    size: 22,
+                    size: 24,
                 }),
             ],
         }),
@@ -24,11 +24,12 @@ const AppButton = ({ icon, name, ...rest }) => {
 };
 export default () => {
     const pinnedApps = userOptions.asyncGet().bar?.pinnedApps || [];
-    
     return Box({
         hexpand: true,
         hpack: 'center',
-        className: 'bar-pinned-apps spacing-h-5',
+        spacing:8,
+        orientation:Gtk.Orientation.VERTICAL,
+        className: 'bar-pinned-apps spacing-v-5',
         children: pinnedApps.map(appId => {
             const app = Applications.list.find(a => 
                 a.desktop?.toLowerCase().includes(appId.toLowerCase()) ||

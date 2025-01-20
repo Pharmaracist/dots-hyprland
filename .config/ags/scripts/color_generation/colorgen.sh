@@ -44,7 +44,26 @@ else
     backend=$(cat "$STATE_DIR/user/colorbackend.txt") # either "" or "-l"
 fi
 
+# Get the color mode
+COLORMODE_FILE_DIR="/tmp/ags/colormode"
+if [ -f "$COLORMODE_FILE_DIR" ]; then
+    colormode=$(sed -n '1p' "$COLORMODE_FILE_DIR")
+    if [[ "$colormode" == "light" ]]; then
+        lightdark="light"
+    else
+        lightdark="dark"
+    fi
+fi
+
 cd "$CONFIG_DIR/scripts/" || exit
+
+# Store the image source if it's an image
+if [[ ! "$1" = "#"* ]]; then # this is an image
+    # Store the image path
+    echo "$1" > "$STATE_DIR/user/current_wallpaper.txt"
+fi
+
+# Then run our color generation
 if [[ "$1" = "#"* ]]; then # this is a color
     color_generation/generate_colors_material.py --color "$1" \
     --mode "$lightdark" --scheme "$materialscheme" --transparency "$transparency" \
@@ -92,3 +111,5 @@ elif [ "$backend" = "pywal" ]; then
         color_generation/applycolor.sh
     fi
 fi
+matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" >&2
+exit 

@@ -10,14 +10,6 @@ import { init as i18n_init, getString } from './i18n/i18n.js'
 i18n_init()
 Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons`);
 
-// Global vars for external control (through keybinds)
-export const showMusicControls = Variable(false, {})
-export const showColorScheme = Variable(false, {})
-globalThis['openMusicControls'] = showMusicControls;
-globalThis['openColorScheme'] = showColorScheme;
-globalThis['mpris'] = Mpris;
-globalThis['getString'] = getString
-
 // Read initial mode from gsettings
 const SCHEMA_ID = 'org.gnome.shell.extensions.ags';
 const KEY_BAR_MODE = 'bar-mode';
@@ -42,6 +34,16 @@ export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
     settings.set_string(KEY_BAR_MODE, mode);
 }
 
+// Global vars for external control (through keybinds)
+export const showMusicControls = Variable(false, {})
+export const showColorScheme = Variable(false, {})
+globalThis['openMusicControls'] = showMusicControls;
+globalThis['openColorScheme'] = showColorScheme;
+globalThis['mpris'] = Mpris;
+globalThis['getString'] = getString
+globalThis['currentShellMode'] = currentShellMode;
+globalThis['updateMonitorShellMode'] = updateMonitorShellMode;
+
 // Watch for monitor changes and update modes
 Hyprland.connect('notify::monitors', () => {
     const currentModes = currentShellMode.value;
@@ -61,31 +63,6 @@ globalThis['cycleMode'] = () => {
     const nextMode = (currentNum + 1) % 5;
     updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
 };
-
-globalThis['currentMode'] = currentShellMode;
-
-// Sidebar width control
-export const sidebarWidth = Variable({
-    left: 350,
-    right: 350,
-});
-
-export const setSidebarWidth = (side, width) => {
-    const validSides = ['left', 'right'];
-    if (!validSides.includes(side)) return;
-    
-    const window = App.getWindow(`side${side}`);
-    if (!window) return;
-
-    sidebarWidth.value = {
-        ...sidebarWidth.value,
-        [side]: width
-    };
-};
-
-// Make functions available globally
-globalThis['sidebarWidth'] = sidebarWidth;
-globalThis['setSidebarWidth'] = setSidebarWidth;
 
 // Window controls
 const range = (length, start = 1) => Array.from({ length }, (_, i) => i + start);

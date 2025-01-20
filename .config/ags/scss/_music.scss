@@ -1,7 +1,7 @@
 @import 'material';
 @import 'musicmaterial';
 @import './wal';
-// @import 'musicwal';
+@import 'musicwal';
 @import './colors';
 @import './lib_mixins';
 $music_transparentize_amount: 0.3;
@@ -67,6 +67,9 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     min-height: 7.5rem;
     background-size: cover;
     background-position: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
+                0 6px 6px rgba(0, 0, 0, 0.23),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .osd-music-info {
@@ -153,4 +156,35 @@ $onSecondaryContainer: mix($color7, $color2, 90%);
     @include icon-material;
     font-size: 1.364rem;
     margin: -0.1rem 0rem;
+}
+.cava-container {
+    min-height: 100px;
+    padding: 5px;
+    border-radius: 12px;
+    
+    .cava-visualizer {
+        font-family: techfont;
+        font-size: 24px;
+        color: $primary;
+        border-radius: 12px;
+        padding: 10px;
+        
+        .cava-bar {
+            background-color: mix($secondary, $background, 70%);
+            border-radius: 4px;
+            transition: all 80ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            &.cava-bar-low {
+                background-color: mix($secondary, $background, 70%);
+            }
+            
+            &.cava-bar-med {
+                background-color: mix($primary, $background, 80%);
+            }
+            
+            &.cava-bar-high {
+                background-color: mix($primary, $background, 95%);
+            }
+        }
+    }
 }

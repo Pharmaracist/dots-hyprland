@@ -119,7 +119,7 @@ const GPTInfo = () => {
     const openAiLogo = Icon({
         hpack: 'center',
         className: 'sidebar-chat-welcome-logo',
-        icon: `openai-symbolic`,
+        icon: userOptions.asyncGet().sidebar.ai.logo,
     });
     return Box({
         vertical: true,
@@ -130,7 +130,7 @@ const GPTInfo = () => {
                 className: 'txt txt-title-small sidebar-chat-welcome-txt',
                 wrap: true,
                 justify: Gtk.Justification.CENTER,
-                label: `Assistant (GPTs)`,
+                label: `Assistant`,
             }),
             Box({
                 className: 'spacing-h-5',
@@ -140,13 +140,16 @@ const GPTInfo = () => {
                         className: 'txt-smallie txt-subtext',
                         wrap: true,
                         justify: Gtk.Justification.CENTER,
-                        label: getString('Provider shown above'),
+                        label: getString(`Powered by OpenRouter`),
                     }),
                     Button({
                         className: 'txt-subtext txt-norm icon-material',
-                        label: 'info',
-                        tooltipText: getString('Uses gpt-3.5-turbo.\nNot affiliated, endorsed, or sponsored by OpenAI.\n\nPrivacy: OpenAI claims they do not use your data\nwhen you use their API. Idk about others.'),
-                        setup: setupCursorHoverInfo,
+                        label: 'add',
+                        onClicked: () => {
+                            Utils.execAsync(['bash', '-c', `xdg-open https://openrouter.ai/models &`]);
+                        },
+                        tooltipText: 'get new models',
+                        setup: setupCursorHover,
                     }),
                 ]
             }),

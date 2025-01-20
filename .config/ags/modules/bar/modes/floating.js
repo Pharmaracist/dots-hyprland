@@ -1,46 +1,23 @@
 const { Gtk } = imports.gi;
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import WindowTitle from "../normal/spaceleft.js";
-import Music from "../normal/mixed.js";
-import System from "../normal/system.js";
 import Indicators from "../normal/spaceright.js";
-import avatar from "../modules/avatar.js";
-import { SideModule } from "../../.commonwidgets/sidemodule.js";
 import ScrolledModule from "../../.commonwidgets/scrolledmodule.js";
 import Clock from "../modules/clock.js";
-import BatteryScaleModule from "../normal/battery_scale.js";
-const NormalOptionalWorkspaces = async () => {
-  try {
-    return (await import("../normal/workspaces_hyprland.js")).default();
-  } catch {
-    try {
-      return (await import("../normal/workspaces_sway.js")).default();
-    } catch {
-      return null;
-    }
-  }
-};
-
-const FocusOptionalWorkspaces = async () => {
-  try {
-    return (await import("../focus/workspaces_hyprland.js")).default();
-  } catch {
-    try {
-      return (await import("../focus/workspaces_sway.js")).default();
-    } catch {
-      return null;
-    }
-  }
-};
+import BatteryScaleModule from "../modules/battery_scale.js";
+import NormalOptionalWorkspaces  from "../normal/workspaces_hyprland.js";
+import media from "../modules/media.js";
+import Battery from "../modules/battery.js";
+import FocusOptionalWorkspaces  from "../focus/workspaces_hyprland.js";
 const expand = () => Widget.Box({ hexpand: true, css: "min-height:0.5rem" });
 
 export const FloatingBar = Widget.CenterBox({
   className: "bar-floating",
-  css: "min-height:2.4rem;padding:0.3rem 0",
+  css: `margin: ${userOptions.asyncGet().bar.floatingElevation}rem ${userOptions.asyncGet().bar.floatingWidth}rem;min-height:2.5rem;padding:0.3rem 0`,
   startWidget: Widget.Box({
     css: "margin-left:1.8rem;",
     children: [
-      ScrolledModule({
+      Battery(),
+	    ScrolledModule({
         children: [
           ...(userOptions.asyncGet().bar.elements.showWorkspaces ? [await NormalOptionalWorkspaces()] : []),
           ...(userOptions.asyncGet().bar.elements.showWorkspaces ? [await FocusOptionalWorkspaces()] : []),
@@ -49,9 +26,12 @@ export const FloatingBar = Widget.CenterBox({
     ],
   }),
   centerWidget: ScrolledModule({
+    hpack:"center",
+    hexpand: true,
     children: [
       ...(userOptions.asyncGet().bar.elements.showClock ? [Clock()] : []),
       expand(),
+	    media(),
       Widget.Box({ children: [expand(),BatteryScaleModule()] }),
     ],
   }),
