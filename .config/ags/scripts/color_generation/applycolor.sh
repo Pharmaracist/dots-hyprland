@@ -6,8 +6,8 @@ XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 CONFIG_DIR="$XDG_CONFIG_HOME/ags"
 CACHE_DIR="$XDG_CACHE_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
-
-term_alpha=90 #Set this to < 100 make all your terminals transparent
+colormodefile="$STATE_DIR/user/colormode.txt"
+term_alpha=85 #Set this to < 100 make all your terminals opaque
 # sleep 0 # idk i wanted some delay or colors dont get applied properly
 if [ ! -d "$CACHE_DIR"/user/generated ]; then
     mkdir -p "$CACHE_DIR"/user/generated
@@ -19,11 +19,16 @@ colorstrings=''
 colorlist=()
 colorvalues=()
 
-# wallpath=$(swww query | head -1 | awk -F 'image: ' '{print $2}')
-# wallpath_png="$CACHE_DIR/user/generated/hypr/lockscreen.png"
-# convert "$wallpath" "$wallpath_png"
-# wallpath_png=$(echo "$wallpath_png" | sed 's/\//\\\//g')
-# wallpath_png=$(sed 's/\//\\\\\//g' <<< "$wallpath_png")
+
+# Fetch second line from color mode file
+secondline=$(sed -n '2p' "$colormodefile")
+
+# Determine terminal opacity based on the second line
+if [[ "$secondline" == *"transparent"* ]]; then
+    term_alpha=85 # Set for transparent background
+else
+    term_alpha=100 # Default to fully opaque
+fi
 
 transparentize() {
   local hex="$1"
@@ -145,7 +150,7 @@ apply_gtk() { # Using gradience-cli
 
 apply_ags() {
     ags run-js "handleStyles(false);"
-    ags run-js 'openColorScheme.value = true; Utils.timeout(2000, () => openColorScheme.value = false);'
+    # ags run-js 'openColorScheme.value = true; Utils.timeout(2000, () => openColorScheme.value = false);'
 }
 
 
