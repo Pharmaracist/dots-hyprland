@@ -1,6 +1,6 @@
 const { Gtk, GLib } = imports.gi;
 import Widget from "resource:///com/github/Aylur/ags/widget.js";
-import { currentShellMode } from "../../variables.js";
+import { currentShellMode, barPosition } from "../../variables.js";
 import { RoundedCorner } from "../.commonwidgets/cairo_roundedcorner.js";
 import { enableClickthrough } from "../.widgetutils/clickthrough.js";
 import { NormalBar } from "./modes/normal.js";
@@ -11,6 +11,8 @@ import { AnoonBar } from "./modes/anoon.js";
 import { DwmBar } from "./modes/dwm.js";
 import { VerticalBar } from "./modes/vertical.js";
 import { VerticalBarPinned } from "./modes/verticalPinned.js";
+import userOptions from '../.configuration/user_options.js';
+
 // Mode configuration:
 // [Component, ShowCorners, Description]
 const horizontalModes = new Map([
@@ -32,8 +34,7 @@ const verticalModes = new Map([
    // Floating Vertical bar
   ["6", [VerticalBar, false, "Vertical Bar"]],
    // Pinned Corners Vertical bar
-  ["7", [VerticalBarPinned, false, "Vertical Bar Pinned"]],
- 
+  ["7", [VerticalBarPinned, true, "Vertical Bar Pinned"]],
 ]);
 
 // Combined modes for easy lookup
@@ -41,52 +42,96 @@ const modes = new Map([...horizontalModes, ...verticalModes]);
 
 const shouldShowCorners = (monitor) => {
   const mode = currentShellMode.value[monitor] || "1";
-  return modes.get(mode)?.[1] ?? false;
+  const shouldShow = modes.get(mode)?.[1] ?? false;
+  return shouldShow;
 };
 
+const getValidPosition = (mode, currentPos) => {
+  const isVerticalMode = verticalModes.has(mode);
+  
+  if (isVerticalMode) {
+    return (currentPos === 'left' || currentPos === 'right') ? currentPos : 'left';
+  } else {
+    return (currentPos === 'top' || currentPos === 'bottom') ? currentPos : 'top';
+  }
+};
 const createCorner = (monitor, side) => {
-  const opts = userOptions.asyncGet();
-  return Widget.Window({
+  const getCornerStyle = (pos, isVert) => {
+    if (isVert) {
+      return pos === "left" 
+        ? side === "left" ? "topleft" : "bottomleft"
+        : side === "left" ? "topright" : "bottomright";
+    }
+    return pos === "top"
+      ? side === "left" ? "topleft" : "topright"
+      : side === "left" ? "bottomleft" : "bottomright";
+  };
+
+  const cornerWindow = Widget.Window({
     monitor,
     name: `barcorner${side[0]}${monitor}`,
     layer: "top",
-    anchor: [opts.bar.position, side],
+    anchor: [
+      getValidPosition(currentShellMode.value[monitor] || "1", barPosition.value),
+      verticalModes.has(currentShellMode.value[monitor] || "1")
+        ? side === "left" ? "top" : "bottom"
+        : side
+    ],
     exclusivity: "normal",
     visible: shouldShowCorners(monitor),
     child: RoundedCorner(
-      `${opts.bar.position === "top" ? "top" : "bottom"}${side}`,
-      { className: "corner" },
+      getCornerStyle(
+        getValidPosition(currentShellMode.value[monitor] || "1", barPosition.value),
+        verticalModes.has(currentShellMode.value[monitor] || "1")
+      ),
+      { className: "corner" }
     ),
     setup: (self) => {
       enableClickthrough(self);
-      self.hook(currentShellMode, () => {
-        self.visible = shouldShowCorners(monitor);
-      });
+      
+      const updateCorner = () => {
+        const mode = currentShellMode.value[monitor] || "1";
+        const pos = getValidPosition(mode, barPosition.value);
+        const isVert = verticalModes.has(mode);
+        const shouldShow = shouldShowCorners(monitor);
+
+        // First update visibility
+        if (shouldShow) {
+          self.child = RoundedCorner(getCornerStyle(pos, isVert), { className: "corner" });
+          self.anchor = [pos, isVert ? side === "left" ? "top" : "bottom" : side];
+          self.show_all();
+        }
+        self.visible = shouldShow;
+      };
+      
+      self.hook(currentShellMode, updateCorner);
+      self.hook(barPosition, updateCorner);
     },
   });
+
+  return cornerWindow;
 };
 
-const getAnchor = (monitor, mode, barPosition) => {
-  // Vertical modes (6-10)
-  if (verticalModes.has(mode)) {
-    return [
-      userOptions.asyncGet().bar.verticalBar?.position || "left",
-      "top",
-      "bottom",
-    ];
+const getAnchor = (monitor, mode) => {
+  const currentPos = barPosition.value;
+  const position = getValidPosition(mode, currentPos);
+  
+  if (position !== currentPos) {
+    barPosition.value = position;
   }
-  // Default horizontal modes
-  return [barPosition, "left", "right"];
+  
+  return verticalModes.has(mode) 
+    ? [position, "top", "bottom"]
+    : [position, "left", "right"];
 };
 
 export const BarCornerTopleft = (monitor = 0) => createCorner(monitor, "left");
-export const BarCornerTopright = (monitor = 0) =>
-  createCorner(monitor, "right");
+export const BarCornerTopright = (monitor = 0) => createCorner(monitor, "right");
 
 export const Bar = async (monitor = 0) => {
   const opts = userOptions.asyncGet();
   const mode = currentShellMode.value[monitor] || "1";
-  const barPosition = opts.bar.position;
+  console.log(`Creating bar: monitor=${monitor}, mode=${mode}`);
 
   const corners = ["left", "right"].map((side) => createCorner(monitor, side));
 
@@ -116,14 +161,18 @@ export const Bar = async (monitor = 0) => {
   const bar = Widget.Window({
     monitor,
     name: `bar${monitor}`,
-    anchor: getAnchor(monitor, mode, barPosition),
+    anchor: getAnchor(monitor, mode),
     exclusivity: "exclusive",
     visible: true,
     child: stack,
     setup: (self) => {
       self.hook(currentShellMode, (w) => {
         const newMode = currentShellMode.value[monitor] || "1";
-        w.anchor = getAnchor(monitor, newMode, barPosition);
+        w.anchor = getAnchor(monitor, newMode);
+      });
+      self.hook(barPosition, (w) => {
+        const currentMode = currentShellMode.value[monitor] || "1";
+        w.anchor = getAnchor(monitor, currentMode);
       });
     },
   });

@@ -13,6 +13,7 @@ Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons`);
 // Read initial mode from gsettings
 const SCHEMA_ID = 'org.gnome.shell.extensions.ags';
 const KEY_BAR_MODE = 'bar-mode';
+const KEY_BAR_POSITION = 'bar-position';
 const settings = new Gio.Settings({ schema_id: SCHEMA_ID });
 
 const getInitialMode = () => {
@@ -25,6 +26,7 @@ const getInitialMode = () => {
 
 // Initialize bar modes directly
 export const currentShellMode = Variable(getInitialMode());
+export const barPosition = Variable(settings.get_string(KEY_BAR_POSITION) || 'top');
 
 // Mode switching
 export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
@@ -34,35 +36,36 @@ export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
     settings.set_string(KEY_BAR_MODE, mode);
 }
 
+// Bar position toggle
+globalThis['toggleBarPosition'] = () => {
+    const currentMode = parseInt(currentShellMode.value[0]) || 0;
+    const isVerticalMode = currentMode >= 6;
+    
+    const currentPosition = barPosition.value;
+    let newPosition;
+    
+    if (isVerticalMode) {
+        // Vertical modes can only toggle between left and right
+        newPosition = currentPosition === 'left' ? 'right' : 'left';
+    } else {
+        // Horizontal modes can only toggle between top and bottom
+        newPosition = currentPosition === 'top' ? 'bottom' : 'top';
+    }
+    
+    settings.set_string(KEY_BAR_POSITION, newPosition);
+    barPosition.value = newPosition;
+};
+
 // Global vars for external control (through keybinds)
 export const showMusicControls = Variable(false, {})
 export const showColorScheme = Variable(false, {})
 globalThis['openMusicControls'] = showMusicControls;
 globalThis['openColorScheme'] = showColorScheme;
 globalThis['mpris'] = Mpris;
-globalThis['getString'] = getString
+globalThis['getString'] = getString;
 globalThis['currentShellMode'] = currentShellMode;
 globalThis['updateMonitorShellMode'] = updateMonitorShellMode;
-
-// Watch for monitor changes and update modes
-Hyprland.connect('notify::monitors', () => {
-    const currentModes = currentShellMode.value;
-    const newModes = {};
-    
-    // Keep existing modes for current monitors
-    Hyprland.monitors.forEach((_, index) => {
-        newModes[index] = currentModes[index];
-    });
-    
-    currentShellMode.value = newModes;
-});
-
-globalThis['cycleMode'] = () => {
-    const monitor = Hyprland.active.monitor.id || 0;
-    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
-    const nextMode = (currentNum + 1) % 5;
-    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
-};
+globalThis['barPosition'] = barPosition;
 
 // Window controls
 const range = (length, start = 1) => Array.from({ length }, (_, i) => i + start);
@@ -91,6 +94,26 @@ globalThis['closeEverything'] = () => {
     App.closeWindow('sideleft');
     App.closeWindow('sideright');
     App.closeWindow('overview');
+};
+
+// Watch for monitor changes and update modes
+Hyprland.connect('notify::monitors', () => {
+    const currentModes = currentShellMode.value;
+    const newModes = {};
+    
+    // Keep existing modes for current monitors
+    Hyprland.monitors.forEach((_, index) => {
+        newModes[index] = currentModes[index];
+    });
+    
+    currentShellMode.value = newModes;
+});
+
+globalThis['cycleMode'] = () => {
+    const monitor = Hyprland.active.monitor.id || 0;
+    const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
+    const nextMode = (currentNum + 1) % 5;
+    updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
 };
 
 // Force immediate update to ensure mode is set
