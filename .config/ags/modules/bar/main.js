@@ -27,7 +27,7 @@ const horizontalModes = new Map([
   // Anoon mode without corners
   ["4", [AnoonBar, false, "Anoon"]],
   // DWM mode WIP 🥲
-  ["5", [DwmBar, false, "DWM"]],	
+  ["5", [DwmBar, false, "DWM"]],
 ]);
 
 const verticalModes = new Map([
@@ -55,6 +55,7 @@ const getValidPosition = (mode, currentPos) => {
     return (currentPos === 'top' || currentPos === 'bottom') ? currentPos : 'top';
   }
 };
+
 const createCorner = (monitor, side) => {
   const getCornerStyle = (pos, isVert) => {
     if (isVert) {
@@ -131,7 +132,6 @@ export const BarCornerTopright = (monitor = 0) => createCorner(monitor, "right")
 export const Bar = async (monitor = 0) => {
   const opts = userOptions.asyncGet();
   const mode = currentShellMode.value[monitor] || "1";
-  console.log(`Creating bar: monitor=${monitor}, mode=${mode}`);
 
   const corners = ["left", "right"].map((side) => createCorner(monitor, side));
 
@@ -140,7 +140,7 @@ export const Bar = async (monitor = 0) => {
     try {
       children[key] = component;
     } catch (error) {
-      console.error(`Failed to add mode ${key}:`, error);
+      // Log removed
     }
   }
 
