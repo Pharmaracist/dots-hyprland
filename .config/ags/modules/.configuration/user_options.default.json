@@ -476,6 +476,21 @@
       "showMusic": true,
       "showBattery": true,
       "showAvatar": true
+    },
+    "systemMonitor": {
+      "ram": false,
+      "swap": false,
+      "cpu": {
+        "usage": true,
+        "temp": true
+      },
+      "fan": true,
+      "nvme": {
+        "temp": false
+      },
+      "disk": {
+        "root": false
+      }
     }
   }
 }

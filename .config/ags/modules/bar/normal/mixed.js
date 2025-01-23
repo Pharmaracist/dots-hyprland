@@ -36,7 +36,7 @@ const BarGroup = ({ child }) => Box({
     ]
 });
 
-const BarResource = (name, icon, command, circprogClassName = 'bar-batt-circprog', textClassName = 'txt-onSurfaceVariant', iconClassName = 'bar-batt') => {
+const BarResource = (name, icon, command, circprogClassName = 'bar-batt-circprog', textClassName = 'txt-onSurfaceVariant', iconClassName = 'bar-batt', unit = '%') => {
     const resourceCircProg = AnimatedCircProg({
         className: `${circprogClassName}`,
         vpack: 'center',
@@ -64,13 +64,13 @@ const BarResource = (name, icon, command, circprogClassName = 'bar-batt-circprog
                 }),
                 resourceLabel,
             ],
-            setup: (self) => self.poll(5000, () => {
+            setup: (self) => self.poll(3000, () => {
                 execAsync(['bash', '-c', command])
                     .then((output) => {
                         const value = Math.round(Number(output));
                         resourceCircProg.css = `font-size: ${value}px;`;
-                        resourceLabel.label = `${value}%`;
-                        widget.tooltipText = `${name}: ${value}%`;
+                        resourceLabel.label = `${value}${unit}`;
+                        widget.tooltipText = `${name}: ${value}${unit}`;
                     }).catch(print);
             }),
         })
@@ -206,15 +206,34 @@ export default () => {
                 css:`padding:0 0.8rem`,
                 // hexpand: true,
                 children: [
+                    ...(userOptions.asyncGet().bar.systemMonitor.ram ? [
                     BarResource(getString('RAM Usage'), 'memory', 
                         `LANG=C free | awk '/^Mem/ {printf("%.2f\\n", ($3/$2) * 100)}'`,
-                        'bar-ram-circprog', 'bar-ram-txt', 'bar-ram-icon'),
-                    BarResource('GPU Temperature', 'thermostat',
-                            `sensors | grep -i 'gpu' | awk '{print $2}' | sed 's/+//;s/°C//'`,
-                            'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon'),
+                        'bar-ram-circprog', 'bar-ram-txt', 'bar-ram-icon')] : []),
+                    ...(userOptions.asyncGet().bar.systemMonitor.swap ? [
+                    BarResource('Swap Usage', 'swap_horiz',
+                        `LANG=C free | awk '/^Swap/ {if($2==0) {print "0"} else {printf "%.1f", ($3/$2) * 100}}'`,
+                        'bar-ram-circprog', 'bar-ram-txt', 'bar-ram-icon')] : []),
+                    ...(userOptions.asyncGet().bar.systemMonitor.cpu?.temp ? [
+                    BarResource('CPU Temperature', 'thermostat',
+                        `LANG=C sensors coretemp-isa-0000 | grep "Core [0-9]" | awk '{sum+=$3} END {printf "%.0f", sum/NR}' | sed 's/+//;s/°C//'`,
+                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon', '°C')] : []), //avg temp for all cores
+                    ...(userOptions.asyncGet().bar.systemMonitor.fan ? [
+                    BarResource('Fan Speed', 'air',
+                        `LANG=C sensors dell_smm-isa-0000 | awk '/^fan1:/ {printf "%.0f", ($2/5100) * 100}'`,
+                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon')] : []),
+                    ...(userOptions.asyncGet().bar.systemMonitor.nvme?.temp ? [
+                    BarResource('NVMe Temp', 'storage',
+                        `LANG=C sensors nvme-pci-3d00 | awk '/^Composite:/ {print $2}' | sed 's/+//;s/°C//'`,
+                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon', '°C')] : []),
+                    ...(userOptions.asyncGet().bar.systemMonitor.disk?.root ? [
+                    BarResource('Root Usage', 'folder',
+                        `df -h / | awk 'NR==2 {print $5}' | sed 's/%//'`,
+                        'bar-ram-circprog', 'bar-ram-txt', 'bar-ram-icon')] : []),
+                    ...(userOptions.asyncGet().bar.systemMonitor.cpu?.usage ? [
                     BarResource(getString('CPU Usage'), 'settings_motion_mode',
                         `LANG=C top -bn1 | grep Cpu | sed 's/\\,/\\./g' | awk '{print $2}'`,
-                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon'),
+                        'bar-cpu-circprog', 'bar-cpu-txt', 'bar-cpu-icon')] : []),
                 ],
             })
         });
