@@ -6,7 +6,6 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 CONFIG_DIR="$XDG_CONFIG_HOME/ags"
 WALLPAPERS_DIR="$HOME/Pictures/Wallpapers"
 
-# Create wallpapers directory if it doesn't exist
 mkdir -p "$WALLPAPERS_DIR"
 
 generate_colors() {
@@ -15,10 +14,8 @@ generate_colors() {
         echo "Invalid image path: $imgpath" >&2
         return 1
     fi
-    
-    # Run everything in parallel
-    swww img "$imgpath" --transition-fps 165 --transition-type grow --transition-duration 0.5 &
-    "$CONFIG_DIR/scripts/color_generation/colorgen.sh" "$imgpath" --apply & 
+    swww img "$imgpath" --transition-fps 165 --transition-type wipe  --transition-step 120 --transition-duration 0.8 &
+    "$CONFIG_DIR/scripts/color_generation/colorgen.sh" "$imgpath" --apply &
 }
 
 main() {
@@ -26,7 +23,7 @@ main() {
         generate_colors "$1" || exit $?
     else
         imgpath=$(yad --width 1200 --height 800 --file --add-preview --large-preview \
-                 --title="Choose wallpaper" --directory "$WALLPAPERS_DIR")
+                 --title="Choose wallpaper" --file)
         [[ -n "$imgpath" && -f "$imgpath" ]] && generate_colors "$imgpath" || exit 1
     fi
 }
