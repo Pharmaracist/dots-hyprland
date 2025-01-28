@@ -9,5 +9,6 @@ depends=(
 	gradience
 	python-libsass
 	python-material-color-utilities
+	python-pywalfox
+	matugen-bin
 )
-
