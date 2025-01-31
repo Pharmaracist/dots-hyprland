@@ -14,8 +14,8 @@ generate_colors() {
         echo "Invalid image path: $imgpath" >&2
         return 1
     fi
-    swww img "$imgpath" --transition-fps 165 --transition-type wipe  --transition-step 120 --transition-duration 0.8 &
-    "$CONFIG_DIR/scripts/color_generation/colorgen.sh" "$imgpath" --apply &
+    swww img "$imgpath" --transition-fps 240 --transition-type fade  --transition-duration 0.5 &&
+    "$CONFIG_DIR/scripts/color_generation/colorgen.sh" "$imgpath" --apply 
 }
 
 main() {

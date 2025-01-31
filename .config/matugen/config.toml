@@ -19,7 +19,7 @@ post_hook = 'starship init zsh > ~/.zshrc'
 
 [templates.obsidian]
 input_path = '~/.config/matugen/templates/obsidian.css'
-output_path = '~/Obsidian Vault/.obsidian/snippets/material-you.css'
+output_path = '/mnt/Data/General-Archive/obsidian/.obsidian/snippets/material-you.css'
 
 [templates.vscode]
 input_path = '~/.config/matugen/templates/vscode-color-theme.json'

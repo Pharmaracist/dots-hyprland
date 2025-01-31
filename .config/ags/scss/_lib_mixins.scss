@@ -81,7 +81,7 @@ $rounding_large: 1.705rem;
 $elevation_margin: 0.476rem;
 
 @mixin elevation2 {
-    box-shadow: 0px 2px 3px transparentize($shadow, 0.55);
+    // box-shadow: 0px 2px 3px transparentize($shadow, 0.55);
     margin: $elevation_margin;
 }
 

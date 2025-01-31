@@ -11,11 +11,11 @@ globalThis['handleStyles'] = (resetMusic) => {
     // Reset
     Utils.exec(`mkdir -p "${GLib.get_user_state_dir()}/ags/scss"`);
     if (resetMusic) {
-        // Utils.exec(`bash -c 'echo "" > ${GLib.get_user_state_dir()}/ags/scss/_musicwal.scss'`); // reset music styles
+        Utils.exec(`bash -c 'echo "" > ${GLib.get_user_state_dir()}/ags/scss/_musicwal.scss'`); // reset music styles
         Utils.exec(`bash -c 'echo "" > ${GLib.get_user_state_dir()}/ags/scss/_musicmaterial.scss'`); // reset music styles
     }
     // Generate overrides
-    let lightdark = darkMode.value ? "dark" : "light";
+    let lightdark = darkMode.value ? "light" : "dark";
     Utils.writeFileSync(
         `@mixin symbolic-icon {
     -gtk-icon-theme: '${userOptions.asyncGet().icons.symbolicIconTheme[lightdark]}';

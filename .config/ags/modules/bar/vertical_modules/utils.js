@@ -68,11 +68,10 @@ const Shortcuts = () => {
   let unsubscriber = () => {};
   let showWallpaperButton = false;
 
-  const unixporn = createUtilButton({
+  const ai = createUtilButton({
     name: "Unix Porn",
     icon: "\udb81\udfea",
-    onClicked: () => Utils.execAsync(`windsurf ${App.configDir}`),
-    onSecondaryClicked: () => Utils.execAsync(`xdg-open "https://www.reddit.com/r/unixporn/"`),
+    onClicked: () => Utils.execAsync(`bash -c '~/.config/ags/assets/localai/run.sh'`),
   });
 
   const collage = createUtilButton({
@@ -126,6 +125,7 @@ const Shortcuts = () => {
       // gitHubButton,
       // unixporn,
       collage,
+      ai,
       agsTweaksButton,
       screenSnipButton,
       colorPickerButton,

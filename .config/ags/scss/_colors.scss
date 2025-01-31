@@ -1,5 +1,7 @@
-$rootTransparency: 0.22; // Transparency = 1 - opacity
-$transparency: 0.75;
+$rootTransparency: 0.42; // Transparency = 1 - opacity
+$transparency: 0.65;
+//$rootTransparency: 0.22; // Transparency = 1 - opacity
+//$transparency: 0.75;
 
 // Transparent versions
 @if $transparent == True {

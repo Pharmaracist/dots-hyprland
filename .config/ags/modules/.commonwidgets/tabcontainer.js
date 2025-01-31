@@ -113,8 +113,13 @@ export const IconTabContainer = ({
             onClicked: () => shownIndex.value = i,
         })),
         setup: (self) => self.hook(shownIndex, (self) => {
-            self.children[previousShownIndex].toggleClassName('tab-icon-active', false);
-            self.children[shownIndex.value].toggleClassName('tab-icon-active', true);
+            // Add safety checks for both indices
+            if (self.children[previousShownIndex]) {
+                self.children[previousShownIndex].toggleClassName('tab-icon-active', false);
+            }
+            if (self.children[shownIndex.value]) {
+                self.children[shownIndex.value].toggleClassName('tab-icon-active', true);
+            }
             previousShownIndex = shownIndex.value;
         }),
     });

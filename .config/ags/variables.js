@@ -39,7 +39,7 @@ export const updateMonitorShellMode = (monitorShellModes, monitor, mode) => {
 // Bar position toggle
 globalThis['toggleBarPosition'] = () => {
     const currentMode = parseInt(currentShellMode.value[0]) || 0;
-    const isVerticalMode = currentMode >= 6;
+    const isVerticalMode = currentMode >= 7;
     
     const currentPosition = barPosition.value;
     let newPosition;
@@ -112,7 +112,7 @@ Hyprland.connect('notify::monitors', () => {
 globalThis['cycleMode'] = () => {
     const monitor = Hyprland.active.monitor.id || 0;
     const currentNum = parseInt(currentShellMode.value[monitor]) || 0;
-    const nextMode = (currentNum + 1) % 5;
+    const nextMode = (currentNum + 1) % 6;
     updateMonitorShellMode(currentShellMode, monitor, nextMode.toString());
 };
 

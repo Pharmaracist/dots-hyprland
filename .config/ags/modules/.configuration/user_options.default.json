@@ -1,12 +1,4 @@
 {
-  "roundingsCss NOT AN OPTION!!": {
-    "rounding_verysmall": "8",
-    "rounding_small": "13",
-    "rounding_mediumsmall": "15",
-    "rounding_medium": "19",
-    "rounding_mediumlarge": "22",
-    "rounding_large": "27"
-  },
   "indicators": {
     "enabled": true
   },
@@ -425,6 +417,9 @@
       "deleteToEnd": "Ctrl+k"
     },
     "sidebar": {
+      "prayerTimes": {
+        "city": "Cairo"
+      },
       "apis": {
         "nextTab": "Page_Down",
         "prevTab": "Page_Up"

@@ -1,0 +1,39 @@
+{
+	"Pro Evolution Soccer 2017": {
+		"pcgamingwiki": {
+			"steamID": "541180",
+			"howLongToBeatID": "",
+			"metacritic": {
+				"score": "",
+				"urlid": ""
+			},
+			"opencritic": {
+				"score": "",
+				"urlid": ""
+			},
+			"igdb": {
+				"score": "",
+				"urlid": ""
+			},
+			"direct3DVersions": [
+				"9.0c"
+			],
+			"genres": [
+				"Sports"
+			],
+			"releaseDate": [
+				"Windows: November 24, 2016"
+			]
+		},
+		"applegamingwiki": null,
+		"howlongtobeat": null,
+		"gamesdb": {
+			"steamID": ""
+		},
+		"steamInfo": null,
+		"umuId": null
+	},
+	"__timestamp": {
+		"Pro Evolution Soccer 2017": "Tue Jan 28 2025 06:20:41 GMT+0200 (Eastern European Standard Time)"
+	}
+}

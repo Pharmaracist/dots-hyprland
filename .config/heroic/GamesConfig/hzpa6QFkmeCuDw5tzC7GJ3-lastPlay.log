@@ -1,0 +1,92 @@
+Launching "Pro Evolution Soccer 2017" (sideload)
+Native? No
+Installed in: /run/media/a3/Data/Entertainment/Games/Pro Evolution Soccer 2017
+
+System Info:
+CPU: 12x Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
+Memory: 16.52 GB (used: 2.92 GB)
+GPUs:
+  GPU 0:
+    Name: NVIDIA Corporation GP107GLM [Quadro P1000 Mobile]
+    IDs: D=1cbb V=10de SD=087d SV=1028
+    Driver: nvidia
+  GPU 1:
+    Name: Intel Corporation CoffeeLake-H GT2 [UHD Graphics 630]
+    IDs: D=3e9b V=8086 SD=087d SV=1028
+    Driver: i915
+OS: Arch Linux 6.12.10-arch1-1 (linux)
+
+The current system is not a Steam Deck
+We are not running inside a Flatpak container
+
+Software Versions:
+  Heroic: 2.15.2 Emeth
+  Legendary: 0.20.36 Urban Flight (Heroic)
+  gogdl: 1.1.2
+  comet: comet 0.1.2
+
+  Nile: 1.1.2 Will A. Zeppeli
+
+Game Settings: {
+	"autoInstallDxvk": true,
+	"autoInstallDxvkNvapi": false,
+	"autoInstallVkd3d": true,
+	"preferSystemLibs": false,
+	"enableEsync": true,
+	"enableMsync": false,
+	"enableFsync": true,
+	"nvidiaPrime": false,
+	"enviromentOptions": [],
+	"wrapperOptions": [],
+	"showFps": false,
+	"useGameMode": false,
+	"battlEyeRuntime": true,
+	"eacRuntime": true,
+	"language": "",
+	"beforeLaunchScriptPath": "",
+	"afterLaunchScriptPath": "",
+	"wineVersion": {
+		"bin": "",
+		"name": "Default Wine - Not Found",
+		"type": "wine"
+	},
+	"winePrefix": "/home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2017",
+	"wineCrossoverBottle": ""
+}
+
+Game launched at: Tue Jan 28 2025 06:16:08 GMT+0200 (Eastern European Standard Time)
+
+Wine version Default Wine - Not Found is not valid, trying another one.
+Changing wine version to Wine - wine-10.0-staging-amd64
+Winetricks packages: 
+
+0140:err:winediag:process_attach Failed to load libgnutls, secure connections will not be available.
+0140:err:secur32:SECUR32_initSchannelSP no schannel support, expect problems
+0140:err:winediag:ntlm_check_version ntlm_auth was not found. Make sure that ntlm_auth >= 3.0.25 is in your path. Usually, you can find it in the winbind package of your distribution.
+0140:err:ntlm:ntlm_LsaApInitializePackage no NTLM support, expect problems
+0140:fixme:heap:RtlSetHeapInformation HEAP_INFORMATION_CLASS 1 not implemented!
+0140:fixme:ntdll:NtQuerySystemInformation info_class SYSTEM_PERFORMANCE_INFORMATION
+0140:fixme:wbemprox:wbem_services_CreateInstanceEnum unsupported flags 0x30
+0140:fixme:wbemprox:enum_class_object_Next timeout not supported
+0140:fixme:ddraw:ddraw7_Initialize Ignoring guid {aeb2cdd4-6e41-43ea-941c-8361cc760781}.
+ALSA lib dlmisc.c:339:(snd_dlobj_cache_get0) Cannot open shared library libasound_module_pcm_pipewire.so (/usr/lib32/alsa-lib/libasound_module_pcm_pipewire.so: cannot open shared object file: No such file or directory)
+ALSA lib dlmisc.c:339:(snd_dlobj_cache_get0) Cannot open shared library libasound_module_pcm_pipewire.so (/usr/lib32/alsa-lib/libasound_module_pcm_pipewire.so: cannot open shared object file: No such file or directory)
+info:  Game: PES2017.exe
+info:  DXVK: v2.5.3
+info:  Build: x86 gcc 14.2.0
+info:  Vulkan: Found vkGetInstanceProcAddr in winevulkan.dll @ 0x7f5c2a80
+info:  Built-in extension providers:
+info:    Platform WSI
+info:    OpenVR
+info:    OpenXR
+info:  OpenVR: could not open registry key, status 2
+info:  OpenVR: Failed to locate module
+info:  Enabled instance extensions:
+info:    VK_KHR_get_surface_capabilities2
+info:    VK_KHR_surface
+info:    VK_KHR_win32_surface
+0140:err:vulkan:wine_vkCreateInstance Failed to create instance, res=-9
+err:   DxvkInstance::createInstance: Failed to create Vulkan 1.1 instance
+err:   D3D11CreateDevice: Failed to create a DXGI factory
+wine: Unhandled page fault on read access to 00000010 at address 795FDE04 (thread 0140), starting debugger...
+============= End of log =============

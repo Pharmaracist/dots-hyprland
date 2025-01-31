@@ -1,0 +1,368 @@
+(06:01:02) INFO:    [Legendary]:        Legendary location: /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/legendary
+(06:01:02) INFO:    [Gog]:              GOGDL location: /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/gogdl
+(06:01:02) INFO:    [Connection]:       Connectivity: check-online
+(06:01:02) INFO:    [Connection]:       Pinging external endpoints
+(06:01:02) INFO:    [Gog]:              Checking for existing gog manifests
+(06:01:03) WARNING: [Backend]:          Protocol already registered.
+(06:01:03) INFO:    [Connection]:       Connectivity: online
+(06:01:03) INFO:    [Backend]:          User Not Found, removing it from Store
+(06:01:03) ERROR:   [Gog]:              Unable to syncQueued playtime, userData not present
+(06:01:03) INFO:    [Gog]:              Running command: GOGDL_CONFIG_PATH=/home/a3/.config/heroic/gogdlConfig /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/gogdl --auth-config-path /home/a3/.config/heroic/gog_store/auth.json auth
+(06:01:03) INFO:    [Backend]:          AreWeAntiCheatYet data downloaded
+(06:01:03) INFO:    [Legendary]:        Running command: LEGENDARY_CONFIG_PATH=/home/a3/.config/heroic/legendaryConfig/legendary /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/legendary --version
+(06:01:03) INFO:    [Gog]:              Running command: GOGDL_CONFIG_PATH=/home/a3/.config/heroic/gogdlConfig /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/gogdl --auth-config-path /home/a3/.config/heroic/gog_store/auth.json --version
+(06:01:04) INFO:    [Nile]:             Running command: NILE_CONFIG_PATH=/home/a3/.config/heroic/nile_config /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/nile --version
+(06:01:05) INFO:    [Backend]:          Frontend Ready
+(06:01:05) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:01:05) INFO:    [Winetricks]:       Downloading Winetricks
+(06:01:05) INFO:    [WineDownloader]:   Updating wine versions info
+(06:01:05) INFO:    [WineDownloader]:   Fetching upstream information...
+(06:01:05) INFO:    [Backend]:          Checking for new Heroic Updates
+(06:01:05) INFO:    [DXVKInstaller]:    Updating dxvk to: dxvk-2.5.3
+(06:01:05) INFO:    [DXVKInstaller]:    Updating vkd3d to: vkd3d-proton-2.14
+(06:01:05) INFO:    [DXVKInstaller]:    Updating dxvk-nvapi to: dxvk-nvapi-v0.8.0
+(06:01:06) INFO:    [Backend]:          
+System Information:
+CPU: 12x Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
+Memory: 16.52 GB (used: 2.92 GB)
+GPUs:
+  GPU 0:
+    Name: NVIDIA Corporation GP107GLM [Quadro P1000 Mobile]
+    IDs: D=1cbb V=10de SD=087d SV=1028
+    Driver: nvidia
+  GPU 1:
+    Name: Intel Corporation CoffeeLake-H GT2 [UHD Graphics 630]
+    IDs: D=3e9b V=8086 SD=087d SV=1028
+    Driver: i915
+OS: Arch Linux 6.12.10-arch1-1 (linux)
+
+The current system is not a Steam Deck
+We are not running inside a Flatpak container
+
+Software Versions:
+  Heroic: 2.15.2 Emeth
+  Legendary: 0.20.36 Urban Flight (Heroic)
+  gogdl: 1.1.2
+  comet: comet 0.1.2
+
+  Nile: 1.1.2 Will A. Zeppeli
+
+(06:01:06) INFO:    [Backend]:          Checking for current version changelog
+(06:01:06) INFO:    [Frontend]:         Updated to a new version, cleaaning up the cache.
+(06:01:06) INFO:    [Legendary]:        Running command: LEGENDARY_CONFIG_PATH=/home/a3/.config/heroic/legendaryConfig/legendary /opt/Heroic/resources/app.asar.unpacked/build/bin/x64/linux/legendary cleanup
+(06:01:06) INFO:    [Frontend]:         Refreshing undefined Library
+(06:01:06) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:01:06) INFO:    [Legendary]:        Refreshing library...
+(06:01:06) INFO:    [WineDownloader]:   wine versions updated
+(06:01:06) INFO:    [WineDownloader]:   Start installation of wine version Wine-GE-Proton8-26
+(06:01:07) INFO:    [WineDownloader]:   Updating wine versions info
+(06:01:07) INFO:    [WineDownloader]:   Fetching upstream information...
+(06:01:08) INFO:    [WineDownloader]:   wine versions updated
+(06:01:09) INFO:    [DownloadManager]:  Downloader: Finished downloading https://github.com/Heroic-Games-Launcher/vkd3d-proton/releases/download/v2.14/vkd3d-proton-2.14.tar.xz
+(06:01:09) INFO:    [DXVKInstaller]:    Downloaded vkd3d, extracting...
+(06:01:09) INFO:    [DownloadManager]:  Downloader: Finished downloading https://github.com/jp7677/dxvk-nvapi/releases/download/v0.8.0/dxvk-nvapi-v0.8.0.tar.gz
+(06:01:09) INFO:    [DXVKInstaller]:    Downloaded dxvk-nvapi, extracting...
+(06:01:09) INFO:    [DXVKInstaller]:    dxvk-nvapi updated!
+(06:01:09) INFO:    [DXVKInstaller]:    vkd3d updated!
+(06:01:10) INFO:    [Backend]:          Starting the Download Queue
+(06:01:11) INFO:    [Backend]:          Downloaded: 2.52 MB / 222.76 MB  @1019.86 KB/s (1.13%)
+(06:01:12) INFO:    [DownloadManager]:  Downloader: Finished downloading https://github.com/doitsujin/dxvk/releases/download/v2.5.3/dxvk-2.5.3.tar.gz
+(06:01:12) INFO:    [DXVKInstaller]:    Downloaded dxvk, extracting...
+(06:01:13) INFO:    [DXVKInstaller]:    dxvk updated!
+(06:01:13) INFO:    [Backend]:          Downloaded: 6.3 MB / 222.76 MB  @1.51 MB/s (2.83%)
+(06:01:14) INFO:    [Backend]:          Writing config for Heroic
+(06:01:14) INFO:    [Backend]:          Changed config: customThemesPath from undefined to 
+(06:01:16) INFO:    [Backend]:          Downloaded: 12.02 MB / 222.76 MB  @2.28 MB/s (5.40%)
+(06:01:18) INFO:    [Backend]:          Downloaded: 18.82 MB / 222.76 MB  @2.72 MB/s (8.45%)
+(06:01:21) INFO:    [Backend]:          Downloaded: 27.02 MB / 222.76 MB  @3.27 MB/s (12.13%)
+(06:01:23) INFO:    [Backend]:          Downloaded: 33.82 MB / 222.76 MB  @2.61 MB/s (15.18%)
+(06:01:26) INFO:    [Backend]:          Downloaded: 43.11 MB / 222.76 MB  @3.37 MB/s (19.35%)
+(06:01:27) INFO:    [Backend]:          Writing config for Heroic
+(06:01:27) INFO:    [Backend]:          Changed config: customThemesPath from  to /home/a3/.config/heroic/themes
+(06:01:29) INFO:    [Backend]:          Downloaded: 50.86 MB / 222.76 MB  @2.86 MB/s (22.83%)
+(06:01:32) INFO:    [Backend]:          Downloaded: 61.01 MB / 222.76 MB  @3.3 MB/s (27.39%)
+(06:01:33) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:01:35) INFO:    [Backend]:          Downloaded: 68.54 MB / 222.76 MB  @3.01 MB/s (30.77%)
+(06:01:37) INFO:    [Backend]:          Downloaded: 75.72 MB / 222.76 MB  @2.87 MB/s (33.99%)
+(06:01:39) INFO:    [Backend]:          Downloaded: 79.92 MB / 222.76 MB  @2.01 MB/s (35.88%)
+(06:01:41) INFO:    [Backend]:          Downloaded: 86.52 MB / 222.76 MB  @2.64 MB/s (38.84%)
+(06:01:44) INFO:    [Backend]:          Downloaded: 94.9 MB / 222.76 MB  @3.2 MB/s (42.60%)
+(06:01:46) INFO:    [Backend]:          Downloaded: 102.89 MB / 222.76 MB  @3.19 MB/s (46.19%)
+(06:01:48) INFO:    [Backend]:          Downloaded: 106.87 MB / 222.76 MB  @3.24 MB/s (47.98%)
+(06:01:50) INFO:    [Backend]:          Downloaded: 115.25 MB / 222.76 MB  @2.81 MB/s (51.74%)
+(06:01:53) INFO:    [Backend]:          Adding shortcuts for GTA V
+(06:01:53) INFO:    [Backend]:          Writing config for s8LzbmfBAU4bF3fk2HQnmW
+(06:01:53) INFO:    [Backend]:          Changed config: winePrefix from /home/a3/Games/Heroic/Prefixes/default to /home/a3/Games/Heroic/Prefixes/default/GTA V
+(06:01:53) INFO:    [Backend]:          Changed config: wineCrossoverBottle from undefined to 
+(06:01:53) INFO:    [Frontend]:         Refreshing sideload Library
+(06:01:53) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:01:53) WARNING: [Backend]:          listUpdateableGames not implemented on Sideload Library Manager
+(06:01:53) INFO:    [Backend]:          Downloaded: 122.45 MB / 222.76 MB  @3.04 MB/s (54.97%)
+(06:01:54) INFO:    [DownloadManager]:  Downloader: Finished downloading https://cdn2.steamgriddb.com/file/sgdb-cdn/grid/f024cb7f6d25f950416a23b64a6b0b72.png
+(06:01:54) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:01:55) INFO:    [Backend]:          Downloaded: 127.01 MB / 222.76 MB  @2.54 MB/s (57.02%)
+(06:01:57) INFO:    [Backend]:          Downloaded: 134.46 MB / 222.76 MB  @2.96 MB/s (60.36%)
+(06:01:59) INFO:    [Backend]:          Downloaded: 139.81 MB / 222.76 MB  @3.21 MB/s (62.77%)
+(06:02:01) INFO:    [Backend]:          Downloaded: 148.17 MB / 222.76 MB  @3.34 MB/s (66.52%)
+(06:02:04) INFO:    [Backend]:          Downloaded: 156.53 MB / 222.76 MB  @3.33 MB/s (70.27%)
+(06:02:05) INFO:    [Backend]:          Downloaded: 159.39 MB / 222.76 MB  @2.74 MB/s (71.55%)
+(06:02:08) INFO:    [Backend]:          Downloaded: 168.45 MB / 222.76 MB  @3.17 MB/s (75.62%)
+(06:02:09) INFO:    [Backend]:          Downloaded: 172.53 MB / 222.76 MB  @3.41 MB/s (77.45%)
+(06:02:11) INFO:    [Backend]:          Downloaded: 177.32 MB / 222.76 MB  @3.36 MB/s (79.60%)
+(06:02:13) INFO:    [Backend]:          Downloaded: 183.61 MB / 222.76 MB  @2.51 MB/s (82.43%)
+(06:02:16) INFO:    [Backend]:          Downloaded: 190.76 MB / 222.76 MB  @2.86 MB/s (85.64%)
+(06:02:19) INFO:    [Backend]:          Downloaded: 202.05 MB / 222.76 MB  @3.28 MB/s (90.70%)
+(06:02:20) INFO:    [Backend]:          Downloaded: 206.05 MB / 222.76 MB  @3.32 MB/s (92.50%)
+(06:02:23) INFO:    [Backend]:          Downloaded: 213.93 MB / 222.76 MB  @3.13 MB/s (96.04%)
+(06:02:24) INFO:    [Backend]:          Downloaded: 219.42 MB / 222.76 MB  @3.28 MB/s (98.50%)
+(06:02:26) INFO:    [Backend]:          Downloaded: 222.76 MB / 222.76 MB  @2.03 MB/s (100.00%)
+(06:02:27) INFO:    [DownloadManager]:  Downloader: Finished downloading https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz
+(06:02:28) INFO:    [Backend]:          Adding shortcuts for Pro Evolution Soccer 2017
+(06:02:28) INFO:    [Backend]:          Writing config for hzpa6QFkmeCuDw5tzC7GJ3
+(06:02:28) INFO:    [Backend]:          Changed config: winePrefix from /home/a3/Games/Heroic/Prefixes/default to /home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2017
+(06:02:28) INFO:    [Backend]:          Changed config: wineCrossoverBottle from undefined to 
+(06:02:28) INFO:    [Frontend]:         Refreshing sideload Library
+(06:02:28) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:02:28) WARNING: [Backend]:          listUpdateableGames not implemented on Sideload Library Manager
+(06:02:29) INFO:    [DownloadManager]:  Downloader: Finished downloading https://cdn2.steamgriddb.com/file/sgdb-cdn/grid/c0e865c81cab6a3aa12ab4e49f74589f.png
+(06:02:30) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:02:51) INFO:    [WineDownloader]:   Finished installation of wine version Wine-GE-Proton8-26
+(06:02:51) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:02:51) INFO:    [Backend]:          Changing wine version to Wine - Wine-GE-Proton8-26
+(06:02:51) INFO:    [Backend]:          Heroic: Setting wineVersion to {"bin":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wine","name":"Wine - Wine-GE-Proton8-26","type":"wine","lib":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib64","lib32":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib","wineserver":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wineserver"} (previous value: {"bin":"","name":"Default Wine - Not Found","type":"wine"})
+(06:02:54) INFO:    [Backend]:          Adding shortcuts for Pro Evolution Soccer 2018
+(06:02:54) INFO:    [Backend]:          Writing config for 1VjGAo7HLJBgnr7KvEjjMn
+(06:02:54) INFO:    [Backend]:          Changed config: wineVersion from {"bin":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wine","name":"Wine - Wine-GE-Proton8-26","type":"wine","lib":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib64","lib32":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib","wineserver":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wineserver"} to {"bin":"","name":"Default Wine - Not Found","type":"wine"}
+(06:02:54) INFO:    [Backend]:          Changed config: winePrefix from /home/a3/Games/Heroic/Prefixes/default to /home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2018
+(06:02:54) INFO:    [Backend]:          Changed config: wineCrossoverBottle from undefined to 
+(06:02:54) INFO:    [Frontend]:         Refreshing sideload Library
+(06:02:54) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:02:54) WARNING: [Backend]:          listUpdateableGames not implemented on Sideload Library Manager
+(06:02:54) INFO:    [DownloadManager]:  Downloader: Finished downloading https://cdn2.steamgriddb.com/file/sgdb-cdn/grid/1d50d2c72d133bf09d09cc73bbe2f5fd.png
+(06:02:55) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:03:02) ERROR:   [Frontend]:         Error: Request failed with status code 404
+(06:03:23) INFO:    [Backend]:          Adding shortcuts for Blur
+(06:03:23) INFO:    [Backend]:          Writing config for wNA3Jwpg1izFor6Tnjdoe2
+(06:03:23) INFO:    [Backend]:          Changed config: wineCrossoverBottle from undefined to Heroic
+(06:03:23) INFO:    [Frontend]:         Refreshing sideload Library
+(06:03:23) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:03:23) WARNING: [Backend]:          listUpdateableGames not implemented on Sideload Library Manager
+(06:03:24) INFO:    [DownloadManager]:  Downloader: Finished downloading https://cdn2.steamgriddb.com/file/sgdb-cdn/grid/30e920df8099c4feb835211451c3aa62.png
+(06:03:26) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:07:50) INFO:    [Backend]:          Adding shortcuts for Pro Evolution Soccer 2019
+(06:07:50) INFO:    [Backend]:          Writing config for ubr4pSdW1Fmc4mFw314ihX
+(06:07:50) INFO:    [Backend]:          Changed config: winePrefix from /home/a3/Games/Heroic/Prefixes/default to /home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2019
+(06:07:50) INFO:    [Backend]:          Changed config: wineCrossoverBottle from undefined to 
+(06:07:50) INFO:    [Frontend]:         Refreshing sideload Library
+(06:07:50) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:07:50) WARNING: [Backend]:          listUpdateableGames not implemented on Sideload Library Manager
+(06:07:51) INFO:    [DownloadManager]:  Downloader: Finished downloading https://cdn2.steamgriddb.com/file/sgdb-cdn/grid/ef3dcf69d5859af6a5be1fe14917b47f.png
+(06:08:29) INFO:    [Frontend]:         Refreshing wine downloader releases
+(06:08:29) INFO:    [WineDownloader]:   Updating wine versions info
+(06:08:29) INFO:    [WineDownloader]:   Fetching upstream information...
+(06:08:31) INFO:    [WineDownloader]:   wine versions updated
+(06:12:30) DEBUG:   [Backend]:          Unable to load Steam Libraries, libraryfolders.vdf not found
+(06:12:32) INFO:    [Backend]:          Heroic: Setting wineVersion to {"bin":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wine","name":"Wine - wine-10.0-staging-amd64","type":"wine","lib":"","lib32":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib","wineserver":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wineserver"} (previous value: {"bin":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wine","name":"Wine - Wine-GE-Proton8-26","type":"wine","lib":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib64","lib32":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib","wineserver":"/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wineserver"})
+(06:12:34) WARNING: [DXVKInstaller]:    DXVK cannot be installed on a Proton or a invalid prefix!
+(06:12:34) INFO:    [Backend]:          Heroic: Setting autoInstallDxvkNvapi to true (previous value: false)
+(06:12:50) INFO:    [Backend]:          Heroic: Setting useGameMode to true (previous value: false)
+(06:12:50) INFO:    [Backend]:          Heroic: Setting preferSystemLibs to true (previous value: false)
+(06:12:51) INFO:    [Backend]:          Heroic: Setting nvidiaPrime to true (previous value: false)
+(06:12:52) INFO:    [Backend]:          Heroic: Setting showMangohud to true (previous value: undefined)
+(06:12:58) INFO:    [Backend]:          Launching Pro Evolution Soccer 2019 (ubr4pSdW1Fmc4mFw314ihX)
+(06:12:58) INFO:    [Backend]:          Preventing display from sleep
+(06:12:58) INFO:    [Backend]:          Checking if wine version exists: Wine - Wine-GE-Proton8-26
+(06:12:58) INFO:    [Backend]:          Preventing machine to sleep
+(06:12:58) INFO:    [Backend]:          Checking if wine version exists: Wine - Wine-GE-Proton8-26
+(06:12:58) INFO:    [Backend]:          Checking if wine version exists: Wine - Wine-GE-Proton8-26
+(06:12:58) INFO:    [Backend]:          Checking if wine version exists: Wine - Wine-GE-Proton8-26
+(06:12:58) DEBUG:   [Backend]:          Running Wine command: wineboot --init
+(06:16:08) INFO:    [Backend]:          Launching Pro Evolution Soccer 2017 (hzpa6QFkmeCuDw5tzC7GJ3)
+(06:16:08) INFO:    [Backend]:          Preventing display from sleep
+(06:16:08) INFO:    [Backend]:          Checking if wine version exists: Default Wine - Not Found
+(06:16:08) ERROR:   [Backend]:          Wine version Default Wine - Not Found is not valid, trying another one.
+(06:16:08) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:16:13) INFO:    [Backend]:          Changing wine version to Wine - wine-10.0-staging-amd64
+(06:16:13) INFO:    [Backend]:          hzpa6QFkmeCuDw5tzC7GJ3: Setting wineVersion to {"bin":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wine","name":"Wine - wine-10.0-staging-amd64","type":"wine","lib":"","lib32":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib","wineserver":"/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wineserver"}
+(06:16:14) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:16:14) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:16:14) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:16:14) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:16:14) DEBUG:   [Backend]:          Running Wine command: wineboot --init
+(06:19:21) INFO:    [DXVKInstaller]:    installing dxvk on... /home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2017
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:21) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:22) INFO:    [DXVKInstaller]:    installing vkd3d on... /home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2017
+(06:19:22) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:22) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:22) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:22) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:22) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:22) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:22) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:22) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d12core /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d12 /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d12core /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d12 /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v dxgi /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d9 /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d8 /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d11 /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d10core /d native,builtin /f
+(06:19:22) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v dxgi /d native,builtin /f
+(06:19:23) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d9 /d native,builtin /f
+(06:19:23) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d8 /d native,builtin /f
+(06:19:23) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d11 /d native,builtin /f
+(06:19:23) DEBUG:   [Backend]:          Running Wine command: reg add HKEY_CURRENT_USER\Software\Wine\DllOverrides /v d3d10core /d native,builtin /f
+(06:19:23) INFO:    [Runtime]:          Downloading runtime eac_runtime with download link https://github.com/lutris/buildbot/releases/download/2022.06.23/eac_runtime-20240114.tar.xz
+(06:19:24) INFO:    [Runtime]:          Downloading runtime battleye_runtime with download link https://github.com/lutris/buildbot/releases/download/2024-05-21/battleeye_runtime.tar.xz
+(06:19:30) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:30) INFO:    [Backend]:          launching non-native sideloaded: /run/media/a3/Data/Entertainment/Games/Pro Evolution Soccer 2017/PES2017.exe 
+(06:19:30) INFO:    [Backend]:          Checking if wine version exists: Wine - wine-10.0-staging-amd64
+(06:19:30) ERROR:   [Backend]:          Couldn't find all library folders of Wine - wine-10.0-staging-amd64!
+Missing /home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib and/or !
+Falling back to system libraries!
+(06:19:30) DEBUG:   [Backend]:          Running Wine command: /run/media/a3/Data/Entertainment/Games/Pro Evolution Soccer 2017/PES2017.exe
+(06:19:30) DEBUG:   [Backend]:          Logging to file "/home/a3/.config/heroic/GamesConfig/hzpa6QFkmeCuDw5tzC7GJ3-lastPlay.log"
+(06:19:30) INFO:    [Backend]:          Preventing display to sleep
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting ExtraGameInfo data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting PCGamingWiki data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting HowLongToBeat data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting GamesDB data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting ExtraGameInfo data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting PCGamingWiki data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting HowLongToBeat data for Pro Evolution Soccer 2017
+(06:20:38) INFO:    [ExtraGameInfo]:    Getting GamesDB data for Pro Evolution Soccer 2017
+(06:20:38) WARNING: [Backend]:          getExtraInfo not implemented on Sideload Game Manager. called for appName = hzpa6QFkmeCuDw5tzC7GJ3
+(06:20:38) INFO:    [Backend]:          Stopping Display Power Saver Blocker
+(06:20:38) INFO:    [Frontend]:         Refreshing sideload Library
+(06:20:38) WARNING: [Backend]:          refresh not implemented on Sideload Library Manager
+(06:20:39) ERROR:   [ExtraGameInfo]:    Got AxiosError when sending HowLongToBeat request for Pro Evolution Soccer 2017: {
+  "message": "Request failed with status code 404",
+  "name": "Error",
+  "stack": "Error: Request failed with status code 404\n    at createError (/opt/Heroic/resources/app.asar/node_modules/axios/lib/core/createError.js:16:15)\n    at settle (/opt/Heroic/resources/app.asar/node_modules/axios/lib/core/settle.js:17:12)\n    at IncomingMessage.handleStreamEnd (/opt/Heroic/resources/app.asar/node_modules/axios/lib/adapters/http.js:322:11)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1696:12)\n    at processTicksAndRejections (node:internal/process/task_queues:82:21)",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "transformRequest": [
+      null
+    ],
+    "transformResponse": [
+      null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "headers": {
+      "Accept": "*/*",
+      "Content-Type": "application/json",
+      "User-Agent": "HeroicGamesLauncher/2.15.2",
+      "Referer": "https://howlongtobeat.com/",
+      "Content-Length": 366
+    },
+    "method": "post",
+    "url": "https://www.howlongtobeat.com/api/search",
+    "data": "{\"searchType\":\"games\",\"searchTerms\":[\"Pro\",\"Evolution\",\"Soccer\",\"2017\"],\"searchPage\":1,\"size\":20,\"searchOptions\":{\"games\":{\"userId\":0,\"platform\":\"\",\"sortCategory\":\"popular\",\"rangeCategory\":\"main\",\"rangeTime\":{\"min\":0,\"max\":0},\"gameplay\":{\"perspective\":\"\",\"flow\":\"\",\"genre\":\"\"},\"modifier\":\"\"},\"users\":{\"sortCategory\":\"postcount\"},\"filter\":\"\",\"sort\":0,\"randomizer\":0}}"
+  },
+  "status": 404
+}
+(06:20:39) WARNING: [Backend]:          getExtraInfo not implemented on Sideload Game Manager. called for appName = hzpa6QFkmeCuDw5tzC7GJ3
+(06:20:39) WARNING: [Backend]:          getExtraInfo not implemented on Sideload Game Manager. called for appName = hzpa6QFkmeCuDw5tzC7GJ3
+(06:20:39) ERROR:   [ExtraGameInfo]:    Got AxiosError when sending HowLongToBeat request for Pro Evolution Soccer 2017: {
+  "message": "Request failed with status code 404",
+  "name": "Error",
+  "stack": "Error: Request failed with status code 404\n    at createError (/opt/Heroic/resources/app.asar/node_modules/axios/lib/core/createError.js:16:15)\n    at settle (/opt/Heroic/resources/app.asar/node_modules/axios/lib/core/settle.js:17:12)\n    at IncomingMessage.handleStreamEnd (/opt/Heroic/resources/app.asar/node_modules/axios/lib/adapters/http.js:322:11)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1696:12)\n    at processTicksAndRejections (node:internal/process/task_queues:82:21)",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "transformRequest": [
+      null
+    ],
+    "transformResponse": [
+      null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "headers": {
+      "Accept": "*/*",
+      "Content-Type": "application/json",
+      "User-Agent": "HeroicGamesLauncher/2.15.2",
+      "Referer": "https://howlongtobeat.com/",
+      "Content-Length": 366
+    },
+    "method": "post",
+    "url": "https://www.howlongtobeat.com/api/search",
+    "data": "{\"searchType\":\"games\",\"searchTerms\":[\"Pro\",\"Evolution\",\"Soccer\",\"2017\"],\"searchPage\":1,\"size\":20,\"searchOptions\":{\"games\":{\"userId\":0,\"platform\":\"\",\"sortCategory\":\"popular\",\"rangeCategory\":\"main\",\"rangeTime\":{\"min\":0,\"max\":0},\"gameplay\":{\"perspective\":\"\",\"flow\":\"\",\"genre\":\"\"},\"modifier\":\"\"},\"users\":{\"sortCategory\":\"postcount\"},\"filter\":\"\",\"sort\":0,\"randomizer\":0}}"
+  },
+  "status": 404
+}
+(06:20:40) ERROR:   [ExtraGameInfo]:    Was not able to get ProtonDB data for 541180 undefined
+(06:20:40) DEBUG:   [Backend]:          No response when getting ProtonDB info
+(06:20:40) DEBUG:   [Backend]:          SteamDeck data for 541180 {"success":1,"results":[]}
+(06:20:40) ERROR:   [Backend]:          No resolved_category in response, API changed?
+(06:20:41) ERROR:   [ExtraGameInfo]:    Was not able to get ProtonDB data for 541180 undefined
+(06:20:41) DEBUG:   [Backend]:          No response when getting ProtonDB info
+(06:20:41) DEBUG:   [Backend]:          SteamDeck data for 541180 {"success":1,"results":[]}
+(06:20:41) ERROR:   [Backend]:          No resolved_category in response, API changed?

@@ -1,0 +1,61 @@
+Launching "Pro Evolution Soccer 2019" (sideload)
+Native? No
+Installed in: /run/media/a3/Data/Entertainment/Games/Pro Evolution Soccer 2019
+
+System Info:
+CPU: 12x Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
+Memory: 16.52 GB (used: 2.92 GB)
+GPUs:
+  GPU 0:
+    Name: NVIDIA Corporation GP107GLM [Quadro P1000 Mobile]
+    IDs: D=1cbb V=10de SD=087d SV=1028
+    Driver: nvidia
+  GPU 1:
+    Name: Intel Corporation CoffeeLake-H GT2 [UHD Graphics 630]
+    IDs: D=3e9b V=8086 SD=087d SV=1028
+    Driver: i915
+OS: Arch Linux 6.12.10-arch1-1 (linux)
+
+The current system is not a Steam Deck
+We are not running inside a Flatpak container
+
+Software Versions:
+  Heroic: 2.15.2 Emeth
+  Legendary: 0.20.36 Urban Flight (Heroic)
+  gogdl: 1.1.2
+  comet: comet 0.1.2
+
+  Nile: 1.1.2 Will A. Zeppeli
+
+Game Settings: {
+	"autoInstallDxvk": true,
+	"autoInstallDxvkNvapi": false,
+	"autoInstallVkd3d": true,
+	"preferSystemLibs": false,
+	"enableEsync": true,
+	"enableMsync": false,
+	"enableFsync": true,
+	"nvidiaPrime": false,
+	"enviromentOptions": [],
+	"wrapperOptions": [],
+	"showFps": false,
+	"useGameMode": false,
+	"battlEyeRuntime": true,
+	"eacRuntime": true,
+	"language": "",
+	"beforeLaunchScriptPath": "",
+	"afterLaunchScriptPath": "",
+	"wineVersion": {
+		"bin": "/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wine",
+		"name": "Wine - Wine-GE-Proton8-26",
+		"type": "wine",
+		"lib": "/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib64",
+		"lib32": "/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/lib",
+		"wineserver": "/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26/bin/wineserver"
+	},
+	"winePrefix": "/home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2019",
+	"wineCrossoverBottle": ""
+}
+
+Game launched at: Tue Jan 28 2025 06:12:58 GMT+0200 (Eastern European Standard Time)
+

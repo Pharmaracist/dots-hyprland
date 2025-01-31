@@ -9,6 +9,7 @@ class PrayerTimesService extends Service {
             this,
             {
                 'updated': [],
+                'cityChanged': ['string'],
             },
             {
                 'nextPrayerName': ['string', 'r'],
@@ -19,6 +20,7 @@ class PrayerTimesService extends Service {
                 'asr': ['string', 'r'],
                 'dhuhr': ['string', 'r'],
                 'fajr': ['string', 'r'],
+                'city': ['string', 'rw'],
             },
         );
     }
@@ -32,6 +34,10 @@ class PrayerTimesService extends Service {
     _asr = '';
     _dhuhr = '';
     _fajr = '';
+    _city = userOptions.asyncGet().sidebar?.prayerTimes?.city || 'Cairo';
+    _latitude = null;
+    _longitude = null;
+    _timezone = null;
     _notificationTimeout = null;
     _soundsDir = GLib.build_filenamev([GLib.get_home_dir(), '.config', 'ags', 'assets', 'sounds']);
     _defaultAdhan = userOptions.asyncGet().sidebar.adhan.default || 'adhan_default.mp3';
@@ -131,6 +137,13 @@ class PrayerTimesService extends Service {
     get asr() { return this._asr; }
     get dhuhr() { return this._dhuhr; }
     get fajr() { return this._fajr; }
+    get city() { return this._city; }
+    set city(value) {
+        if (this._city === value) return;
+        this._city = value;
+        this.emit('cityChanged', value);
+        this.#updateCoordinates();
+    }
 
     refresh() {
         this.#fetchPrayerTimes();
@@ -274,14 +287,43 @@ class PrayerTimesService extends Service {
         }
     }
 
+    async #updateCoordinates() {
+        try {
+            const response = await execAsync(['curl', '-s', `https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(this._city)}&format=json`]);
+            const data = JSON.parse(response);
+            
+            if (data && data[0]) {
+                this._latitude = data[0].lat;
+                this._longitude = data[0].lon;
+                this.refresh();
+            } else {
+                console.error('City not found:', this._city);
+            }
+        } catch (error) {
+            console.error('Error fetching coordinates:', error);
+        }
+    }
+
     #fetchPrayerTimes() {
+        if (!this._latitude || !this._longitude) {
+            this.#updateCoordinates();
+            return;
+        }
+
         const currentDate = new Date();
         const day = currentDate.getDate().toString().padStart(2, '0');
         const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
         const year = currentDate.getFullYear();
         const formattedDate = `${day}-${month}-${year}`;
 
-        execAsync(['curl', '-s', `http://api.aladhan.com/v1/timings/${formattedDate}?latitude=31.9539&longitude=35.9106&method=3`])
+        // Using method 5 (Egyptian General Authority of Survey) for Egypt
+        // and method 3 (Muslim World League) for other locations
+        const method = this._city.toLowerCase() === 'cairo' ? 5 : 3;
+        
+        // Get timezone offset in hours
+        const tzOffset = -(new Date().getTimezoneOffset() / 60);
+
+        execAsync(['curl', '-s', `http://api.aladhan.com/v1/timings/${formattedDate}?latitude=${this._latitude}&longitude=${this._longitude}&method=${method}&tune=0,0,0,0,0,0,0,0&timezonestring=Africa/Cairo`])
             .then(output => {
                 const data = JSON.parse(output);
                 this.#updateTimes(data);

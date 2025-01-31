@@ -1,0 +1,33 @@
+{
+  "hzpa6QFkmeCuDw5tzC7GJ3": {
+    "autoInstallDxvk": true,
+    "autoInstallDxvkNvapi": false,
+    "autoInstallVkd3d": true,
+    "preferSystemLibs": false,
+    "enableEsync": true,
+    "enableMsync": false,
+    "enableFsync": true,
+    "nvidiaPrime": false,
+    "enviromentOptions": [],
+    "wrapperOptions": [],
+    "showFps": false,
+    "useGameMode": false,
+    "battlEyeRuntime": true,
+    "eacRuntime": true,
+    "language": "",
+    "beforeLaunchScriptPath": "",
+    "afterLaunchScriptPath": "",
+    "wineVersion": {
+      "bin": "/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wine",
+      "name": "Wine - wine-10.0-staging-amd64",
+      "type": "wine",
+      "lib": "",
+      "lib32": "/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/lib",
+      "wineserver": "/home/a3/.config/heroic/tools/wine/wine-10.0-staging-amd64/bin/wineserver"
+    },
+    "winePrefix": "/home/a3/Games/Heroic/Prefixes/default/Pro Evolution Soccer 2017",
+    "wineCrossoverBottle": ""
+  },
+  "version": "v0",
+  "explicit": true
+}

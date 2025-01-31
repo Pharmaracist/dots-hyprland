@@ -1,0 +1,948 @@
+{
+  "wine-releases" : [
+    {
+      "version" : "Wine-GE-latest",
+      "type" : "Wine-GE",
+      "date" : "2024-02-04",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz",
+      "downsize" : 233577252,
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.sha512sum"
+    },
+    {
+      "version" : "Wine-GE-Proton8-26",
+      "type" : "Wine-GE",
+      "date" : "2024-02-04",
+      "disksize" : 974837157,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26/wine-lutris-GE-Proton8-26-x86_64.tar.xz",
+      "downsize" : 233577252,
+      "installDir" : "/home/a3/.config/heroic/tools/wine/Wine-GE-Proton8-26",
+      "isInstalled" : true
+    },
+    {
+      "version" : "Wine-GE-Proton8-27-LoL",
+      "type" : "Wine-GE",
+      "date" : "2023-12-14",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-27-LoL/wine-lutris-GE-Proton8-27-LoL-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-27-LoL/wine-lutris-GE-Proton8-27-LoL-x86_64.tar.xz",
+      "downsize" : 223823200
+    },
+    {
+      "version" : "Wine-GE-Proton8-26-LoL",
+      "type" : "Wine-GE",
+      "date" : "2023-12-14",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26-LoL/wine-lutris-GE-Proton8-26-LoL-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-26-LoL/wine-lutris-GE-Proton8-26-LoL-x86_64.tar.xz",
+      "downsize" : 224801284
+    },
+    {
+      "version" : "Wine-GE-Proton8-25-LoL",
+      "type" : "Wine-GE",
+      "date" : "2023-12-14",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-25-LoL/wine-lutris-GE-Proton8-25-LoL-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-25-LoL/wine-lutris-GE-Proton8-25-LoL-x86_64.tar.xz",
+      "downsize" : 224767332
+    },
+    {
+      "version" : "Wine-GE-Proton8-25",
+      "type" : "Wine-GE",
+      "date" : "2023-12-01",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-25/wine-lutris-GE-Proton8-25-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-25/wine-lutris-GE-Proton8-25-x86_64.tar.xz",
+      "downsize" : 224753336
+    },
+    {
+      "version" : "Wine-GE-Proton8-24",
+      "type" : "Wine-GE",
+      "date" : "2023-11-20",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-24/wine-lutris-GE-Proton8-24-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-24/wine-lutris-GE-Proton8-24-x86_64.tar.xz",
+      "downsize" : 224764136
+    },
+    {
+      "version" : "Wine-GE-Proton8-23",
+      "type" : "Wine-GE",
+      "date" : "2023-11-20",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-23/wine-lutris-GE-Proton8-23-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-23/wine-lutris-GE-Proton8-23-x86_64.tar.xz",
+      "downsize" : 224783676
+    },
+    {
+      "version" : "Wine-GE-Proton8-22",
+      "type" : "Wine-GE",
+      "date" : "2023-10-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-22/wine-lutris-GE-Proton8-22-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-22/wine-lutris-GE-Proton8-22-x86_64.tar.xz",
+      "downsize" : 233735620
+    },
+    {
+      "version" : "Wine-GE-Proton8-21",
+      "type" : "Wine-GE",
+      "date" : "2023-10-23",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-21/wine-lutris-GE-Proton8-21-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-21/wine-lutris-GE-Proton8-21-x86_64.tar.xz",
+      "downsize" : 233570064
+    },
+    {
+      "version" : "Wine-GE-Proton8-20",
+      "type" : "Wine-GE",
+      "date" : "2023-10-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-20/wine-lutris-GE-Proton8-20-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-20/wine-lutris-GE-Proton8-20-x86_64.tar.xz",
+      "downsize" : 234356568
+    },
+    {
+      "version" : "Wine-GE-Proton8-19",
+      "type" : "Wine-GE",
+      "date" : "2023-10-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-19/wine-lutris-GE-Proton8-19-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-19/wine-lutris-GE-Proton8-19-x86_64.tar.xz",
+      "downsize" : 178850548
+    },
+    {
+      "version" : "Wine-GE-Proton8-18",
+      "type" : "Wine-GE",
+      "date" : "2023-10-15",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-18/wine-lutris-GE-Proton8-18-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-18/wine-lutris-GE-Proton8-18-x86_64.tar.xz",
+      "downsize" : 317934476
+    },
+    {
+      "version" : "Wine-GE-Proton8-17",
+      "type" : "Wine-GE",
+      "date" : "2023-09-25",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-17/wine-lutris-GE-Proton8-17-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-17/wine-lutris-GE-Proton8-17-x86_64.tar.xz",
+      "downsize" : 233396424
+    },
+    {
+      "version" : "Wine-GE-Proton8-16",
+      "type" : "Wine-GE",
+      "date" : "2023-09-24",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-16/wine-lutris-GE-Proton8-16-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-16/wine-lutris-GE-Proton8-16-x86_64.tar.xz",
+      "downsize" : 282237688
+    },
+    {
+      "version" : "Wine-GE-Proton8-15",
+      "type" : "Wine-GE",
+      "date" : "2023-09-17",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-15/wine-lutris-GE-Proton8-15-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-15/wine-lutris-GE-Proton8-15-x86_64.tar.xz",
+      "downsize" : 91427396
+    },
+    {
+      "version" : "Wine-GE-Proton8-14",
+      "type" : "Wine-GE",
+      "date" : "2023-08-20",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-14/wine-lutris-GE-Proton8-14-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-14/wine-lutris-GE-Proton8-14-x86_64.tar.xz",
+      "downsize" : 92437616
+    },
+    {
+      "version" : "Wine-GE-Proton8-13",
+      "type" : "Wine-GE",
+      "date" : "2023-08-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-13/wine-lutris-GE-Proton8-13-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-13/wine-lutris-GE-Proton8-13-x86_64.tar.xz",
+      "downsize" : 92420916
+    },
+    {
+      "version" : "Wine-GE-LOL-p8-12",
+      "type" : "Wine-GE",
+      "date" : "2023-07-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-LOL-p8-12/wine-lutris-ge-lol-p8-12-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-LOL-p8-12/wine-lutris-ge-lol-p8-12-x86_64.tar.xz",
+      "downsize" : 92329852
+    },
+    {
+      "version" : "Wine-GE-Proton8-12",
+      "type" : "Wine-GE",
+      "date" : "2023-07-22",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-12/wine-lutris-GE-Proton8-12-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-12/wine-lutris-GE-Proton8-12-x86_64.tar.xz",
+      "downsize" : 92333736
+    },
+    {
+      "version" : "Wine-GE-Proton8-11",
+      "type" : "Wine-GE",
+      "date" : "2023-07-21",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-11/wine-lutris-GE-Proton8-11-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-11/wine-lutris-GE-Proton8-11-x86_64.tar.xz",
+      "downsize" : 92330568
+    },
+    {
+      "version" : "Wine-GE-Proton8-9",
+      "type" : "Wine-GE",
+      "date" : "2023-07-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-9/wine-lutris-GE-Proton8-9-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-9/wine-lutris-GE-Proton8-9-x86_64.tar.xz",
+      "downsize" : 92309392
+    },
+    {
+      "version" : "Wine-GE-Proton8-10",
+      "type" : "Wine-GE",
+      "date" : "2023-07-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-10/wine-lutris-GE-Proton8-10-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-10/wine-lutris-GE-Proton8-10-x86_64.tar.xz",
+      "downsize" : 92309528
+    },
+    {
+      "version" : "Wine-GE-Proton8-8",
+      "type" : "Wine-GE",
+      "date" : "2023-06-05",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-8/wine-lutris-GE-Proton8-8-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-8/wine-lutris-GE-Proton8-8-x86_64.tar.xz",
+      "downsize" : 91997840
+    },
+    {
+      "version" : "Wine-GE-Proton8-7",
+      "type" : "Wine-GE",
+      "date" : "2023-05-22",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-7/wine-lutris-GE-Proton8-7-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-7/wine-lutris-GE-Proton8-7-x86_64.tar.xz",
+      "downsize" : 92041696
+    },
+    {
+      "version" : "Wine-GE-Proton8-6",
+      "type" : "Wine-GE",
+      "date" : "2023-05-21",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-6/wine-lutris-GE-Proton8-6-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-6/wine-lutris-GE-Proton8-6-x86_64.tar.xz",
+      "downsize" : 92044332
+    },
+    {
+      "version" : "Wine-8.7-GE-1-LoL",
+      "type" : "Wine-GE",
+      "date" : "2023-05-11",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/8.7-GE-1-LoL/wine-lutris-ge-lol-8.7-1-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/8.7-GE-1-LoL/wine-lutris-ge-lol-8.7-1-x86_64.tar.xz",
+      "downsize" : 93080532
+    },
+    {
+      "version" : "Wine-GE-Proton8-5",
+      "type" : "Wine-GE",
+      "date" : "2023-05-10",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-5/wine-lutris-GE-Proton8-5-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-5/wine-lutris-GE-Proton8-5-x86_64.tar.xz",
+      "downsize" : 93638032
+    },
+    {
+      "version" : "Wine-GE-Proton8-4",
+      "type" : "Wine-GE",
+      "date" : "2023-05-06",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-4/wine-lutris-GE-Proton8-4-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-4/wine-lutris-GE-Proton8-4-x86_64.tar.xz",
+      "downsize" : 93648592
+    },
+    {
+      "version" : "Wine-GE-Proton8-3",
+      "type" : "Wine-GE",
+      "date" : "2023-05-05",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-3/wine-lutris-GE-Proton8-3-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-3/wine-lutris-GE-Proton8-3-x86_64.tar.xz",
+      "downsize" : 93637464
+    },
+    {
+      "version" : "Wine-GE-Proton8-2",
+      "type" : "Wine-GE",
+      "date" : "2023-05-04",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-2/wine-lutris-GE-Proton8-2-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-2/wine-lutris-GE-Proton8-2-x86_64.tar.xz",
+      "downsize" : 93972996
+    },
+    {
+      "version" : "Wine-GE-Proton8-1",
+      "type" : "Wine-GE",
+      "date" : "2023-05-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-1/wine-lutris-GE-Proton8-1-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton8-1/wine-lutris-GE-Proton8-1-x86_64.tar.xz",
+      "downsize" : 93944784
+    },
+    {
+      "version" : "Wine-7.0-GE-8-LoL",
+      "type" : "Wine-GE",
+      "date" : "2023-04-11",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/7.0-GE-8-LoL/wine-lutris-ge-lol-7.0.8-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/7.0-GE-8-LoL/wine-lutris-ge-lol-7.0.8-x86_64.tar.xz",
+      "downsize" : 89597908
+    },
+    {
+      "version" : "Wine-GE-Proton7-43",
+      "type" : "Wine-GE",
+      "date" : "2023-04-10",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-43/wine-lutris-GE-Proton7-43-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-43/wine-lutris-GE-Proton7-43-x86_64.tar.xz",
+      "downsize" : 90982276
+    },
+    {
+      "version" : "Wine-GE-Proton7-42",
+      "type" : "Wine-GE",
+      "date" : "2023-04-03",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-42/wine-lutris-GE-Proton7-42-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-42/wine-lutris-GE-Proton7-42-x86_64.tar.xz",
+      "downsize" : 90947524
+    },
+    {
+      "version" : "Wine-GE-Proton7-41",
+      "type" : "Wine-GE",
+      "date" : "2023-03-24",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-41/wine-lutris-GE-Proton7-41-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-41/wine-lutris-GE-Proton7-41-x86_64.tar.xz",
+      "downsize" : 90965844
+    },
+    {
+      "version" : "Wine-GE-Proton7-40",
+      "type" : "Wine-GE",
+      "date" : "2023-03-24",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-40/wine-lutris-GE-Proton7-40-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-40/wine-lutris-GE-Proton7-40-x86_64.tar.xz",
+      "downsize" : 90982488
+    },
+    {
+      "version" : "Wine-GE-Proton7-39-diablo_4_beta",
+      "type" : "Wine-GE",
+      "date" : "2023-03-18",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-39-diablo_4_beta/wine-lutris-GE-diablo_4_beta-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-39-diablo_4_beta/wine-lutris-GE-diablo_4_beta-x86_64.tar.xz",
+      "downsize" : 90962688
+    },
+    {
+      "version" : "Wine-GE-Proton7-39",
+      "type" : "Wine-GE",
+      "date" : "2023-03-17",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-39/wine-lutris-GE-Proton7-39-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-39/wine-lutris-GE-Proton7-39-x86_64.tar.xz",
+      "downsize" : 91004276
+    },
+    {
+      "version" : "Wine-GE-Proton7-38",
+      "type" : "Wine-GE",
+      "date" : "2023-03-06",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-38/wine-lutris-GE-Proton7-38-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-38/wine-lutris-GE-Proton7-38-x86_64.tar.xz",
+      "downsize" : 91508972
+    },
+    {
+      "version" : "Wine-GE-Proton7-37",
+      "type" : "Wine-GE",
+      "date" : "2023-02-07",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-37/wine-lutris-GE-Proton7-37-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-37/wine-lutris-GE-Proton7-37-x86_64.tar.xz",
+      "downsize" : 91507004
+    },
+    {
+      "version" : "Wine-GE-Proton7-36",
+      "type" : "Wine-GE",
+      "date" : "2023-01-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-36/wine-lutris-GE-Proton7-36-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-36/wine-lutris-GE-Proton7-36-x86_64.tar.xz",
+      "downsize" : 91491884
+    },
+    {
+      "version" : "Wine-GE-Proton7-35",
+      "type" : "Wine-GE",
+      "date" : "2022-12-19",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-35/wine-lutris-GE-Proton7-35-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-35/wine-lutris-GE-Proton7-35-x86_64.tar.xz",
+      "downsize" : 90777872
+    },
+    {
+      "version" : "Wine-GE-Proton7-34",
+      "type" : "Wine-GE",
+      "date" : "2022-11-06",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-34/wine-lutris-GE-Proton7-34-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-34/wine-lutris-GE-Proton7-34-x86_64.tar.xz",
+      "downsize" : 91460976
+    },
+    {
+      "version" : "Wine-GE-Proton7-33",
+      "type" : "Wine-GE",
+      "date" : "2022-11-01",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-33/wine-lutris-GE-Proton7-33-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-33/wine-lutris-GE-Proton7-33-x86_64.tar.xz",
+      "downsize" : 91460156
+    },
+    {
+      "version" : "Wine-GE-Proton7-32",
+      "type" : "Wine-GE",
+      "date" : "2022-10-25",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-32/wine-lutris-GE-Proton7-32-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-32/wine-lutris-GE-Proton7-32-x86_64.tar.xz",
+      "downsize" : 91441112
+    },
+    {
+      "version" : "Wine-GE-Proton7-31",
+      "type" : "Wine-GE",
+      "date" : "2022-10-05",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-31/wine-lutris-GE-Proton7-31-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-31/wine-lutris-GE-Proton7-31-x86_64.tar.xz",
+      "downsize" : 91405968
+    },
+    {
+      "version" : "Wine-GE-Proton7-30",
+      "type" : "Wine-GE",
+      "date" : "2022-10-03",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-30/wine-lutris-GE-Proton7-30-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-30/wine-lutris-GE-Proton7-30-x86_64.tar.xz",
+      "downsize" : 91424960
+    },
+    {
+      "version" : "Wine-GE-Proton7-29",
+      "type" : "Wine-GE",
+      "date" : "2022-09-19",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-29/wine-lutris-GE-Proton7-29-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-29/wine-lutris-GE-Proton7-29-x86_64.tar.xz",
+      "downsize" : 91366888
+    },
+    {
+      "version" : "Wine-GE-Proton7-28",
+      "type" : "Wine-GE",
+      "date" : "2022-09-11",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-28/wine-lutris-GE-Proton7-28-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-28/wine-lutris-GE-Proton7-28-x86_64.tar.xz",
+      "downsize" : 91365576
+    },
+    {
+      "version" : "Wine-GE-Proton7-27",
+      "type" : "Wine-GE",
+      "date" : "2022-08-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-27/wine-lutris-GE-Proton7-27-x86_64.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/wine-ge-custom/releases/download/GE-Proton7-27/wine-lutris-GE-Proton7-27-x86_64.tar.xz",
+      "downsize" : 91371956
+    },
+    {
+      "version" : "Proton-GE-latest",
+      "type" : "Proton-GE",
+      "date" : "2025-01-17",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-23/GE-Proton9-23.tar.gz",
+      "downsize" : 488054705,
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-23/GE-Proton9-23.sha512sum"
+    },
+    {
+      "version" : "Proton-GE-Proton9-23",
+      "type" : "Proton-GE",
+      "date" : "2025-01-17",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-23/GE-Proton9-23.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-23/GE-Proton9-23.tar.gz",
+      "downsize" : 488054705
+    },
+    {
+      "version" : "Proton-GE-Proton9-22",
+      "type" : "Proton-GE",
+      "date" : "2024-12-28",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-22/GE-Proton9-22.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-22/GE-Proton9-22.tar.gz",
+      "downsize" : 487538473
+    },
+    {
+      "version" : "Proton-GE-Proton9-21",
+      "type" : "Proton-GE",
+      "date" : "2024-12-12",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-21/GE-Proton9-21.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-21/GE-Proton9-21.tar.gz",
+      "downsize" : 487726014
+    },
+    {
+      "version" : "Proton-GE-Proton9-20",
+      "type" : "Proton-GE",
+      "date" : "2024-11-10",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-20/GE-Proton9-20.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-20/GE-Proton9-20.tar.gz",
+      "downsize" : 449514226
+    },
+    {
+      "version" : "Proton-GE-Proton9-19",
+      "type" : "Proton-GE",
+      "date" : "2024-11-09",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-19/GE-Proton9-19.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-19/GE-Proton9-19.tar.gz",
+      "downsize" : 449529089
+    },
+    {
+      "version" : "Proton-GE-Proton9-18",
+      "type" : "Proton-GE",
+      "date" : "2024-11-01",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-18/GE-Proton9-18.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-18/GE-Proton9-18.tar.gz",
+      "downsize" : 449085043
+    },
+    {
+      "version" : "Proton-GE-Proton9-17",
+      "type" : "Proton-GE",
+      "date" : "2024-10-31",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-17/GE-Proton9-17.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-17/GE-Proton9-17.tar.gz",
+      "downsize" : 449084830
+    },
+    {
+      "version" : "Proton-GE-Proton9-16",
+      "type" : "Proton-GE",
+      "date" : "2024-10-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-16/GE-Proton9-16.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-16/GE-Proton9-16.tar.gz",
+      "downsize" : 435277158
+    },
+    {
+      "version" : "Proton-GE-Proton9-15",
+      "type" : "Proton-GE",
+      "date" : "2024-09-29",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-15/GE-Proton9-15.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-15/GE-Proton9-15.tar.gz",
+      "downsize" : 434561651
+    },
+    {
+      "version" : "Proton-GE-Proton9-14",
+      "type" : "Proton-GE",
+      "date" : "2024-09-24",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-14/GE-Proton9-14.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-14/GE-Proton9-14.tar.gz",
+      "downsize" : 434109617
+    },
+    {
+      "version" : "Proton-GE-Proton9-13",
+      "type" : "Proton-GE",
+      "date" : "2024-09-04",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-13/GE-Proton9-13.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-13/GE-Proton9-13.tar.gz",
+      "downsize" : 430084551
+    },
+    {
+      "version" : "Proton-GE-Proton9-12",
+      "type" : "Proton-GE",
+      "date" : "2024-08-31",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-12/GE-Proton9-12.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-12/GE-Proton9-12.tar.gz",
+      "downsize" : 433117443
+    },
+    {
+      "version" : "Proton-GE-Proton9-11",
+      "type" : "Proton-GE",
+      "date" : "2024-07-28",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-11/GE-Proton9-11.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-11/GE-Proton9-11.tar.gz",
+      "downsize" : 433150823
+    },
+    {
+      "version" : "Proton-GE-Proton9-10",
+      "type" : "Proton-GE",
+      "date" : "2024-07-07",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-10/GE-Proton9-10.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-10/GE-Proton9-10.tar.gz",
+      "downsize" : 433334753
+    },
+    {
+      "version" : "Proton-GE-Proton9-9",
+      "type" : "Proton-GE",
+      "date" : "2024-06-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-9/GE-Proton9-9.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-9/GE-Proton9-9.tar.gz",
+      "downsize" : 435596930
+    },
+    {
+      "version" : "Proton-GE-Proton9-8",
+      "type" : "Proton-GE",
+      "date" : "2024-06-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-8/GE-Proton9-8.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-8/GE-Proton9-8.tar.gz",
+      "downsize" : 435601243
+    },
+    {
+      "version" : "Proton-GE-Proton9-7",
+      "type" : "Proton-GE",
+      "date" : "2024-06-06",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-7/GE-Proton9-7.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-7/GE-Proton9-7.tar.gz",
+      "downsize" : 435456079
+    },
+    {
+      "version" : "Proton-GE-Proton9-6",
+      "type" : "Proton-GE",
+      "date" : "2024-06-04",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-6/GE-Proton9-6.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-6/GE-Proton9-6.tar.gz",
+      "downsize" : 435435205
+    },
+    {
+      "version" : "Proton-GE-Proton9-5",
+      "type" : "Proton-GE",
+      "date" : "2024-05-11",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-5/GE-Proton9-5.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-5/GE-Proton9-5.tar.gz",
+      "downsize" : 435344174
+    },
+    {
+      "version" : "Proton-GE-Proton9-4",
+      "type" : "Proton-GE",
+      "date" : "2024-04-15",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-4/GE-Proton9-4.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-4/GE-Proton9-4.tar.gz",
+      "downsize" : 435270624
+    },
+    {
+      "version" : "Proton-GE-Proton9-3",
+      "type" : "Proton-GE",
+      "date" : "2024-04-14",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-3/GE-Proton9-3.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-3/GE-Proton9-3.tar.gz",
+      "downsize" : 435294359
+    },
+    {
+      "version" : "Proton-GE-Proton9-2",
+      "type" : "Proton-GE",
+      "date" : "2024-03-21",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-2/GE-Proton9-2.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-2/GE-Proton9-2.tar.gz",
+      "downsize" : 435314167
+    },
+    {
+      "version" : "Proton-GE-Proton9-1",
+      "type" : "Proton-GE",
+      "date" : "2024-03-08",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-1/GE-Proton9-1.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton9-1/GE-Proton9-1.tar.gz",
+      "downsize" : 435267845
+    },
+    {
+      "version" : "Proton-GE-Proton8-32",
+      "type" : "Proton-GE",
+      "date" : "2024-02-12",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-32/GE-Proton8-32.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-32/GE-Proton8-32.tar.gz",
+      "downsize" : 448215391
+    },
+    {
+      "version" : "Proton-GE-Proton8-31",
+      "type" : "Proton-GE",
+      "date" : "2024-02-10",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-31/GE-Proton8-31.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-31/GE-Proton8-31.tar.gz",
+      "downsize" : 448216899
+    },
+    {
+      "version" : "Proton-GE-Proton8-30",
+      "type" : "Proton-GE",
+      "date" : "2024-01-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-30/GE-Proton8-30.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-30/GE-Proton8-30.tar.gz",
+      "downsize" : 448135203
+    },
+    {
+      "version" : "Proton-GE-Proton8-29",
+      "type" : "Proton-GE",
+      "date" : "2024-01-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-29/GE-Proton8-29.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-29/GE-Proton8-29.tar.gz",
+      "downsize" : 448147023
+    },
+    {
+      "version" : "Proton-GE-Proton8-28",
+      "type" : "Proton-GE",
+      "date" : "2024-01-28",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-28/GE-Proton8-28.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-28/GE-Proton8-28.tar.gz",
+      "downsize" : 428517462
+    },
+    {
+      "version" : "Proton-GE-Proton8-27",
+      "type" : "Proton-GE",
+      "date" : "2024-01-09",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-27/GE-Proton8-27.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-27/GE-Proton8-27.tar.gz",
+      "downsize" : 428679858
+    },
+    {
+      "version" : "Proton-GE-Proton8-26",
+      "type" : "Proton-GE",
+      "date" : "2024-01-09",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-26/GE-Proton8-26.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-26/GE-Proton8-26.tar.gz",
+      "downsize" : 446428855
+    },
+    {
+      "version" : "Proton-GE-Proton8-25",
+      "type" : "Proton-GE",
+      "date" : "2023-11-21",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-25/GE-Proton8-25.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-25/GE-Proton8-25.tar.gz",
+      "downsize" : 428716716
+    },
+    {
+      "version" : "Proton-GE-Proton8-24",
+      "type" : "Proton-GE",
+      "date" : "2023-11-19",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-24/GE-Proton8-24.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-24/GE-Proton8-24.tar.gz",
+      "downsize" : 428720199
+    },
+    {
+      "version" : "Proton-GE-Proton8-23",
+      "type" : "Proton-GE",
+      "date" : "2023-11-08",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-23/GE-Proton8-23.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-23/GE-Proton8-23.tar.gz",
+      "downsize" : 442887536
+    },
+    {
+      "version" : "Proton-GE-Proton8-22",
+      "type" : "Proton-GE",
+      "date" : "2023-10-30",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-22/GE-Proton8-22.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-22/GE-Proton8-22.tar.gz",
+      "downsize" : 442775618
+    },
+    {
+      "version" : "Proton-GE-Proton8-21",
+      "type" : "Proton-GE",
+      "date" : "2023-10-23",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-21/GE-Proton8-21.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-21/GE-Proton8-21.tar.gz",
+      "downsize" : 442501304
+    },
+    {
+      "version" : "Proton-GE-Proton8-20",
+      "type" : "Proton-GE",
+      "date" : "2023-10-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-20/GE-Proton8-20.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-20/GE-Proton8-20.tar.gz",
+      "downsize" : 442490055
+    },
+    {
+      "version" : "Proton-GE-Proton8-19",
+      "type" : "Proton-GE",
+      "date" : "2023-10-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-19/GE-Proton8-19.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-19/GE-Proton8-19.tar.gz",
+      "downsize" : 442487952
+    },
+    {
+      "version" : "Proton-GE-Proton8-18",
+      "type" : "Proton-GE",
+      "date" : "2023-10-15",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-18/GE-Proton8-18.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-18/GE-Proton8-18.tar.gz",
+      "downsize" : 442487141
+    },
+    {
+      "version" : "Proton-GE-Proton8-17",
+      "type" : "Proton-GE",
+      "date" : "2023-10-15",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-17/GE-Proton8-17.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-17/GE-Proton8-17.tar.gz",
+      "downsize" : 442487715
+    },
+    {
+      "version" : "Proton-GE-Proton8-16",
+      "type" : "Proton-GE",
+      "date" : "2023-09-24",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-16/GE-Proton8-16.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-16/GE-Proton8-16.tar.gz",
+      "downsize" : 443116881
+    },
+    {
+      "version" : "Proton-GE-Proton8-15",
+      "type" : "Proton-GE",
+      "date" : "2023-09-16",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-15/GE-Proton8-15.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-15/GE-Proton8-15.tar.gz",
+      "downsize" : 443045986
+    },
+    {
+      "version" : "Proton-GE-Proton8-14",
+      "type" : "Proton-GE",
+      "date" : "2023-09-01",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-14/GE-Proton8-14.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-14/GE-Proton8-14.tar.gz",
+      "downsize" : 443044180
+    },
+    {
+      "version" : "Proton-GE-Proton8-13",
+      "type" : "Proton-GE",
+      "date" : "2023-08-20",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-13/GE-Proton8-13.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-13/GE-Proton8-13.tar.gz",
+      "downsize" : 440531104
+    },
+    {
+      "version" : "Proton-GE-Proton8-12",
+      "type" : "Proton-GE",
+      "date" : "2023-08-20",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-12/GE-Proton8-12.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-12/GE-Proton8-12.tar.gz",
+      "downsize" : 440549780
+    },
+    {
+      "version" : "Proton-GE-Proton8-11",
+      "type" : "Proton-GE",
+      "date" : "2023-08-04",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-11/GE-Proton8-11.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-11/GE-Proton8-11.tar.gz",
+      "downsize" : 440508897
+    },
+    {
+      "version" : "Proton-GE-Proton8-10",
+      "type" : "Proton-GE",
+      "date" : "2023-08-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-10/GE-Proton8-10.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-10/GE-Proton8-10.tar.gz",
+      "downsize" : 437369393
+    },
+    {
+      "version" : "Proton-GE-Proton8-9",
+      "type" : "Proton-GE",
+      "date" : "2023-07-22",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-9/GE-Proton8-9.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-9/GE-Proton8-9.tar.gz",
+      "downsize" : 440379174
+    },
+    {
+      "version" : "Proton-GE-Proton8-8",
+      "type" : "Proton-GE",
+      "date" : "2023-07-22",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-8/GE-Proton8-8.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-8/GE-Proton8-8.tar.gz",
+      "downsize" : 252576590
+    },
+    {
+      "version" : "Proton-GE-Proton8-7",
+      "type" : "Proton-GE",
+      "date" : "2023-07-21",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-7/GE-Proton8-7.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-7/GE-Proton8-7.tar.gz",
+      "downsize" : 440379720
+    },
+    {
+      "version" : "Proton-GE-Proton8-6",
+      "type" : "Proton-GE",
+      "date" : "2023-07-02",
+      "disksize" : 0,
+      "checksum" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-6/GE-Proton8-6.sha512sum",
+      "download" : "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton8-6/GE-Proton8-6.tar.gz",
+      "downsize" : 440870582
+    },
+    {
+      "version" : "vkd3d-lutris-2.14",
+      "type" : "VKD3D-Lutris",
+      "date" : "2024-12-13",
+      "checksum" : "",
+      "download" : "https://github.com/lutris/vkd3d/releases/download/v2.14/vkd3d-2.14.tar.xz",
+      "downsize" : 2185764,
+      "isInstalled" : true,
+      "hasUpdate" : false,
+      "installDir" : "/home/a3/.config/heroic/vkd3d-lutris-2.14",
+      "disksize" : 0
+    },
+    {
+      "version" : "wine-10.0-staging-amd64",
+      "type" : "Wine-Staging (Kron4ek)",
+      "date" : "2025-01-08",
+      "checksum" : "",
+      "download" : "https://github.com/Kron4ek/Wine-Builds/releases/download/10.0/wine-10.0-amd64.tar.xz",
+      "downsize" : 65094660,
+      "isInstalled" : true,
+      "hasUpdate" : false,
+      "installDir" : "/home/a3/.config/heroic/wine-10.0-staging-amd64",
+      "disksize" : 0
+    }
+  ]
+}
