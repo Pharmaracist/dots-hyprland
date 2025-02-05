@@ -7,8 +7,7 @@ CONFIG_DIR="$XDG_CONFIG_HOME/ags"
 CACHE_DIR="$XDG_CACHE_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
 colormodefile="$STATE_DIR/user/colormode.txt"
-term_alpha=85 #Set this to < 100 make all your terminals opaque
-# sleep 0 # idk i wanted some delay or colors dont get applied properly
+
 if [ ! -d "$CACHE_DIR"/user/generated ]; then
     mkdir -p "$CACHE_DIR"/user/generated
 fi
@@ -24,10 +23,16 @@ colorvalues=()
 secondline=$(sed -n '2p' "$colormodefile")
 
 # Determine terminal opacity based on the second line
-if [[ "$secondline" == *"transparent"* ]]; then
-    term_alpha=85 # Set for transparent background
-else
-    term_alpha=100 # Default to fully opaque
+if [[ "$secondline" == *"transparent"* ]]; then # Set for transparent background
+    term_alpha=75 
+    hypr_opacity=0.9
+    rofi_alpha=#00000090
+    rofi_alpha_element=#00000025
+else #Opaque Stuff
+    term_alpha=100 
+    hypr_opacity=1
+    rofi_alpha="var(surface)"
+    rofi_alpha_element="var(surface-container-low)"
 fi
 
 transparentize() {
@@ -51,24 +56,10 @@ get_light_dark() {
     fi
     echo "$lightdark"
 }
-
-apply_fuzzel() {
-    # Check if scripts/templates/fuzzel/fuzzel.ini exists
-    if [ ! -f "scripts/templates/fuzzel/fuzzel.ini" ]; then
-        echo "Template file not found for Fuzzel. Skipping that."
-        return
-    fi
-    # Copy template
-    mkdir -p "$CACHE_DIR"/user/generated/fuzzel
-    cp "scripts/templates/fuzzel/fuzzel.ini" "$CACHE_DIR"/user/generated/fuzzel/fuzzel.ini
-    # Apply colors
-    for i in "${!colorlist[@]}"; do
-        sed -i "s/{{ ${colorlist[$i]} }}/${colorvalues[$i]#\#}/g" "$CACHE_DIR"/user/generated/fuzzel/fuzzel.ini
-    done
-
-    cp  "$CACHE_DIR"/user/generated/fuzzel/fuzzel.ini "$XDG_CONFIG_HOME"/fuzzel/fuzzel.ini
+apply_rofi() {
+    sed -i "s/wbg:.*;/wbg:$rofi_alpha;/" ~/.local/share/rofi/themes/style-4.rasi
+    sed -i "s/element-bg:.*;/element-bg:$rofi_alpha_element;/" ~/.local/share/rofi/themes/style-4.rasi
 }
-
 apply_term() {
     # Check if terminal escape sequence template exists
     if [ ! -f "scripts/templates/terminal/sequences.txt" ]; then
@@ -82,9 +73,7 @@ apply_term() {
     for i in "${!colorlist[@]}"; do
         sed -i "s/${colorlist[$i]} #/${colorvalues[$i]#\#}/g" "$CACHE_DIR"/user/generated/terminal/sequences.txt
     done
-
-    sed -i "s/\$alpha/$term_alpha/g" "$CACHE_DIR/user/generated/terminal/sequences.txt"
-
+   sed -i "s/\$alpha/$term_alpha/g" "$CACHE_DIR/user/generated/terminal/sequences.txt"
     for file in /dev/pts/*; do
       if [[ $file =~ ^/dev/pts/[0-9]+$ ]]; then
         cat "$CACHE_DIR"/user/generated/terminal/sequences.txt > "$file"
@@ -105,7 +94,7 @@ apply_hyprland() {
     for i in "${!colorlist[@]}"; do
         sed -i "s/{{ ${colorlist[$i]} }}/${colorvalues[$i]#\#}/g" "$CACHE_DIR"/user/generated/hypr/hyprland/colors.conf
     done
-
+    sed -i "s/windowrule = opacity .*\ override/windowrule = opacity $hypr_opacity override/" ~/.config/hypr/hyprland/rules/default.conf     
     cp "$CACHE_DIR"/user/generated/hypr/hyprland/colors.conf "$XDG_CONFIG_HOME"/hypr/hyprland/colors.conf
 }
 
@@ -120,7 +109,7 @@ apply_lightdark() {
 
 apply_gtk() { # Using gradience-cli
     usegradience=$(sed -n '4p' "$STATE_DIR/user/colormode.txt")
-    if [[ "$usegradience" = "nogradience" ]]; then
+    if [[ "$usegradience" = "nogradience" ]]; then 
         rm "$XDG_CONFIG_HOME/gtk-3.0/gtk.css"
         rm "$XDG_CONFIG_HOME/gtk-4.0/gtk.css"
         return
@@ -164,5 +153,5 @@ apply_ags &
 apply_hyprland &
 apply_lightdark &
 apply_gtk &
-apply_fuzzel &
 apply_term &
+apply_rofi &

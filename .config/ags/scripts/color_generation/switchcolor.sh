@@ -57,7 +57,7 @@ else
 fi
 
 # Wait for all background processes
-wait
+# wait # todo
 
 if [[ "$1" = "#"* ]]; then
   "$CONFIG_DIR"/scripts/color_generation/colorgen.sh "${color}" --apply

@@ -34,31 +34,6 @@ export function launchCustomCommand(command) {
             const monitor = Hyprland.active.monitor.id || 0;
             updateMonitorShellMode(currentShellMode, monitor, mode.toString());
         },
-        '>bard': () => {
-            if (!args[0]) return;
-            const mode = parseInt(args[0]);
-            if (isNaN(mode)) return;
-            
-            const configPath = GLib.get_home_dir() + '/.ags/config.json';
-            
-            // Update all monitors
-            const monitors = Hyprland.monitors;
-            monitors.forEach((_, index) => {
-                updateMonitorShellMode(currentShellMode, index, mode.toString());
-            });
-
-            // Update config.json for persistence
-            execAsync(['bash', '-c', `
-                if [ -f "${configPath}" ]; then
-                    # Update existing config
-                    jq '.bar.modes = "${mode}"' "${configPath}" > "${configPath}.tmp" && mv "${configPath}.tmp" "${configPath}"
-                else
-                    # Create new config
-                    mkdir -p "$(dirname "${configPath}")" &&
-                    echo '{"bar":{"position":"top","modes":"${mode}"}}' > "${configPath}"
-                fi
-            `]).catch(print);
-        },
         '>img': () => execScript('color_generation/switchwall.sh', '&'),
         '>color': () => {
             if (!args[0]) execScript('color_generation/switchcolor.sh --pick', '&');

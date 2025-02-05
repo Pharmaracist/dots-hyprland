@@ -127,7 +127,7 @@ export default ({ id = 0 }) => {
         ],
         setup: (self) => self
             .hook(App, (_b, name, visible) => {
-                if (visible) lockButton.grab_focus(); // Lock is the default option
+                if (visible) shutdownButton.grab_focus(); // Lock is the default option
             })
         ,
     });

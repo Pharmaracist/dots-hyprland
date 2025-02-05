@@ -21,7 +21,7 @@
         "editorCursor.foreground": "{{colors.primary.default.hex}}",
         "editorGroup.border": "{{colors.outline.default.hex}}",
         "editorGroupHeader.tabsBackground": "{{colors.background.default.hex}}",
-        // "editorIndentGuide.background": "{{colors.outline.default.hex}}40",
+        "editorIndentGuide.background": "{{colors.outline.default.hex}}40",
         "editorLineNumber.foreground": "{{colors.outline.default.hex}}",
         "editorLineNumber.activeForeground": "{{colors.primary.default.hex}}",
         "focusBorder": "{{colors.primary.default.hex}}",

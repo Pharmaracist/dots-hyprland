@@ -234,19 +234,46 @@
       "repoName": "dots-hyprland"
     },
     "ai": {
-      "logo": "openai-symbolic",
+      "logo": "deepseek-symbolic",
       "__custom": [
         "extraGptModels"
       ],
-      "extraGptModels": {
+    "extraGptModels": {
         "deepseek": {
-          "name": "deepseek/deepseek-chat",
-          "logo_name": "openrouter-symbolic",
+          "name": "deepseek API",
+          "logo_name": "deepseek-symbolic",
           "description": "deepseek/deepseek-chat via OpenRouter",
           "base_url": "https://openrouter.ai/api/v1/chat/completions",
           "key_get_url": "https://openrouter.ai/keys",
           "key_file": "openrouter_key.txt",
           "model": "deepseek/deepseek-chat"
+        },
+        "zuki": {
+          "name": "ZoukiJourney API",
+          "logo_name": "ai-zukijourney-symbolic",
+          "description": "An API from @zukixa on GitHub.\nNote: Keys are IP-locked so it's buggy sometimes\nPricing: Free: 10/min, 800/day.\nRequires you to join their Discord for a key",
+          "base_url": "https://zukijourney.xyzbot.net/v1/chat/completions",
+          "key_get_url": "https://discord.com/invite/Y4J6XXnmQ6",
+          "key_file": "zuki_key.txt",
+          "model": "gpt-3.5-turbo"
+        },
+        "ollama": {
+          "name": "DeepSeek",
+          "logo_name": "ollama-symbolic",
+          "description": "Ollama Local AI",
+          "base_url": "http://localhost:11434/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "ollama_key.txt",
+          "model": "deepseek-r1:1.5b"
+        },
+        "oxygen-40": {
+          "name": "Oxygen (GPT-4o)",
+          "logo_name": "ai-oxygen-symbolic",
+          "description": "An API from Tornado Softwares\nPricing: Free: 100/day\nRequires you to join their Discord for a key')",
+          "base_url": "https://app.oxyapi.uk/v1/chat/completions",
+          "key_get_url": "https://discord.com/invite/kM6MaCqGKA",
+          "key_file": "oxygen_key.txt",
+          "model": "gpt-4o"
         },
         "microsoft-phi-4": {
           "name": "microsoft/phi-4",
@@ -256,6 +283,24 @@
           "key_get_url": "https://openrouter.ai/keys",
           "key_file": "openrouter_key.txt",
           "model": "microsoft/phi-4"
+        },
+        "deepseek-llama-70b": {
+          "name": "deepseek-r1-70b",
+          "logo_name": "openrouter-symbolic",
+          "description": "deepseek/deepseek-r1-distill-llama-70b:free via OpenRouter",
+          "base_url": "https://openrouter.ai/api/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "openrouter_key.txt",
+          "model": "deepseek/deepseek-r1-distill-llama-70b:free"
+        },
+        "mistral-free": {
+          "name": "mistralai/mistral-7b-instruct:free",
+          "logo_name": "openrouter-symbolic",
+          "description": "mistralai/mistral-7b-instruct:free via OpenRouter",
+          "base_url": "https://openrouter.ai/api/v1/chat/completions",
+          "key_get_url": "https://openrouter.ai/keys",
+          "key_file": "openrouter_key.txt",
+          "model": "mistralai/mistral-7b-instruct:free"
         }
       },
       "initMessages": []

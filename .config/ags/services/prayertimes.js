@@ -318,7 +318,7 @@ class PrayerTimesService extends Service {
 
         // Using method 5 (Egyptian General Authority of Survey) for Egypt
         // and method 3 (Muslim World League) for other locations
-        const method = this._city.toLowerCase() === 'cairo' ? 5 : 3;
+        const method = this._city.toLowerCase() === 'Cairo' ? 5 : 3;
         
         // Get timezone offset in hours
         const tzOffset = -(new Date().getTimezoneOffset() / 60);

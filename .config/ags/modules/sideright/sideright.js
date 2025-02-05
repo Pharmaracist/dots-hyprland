@@ -99,58 +99,87 @@ const timeRow = Box({
     children: [
         Widget.Icon({
             icon: getDistroIcon(),
-            className: 'txt txt-larger',
+            className: 'txt sec-txt txt-hugerass',
         }),
-        Widget.Label({
-            hpack: 'center',
-            className: 'txt-small txt',
-            setup: (self) => {
-                const getUptime = async () => {
-                    try {
-                        await execAsync(['bash', '-c', 'uptime -p']);
-                        return execAsync(['bash', '-c', `uptime -p | sed -e 's/...//;s/ day\\| days/d/;s/ hour\\| hours/h/;s/ minute\\| minutes/m/;s/,[^,]*//2'`]);
-                    } catch {
-                        return execAsync(['bash', '-c', 'uptime']).then(output => {
-                            const uptimeRegex = /up\s+((\d+)\s+days?,\s+)?((\d+):(\d+)),/;
-                            const matches = uptimeRegex.exec(output);
-
-                            if (matches) {
-                                const days = matches[2] ? parseInt(matches[2]) : 0;
-                                const hours = matches[4] ? parseInt(matches[4]) : 0;
-                                const minutes = matches[5] ? parseInt(matches[5]) : 0;
-
-                                let formattedUptime = '';
-
-                                if (days > 0) {
-                                    formattedUptime += `${days} d `;
-                                }
-                                if (hours > 0) {
-                                    formattedUptime += `${hours} h `;
-                                }
-                                formattedUptime += `${minutes} m`;
-
-                                return formattedUptime;
-                            } else {
-                                throw new Error('Failed to parse uptime output');
+        Box({
+            vertical:true,
+            children:[
+                Widget.Label({
+                    xalign:0,
+                    className: 'txt-small sec-txt txt',
+                    setup: (self) => {
+                        const getUsername = async () => {
+                            try {
+                                // Fetch the current username
+                                return execAsync(['bash', '-c', 'whoami']);
+                            } catch (err) {
+                                console.error(`Failed to fetch username: ${err}`);
+                                return "Unknown";
                             }
+                        };
+                
+                        self.poll(5000, label => {
+                            getUsername().then(username => {
+                                label.label = `${username}`;
+                            }).catch(err => {
+                                console.error(`Failed to fetch username: ${err}`);
+                            });
                         });
-                    }
-                };
-
-                self.poll(5000, label => {
-                    getUptime().then(upTimeString => {
-                        label.label = `${getString("Uptime:"
-                        )} ${upTimeString}`;
-                    }).catch(err => {
-                        console.error(`Failed to fetch uptime: ${err}`);
-                    });
-                });
-            },
+                    },
+                }),
+                Widget.Label({
+                    xalign:0,
+                    opacity:0.6,
+                    className: 'txt-smallie sec-txt txt',
+                    setup: (self) => {
+                        const getUptime = async () => {
+                            try {
+                                await execAsync(['bash', '-c', 'uptime -p']);
+                                return execAsync(['bash', '-c', `uptime -p | sed -e 's/...//;s/ day\\| days/d/;s/ hour\\| hours/h/;s/ minute\\| minutes/m/;s/,[^,]*//2'`]);
+                            } catch {
+                                return execAsync(['bash', '-c', 'uptime']).then(output => {
+                                    const uptimeRegex = /up\s+((\d+)\s+days?,\s+)?((\d+):(\d+)),/;
+                                    const matches = uptimeRegex.exec(output);
+        
+                                    if (matches) {
+                                        const days = matches[2] ? parseInt(matches[2]) : 0;
+                                        const hours = matches[4] ? parseInt(matches[4]) : 0;
+                                        const minutes = matches[5] ? parseInt(matches[5]) : 0;
+        
+                                        let formattedUptime = '';
+        
+                                        if (days > 0) {
+                                            formattedUptime += `${days} d `;
+                                        }
+                                        if (hours > 0) {
+                                            formattedUptime += `${hours} h `;
+                                        }
+                                        formattedUptime += `${minutes} m`;
+        
+                                        return formattedUptime;
+                                    } else {
+                                        throw new Error('Failed to parse uptime output');
+                                    }
+                                });
+                            }
+                        };
+        
+                        self.poll(5000, label => {
+                            getUptime().then(upTimeString => {
+                                label.label = `${getString("Uptime:"
+                                )} ${upTimeString}`;
+                            }).catch(err => {
+                                console.error(`Failed to fetch uptime: ${err}`);
+                            });
+                        });
+                    },
+                }),
+            ]
         }),
         Widget.Box({ hexpand: true }),
         // ModuleReloadIcon({ hpack: 'end' }),
-        ModuleSettingsIcon({ hpack: 'end' }),
-        ModulePowerIcon({ hpack: 'end' }),
+        // ModuleSettingsIcon({ hpack: 'end' }),
+        // ModulePowerIcon({ hpack: 'end' }),
     ]
 });
 
@@ -179,7 +208,35 @@ export const sidebarOptionsStack = ExpandingIconTabContainer({
         if (getEnabledModules()[id].onFocus) getEnabledModules()[id].onFocus();
     }
 });
+const images = [
+    // '1',
+    // '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    // '7',
+    // '8',
+    '9',
+    // '10'
+];
 
+const randomIndex = Math.floor(Math.random() * images.length);
+const selectedImage = images[randomIndex];
+
+const Cat = Widget.Button({
+    onClicked: () => {
+        App.closeWindow('sideright');
+        Utils.execAsync(['bash', '-c', `${GLib.get_home_dir()}/.local/bin/ags-tweaks`]);
+    },
+    child: Widget.Icon({
+        hpack: "end",
+        hexpand: "true",
+        icon: selectedImage,
+        css: `font-size:7rem;margin-bottom:1rem`,
+        className: 'txt sec-txt txt-massive',
+    }),
+});
 export default () => Box({
     vexpand: true,
     hexpand: true,
@@ -195,13 +252,19 @@ export default () => Box({
             vexpand: true,
             className: 'sidebar-right spacing-v-15',
             children: [
-                Box({
-                    vertical: true,
-                    className: 'spacing-v-5',
-                    children: [
-                        timeRow,
-                        togglesBox,
-                    ]
+                Widget.Overlay({
+                    child:Cat,
+                    overlays:[Box({
+                        vertical: true,
+                        vpack:"center",
+                        className: 'spacing-v-5',
+                        children: [
+                            timeRow,
+                            togglesBox,
+                        ]
+                    }),
+                       
+                    ]     
                 }),
                 Box({
                     className: 'sidebar-group',

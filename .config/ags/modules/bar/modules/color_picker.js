@@ -8,8 +8,8 @@ import { darkMode } from '../../.miscutils/system.js';
 const LIGHTDARK_FILE = `${GLib.get_user_state_dir()}/ags/user/colormode.txt`;
 
 const schemeOptions = [
-    { icon: 'palette', value: 'tonalspot', tooltip: 'Tonal Spot' },
-    { icon: 'restaurant', value: 'fruitsalad', tooltip: 'Fruit Salad' },
+    { icon: 'palette', value: 'tonal-spot', tooltip: 'Tonal Spot' },
+    { icon: 'restaurant', value: 'fruit-salad', tooltip: 'Fruit Salad' },
     { icon: 'music_note', value: 'fidelity', tooltip: 'Fidelity' },
     { icon: 'looks', value: 'rainbow', tooltip: 'Rainbow' },
     { icon: 'tonality', value: 'neutral', tooltip: 'Neutral' },

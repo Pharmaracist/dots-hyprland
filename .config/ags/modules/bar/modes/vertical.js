@@ -14,6 +14,7 @@ import { MediaControls } from "../vertical_modules/bar_toggles.js";
 import { VolumeControl } from "../vertical_modules/empty_area.js";
 import { BrightnessControl } from "../vertical_modules/empty_area.js";
 import { MaterialIcon } from '../../.commonwidgets/materialicon.js';
+import { setupCursorHover } from '../../.widgetutils/cursorhover.js';
 
 export const VerticalBar = Widget.CenterBox({
   className: "bar-floating-outline",
@@ -56,8 +57,7 @@ export const VerticalBar = Widget.CenterBox({
     children:[
         VolumeControl(),
         StatusIcons(),
-        Widget.Button({className:"bar-colorscheme-btn onSurfaceVariant",onClicked:()=>Utils.execAsync(`bash -c '~/.config/ags/assets/localai/run.sh'`),child:MaterialIcon("robot", 'large')}),
-        VerticalClock(),
+	VerticalClock(),
     ]
   })
 });

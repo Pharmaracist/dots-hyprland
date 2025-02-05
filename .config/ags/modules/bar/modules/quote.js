@@ -12,11 +12,11 @@ const QuoteWidget = () => {
         className: 'txt-small onSurfaceVariant',
         label: 'Loading quote...',
         justification: 'left',
-        // wrap: true,
-        truncate: 'end',
-        // wrapMode: 'word',  // Wrap at word boundaries
-        // widthChars: 35,    // Force width to roughly 10rem
-        maxWidthChars: 45, // Maximum width in characters
+        wrap: true,
+        // truncate: 'end',
+        wrapMode: 'word',  // Wrap at word boundaries
+        widthChars: 35,    // Force width to roughly 10rem
+        maxWidthChars: 50, // Maximum width in characters
     });
 
     // Create the main widget

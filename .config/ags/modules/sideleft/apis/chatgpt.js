@@ -15,7 +15,7 @@ import { chatEntry } from '../apiwidgets.js';
 
 export const chatGPTTabIcon = Icon({
     hpack: 'center',
-    icon: `openai-symbolic`,
+    icon: userOptions.asyncGet().sidebar.ai.logo,
 });
 
 const ProviderSwitcher = () => {

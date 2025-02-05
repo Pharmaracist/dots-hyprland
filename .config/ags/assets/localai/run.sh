@@ -35,7 +35,7 @@ setup_frontend() {
     $start_cmd &
 
     # Wait and open in browser
-    firefox --new-window http://localhost:3001 &
+ 	xdg-open http://localhost:3001 &
 }
 
 # Backend setup

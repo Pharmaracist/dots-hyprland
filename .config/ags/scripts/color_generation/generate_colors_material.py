@@ -87,7 +87,7 @@ elif args.color is not None:
     argb = hex_to_argb(args.color)
     hct = Hct.from_int(argb)
 
-if args.scheme == 'fruitsalad':
+if args.scheme == 'fruit-salad':
     from materialyoucolor.scheme.scheme_fruit_salad import SchemeFruitSalad as Scheme
 elif args.scheme == 'expressive':
     from materialyoucolor.scheme.scheme_expressive import SchemeExpressive as Scheme
@@ -95,7 +95,7 @@ elif args.scheme == 'monochrome':
     from materialyoucolor.scheme.scheme_monochrome import SchemeMonochrome as Scheme
 elif args.scheme == 'rainbow':
     from materialyoucolor.scheme.scheme_rainbow import SchemeRainbow as Scheme
-elif args.scheme == 'tonalspot':
+elif args.scheme == 'tonal-spot':
     from materialyoucolor.scheme.scheme_tonal_spot import SchemeTonalSpot as Scheme
 elif args.scheme == 'neutral':
     from materialyoucolor.scheme.scheme_neutral import SchemeNeutral as Scheme

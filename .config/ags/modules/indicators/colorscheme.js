@@ -78,8 +78,8 @@ function calculateSchemeInitIndex(optionsArr, searchValue = 'vibrant') {
 
 const schemeOptionsArr = [
     [
-        { name: getString('Tonal Spot'), value: 'tonalspot' },
-        { name: getString('Fruit Salad'), value: 'fruitsalad' },
+        { name: getString('Tonal Spot'), value: 'tonal-spot' },
+        { name: getString('Fruit Salad'), value: 'fruit-salad' },
         { name: getString('Fidelity'), value: 'fidelity' },
         { name: getString('Rainbow'), value: 'rainbow' },
     ],

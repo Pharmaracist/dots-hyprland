@@ -62,6 +62,7 @@ if [[ ! "$1" = "#"* ]]; then # this is an image
     # Store the image path
     echo "$1" > "$STATE_DIR/user/current_wallpaper.txt"
 fi
+    matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" 
 
 # Then run our color generation
 if [[ "$1" = "#"* ]]; then # this is a color
@@ -111,5 +112,4 @@ elif [ "$backend" = "pywal" ]; then
         color_generation/applycolor.sh
     fi
 fi
-matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" >&2
 exit 
