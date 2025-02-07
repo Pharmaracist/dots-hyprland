@@ -52,7 +52,7 @@ $sidebar_chat_textboxareaColor: mix($onSurfaceVariant, $surfaceVariant, 40%);
 .sidebar-iconbutton {
     @include full-rounding;
     @include element_decel;
-    color: $onSurface;
+    color: $onSurfaceVariant;
     min-width: 2.727rem;
     min-height: 2.727rem;
 }

@@ -140,7 +140,6 @@ export default () => {
 
     unsubscribe = ORDER.subscribe ((n) => {
         // box.remove (widgetContent);
-
         // widgetContent = WidgetContent (n);
         // box.add (widgetContent);
     });

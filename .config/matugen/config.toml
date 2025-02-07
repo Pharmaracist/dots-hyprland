@@ -1,6 +1,10 @@
 [config.wallpaper]
 command = "swww"
-set = false
+
+[templates.ags]
+input_path = '~/.config/matugen/templates/ags.scss'
+output_path = '~/.cache/ags/user/generated/material_colors.scss'
+post_hook='ags run-js "handleStyles(false);"'
 
 [templates.hyprlock]
 input_path = '~/.config/matugen/templates/hyprlock.conf'
@@ -10,15 +14,16 @@ post_hook = 'hyprctl reload'
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland-colors.conf'
 output_path = '~/.config/hypr/colors.conf'
-post_hook = 'hyprctl reload'
 
 [templates.spicetify]
 input_path = '~/.config/matugen/templates/colors.ini'
 output_path = '~/.config/spicetify/Themes/Comfy/color.ini'
 post_hook = 'spicetify watch -q -s &'
+
 [templates.qt5ct]
 input_path = '~/.config/matugen/templates/qtct-colors.conf'
 output_path = '~/.config/qt5ct/colors/matugen.conf'
+
 [templates.qt6ct]
 input_path = '~/.config/matugen/templates/qtct-colors.conf'
 output_path = '~/.config/qt6ct/colors/matugen.conf'
@@ -53,6 +58,7 @@ output_path = '~/.config/vesktop/themes/material-you.css'
 [templates.telegram]
 input_path = '~/.config/matugen/templates/telegram-colors.tdesktop-theme'
 output_path = '~/.config/telegram-desktop/themes/material-you.tdesktop-theme'
+
 [templates.kitty]
 input_path = '~/.config/matugen/templates/kitty-colors.conf'
 output_path = '~/.config/kitty/colors.conf'
@@ -65,6 +71,10 @@ output_path = '~/.local/share/rofi/themes/colors.rasi'
 input_path = '~/.config/matugen/templates/anyrun.css'
 output_path = '~/.config/anyrun/style.css'
 
+[templates.gtk3]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-3.0/colors.css'
 
-
-
+[templates.gtk4]
+input_path = '~/.config/matugen/templates/gtk-colors.css'
+output_path = '~/.config/gtk-4.0/colors.css'

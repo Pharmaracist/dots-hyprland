@@ -28,11 +28,6 @@ globalThis['handleStyles'] = (resetMusic) => {
         Utils.exec(`sass -I "${GLib.get_user_state_dir()}/ags/scss" -I "${App.configDir}/scss/fallback" "${App.configDir}/scss/main.scss" "${COMPILED_STYLE_DIR}/style.css"`);
         App.resetCss();
         App.applyCss(`${COMPILED_STYLE_DIR}/style.css`);
-        
-        // Вычисляем время загрузки
-        // const endTime = GLib.get_monotonic_time();
-        // const loadTime = ((endTime - globalThis.startupTime) / 1000000).toFixed(3);
-        // console.log(`[LOG] AGS loaded in ${loadTime}s`);
     }
-    applyStyle().catch(print);
+    applyStyle();
 }

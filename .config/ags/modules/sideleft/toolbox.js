@@ -3,7 +3,7 @@ const { Box, Label, Scrollable } = Widget;
 import QuickScripts from './tools/quickscripts.js';
 import ColorPicker from './tools/colorpicker.js';
 import Name from './tools/name.js';
-
+import Bookmarks from './tools/bookmarks.js';
 export default Scrollable({
     hscroll: "never",
     vscroll: "automatic",
@@ -15,6 +15,7 @@ export default Scrollable({
             ColorPicker(),
             Box({ vexpand: true }),
             Name(),
+            Bookmarks(),
         ]
     })
 });

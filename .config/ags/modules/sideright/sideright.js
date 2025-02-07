@@ -5,9 +5,9 @@ const { Box, EventBox, Label } = Widget;
 import {
     ToggleIconBluetooth,
     ToggleIconWifi,
-    HyprToggleIcon,
     ModuleNightLight,
     ModuleIdleInhibitor,
+    HyprToggleIcon,
     ModuleReloadIcon,
     ModuleSettingsIcon,
     ModulePowerIcon,
@@ -185,14 +185,16 @@ const timeRow = Box({
 
 const togglesBox = Widget.Box({
     hpack: 'center',
-    className: 'sidebar-togglesbox spacing-h-5',
+    spacing:8,
+    className: 'sidebar-togglesbox',
     children: [
         ToggleIconWifi(),
         ToggleIconBluetooth(),
-        // await ModuleRawInput(),
-        // await HyprToggleIcon('touchpad_mouse', 'No touchpad while typing', 'input:touchpad:disable_while_typing', {}),
+        await ModuleRawInput(),
+        await HyprToggleIcon('touchpad_mouse', 'No touchpad while typing', 'input:touchpad:disable_while_typing', {}),
         await ModuleNightLight(),
         ModuleIdleInhibitor(),
+        ModuleSettingsIcon(),
         await ModuleCloudflareWarp(),
     ]
 })
