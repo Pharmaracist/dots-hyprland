@@ -55,7 +55,6 @@ class QuotesService extends Service {
             this.#content = quote.content;
             this.#author = quote.author;
         } catch (error) {
-            console.error('QuotesService: Failed to fetch quote:', error);
             this.#content = '';
             this.#author = '';
         } finally {

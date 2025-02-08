@@ -2,7 +2,7 @@
 
 WallSwitch="$HOME/.config/ags/scripts/color_generation/switchwall.sh"
 RecentWallpapersFile="$HOME/.config/ags/switched_wallpapers.txt"
-MaxRecentWallpapers=5  # Number of recent wallpapers to remember
+MaxRecentWallpapers=1  # Number of recent wallpapers to remember
 
 mkdir -p "$(dirname "$RecentWallpapersFile")"
 touch "$RecentWallpapersFile"

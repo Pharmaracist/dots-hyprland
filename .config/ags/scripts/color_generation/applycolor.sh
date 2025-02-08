@@ -27,12 +27,14 @@ if [[ "$secondline" == *"transparent"* ]]; then # Set for transparent background
     term_alpha=75 
     ags_transparency=True
     hypr_opacity=0.9
+    hypr_blur=true
     rofi_alpha=#00000090
     rofi_alpha_element=#00000025
 else #Opaque Stuff
     term_alpha=100 
     ags_transparency=False
     hypr_opacity=1
+    hypr_blur=false
     rofi_alpha="var(surface)"
     rofi_alpha_element="var(surface-container-low)"
 fi
@@ -72,35 +74,14 @@ apply_transparency() {
     sed -i "s/$transparent:.*;/$transparent:$ags_transparency;/" ~/.config/ags/scss/mode.scss
     ags run-js "handleStyles(false);"
     # Rofi 
-    sed -i "s/wbg:.*;/wbg:$rofi_alpha;/" ~/.local/share/rofi/themes/style-4.rasi
-    sed -i "s/element-bg:.*;/element-bg:$rofi_alpha_element;/" ~/.local/share/rofi/themes/style-4.rasi
+    sed -i "s/wbg:.*;/wbg:$rofi_alpha;/" ~/.config/rofi/config.rasi
+    sed -i "s/element-bg:.*;/element-bg:$rofi_alpha_element;/" ~/.config/rofi/config.rasi
     # Hyprland
+    hyprctl getoption decoration:blur:ignore_opacity:$hypr_blur
     sed -i "s/windowrule = opacity .*\ override/windowrule = opacity $hypr_opacity override/" ~/.config/hypr/hyprland/rules/default.conf     
     # Terminal
     sed -i "s/\$alpha/$term_alpha/g" "$CACHE_DIR/user/generated/terminal/sequences.txt"
 }
-
-
-# apply_term() {    Todo
-#     # Check if terminal escape sequence template exists
-#     if [ ! -f "scripts/templates/terminal/sequences.txt" ]; then
-#         echo "Template file not found for Terminal. Skipping that."
-#         return
-#     fi
-#     # Copy template
-#     mkdir -p "$CACHE_DIR"/user/generated/terminal
-#     cp "scripts/templates/terminal/sequences.txt" "$CACHE_DIR"/user/generated/terminal/sequences.txt
-#     # Apply colors
-#     for i in "${!colorlist[@]}"; do
-#         sed -i "s/${colorlist[$i]} #/${colorvalues[$i]#\#}/g" "$CACHE_DIR"/user/generated/terminal/sequences.txt
-#     done
-#    sed -i "s/\$alpha/$term_alpha/g" "$CACHE_DIR/user/generated/terminal/sequences.txt"
-#     for file in /dev/pts/*; do
-#       if [[ $file =~ ^/dev/pts/[0-9]+$ ]]; then
-#         cat "$CACHE_DIR"/user/generated/terminal/sequences.txt > "$file"
-#       fi
-#     done
-# }
 
 colornames=$(cat $STATE_DIR/scss/_material.scss | cut -d: -f1)
 colorstrings=$(cat $STATE_DIR/scss/_material.scss | cut -d: -f2 | cut -d ' ' -f2 | cut -d ";" -f1)

@@ -27,6 +27,8 @@ export default () => {
     return Box({
         hexpand: true,
         hpack: 'center',
+        vexpand: true,
+        vpack: 'center',
         spacing:8,
         orientation:Gtk.Orientation.VERTICAL,
         className: 'bar-pinned-apps spacing-v-5',

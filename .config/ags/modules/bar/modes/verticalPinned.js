@@ -9,6 +9,7 @@ import KbLayout from "../modules/kb_layout.js";
 import VerticalOptionalWorkspace from "../vertical_modules/workspaces_hyprland.js"
 import ScrolledModule from "../../.commonwidgets/scrolledmodule.js";
 import { MediaControls } from "../vertical_modules/bar_toggles.js";
+import SystemResources from "../vertical_modules/vertical_resources.js";
 export const VerticalBarPinned = Widget.CenterBox({
   className: "bar-bg",
   css:`min-width:3rem`,
@@ -22,17 +23,20 @@ export const VerticalBarPinned = Widget.CenterBox({
     children: [
       BarBattery(),
       ScrolledModule({
+        hpack:"center",
         children:[
-          Widget.Box({vpack:"center",className:"bar-group-pad-vertical bar-group",child:BarToggles()}),
           Widget.Box({vpack:"center",className:"bar-group-pad-vertical bar-group",child:MediaControls()}),
+          Widget.Box({vpack:"center",className:"bar-group-pad-vertical bar-group",child:BarToggles()}),
         ]
       })
     ],
   }),
   centerWidget: 
   ScrolledModule({
+    hpack:"center",
     children:[
       Widget.Box({className:"bar-group-pad-vertical bar-group",child:VerticalOptionalWorkspace()}),
+      Widget.Box({className:"bar-group-pad-vertical bar-group",child:SystemResources()}),
       Widget.Box({className:"bar-group-pad-vertical bar-group",child:VerticalPinnedApps()}),
     ]
   }),
@@ -46,7 +50,9 @@ export const VerticalBarPinned = Widget.CenterBox({
     spacing: 15,
     children:[
         StatusIcons(),
+        KbLayout(),
         VerticalClock(),
+
     ]
   })
 });

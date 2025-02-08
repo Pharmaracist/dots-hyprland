@@ -3,8 +3,13 @@ command = "swww"
 
 [templates.ags]
 input_path = '~/.config/matugen/templates/ags.scss'
-output_path = '~/.cache/ags/user/generated/material_colors.scss'
+output_path = '~/.local/state/ags/scss/_material.scss'
 post_hook='ags run-js "handleStyles(false);"'
+
+[templates.gradience]
+input_path = '~/.config/matugen/templates/gradience.json'
+output_path = '~/.cache/ags/user/generated/gradience/gradience.json'
+post_hook='rm -rf ~/.config/gtk-4.0 & rm -rf ~/.config/gtk-3.0 & gradience-cli apply -p ~/.cache/ags/user/generated/gradience/gradience.json --gtk both'
 
 [templates.hyprlock]
 input_path = '~/.config/matugen/templates/hyprlock.conf'
@@ -18,7 +23,6 @@ output_path = '~/.config/hypr/colors.conf'
 [templates.spicetify]
 input_path = '~/.config/matugen/templates/colors.ini'
 output_path = '~/.config/spicetify/Themes/Comfy/color.ini'
-post_hook = 'spicetify watch -q -s &'
 
 [templates.qt5ct]
 input_path = '~/.config/matugen/templates/qtct-colors.conf'
@@ -65,16 +69,8 @@ output_path = '~/.config/kitty/colors.conf'
 
 [templates.rofi]
 input_path = '~/.config/matugen/templates/rofi-colors.rasi'
-output_path = '~/.local/share/rofi/themes/colors.rasi'
+output_path = '~/.config/rofi/colors.rasi'
 
 [templates.anyrun]
 input_path = '~/.config/matugen/templates/anyrun.css'
 output_path = '~/.config/anyrun/style.css'
-
-[templates.gtk3]
-input_path = '~/.config/matugen/templates/gtk-colors.css'
-output_path = '~/.config/gtk-3.0/colors.css'
-
-[templates.gtk4]
-input_path = '~/.config/matugen/templates/gtk-colors.css'
-output_path = '~/.config/gtk-4.0/colors.css'

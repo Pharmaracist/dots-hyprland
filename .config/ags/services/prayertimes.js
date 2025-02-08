@@ -300,7 +300,6 @@ class PrayerTimesService extends Service {
                 console.error('City not found:', this._city);
             }
         } catch (error) {
-            console.error('Error fetching coordinates:', error);
         }
     }
 

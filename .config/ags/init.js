@@ -29,5 +29,5 @@ globalThis['handleStyles'] = (resetMusic) => {
         App.resetCss();
         App.applyCss(`${COMPILED_STYLE_DIR}/style.css`);
     }
-    applyStyle();
+    applyStyle().catch(console.error);
 }

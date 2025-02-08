@@ -127,7 +127,7 @@
     "fakeScreenRounding": 1
   },
   "apps": {
-    "bluetooth": "blueberry",
+    "bluetooth": "overskride",
     "imageViewer": "loupe",
     "network": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi",
     "settings": "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center",

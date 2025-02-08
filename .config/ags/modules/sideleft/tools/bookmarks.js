@@ -18,7 +18,7 @@ export default () => Box({
             onClicked: () => execAsync(['xdg-open', 'http://192.168.1.1']),
             child: Icon({
                 className: 'txt txt-norm',
-                icon: 'network-manager-symbolic',
+                icon: 'network-manager',
             }),
             setup: setupCursorHover,
         })

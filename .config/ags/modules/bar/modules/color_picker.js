@@ -15,8 +15,7 @@ const schemeOptions = [
     { icon: 'tonality', value: 'neutral', tooltip: 'Neutral' },
     { icon: 'contrast', value: 'monochrome', tooltip: 'Monochrome' },
     { icon: 'theater_comedy', value: 'expressive', tooltip: 'Expressive' },
-    { icon: 'auto_awesome', value: 'vibrant', tooltip: 'Vibrant' },
-    { icon: 'favorite', value: 'content', tooltip: 'Content' },
+    { icon: 'favorite', value: 'content', tooltip: 'Vibrant' },
 ];
 
 const ColorButton = ({ icon, value, tooltip }) => Widget.Button({
@@ -78,7 +77,6 @@ const TransparencyToggle = () => {
         onClicked: (self) => {
             self._isTransparent = !self._isTransparent;
             stack.shown = self._isTransparent ? 'transparent' : 'opaque';
-            
             const newValue = self._isTransparent ? "transparent" : "opaque";
             Utils.execAsync([`bash`, `-c`,
                 `mkdir -p ${GLib.get_user_state_dir()}/ags/user && ` +
@@ -98,11 +96,11 @@ const TransparencyToggle = () => {
 export default () => Widget.Box({
     className: 'spacing-h-5 bar-group-margin onSurfaceVariant bar-colorscheme',
     child: Widget.Box({
-        spacing: 5,
+        spacing: 8,
         children: [
             DarkModeToggle(),
             TransparencyToggle(),
-            Widget.Separator({ className: 'bar-separator-line' }),
+            Widget.Label({ css:`padding:0 8px`,className: 'txt-norm onSurfaceVariant',label:"|" }),
             ...schemeOptions.map(opt => ColorButton(opt)),
         ],
     }),

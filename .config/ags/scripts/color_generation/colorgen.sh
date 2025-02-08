@@ -4,6 +4,7 @@ XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 CONFIG_DIR="$XDG_CONFIG_HOME/ags"
+SCRIPTS_DIR="$XDG_CONFIG_HOME/ags/scripts"
 CACHE_DIR="$XDG_CACHE_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
 
@@ -52,12 +53,9 @@ if [[ ! "$1" = "#"* ]]; then # this is an image
     echo "$1" > "$STATE_DIR/user/current_wallpaper.txt"
 fi
 
-# Generate colors using matugen
 matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" 
 # Apply the generated colors if --apply flag is set
-if [ "$2" = "--apply" ]; then
-    cp "$CACHE_DIR/user/generated/material_colors.scss" "$STATE_DIR/scss/_material.scss"
-    color_generation/applycolor.sh
-fi
+if [ "$2" = "" ]; then
 
+fi
 exit

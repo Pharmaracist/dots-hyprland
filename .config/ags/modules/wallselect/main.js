@@ -18,13 +18,9 @@ let cachedContent = null;
 const WallpaperButton = (path) => 
     Widget.Button({
         child: Box({ className: "preview-box", css: `background-image: url("${path}");` }),
-        onClicked: async () => {
-            try {
-                await Utils.execAsync(['sh', `${CONFIG_DIR}/scripts/color_generation/switchwall.sh`, path.replace("thumbnails", "")]);
+        onClicked: () => {
+                Utils.execAsync(['sh', `${CONFIG_DIR}/scripts/color_generation/switchwall.sh`, path.replace("thumbnails", "")]);
                 App.closeWindow("wallselect");
-            } catch (error) {
-                console.error("Error switching wallpaper:", error);
-            }
         },
     });
 
@@ -93,8 +89,8 @@ const createPlaceholder = () => Box({
             hpack: 'center',
             vexpand: true,
             children: [
-                Label({ label: 'No wallpapers found.', className: 'txt-large txt-bold', }),
-                Label({ label: 'Generate thumbnails to get started.', className: 'txt-norm txt-subtext', }),
+                Label({ label: 'No wallpapers found.', className: 'txt-norm onSurfaceVariant', }),
+                Label({ label: 'Generate thumbnails to get started.',opacity:0.8, className: 'txt-small onSurfaceVariant', }),
             ],
         }),
     ],
@@ -104,9 +100,10 @@ const createPlaceholder = () => Box({
 const GenerateButton = () => Widget.Button({
     className: 'button-accent generate-thumbnails',
     child: Box({
+        spacing:8,
         children: [
             Widget.Icon({ icon: 'view-refresh-symbolic', size: 16, }),
-            Widget.Label({ label: ' Generate Thumbnails', }),
+            Widget.Label({ className:"txt-small onSurfaceVariant",label: 'Generate Thumbnails', }),
         ],
     }),
     tooltipText: 'Regenerate all wallpaper thumbnails',

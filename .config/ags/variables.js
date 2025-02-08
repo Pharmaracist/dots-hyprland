@@ -91,6 +91,7 @@ globalThis['closeEverything'] = () => {
         App.closeWindow(`cheatsheet${i}`);
         App.closeWindow(`session${i}`);
     }
+    Utils.exec(`pkill rofi`);
     App.closeWindow('sideleft');
     App.closeWindow('sideright');
     App.closeWindow('overview');
