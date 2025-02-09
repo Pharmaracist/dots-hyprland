@@ -1,5 +1,5 @@
 <div align="center">
-    <h1>【 Pharmaracism's Hyprland Rice 】</h1>
+    <h1>【 Pharmaracism's HyprNoon 】</h1>
     <p align="center">
       <img width="40%" src="https://user-images.githubusercontent.com/74038190/219923809-b86dc415-a0c2-4a38-bc88-ad6cf06395a8.gif">
     </p>
@@ -53,12 +53,7 @@ git clone https://github.com/pharmaracist/dots-hyprland.git
 cd dots-hyprland
 
 # For Arch Linux
-chmod +x install.sh
 ./install.sh
-
-# For Fedora (Work in Progress)
-chmod +x install-fedora.sh
-./install-fedora.sh
 ```
 
 ## 🖼️ Pics
@@ -85,11 +80,8 @@ chmod +x install-fedora.sh
 
 ## 🙏 Credits
 - Special thanks to my girlfriend for the support!
-- Thanks to Claude 3.5 sonnet for development assistance.
 - Acknowledgements to End-4 for the original Hyprland rice.
 - Thanks to Sh1zicus for the help and the awesome kickstart.
-- Shoutout to the Hyprland community and all the amazing ricers at Unixporn.
-- Inspiration from osu!lazer, Novelknocks, Hybrid, AvdanOS (concept), and Old End4 Configs.
 
 ## 🤝 Contributing
 We welcome contributions! Please feel free to submit a pull request or open an issue if you have suggestions or improvements.
