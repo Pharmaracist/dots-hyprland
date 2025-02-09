@@ -5,10 +5,8 @@ pkgdesc='Illogical Impulse PyMYC Dependencies'
 arch=(any)
 license=(None)
 depends=(
-	python-materialyoucolor-git
 	gradience
 	python-libsass
-	python-material-color-utilities
 	python-pywalfox
 	matugen-bin
 )

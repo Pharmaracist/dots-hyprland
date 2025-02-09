@@ -11,5 +11,6 @@ depends=(
 	blueberry networkmanager
 	gammastep
 	gnome-bluetooth-3.0
+	overskride-bin
 )
 

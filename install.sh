@@ -151,14 +151,13 @@ esac
 
 
 # Why need cleanbuild? see https://github.com/end-4/dots-hyprland/issues/389#issuecomment-2040671585
-# Why install deps by running a seperate command? see pinned comment of https://aur.archlinux.org/packages/hyprland-git
 case $SKIP_HYPR_AUR in
   true) sleep 0;;
   *)
 	  hyprland_installflags="-S"
 	  $ask || hyprland_installflags="$hyprland_installflags --noconfirm"
-    v yay $hyprland_installflags --asdeps hyprutils-git hyprlang-git hyprcursor-git hyprwayland-scanner-git
-    v yay $hyprland_installflags --answerclean=a hyprland-git
+    v yay $hyprland_installflags --asdeps hyprutils hyprlang hyprcursor hyprwayland-scanner
+    v yay $hyprland_installflags --answerclean=a hyprland
     ;;
 esac
 
@@ -182,43 +181,6 @@ case $SKIP_PLASMAINTG in
     esac
     ;;
 esac
-
-# Theme integration packages
-install_theme_integrations() {
-    if $ask; then
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Discord? [y/N]\e[0m"
-        read -p "====> " discord
-        case $discord in
-            [yY]) v yay -S --needed pywal-discord-git ;;
-            *) echo "Skipping Discord theme integration" ;;
-        esac
-
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Telegram? [y/N]\e[0m"
-        read -p "====> " telegram
-        case $telegram in
-            [yY]) v yay -S --needed wal-telegram-git ;;
-            *) echo "Skipping Telegram theme integration" ;;
-        esac
-
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Firefox? [y/N]\e[0m"
-        read -p "====> " firefox
-        case $firefox in
-            [yY]) v yay -S --needed pywalfox ;;
-            *) echo "Skipping Firefox theme integration" ;;
-        esac
-
-        echo -e "\e[33m[$0]: Would you like to install theme integration for Spotify? [y/N]\e[0m"
-        read -p "====> " spotify
-        case $spotify in
-            [yY]) v yay -S --needed spicetify-cli python-pywal-spicetify-git ;;
-            *) echo "Skipping Spotify theme integration" ;;
-        esac
-    else
-        v yay -S --needed --noconfirm pywal-discord-git wal-telegram-git pywalfox spicetify-cli python-pywal-spicetify-git
-    fi
-}
-
-v install_theme_integrations
 
 v sudo usermod -aG video,i2c,input "$(whoami)"
 v bash -c "echo i2c-dev | sudo tee /etc/modules-load.d/i2c-dev.conf"
@@ -349,8 +311,6 @@ done
 #####################################################################################
 printf "\e[36m[$0]: Finished. See the \"Import Manually\" folder and grab anything you need.\e[0m\n"
 printf "\n"
-printf "\e[36mIf you are new to Hyprland, please read\n"
-printf "https://sh1zicus.github.io/dots-hyprland-wiki/en/i-i/01setup/#post-installation\n"
 printf "for hints on launching Hyprland.\e[0m\n"
 printf "\n"
 

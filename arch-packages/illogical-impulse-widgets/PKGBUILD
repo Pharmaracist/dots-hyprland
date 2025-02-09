@@ -14,5 +14,4 @@ depends=(
 	wlogout
 	wl-clipboard
 	hyprpicker
-	anyrun-git
 )
