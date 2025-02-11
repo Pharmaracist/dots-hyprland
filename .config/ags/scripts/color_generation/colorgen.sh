@@ -8,30 +8,27 @@ SCRIPTS_DIR="$XDG_CONFIG_HOME/ags/scripts"
 CACHE_DIR="$XDG_CACHE_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
 
-# check if no arguments
-if [ $# -eq 0 ]; then
-    echo "Usage: colorgen.sh /path/to/image (--apply)"
-    exit 1
-fi
-
 # check if the file $STATE_DIR/user/colormode.txt exists. if not, create it. else, read it to $lightdark
 colormodefile="$STATE_DIR/user/colormode.txt"
 lightdark=""
 transparency=""
 materialscheme=""
-
+gowall=""
 if [ ! -f $colormodefile ]; then
     echo "dark" > $colormodefile
     echo "opaque" >> $colormodefile
     echo "vibrant" >> $colormodefile
-elif [[ $(wc -l < $colormodefile) -ne 3 || $(wc -w < $colormodefile) -ne 3 ]]; then
+    echo "" >> $colormodefile
+elif [[ $(wc -l < $colormodefile) -ne 4 || $(wc -w < $colormodefile) -ne 4 ]]; then
     echo "dark" > $colormodefile
     echo "opaque" >> $colormodefile
     echo "vibrant" >> $colormodefile
+    echo "" >> $colormodefile
 else
     lightdark=$(sed -n '1p' $colormodefile)
     transparency=$(sed -n '2p' $colormodefile)
     materialscheme=$(sed -n '3p' $colormodefile)
+    gowall=(sed -n '4p' $colormodefile)
 fi
 
 # Get the color mode
@@ -52,10 +49,10 @@ if [[ ! "$1" = "#"* ]]; then # this is an image
     # Store the image path
     echo "$1" > "$STATE_DIR/user/current_wallpaper.txt"
 fi
+matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" &&
+agsv1 run-js "handleStyles(false);"
 
-matugen image "$1" -m "$lightdark" -t "scheme-$materialscheme" 
 # Apply the generated colors if --apply flag is set
 if [ "$2" = "" ]; then
-
+    exit
 fi
-exit

@@ -72,7 +72,7 @@ apply_lightdark() {
 apply_transparency() {
     # Ags
     sed -i "s/$transparent:.*;/$transparent:$ags_transparency;/" ~/.config/ags/scss/mode.scss
-    ags run-js "handleStyles(false);"
+    agsv1 run-js "handleStyles(false);"
     # Rofi 
     sed -i "s/wbg:.*;/wbg:$rofi_alpha;/" ~/.config/rofi/config.rasi
     sed -i "s/element-bg:.*;/element-bg:$rofi_alpha_element;/" ~/.config/rofi/config.rasi

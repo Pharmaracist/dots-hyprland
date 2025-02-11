@@ -7,4 +7,4 @@ CONFIG_DIR="$XDG_CONFIG_HOME/ags"
 STATE_DIR="$XDG_STATE_HOME/ags"
 COLORMODE_FILE_DIR="$STATE_DIR/user/colormode.txt"
 
-"$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$(cat "$STATE_DIR/user/current_wallpaper.txt")" &
+"$CONFIG_DIR"/scripts/color_generation/colorgen.sh "$(cat "$STATE_DIR/user/current_wallpaper.txt")" 

@@ -4,7 +4,7 @@ command = "swww"
 [templates.ags]
 input_path = '~/.config/matugen/templates/ags.scss'
 output_path = '~/.local/state/ags/scss/_material.scss'
-post_hook='ags run-js "handleStyles(false);"'
+post_hook='agsv1 run-js "handleStyles(false);"'
 
 [templates.gradience]
 input_path = '~/.config/matugen/templates/gradience.json'
