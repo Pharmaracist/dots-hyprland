@@ -7,10 +7,11 @@ import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
 import PrayerTimesService from '../../../services/prayertimes.js';
 import Media from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
-
+import Clock from './clock.js'
 const WEATHER_CACHE_FOLDER = `${GLib.get_user_cache_dir()}/ags/weather`;
 const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
+const userName = GLib.get_real_name() + " ~ " + GLib.get_user_name();
 
 const WWO_CODE = {
   '113': 'Sunny',
@@ -76,8 +77,8 @@ const WeatherWidget = () => {
   const PRIORITY_DISPLAY_TIME = 1000; // 1 second for priority displays
   let lastUpdate = 0;
   let cachedData = null;
-  let displayMode = 'weather';
-  let previousMode = 'weather';
+  let displayMode = 'clock';
+  let previousMode = 'clock';
   let notificationTimeout = null;
   let cycleTimeout = null;
   let cachedTrackTitle = null;
@@ -258,6 +259,25 @@ const WeatherWidget = () => {
     ]
   });
 
+  const usernameContent = Box({
+    className: 'prayer-content spacing-h-10',
+    hpack: 'center',
+    vpack: 'center',
+    children: [
+      Box({
+        className: 'spacing-h-10',
+        hpack: 'center',
+        vpack: 'center',
+        children: [
+          Widget.Label({
+            className: 'txt-norm txt-onLayer1',
+            label: userName
+          })
+        ]
+      })
+    ]
+  });
+
   const mediaContent = Box({
     className: 'weather-content spacing-h-4',
     hpack: 'center',
@@ -288,6 +308,19 @@ const WeatherWidget = () => {
     ]
   });
 
+  const clockContent = Box({
+    className: 'weather-content spacing-h-4',
+    hpack: 'center',
+    vpack: 'center',
+    children: [
+      Box({
+        className: 'spacing-h-2',
+        hpack: 'center',
+        vpack: 'center',
+        children: [Clock()]
+      })
+    ]
+  });
   const contentStack = Stack({
     transition: 'slide_up_down',
     transitionDuration: 400,
@@ -296,11 +329,13 @@ const WeatherWidget = () => {
       'prayer': prayerContent,
       'media': mediaContent,
       'notification': notificationContent,
+      'clock': clockContent,
+      'username': usernameContent,
     },
   });
 
   const weatherBox = Box({
-    // css: `padding:4.55px 30px`,
+    css: `padding:4.55px 80px`,
     // className: "txt-onSurfaceVariant bar-group-margin bar-group bar-group-standalone bar-group-pad",
     children: [contentStack],
   });
@@ -365,9 +400,9 @@ const WeatherWidget = () => {
     
     lastTitle = newTitle;
   };
-
-  const showNotification = (notification) => {
-    notificationLabel.label = truncateText(notification.summary) || 'New Notification';
+  const showNotification = (Notification) => {
+    const summaryText = Notification.summary || 'New Notification';
+    notificationLabel.label = truncateText(summaryText);
     showPriorityContent('notification', PRIORITY_DISPLAY_TIME);
   };
 
@@ -384,8 +419,16 @@ const WeatherWidget = () => {
         displayMode = 'media';
         break;
       case 'media':
+        displayMode = 'clock';
+        break;
+      case 'clock':
+        displayMode = 'username';
+        break;
+      case 'username':
         displayMode = 'weather';
         break;
+      default:
+        displayMode = 'weather';
     }
     
     contentStack.shown = displayMode;
@@ -436,12 +479,10 @@ const WeatherWidget = () => {
 
       // Set up media monitoring
       Media.connect('changed', updateMediaInfo);
-      
-      // Set up notification monitoring
-      Notifications.connect('notified', () => {
-        showNotification({ summary: 'New Notification' });
+      Notifications.connect('notified', (box, notifications) => {
+        showNotification(notifications);
       });
-      
+
       // Regular weather updates
       self.poll(CACHE_DURATION / 1000000, updateWidget);
     }

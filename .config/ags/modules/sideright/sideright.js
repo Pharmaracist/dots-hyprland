@@ -224,7 +224,7 @@ const images = [
 ];
 
 const randomIndex = Math.floor(Math.random() * images.length);
-const selectedImage = images[randomIndex];
+export const selectedImage = images[randomIndex];
 
 const Cat = Widget.Button({
     onClicked: () => {

@@ -9,7 +9,7 @@ const { execAsync, exec } = Utils;
 import { execAndClose, expandTilde, hasUnterminatedBackslash, couldBeMath, launchCustomCommand, ls } from './miscfunctions.js';
 import {
     CalculationResultButton, CustomCommandButton, DirectoryButton,
-    DesktopEntryButton, ExecuteCommandButton, SearchButton, AiButton, NoResultButton,
+    DesktopEntryButton, ExecuteCommandButton, SearchButton, AiButton, WallpaperButton, NoResultButton,
 } from './searchbuttons.js';
 import { checkKeybind } from '../.widgetutils/keybind.js';
 import GeminiService from '../../services/gemini.js';
@@ -194,6 +194,7 @@ export const SearchAndWindows = () => {
                 resultsBox.add(AiButton({ text }));
             if (options.search.enableFeatures.webSearch)
                 resultsBox.add(SearchButton({ text }));
+                resultsBox.add(WallpaperButton({ text }));
             if (resultsBox.children.length === 0)
                 resultsBox.add(NoResultButton());
 
