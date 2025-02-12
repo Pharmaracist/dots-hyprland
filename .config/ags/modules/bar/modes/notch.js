@@ -24,6 +24,21 @@ const powerbtn = Widget.Button({
     Utils.timeout(1, () => openWindowOnAllMonitors('session'));
   }
 });
+const chatGPT = Widget.Button({
+  vpack:'center',
+  hpack:'center',
+  css:`padding:3px ;margin: 5px;`,
+  className: "txt-large bar-util-btn2 icon-material onSurfaceVariant",
+  child: Widget.Icon({
+    icon: "openai-symbolic",
+    size: 18,
+  }),
+  onClicked: () => {
+    Utils.execAsync([`xdg-open`,`https://chat.openai.com/`]).catch(print);  
+  },
+  setup:setupCursorHover
+});
+
 const topLeftCorner = RoundedCorner('topleft', {
   className: 'corner'
 })
@@ -44,7 +59,7 @@ export const NotchBar = Widget.CenterBox({
   centerWidget: 
   Widget.Box({
     children: [
-      Widget.Box({child:avatar(),css:`padding:6px 8px`,hpack:'center',vpack:'center',className: "bar-util-btn2 ",}),
+      Widget.Box({child:chatGPT,hpack:'center',vpack:'center',className: "bar-util-btn2 ",}),
       Widget.Box({
         children:[
           topRightCorner,

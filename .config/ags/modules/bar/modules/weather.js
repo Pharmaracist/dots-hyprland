@@ -335,7 +335,7 @@ const WeatherWidget = () => {
   });
 
   const weatherBox = Box({
-    css: `padding:4.55px 80px`,
+    css: `padding:4.55px 45px`,
     // className: "txt-onSurfaceVariant bar-group-margin bar-group bar-group-standalone bar-group-pad",
     children: [contentStack],
   });

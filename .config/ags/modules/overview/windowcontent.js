@@ -6,6 +6,7 @@ import GLib from "gi://GLib";
 import Gio from 'gi://Gio';
 import Applications from 'resource:///com/github/Aylur/ags/service/applications.js';
 const { execAsync, exec } = Utils;
+const { Overlay, Revealer, RevealerState, RevealerTransitionType, RevealerTransitionDirection } = Widget;
 import { execAndClose, expandTilde, hasUnterminatedBackslash, couldBeMath, launchCustomCommand, ls } from './miscfunctions.js';
 import {
     CalculationResultButton, CustomCommandButton, DirectoryButton,
@@ -107,7 +108,7 @@ export const SearchAndWindows = () => {
         hpack: 'center',
         child: Widget.Label({
             className: 'overview-search-prompt txt-small txt',
-            label: getString('Type to search')
+            label: getString(`hi ${GLib.get_real_name()} ! Lets Dive!`),
         }),
     });
 
@@ -205,19 +206,26 @@ export const SearchAndWindows = () => {
     return Widget.Box({
         vertical: true,
         children: [
-            Widget.Box({
-                hpack: 'center',
-                children: [
-                    entry,
+            Widget.Overlay({
+                child:overviewContent,
+                overlays:[
                     Widget.Box({
-                        className: 'overview-search-icon-box',
-                        setup: box => box.pack_start(entryPromptRevealer, true, true, 0),
-                    }),
-                    entryIcon,
-                ]
-            }),
-            overviewContent,
-            resultsRevealer,
+                        hpack: 'center',
+                        vexpand:false,
+                        vpack:'start',
+                        css:`margin-top: 1rem;`,
+                        children: [
+                            entry,
+                            Widget.Box({
+                                className: 'overview-search-icon-box',
+                            setup: box => box.pack_start(entryPromptRevealer, true, true, 0),
+                        }),
+                        entryIcon,
+                    ]
+                }),
+            ],
+        }),
+        resultsRevealer,
         ],
         setup: (self) => self
             .hook(App, (_b, name, visible) => {

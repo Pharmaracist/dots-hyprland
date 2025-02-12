@@ -28,7 +28,7 @@ const WallpaperButton = (path) =>
     Widget.Button({
         child: Box({ className: "preview-box", css: `background-image: url("${path}");` }),
         onClicked: () => {
-                Utils.execAsync(['sh', `${CONFIG_DIR}/scripts/color_generation/switchwall.sh`, path.replace("thumbnails", "")]);
+                Utils.execAsync(['sh', `${CONFIG_DIR}/scripts/color_generation/switchwall.sh`, path.replace("thumbnails", "")]).catch(print);
                 App.closeWindow("wallselect");
         },
     });
