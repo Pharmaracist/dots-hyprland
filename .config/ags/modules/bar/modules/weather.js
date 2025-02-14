@@ -4,6 +4,7 @@ const { Box, Label, EventBox, Stack } = Widget;
 const { execAsync } = Utils;
 const { GLib } = imports.gi;
 import { MaterialIcon } from "../../.commonwidgets/materialicon.js";
+import { WWO_CODE } from "../../.commondata/weather.js";
 import PrayerTimesService from '../../../services/prayertimes.js';
 import Media from 'resource:///com/github/Aylur/ags/service/mpris.js';
 import Notifications from 'resource:///com/github/Aylur/ags/service/notifications.js';
@@ -13,56 +14,6 @@ const WEATHER_CACHE_PATH = WEATHER_CACHE_FOLDER + "/wttr.in.txt";
 Utils.exec(`mkdir -p ${WEATHER_CACHE_FOLDER}`);
 const userName = GLib.get_real_name() + " ~ " + GLib.get_user_name();
 
-const WWO_CODE = {
-  '113': 'Sunny',
-  '116': 'PartlyCloudy',
-  '119': 'Cloudy',
-  '122': 'VeryCloudy',
-  '143': 'Fog',
-  '176': 'LightShowers',
-  '179': 'LightRain',
-  '182': 'HeavyRain',
-  '185': 'HeavyShowers',
-  '200': 'ThunderyShowers',
-  '227': 'LightSnow',
-  '230': 'HeavySnow',
-  '248': 'LightSleet',
-  '260': 'LightSleetShowers',
-  '263': 'LightSnowShowers',
-  '266': 'HeavySnowShowers',
-  '281': 'LightSleet',
-  '284': 'LightSleetShowers',
-  '293': 'LightRain',
-  '296': 'LightRain',
-  '299': 'HeavyRain',
-  '302': 'HeavyRain',
-  '305': 'HeavyRain',
-  '308': 'HeavyRain',
-  '311': 'LightDrizzle',
-  '314': 'LightDrizzle',
-  '317': 'LightDrizzle',
-  '320': 'LightDrizzle',
-  '323': 'LightDrizzle',
-  '326': 'LightDrizzle',
-  '329': 'LightDrizzle',
-  '332': 'LightMist',
-  '335': 'LightMist',
-  '338': 'LightMist',
-  '350': 'LightMist',
-  '353': 'LightMist',
-  '356': 'LightMist',
-  '359': 'LightMist',
-  '362': 'LightMist',
-  '365': 'LightMist',
-  '368': 'LightMist',
-  '371': 'LightMist',
-  '374': 'LightMist',
-  '377': 'LightMist',
-  '386': 'LightMist',
-  '389': 'LightMist',
-  '392': 'LightMist',
-  '395': 'LightMist',
-};
 
 const MAX_TEXT_LENGTH = 30;
 
@@ -73,7 +24,7 @@ const truncateText = (text, maxLength = MAX_TEXT_LENGTH) => {
 
 const WeatherWidget = () => {
   const CACHE_DURATION = 15 * 60 * 1000000; // 15 minutes
-  const CYCLE_INTERVAL = 3000; // 3 seconds
+  const CYCLE_INTERVAL = userOptions.asyncGet().etc.weather.cycleTimeout || 10000; // 10 seconds as fallback
   const PRIORITY_DISPLAY_TIME = 1000; // 1 second for priority displays
   let lastUpdate = 0;
   let cachedData = null;
@@ -184,7 +135,6 @@ const WeatherWidget = () => {
         return 'mosque';
     }
   };
-
   const weatherIcon = MaterialIcon('device_thermostat', 'large weather-icon txt-norm txt-onLayer1');
   const prayerIcon = MaterialIcon('mosque', 'large weather-icon txt-norm txt-onLayer1');
   const mediaIcon = MaterialIcon('music_note', 'large weather-icon txt-norm txt-onLayer1');
@@ -323,7 +273,7 @@ const WeatherWidget = () => {
   });
   const contentStack = Stack({
     transition: 'slide_up_down',
-    transitionDuration: 400,
+    transitionDuration: userOptions.asyncGet().animations.durationSmall,
     children: {
       'weather': weatherContent,
       'prayer': prayerContent,

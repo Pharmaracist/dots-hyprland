@@ -11,7 +11,7 @@ depends=(
 	cliphist
 	cmake
 	curl
-	rofi-lbonn-wayland-git
+	rofi-wayland
 	rsync
 	wget
 	ripgrep

@@ -517,5 +517,11 @@
       "showBattery": true,
       "showAvatar": true
     }
+  },
+  "etc":{
+    "weather":{
+      "cycle": false,
+      "cycleTimeout":"5000"
+    }
   }
 }
