@@ -744,12 +744,16 @@ function showFontChooserDialog(title, callback) {
 }
 
 function createSidebar() {
-    const sidebar = new Gtk.Box({
-        orientation: Gtk.Orientation.VERTICAL,
-        spacing: 6,
-        css_classes: ['navigation-sidebar']
+     const sidebar = new Gtk.ScrolledWindow({
+        hscrollbar_policy: Gtk.PolicyType.NEVER,
+        vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+        vexpand: true,
+        hexpand: false,
+        min_content_height: 300,
+        max_content_height: 400,
+        propagate_natural_height: true,
+        css_classes: ['sidebar']
     });
-
     const list = new Gtk.ListBox({
         selection_mode: Gtk.SelectionMode.SINGLE,
         css_classes: ['navigation-sidebar']
@@ -812,7 +816,7 @@ function createSidebar() {
         }
     });
 
-    sidebar.append(list);
+    sidebar.set_child(list);
     return sidebar;
 }
 
