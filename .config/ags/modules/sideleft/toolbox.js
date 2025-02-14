@@ -12,10 +12,10 @@ export default Scrollable({
         spacing:10,
         children: [
             Widget.Box({ css:`margin-top:1.8rem`,child:ModuleConfigure()}),
-            MusicControls(),
             // Box({ vexpand: true }),
             QuickScripts(),
             ColorPicker(),
+            MusicControls(),
         ]
     })
 });
