@@ -14,8 +14,6 @@ import "./modules/session/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/desktopWidgets/"
-// import "./modules/clipboard/"
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -32,7 +30,6 @@ ShellRoot {
 
     Bar {}
     ClockWidget {}
-    // Clipboard {}
     Cheatsheet {}
     ActivateLinux {}
     Dock {}
