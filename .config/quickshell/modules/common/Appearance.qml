@@ -150,6 +150,8 @@ Singleton {
             property string iconNerd: "SpaceMono NF"
             property string monospace: "JetBrains Mono NF"
             property string reading: "Readex Pro"
+            property string niche: "Nothing Font (5x7)"
+
         }
         property QtObject pixelSize: QtObject {
             property int smallest: 10
@@ -249,8 +251,8 @@ Singleton {
     }
 
     sizes: QtObject {
-        property real barHeight: 40
-        property real barCenterSideModuleWidth: 360
+        property real barHeight: 33
+        property real barCenterSideModuleWidth: 300
         property real barPreferredSideSectionWidth: 400
         property real sidebarWidth: 460
         property real sidebarWidthExtended: 750

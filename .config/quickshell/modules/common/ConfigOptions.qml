@@ -13,19 +13,21 @@ Singleton {
     }
 
     property QtObject apps: QtObject {
-        property string bluetooth: "blueberry"
+        property string bluetooth: "better-control --bluetooth"
         property string imageViewer: "loupe"
-        property string network: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi"
-        property string settings: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center"
+        property string network: "better-control --wifi"
+        property string settings: "better-control"
         property string taskManager: "gnome-usage"
         property string terminal: "foot" // This is only for shell actions
     }
 
     property QtObject bar: QtObject {
+        property string position: "top"
+        property bool monitorExclusive: true
         property int batteryLowThreshold: 20
         property string topLeftIcon: "spark" // Options: distro, spark
-        property bool showBackground: true
-        property bool borderless: false
+        property bool showBackground: false
+        property bool borderless: true
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
             property bool alwaysShowCpu: false

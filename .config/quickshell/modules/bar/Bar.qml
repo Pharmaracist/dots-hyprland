@@ -3,6 +3,7 @@ import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
 import QtQuick
+import QtNetwork
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
@@ -19,6 +20,7 @@ Scope {
     readonly property int barCenterSideModuleWidth: Appearance.sizes.barCenterSideModuleWidth
     readonly property int osdHideMouseMoveThreshold: 20
     property bool showBarBackground: ConfigOptions.bar.showBackground
+    property string barPosition: ConfigOptions.bar.position
 
     Variants { // For each monitor
         model: Quickshell.screens
@@ -39,16 +41,18 @@ Scope {
             color: "transparent"
 
             anchors {
-                top: true
                 left: true
                 right: true
+                top: barPosition === "top"
+                bottom: barPosition === "bottom"
             }
 
             Rectangle { // Bar background
                 id: barContent
                 anchors.right: parent.right
                 anchors.left: parent.left
-                anchors.top: parent.top
+                anchors.top: barPosition === "top" ? parent.top : undefined
+                anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
                 color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
                 height: barHeight
                 
@@ -101,6 +105,7 @@ Scope {
                         }
                     }
                     Item {  // Left section
+                        visible: Quickshell.screens.indexOf(modelData) === 0
                         anchors.fill: parent
                         implicitHeight: leftSectionRowLayout.implicitHeight
                         implicitWidth: leftSectionRowLayout.implicitWidth
@@ -210,9 +215,10 @@ Scope {
                             Layout.alignment: Qt.AlignVCenter
                         }
 
-                        Battery {
-                            Layout.alignment: Qt.AlignVCenter
-                        }
+                        // Battery {
+                        //     visible: Quickshell.screens.indexOf(modelData) === 0
+                        //     Layout.alignment: Qt.AlignVCenter
+                        // }
 
                     }
 
@@ -290,6 +296,7 @@ Scope {
                         }
 
                         RowLayout {
+                            visible: Quickshell.screens.indexOf(modelData) === 0
                             id: rightSectionRowLayout
                             anchors.fill: parent
                             spacing: 5
@@ -344,13 +351,19 @@ Scope {
                                     }
                                     MaterialSymbol {
                                         Layout.rightMargin: indicatorsRowLayout.realSpacing
-                                        text: (Network.networkName.length > 0 && Network.networkName != "lo") ? (
-                                            Network.networkStrength > 80 ? "signal_wifi_4_bar" :
-                                            Network.networkStrength > 60 ? "network_wifi_3_bar" :
-                                            Network.networkStrength > 40 ? "network_wifi_2_bar" :
-                                            Network.networkStrength > 20 ? "network_wifi_1_bar" :
-                                            "signal_wifi_0_bar"
-                                        ) : "signal_wifi_off"
+                                        text: {
+                                            if (NetworkInformation.TransportMedium.Ethernet) {
+                                                return "lan";
+                                            } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
+                                                return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
+                                                    Network.networkStrength > 60 ? "network_wifi_3_bar" :
+                                                    Network.networkStrength > 40 ? "network_wifi_2_bar" :
+                                                    Network.networkStrength > 20 ? "network_wifi_1_bar" :
+                                                    "signal_wifi_0_bar";
+                                            } else {
+                                                return "signal_wifi_off";
+                                            }
+                                        }
                                         iconSize: Appearance.font.pixelSize.larger
                                         color: Appearance.colors.colOnLayer0
                                     }
@@ -381,21 +394,24 @@ Scope {
             Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.top: barContent.bottom
+                anchors.top: barPosition === "top" ? barContent.bottom : undefined
+                anchors.bottom: barPosition === "bottom" ? barContent.top : undefined
                 height: Appearance.rounding.screenRounding
 
                 RoundCorner {
-                    anchors.top: parent.top
+                    anchors.top: barPosition === "top" ? parent.top : undefined
+                    anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
                     anchors.left: parent.left
                     size: Appearance.rounding.screenRounding
-                    corner: cornerEnum.topLeft
+                    corner: barPosition === "top" ? cornerEnum.topLeft : cornerEnum.bottomLeft
                     color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
                 }
                 RoundCorner {
-                    anchors.top: parent.top
+                    anchors.top: barPosition === "top" ? parent.top : undefined
+                    anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
                     anchors.right: parent.right
                     size: Appearance.rounding.screenRounding
-                    corner: cornerEnum.topRight
+                    corner: barPosition === "top" ? cornerEnum.topRight : cornerEnum.bottomRight
                     color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
                 }
             }

@@ -17,9 +17,147 @@ Singleton {
     property var responses: []
     property int runningRequests: 0
     property var defaultUserAgent: ConfigOptions?.networking?.userAgent || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
-    property var providerList: ["yandere", "konachan", "zerochan", "danbooru", "gelbooru", "waifu.im"]
+    property var providerList: ["wallhaven", "yandere", "konachan", "zerochan", "danbooru", "gelbooru", "waifu.im"]
     property var providers: {
         "system": { "name": qsTr("System") },
+        "wallhaven": {
+            "name": "Wallhaven",
+            "url": "https://wallhaven.cc",
+            "api": "https://wallhaven.cc/api/v1/search",
+            "description": qsTr("High quality wallpapers | CC licensed images"),
+            "constructUrl": function(tags, nsfw, limit, page) {
+                let url = "https://wallhaven.cc/api/v1/search"
+                let params = []
+                
+                // Handle special category tags
+                let specialCategory = "";
+                let useSpecialCategory = true;
+                let remainingTags = [];
+                
+                if (tags && tags.length > 0) {
+                    // Check for special category tags
+                    tags.forEach(tag => {
+                        const lowerTag = tag.toLowerCase();
+                        if (lowerTag === "toplist" || lowerTag === "top") {
+                            specialCategory = "toplist";
+                            useSpecialCategory = true;
+                        } else if (lowerTag === "hot") {
+                            specialCategory = "hot";
+                            useSpecialCategory = true;
+                        } else if (lowerTag === "latest") {
+                            specialCategory = "latest";
+                            useSpecialCategory = true;
+                        } else if (lowerTag === "random") {
+                            specialCategory = "random";
+                            useSpecialCategory = true;
+                        } else if (lowerTag === "best" || lowerTag === "favorites") {
+                            specialCategory = "best";
+                            useSpecialCategory = true;
+                        } else {
+                            remainingTags.push(tag);
+                        }
+                    });
+                    
+                    // Add remaining tags as search query
+                    if (remainingTags.length > 0) {
+                        params.push("q=" + encodeURIComponent(remainingTags.join(" ")));
+                    }
+                }
+                
+                // Handle purity settings (SFW/NSFW)
+                // 100 = SFW, 010 = sketchy, 001 = NSFW
+                params.push("purity=" + (nsfw ? "110" : "100"));
+                
+                // Add pagination
+                params.push("page=" + page);
+                
+                // Set sorting based on special category
+                if (useSpecialCategory) {
+                    if (specialCategory === "toplist") {
+                        params.push("sorting=toplist");
+                        params.push("topRange=1M"); // 1 month toplist
+                    } else if (specialCategory === "hot") {
+                        params.push("sorting=hot");
+                    } else if (specialCategory === "latest") {
+                        params.push("sorting=date_added");
+                        params.push("order=desc");
+                    } else if (specialCategory === "random") {
+                        params.push("sorting=random");
+                    } else if (specialCategory === "best") {
+                        params.push("sorting=toplist");
+                        params.push("topRange=1y"); // Best of the year
+                        params.push("atleast=1920x1080"); // High resolution only
+                    }
+                } else if (remainingTags.length > 0) {
+                    // Use relevance for specific searches
+                    params.push("sorting=relevance");
+                } else {
+                    // Default to toplist for general browsing
+                    params.push("sorting=toplist");
+                    params.push("topRange=1M"); // 1 month toplist
+                }
+                
+                // Add other parameters
+                params.push("ratios=landscape");
+                params.push("categories=111"); // General, Anime, People
+                
+                // Combine URL
+                return url + "?" + params.join("&");
+            },
+            "mapFunc": (response) => {
+                // Check if response has the expected structure
+                if (!response || !response.data) {
+                    console.log("[Booru] Wallhaven response missing data property:", JSON.stringify(response))
+                    return []
+                }
+                
+                return response.data.map(item => {
+                    return {
+                        "id": item.id,
+                        "width": parseInt(item.dimension_x) || 0,
+                        "height": parseInt(item.dimension_y) || 0,
+                        "aspect_ratio": (parseInt(item.dimension_x) && parseInt(item.dimension_y)) ? (parseInt(item.dimension_x) / parseInt(item.dimension_y)) : 1.0,
+                        "tags": Array.isArray(item.tags) ? item.tags.map(tag => tag.name).join(' ') : "",
+                        "rating": item.purity,
+                        "is_nsfw": (item.purity !== 'sfw'),
+                        "md5": item.id,
+                        "preview_url": item.thumbs.small,
+                        "sample_url": item.thumbs.original,
+                        "file_url": item.path,
+                        "file_ext": item.file_type ? item.file_type.split('/')[1] : "jpg",
+                        "source": item.url,
+                    }
+                })
+            },
+            "tagSearchTemplate": "https://wallhaven.cc/api/v1/search?q={{query}}&sorting=relevance&categories=111&purity=100",
+            "tagMapFunc": (response) => {
+                // Check if response has the expected structure
+                if (!response || !response.data || !Array.isArray(response.data)) {
+                    console.log("[Booru] Wallhaven tag response missing data array:", JSON.stringify(response))
+                    return []
+                }
+                
+                // Extract unique tags from the results
+                const tags = [];
+                const tagSet = new Set();
+                
+                response.data.forEach(item => {
+                    if (item.tags && Array.isArray(item.tags) && item.tags.length > 0) {
+                        item.tags.forEach(tag => {
+                            if (tag.name && !tagSet.has(tag.name)) {
+                                tagSet.add(tag.name);
+                                tags.push({
+                                    "name": tag.name,
+                                    "count": tag.category || 0
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                return tags;
+            }
+        },
         "yandere": {
             "name": "yande.re",
             "url": "https://yande.re",
@@ -253,6 +391,12 @@ Singleton {
 
     function constructRequestUrl(tags, nsfw=true, limit=20, page=1) {
         var provider = providers[currentProvider]
+        
+        // Use custom URL constructor for Wallhaven
+        if (currentProvider === "wallhaven" && provider.constructUrl) {
+            return provider.constructUrl(tags, nsfw, limit, page)
+        }
+        
         var baseUrl = provider.api
         var tagString = tags.join(" ")
         if (!nsfw && !(["zerochan", "waifu.im"].includes(currentProvider))) {
@@ -335,7 +479,7 @@ Singleton {
         }
 
         try {
-            // Required for danbooru
+            // Set appropriate headers for different providers
             if (currentProvider == "danbooru") {
                 xhr.setRequestHeader("User-Agent", defaultUserAgent)
             }
@@ -343,6 +487,14 @@ Singleton {
                 const userAgent = ConfigOptions?.sidebar?.booru?.zerochan?.username ? `Desktop sidebar booru viewer - username: ${ConfigOptions.sidebar.booru.zerochan.username}` : defaultUserAgent
                 xhr.setRequestHeader("User-Agent", userAgent)
             }
+            else if (currentProvider == "wallhaven") {
+                // Wallhaven requires a User-Agent header
+                xhr.setRequestHeader("User-Agent", defaultUserAgent)
+            }
+            
+            // Log the request URL for debugging
+            console.log("[Booru] Making request to: " + url)
+            
             root.runningRequests++;
             xhr.send()
         } catch (error) {

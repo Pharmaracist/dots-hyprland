@@ -4,6 +4,7 @@
 
 import "./modules/bar/"
 import "./modules/cheatsheet/"
+import "./modules/dock/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
@@ -12,6 +13,9 @@ import "./modules/screenCorners/"
 import "./modules/session/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
+import "./modules/desktopWidgets/"
+// import "./modules/clipboard/"
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -27,7 +31,11 @@ ShellRoot {
     }
 
     Bar {}
+    ClockWidget {}
+    // Clipboard {}
     Cheatsheet {}
+    ActivateLinux {}
+    Dock {}
     MediaControls {}
     NotificationPopup {}
     OnScreenDisplayBrightness {}

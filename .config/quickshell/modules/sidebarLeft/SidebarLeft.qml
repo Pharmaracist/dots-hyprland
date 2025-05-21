@@ -34,9 +34,9 @@ Scope { // Scope
             property bool pin: false
             property real sidebarWidth: sidebarRoot.extend ? Appearance.sizes.sidebarWidthExtended : Appearance.sizes.sidebarWidth
 
-            function hide() {
-                sidebarLoader.active = false
-            }
+            // function hide() {
+            //     sidebarLoader.active = false
+            // }
 
             exclusiveZone: sidebarRoot.pin ? sidebarWidth : 0
             implicitWidth: Appearance.sizes.sidebarWidthExtended
