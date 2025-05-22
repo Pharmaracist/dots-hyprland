@@ -5,16 +5,12 @@ $character'''
 palette = 'colors'
 
 [palettes.colors]
-mustard = '#af8700' # example
-color1 = '#ffb3b2'
-color2 = '#561d1f'
-color3 = '#d7c1c0'
-color4 = '#271d1d'
-color5 = '#561d1f'
-color6 = '#1a1111'
-color7 = '#1a1111'
-color8 = '#ffb3b2'
-color9 = '#e4c18d'
+color1 = '#92cef5'
+color2 = '#00344b'
+color3 = '#c1c7ce'
+color5 = '#00344b'
+color8 = '#92cef5'
+color9 = '#ccc1e9'
 
 # Prompt symbols 
 [character]

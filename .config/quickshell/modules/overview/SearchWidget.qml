@@ -246,14 +246,6 @@ Item { // Wrapper
                     }
                 }
             }
-
-            Rectangle { // Separator
-                visible: root.showResults
-                Layout.fillWidth: true
-                height: 1
-                color: Appearance.m3colors.m3outlineVariant
-            }
-
             ListView { // App results
                 id: appResults
                 visible: root.showResults
