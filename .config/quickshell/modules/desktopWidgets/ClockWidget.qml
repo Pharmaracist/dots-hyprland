@@ -36,7 +36,7 @@ ShellRoot {
                 color: Appearance.colors.colOnLayer2
                 font.pixelSize: 80
                 opacity: 0.85
-                anchors.left: parent
+                Layout.alignment: Qt.AlignLeft
                 text: DateTime.time
             }
 
@@ -46,7 +46,7 @@ ShellRoot {
                 color: Appearance.colors.colOnLayer1
                 font.pixelSize: 40
                 opacity: 0.6
-                anchors.left: parent
+                Layout.alignment: Qt.AlignLeft
                 text: DateTime.date
             }
 
