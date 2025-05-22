@@ -5,6 +5,7 @@ import "root:/modules/common/widgets"
 import "root:/modules/common/functions/fuzzysort.js" as Fuzzy
 import "root:/modules/common/functions/string_utils.js" as StringUtils
 import "root:/modules/common/functions/file_utils.js" as FileUtils
+import "root:/modules/common/functions/file_utils.js" as FileUtils
 import "./anime/"
 import Qt.labs.platform
 import QtQuick
@@ -20,6 +21,9 @@ Item {
     property var panelWindow
     property var inputField: tagInputField
     readonly property var responses: Booru.responses
+    property string previewDownloadPath: FileUtils.trimFileProtocol(`${XdgDirectories.cache}/media/waifus`)
+    property string downloadPath: FileUtils.trimFileProtocol(XdgDirectories.pictures  + "/homework")
+    property string nsfwPath: FileUtils.trimFileProtocol(XdgDirectories.pictures + "/homework/🌶️")
     property string previewDownloadPath: FileUtils.trimFileProtocol(`${XdgDirectories.cache}/media/waifus`)
     property string downloadPath: FileUtils.trimFileProtocol(XdgDirectories.pictures  + "/homework")
     property string nsfwPath: FileUtils.trimFileProtocol(XdgDirectories.pictures + "/homework/🌶️")

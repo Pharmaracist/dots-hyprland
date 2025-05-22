@@ -21,7 +21,6 @@ Item {
     property bool expanded: false
     property bool enableAnimation: true
     property int notificationListSpacing: 5
-    property bool ready: false
     property int defaultTimeoutValue: 5000
 
     property var notificationXAnimation: Appearance.animation.elementMoveEnter
@@ -29,18 +28,9 @@ Item {
     Layout.fillWidth: true
     clip: !popup
 
-    implicitHeight: ready ? notificationColumnLayout.implicitHeight + notificationListSpacing : 0
-    Behavior on implicitHeight {
-        enabled: enableAnimation
-        NumberAnimation {
-            duration: Appearance.animation.elementMoveFast.duration
-            easing.type: Appearance.animation.elementMoveFast.type
-            easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-        }
-    }
+    implicitHeight: notificationColumnLayout.implicitHeight + notificationListSpacing
 
     Component.onCompleted: {
-        root.ready = true
         if (popup) timeoutTimer.start()
     }
 
@@ -89,17 +79,7 @@ Item {
         onTriggered: {
             notificationRowWrapper.anchors.top = undefined
             notificationRowWrapper.anchors.bottom = root.bottom
-            implicitHeight = 0
-            destroyTimer2.start()
-        }
-    }
-
-    Timer {
-        id: destroyTimer2
-        interval: Appearance.animation.elementMoveFast.duration
-        repeat: false
-        onTriggered: {
-            root.destroy()
+            Notifications.discardNotification(notificationObject.id);
         }
     }
 
@@ -109,7 +89,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         onClicked: (mouse) => {
             if (mouse.button == Qt.MiddleButton) 
-                Notifications.discardNotification(notificationObject.id);
+                root.destroyWithAnimation()
             else if (mouse.button == Qt.RightButton) 
                 root.toggleExpanded()
         }
@@ -141,7 +121,7 @@ Item {
             if (mouse.button === Qt.LeftButton) {
                 if (notificationRowWrapper.x > dragConfirmThreshold) {
                     root.notificationXAnimation = Appearance.animation.elementMoveEnter
-                    Notifications.discardNotification(notificationObject.id);
+                    root.destroyWithAnimation()
                 } else {
                     // Animate back if not far enough
                     root.notificationXAnimation = Appearance.animation.elementMoveFast
@@ -150,6 +130,19 @@ Item {
                 }
             }
         }
+        onCanceled: (mouse) => {
+            dragStarted = false
+            if (notificationRowWrapper.x > dragConfirmThreshold) {
+                root.notificationXAnimation = Appearance.animation.elementMoveEnter
+                root.destroyWithAnimation()
+            } else {
+                // Animate back if not far enough
+                root.notificationXAnimation = Appearance.animation.elementMoveFast
+                notificationRowWrapper.x = 0
+                notificationBackground.x = 0
+            }
+        }
+
         onPositionChanged: (mouse) => {
             if (mouse.buttons & Qt.LeftButton) {
                 let dx = mouse.x - startX
@@ -172,11 +165,9 @@ Item {
     Item {
         id: notificationBackgroundWrapper
 
-        // anchors.fill: parent
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        // anchors.top: parent.top
         anchors.topMargin: notificationListSpacing
         implicitHeight: notificationColumnLayout.implicitHeight + notificationListSpacing
 
@@ -186,7 +177,7 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             // anchors.top: parent.top
-            height: notificationColumnLayout.implicitHeight
+            implicitHeight: notificationColumnLayout.implicitHeight
 
             color: (notificationObject.urgency == NotificationUrgency.Critical) ? 
                 ColorUtils.mix(Appearance.m3colors.m3secondaryContainer, Appearance.colors.colLayer2, 0.35) : Appearance.colors.colLayer2
@@ -208,14 +199,6 @@ Item {
                     duration: root.notificationXAnimation.duration
                     easing.type: root.notificationXAnimation.type
                     easing.bezierCurve: root.notificationXAnimation.bezierCurve
-                }
-            }
-            Behavior on height {
-                enabled: enableAnimation
-                NumberAnimation {
-                    duration: Appearance.animation.elementMoveFast.duration
-                    easing.type: Appearance.animation.elementMoveFast.type
-                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
                 }
             }
         }
@@ -583,7 +566,7 @@ Item {
                             (contentItem.implicitWidth + leftPadding + rightPadding)
 
                         onClicked: {
-                            Notifications.discardNotification(notificationObject.id);
+                            root.destroyWithAnimation()
                         }
 
                         contentItem: MaterialSymbol {
