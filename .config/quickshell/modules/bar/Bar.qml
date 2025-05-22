@@ -167,7 +167,17 @@ Scope {
                 anchors.top: barPosition === "top" ? barContent.bottom : undefined
                 anchors.bottom: barPosition === "bottom" ? barContent.top : undefined
                 height: Appearance.rounding.screenRounding
-                visible: bar.layoutsWithCorners.includes(barLayouts[currentBarLayout]) 
+                visible: {
+                    // Use a completely defensive approach to avoid any undefined errors
+                    if (!barLayouts) return true;
+                    if (!Array.isArray(bar.layoutsWithCorners)) return true;
+                    if (currentBarLayout < 0 || currentBarLayout >= barLayouts.length) return true;
+                    
+                    const currentLayout = barLayouts[currentBarLayout];
+                    if (!currentLayout) return true;
+                    
+                    return bar.layoutsWithCorners.indexOf(currentLayout) >= 0;
+                }
                 RoundCorner {
                     anchors.top: barPosition === "top" ? parent.top : undefined
                     anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined

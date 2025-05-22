@@ -20,20 +20,26 @@ Item {
     width: parent.width
     height: parent.height
     property var barRoot
- RowLayout {
-    anchors.left: minimalLayout.left
-    anchors.leftMargin: Appearance.rounding.screenRounding 
-    spacing:Appearance.sizes.spacing
+    Rectangle {
+        width: parent.width
+        height: parent.height
+        color: Appearance.colors.colLayer0
+    
+    RowLayout {
+        anchors.left: parent.left
+        anchors.leftMargin: Appearance.rounding.screenRounding 
+        spacing: Appearance.sizes.spacing
 
-    Components.MinimalBattery {
-        visible: hasbattery 
-        id: battery
+        Components.MinimalBattery {
+            visible: hasbattery 
+            id: battery
+        }
+        Components.Workspaces {
+            id: workspaces
+            bar: barRoot
+        }
     }
-    Components.Workspaces {
-        id: workspaces
-        bar: barRoot
-    }
-    }
+    
     MouseArea {
         acceptedButtons: Qt.LeftButton
         anchors.left: workspaces.right
@@ -46,6 +52,7 @@ Item {
             }
         }
     }
+    
     MouseArea {
         anchors.centerIn: parent
         acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -60,11 +67,13 @@ Item {
             }
         }
     }
+    
     Components.ClockWidget {
         id: clockWidget
         Layout.alignment: Qt.AlignVCenter
         anchors.centerIn: parent
     }
+    
     MouseArea { 
         id: barRightSideMouseArea
         anchors.left: clockWidget.right
@@ -126,104 +135,103 @@ Item {
             }
         }
         
-            RowLayout {
-                id: rightSectionRowLayout
-                layoutDirection: Qt.RightToLeft
-                height: parent.height
-                anchors {
-                    right: parent.right
-                    rightMargin: 80 + Appearance.rounding.screenRounding
-                }
-                Layout.fillWidth: true
+        RowLayout {
+            id: rightSectionRowLayout
+            layoutDirection: Qt.RightToLeft
+            height: parent.height
+            anchors {
+                right: parent.right
+                rightMargin: 80 + Appearance.rounding.screenRounding
+            }
+            Layout.fillWidth: true
+            
+            Rectangle {
+                Layout.margins: 4
+                Layout.rightMargin: Appearance.rounding.screenRounding
+                Layout.fillHeight: true
+                implicitWidth: indicatorsRowLayout.implicitWidth + 20
+                radius: Appearance.rounding.full
+                color: (barRightSideMouseArea.pressed || GlobalStates.sidebarRightOpen) ? Appearance.colors.colLayer1Active : barRightSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : "transparent"
                 
-                Rectangle {
-                    Layout.margins: 4
-                    Layout.rightMargin: Appearance.rounding.screenRounding
-                    Layout.fillHeight: true
-                    implicitWidth: indicatorsRowLayout.implicitWidth + 20
-                    radius: Appearance.rounding.full
-                    color: (barRightSideMouseArea.pressed || GlobalStates.sidebarRightOpen) ? Appearance.colors.colLayer1Active : barRightSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : "transparent"
+                RowLayout {
+                    id: indicatorsRowLayout
+                    anchors.centerIn: parent
+                    property real realSpacing: 15
+                    spacing: 0
                     
-                    RowLayout {
-                        id: indicatorsRowLayout
-                        anchors.centerIn: parent
-                        property real realSpacing: 15
-                        spacing: 0
-                        
-                        Revealer {
-                            reveal: Audio.sink?.audio?.muted ?? false
-                            Layout.fillHeight: true
-                            Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                            Behavior on Layout.rightMargin {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration
-                                    easing.type: Appearance.animation.elementMoveFast.type
-                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-                                }
-                            }
-                            MaterialSymbol {
-                                text: "volume_off"
-                                iconSize: Appearance.font.pixelSize.larger
-                                color: Appearance.colors.colOnLayer0
+                    Revealer {
+                        reveal: Audio.sink?.audio?.muted ?? false
+                        Layout.fillHeight: true
+                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
+                        Behavior on Layout.rightMargin {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
                             }
                         }
-                        
-                        Revealer {
-                            reveal: Audio.source?.audio?.muted ?? false
-                            Layout.fillHeight: true
-                            Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                            Behavior on Layout.rightMargin {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration
-                                    easing.type: Appearance.animation.elementMoveFast.type
-                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-                                }
-                            }
-                            MaterialSymbol {
-                                text: "mic_off"
-                                iconSize: Appearance.font.pixelSize.larger
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        
                         MaterialSymbol {
-                            Layout.rightMargin: indicatorsRowLayout.realSpacing
-                            text: {
-                                if (NetworkInformation.TransportMedium.Ethernet) {
-                                    return "lan";
-                                } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
-                                    return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
-                                        Network.networkStrength > 60 ? "network_wifi_3_bar" :
-                                        Network.networkStrength > 40 ? "network_wifi_2_bar" :
-                                        Network.networkStrength > 20 ? "network_wifi_1_bar" :
-                                        "signal_wifi_0_bar";
-                                } else {
-                                    return "signal_wifi_off";
-                                }
-                            }
-                            iconSize: Appearance.font.pixelSize.larger
-                            color: Appearance.colors.colOnLayer0
-                        }
-                        
-                        MaterialSymbol {
-                            text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
+                            text: "volume_off"
                             iconSize: Appearance.font.pixelSize.larger
                             color: Appearance.colors.colOnLayer0
                         }
                     }
-                }
-                
-                Components.SysTray {
-                    bar: barRoot
-                    Layout.fillWidth: false
-                    Layout.fillHeight: true
-                }
-                
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    
+                    Revealer {
+                        reveal: Audio.source?.audio?.muted ?? false
+                        Layout.fillHeight: true
+                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
+                        Behavior on Layout.rightMargin {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                            }
+                        }
+                        MaterialSymbol {
+                            text: "mic_off"
+                            iconSize: Appearance.font.pixelSize.larger
+                            color: Appearance.colors.colOnLayer0
+                        }
+                    }
+                    
+                    MaterialSymbol {
+                        Layout.rightMargin: indicatorsRowLayout.realSpacing
+                        text: {
+                            if (NetworkInformation.TransportMedium.Ethernet) {
+                                return "lan";
+                            } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
+                                return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
+                                    Network.networkStrength > 60 ? "network_wifi_3_bar" :
+                                    Network.networkStrength > 40 ? "network_wifi_2_bar" :
+                                    Network.networkStrength > 20 ? "network_wifi_1_bar" :
+                                    "signal_wifi_0_bar";
+                            } else {
+                                return "signal_wifi_off";
+                            }
+                        }
+                        iconSize: Appearance.font.pixelSize.larger
+                        color: Appearance.colors.colOnLayer0
+                    }
+                    
+                    MaterialSymbol {
+                        text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
+                        iconSize: Appearance.font.pixelSize.larger
+                        color: Appearance.colors.colOnLayer0
+                    }
                 }
             }
+            
+            Components.SysTray {
+                bar: barRoot
+                Layout.fillWidth: false
+                Layout.fillHeight: true
+            }
+            
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
             }
         }
-
+    }}
+}

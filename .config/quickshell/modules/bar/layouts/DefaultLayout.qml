@@ -23,7 +23,10 @@ Item {
     property var barRoot
     property int barHeight: Appearance.sizes.barHeight
     property int osdHideMouseMoveThreshold: 20
-    
+   Rectangle {
+    color: Appearance.colors.colLayer0
+    width: parent.width
+    height: parent.height 
     MouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
         anchors.left: parent.left
@@ -361,5 +364,5 @@ Item {
                 }
             }
         }
-    }
+    }}
 }

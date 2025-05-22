@@ -17,6 +17,12 @@ output_path = '~/.config/hypr/hyprland/colors.conf'
 input_path = '~/.config/matugen/templates/hyprland/hyprlock.conf'
 output_path = '~/.config/hypr/hyprlock.conf'
 
+[templates.starship]
+input_path = "~/.config/matugen/templates/apps/starship-colors.toml"
+output_path = "~/.config/starship.toml"
+post_hook = "starship init zsh > ~/.zshrc"
+
+
 [templates.fuzzel]
 input_path = '~/.config/matugen/templates/fuzzel/fuzzel.ini'
 output_path = '~/.config/fuzzel/fuzzel.ini'
@@ -37,6 +43,10 @@ output_path = "~/.config/vesktop/themes/HyprNoon.css"
 # [templates.obsidian]
 # input_path = "~/.config/matugen/templates/apps/obsidian.css"
 # output_path = "/mnt/Data/General-Archive/obsidian/.obsidian/snippets/HyprNoon.css"
+
+[templates.kitty]
+input_path = '~/.config/matugen/templates/apps/kitty-colors.conf'
+output_path = '~/.config/kitty/colors.conf'
 
 [templates.vscode]
 input_path = "~/.config/matugen/templates/apps/vscode-color-theme.json"

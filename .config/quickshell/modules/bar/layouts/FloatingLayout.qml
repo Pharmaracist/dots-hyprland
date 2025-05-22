@@ -6,6 +6,7 @@ import "root:/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
+import "root:/services" as Services
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.Mpris
@@ -18,7 +19,7 @@ import "../components" as Components
 Item {
     id: minimalLayout
     width: parent.width
-    height: parent.height + 20 
+    height: parent.height
     property var barRoot
     
 Rectangle {
@@ -28,28 +29,18 @@ Rectangle {
  
     Rectangle {
         id: leftGradientRect
-        anchors.left: parent.left
-        anchors.leftMargin: Appearance.rounding.screenRounding * 0.5
+        anchors {
+            left: parent.left
+            leftMargin: Appearance.rounding.screenRounding * 0.1
+            verticalCenter: parent.verticalCenter
+        }
         radius: Appearance.rounding.full
         width: leftSection.implicitWidth + 16 // Add some padding
-        height: parent.height * 0.85
-        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height * 0.8
+        color: isHovered ? Appearance.colors.colSecondaryContainerActive : Appearance.colors.colPrimaryContainerActive
+        Behavior on color { ColorAnimation { duration: 300 } }
         
         property bool isHovered: false
-        
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { 
-                position: 1.0
-                color: leftGradientRect.isHovered ? Appearance.colors.colLayer2 : Appearance.colors.colLayer2
-                Behavior on color { ColorAnimation { duration: 300 } }
-            }
-            GradientStop { 
-                position: 0.0
-                color: leftGradientRect.isHovered ? Appearance.colors.colTertiaryActive : Appearance.colors.colPrimaryContainerActive
-                Behavior on color { ColorAnimation { duration: 300 } }
-            }
-        }
         
         MouseArea {
             anchors.fill: parent
@@ -69,28 +60,25 @@ Rectangle {
             propagateComposedEvents: true
         }
         
-        RowLayout {
+        Row {
             id: leftSection
-            anchors.centerIn: parent
-            spacing: Appearance.sizes.spacing
-            
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: -8
             Components.MinimalBattery {
-                visible: hasbattery 
                 id: battery
-                Layout.alignment: Qt.AlignVCenter
+                anchors.verticalCenter: parent.verticalCenter
             }
             Components.Workspaces {
                 id: workspaces
                 bar: barRoot
-                Layout.alignment: Qt.AlignVCenter
+                anchors.verticalCenter: parent.verticalCenter
             }
-        
         }
         Components.InlineWindowTitle {
             bar: barRoot
             anchors.left: leftSection.right
-            anchors.leftMargin:20
-            Layout.alignment: Qt.AlignVCenter
+            anchors.leftMargin: 30
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
     MouseArea {
@@ -180,206 +168,126 @@ Rectangle {
         Layout.alignment: Qt.AlignVCenter
         anchors.centerIn: parent
     }
-    MouseArea { 
-        id: barRightSideMouseArea
-        anchors.left: clockWidget.right
-        implicitHeight: barHeight
-        width: parent.width / 2
+    Rectangle {
+        id: rightGradientRect
+        anchors.right: parent.right
+        anchors.rightMargin: Appearance.rounding.screenRounding * 0.1
+        width: rightSectionRowLayout.implicitWidth 
+        radius: Appearance.rounding.full
+        height: parent.height * 0.8
+        anchors.verticalCenter: parent.verticalCenter
+        color: isHovered ? 
+            (Appearance.colors.colSecondaryContainerActive) : 
+            (Appearance.colors.colPrimaryContainerActive)
+        Behavior on color { ColorAnimation { duration: 300 } }
         
-        property bool hovered: false
-        property real lastScrollX: 0
-        property real lastScrollY: 0
-        property bool trackingScroll: false
+        property bool isHovered: false
         
-        acceptedButtons: Qt.LeftButton
-        hoverEnabled: true
-        propagateComposedEvents: true
-        
-        onEntered: (event) => {
-            barRightSideMouseArea.hovered = true
-        }
-        
-        onExited: (event) => {
-            barRightSideMouseArea.hovered = false
-            barRightSideMouseArea.trackingScroll = false
-        }
-        
-        onPressed: (event) => {
-            if (event.button === Qt.LeftButton) {
-                Hyprland.dispatch('global quickshell:sidebarRightOpen')
-            }
-            else if (event.button === Qt.RightButton) {
-                MprisController.activePlayer.next()
-            }
-        }
-        
-        // Scroll to change volume
-        WheelHandler {
-            onWheel: (event) => {
-                const currentVolume = Audio.value;
-                const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;
-                if (event.angleDelta.y < 0)
-                    Audio.sink.audio.volume -= step;
-                else if (event.angleDelta.y > 0)
-                    Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);
-                // Store the mouse position and start tracking
-                barRightSideMouseArea.lastScrollX = event.x;
-                barRightSideMouseArea.lastScrollY = event.y;
-                barRightSideMouseArea.trackingScroll = true;
-            }
-            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        }
-        
-        onPositionChanged: (mouse) => {
-            if (barRightSideMouseArea.trackingScroll) {
-                const dx = mouse.x - barRightSideMouseArea.lastScrollX;
-                const dy = mouse.y - barRightSideMouseArea.lastScrollY;
-                if (Math.sqrt(dx*dx + dy*dy) > osdHideMouseMoveThreshold) {
-                    Hyprland.dispatch('global quickshell:osdVolumeHide')
-                    barRightSideMouseArea.trackingScroll = false;
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onEntered: rightGradientRect.isHovered = true
+            onExited: rightGradientRect.isHovered = false
+            onClicked: (event) => {
+                if (event.button === Qt.LeftButton) {
+                    Hyprland.dispatch('global quickshell:sidebarRightOpen')
+                }
+                else if (event.button === Qt.RightButton) {
+                    MprisController.activePlayer.next()
                 }
             }
+            propagateComposedEvents: true
         }
-        Rectangle{
-            id: rightGradientRect
-            anchors.right: parent.right
-            anchors.rightMargin: 90 + Appearance.rounding.screenRounding 
-            radius: Appearance.rounding.full
-            width: rightSectionRowLayout.implicitWidth
-            height: parent.height * 0.85
-            anchors.verticalCenter: parent.verticalCenter
+        
+        RowLayout {
+            id: rightSectionRowLayout
+            anchors.fill: parent
+            anchors.rightMargin: -1 * Appearance.rounding.screenRounding 
+            spacing: 10
+            layoutDirection: Qt.RightToLeft
             
-            property bool isHovered: false
-            
-            gradient: Gradient {
-                orientation: Gradient.Horizontal
-                GradientStop { 
-                    position: 1.0
-                    color: rightGradientRect.isHovered ? Appearance.colors.colLayer3 : Appearance.colors.colLayer2
-                    Behavior on color { ColorAnimation { duration: 300 } }
-                }
-                GradientStop { 
-                    position: 0.0
-                    color: rightGradientRect.isHovered ? Appearance.colors.colPrimary : Appearance.colors.colPrimaryContainerActive
-                    Behavior on color { ColorAnimation { duration: 300 } }
-                }
+            Components.SysTray {
+                bar: barRoot
+                Layout.fillHeight: true
             }
             
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onEntered: rightGradientRect.isHovered = true
-                onExited: rightGradientRect.isHovered = false
-                onClicked: (event) => {
-                    if (event.button === Qt.LeftButton) {
-                        Hyprland.dispatch('global quickshell:sidebarRightOpen')
-                    }
-                    else if (event.button === Qt.RightButton) {
-                        MprisController.activePlayer.next()
-                    }
-                }
-                // Pass through to inner mouse areas
-                propagateComposedEvents: true
-            }
-            RowLayout {
-                id: rightSectionRowLayout
-                layoutDirection: Qt.RightToLeft
-                height: parent.height
-                anchors {
-                    right: parent.right
-                }
-                Layout.fillWidth: true
+            Rectangle {
+                Layout.margins: 4
+                Layout.fillHeight: true
+                implicitWidth: indicatorsRowLayout.implicitWidth * 1.2
+                radius: Appearance.rounding.full
+                color: "transparent"
                 
-                Rectangle {
-                    Layout.margins: 4
-                    Layout.rightMargin: Appearance.rounding.screenRounding
-                    Layout.fillHeight: true
-                    implicitWidth: indicatorsRowLayout.implicitWidth + 20
-                    radius: Appearance.rounding.full
-                    color: "transparent"
+                RowLayout {
+                    id: indicatorsRowLayout
+                    anchors.centerIn: parent
+                    property real realSpacing: 15
+                    spacing: 0
                     
-                    RowLayout {
-                        id: indicatorsRowLayout
-                        anchors.centerIn: parent
-                        property real realSpacing: 15
-                        spacing: 0
-                        
-                        Revealer {
-                            reveal: Audio.sink?.audio?.muted ?? false
-                            Layout.fillHeight: true
-                            Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                            Behavior on Layout.rightMargin {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration
-                                    easing.type: Appearance.animation.elementMoveFast.type
-                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-                                }
-                            }
-                            MaterialSymbol {
-                                text: "volume_off"
-                                iconSize: Appearance.font.pixelSize.larger
-                                color: Appearance.colors.colOnLayer0
+                    Revealer {
+                        reveal: Audio.sink?.audio?.muted ?? false
+                        Layout.fillHeight: true
+                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
+                        Behavior on Layout.rightMargin {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
                             }
                         }
-                        
-                        Revealer {
-                            reveal: Audio.source?.audio?.muted ?? false
-                            Layout.fillHeight: true
-                            Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
-                            Behavior on Layout.rightMargin {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration
-                                    easing.type: Appearance.animation.elementMoveFast.type
-                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
-                                }
-                            }
-                            MaterialSymbol {
-                                text: "mic_off"
-                                iconSize: Appearance.font.pixelSize.larger
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        
                         MaterialSymbol {
-                            Layout.rightMargin: indicatorsRowLayout.realSpacing
-                            text: {
-                                if (NetworkInformation.TransportMedium.Ethernet) {
-                                    return "lan";
-                                } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
-                                    return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
-                                        Network.networkStrength > 60 ? "network_wifi_3_bar" :
-                                        Network.networkStrength > 40 ? "network_wifi_2_bar" :
-                                        Network.networkStrength > 20 ? "network_wifi_1_bar" :
-                                        "signal_wifi_0_bar";
-                                } else {
-                                    return "signal_wifi_off";
-                                }
-                            }
-                            iconSize: Appearance.font.pixelSize.larger
-                            color: Appearance.colors.colOnLayer0
-                        }
-                        
-                        MaterialSymbol {
-                            text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
+                            text: "volume_off"
                             iconSize: Appearance.font.pixelSize.larger
                             color: Appearance.colors.colOnLayer0
                         }
                     }
+                    
+                    Revealer {
+                        reveal: Audio.source?.audio?.muted ?? false
+                        Layout.fillHeight: true
+                        Layout.rightMargin: reveal ? indicatorsRowLayout.realSpacing : 0
+                        Behavior on Layout.rightMargin {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                            }
+                        }
+                        MaterialSymbol {
+                            text: "mic_off"
+                            iconSize: Appearance.font.pixelSize.larger
+                            color: Appearance.colors.colOnLayer0
+                        }
+                    }
+                    
+                    MaterialSymbol {
+                        Layout.rightMargin: indicatorsRowLayout.realSpacing
+                        text: {
+                            if (NetworkInformation.TransportMedium.Ethernet) {
+                                return "lan";
+                            } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
+                                return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
+                                    Network.networkStrength > 60 ? "network_wifi_3_bar" :
+                                    Network.networkStrength > 40 ? "network_wifi_2_bar" :
+                                    Network.networkStrength > 20 ? "network_wifi_1_bar" :
+                                    "signal_wifi_0_bar";
+                            } else {
+                                return "signal_wifi_off";
+                            }
+                        }
+                        iconSize: Appearance.font.pixelSize.larger
+                        color: Appearance.colors.colOnLayer0
+                    }
+                    
+                    MaterialSymbol {
+                        text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
+                        iconSize: Appearance.font.pixelSize.larger
+                        color: Appearance.colors.colOnLayer0
+                    }
                 }
-                
-                Components.SysTray {
-                    bar: barRoot
-                    Layout.fillWidth: false
-                    Layout.fillHeight: true
-                }
-                
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
-            }}
             }
         }
-
+    }
+}
 }

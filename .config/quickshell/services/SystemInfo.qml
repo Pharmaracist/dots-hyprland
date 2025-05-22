@@ -10,26 +10,8 @@ Singleton {
     property string distroId: "unknown"
     property string distroIcon: "linux-symbolic"
     property string username: "user"
-    property bool hasbattery: false
 
-    Timer {
-        interval: 1
-        running: true
-        repeat: false
-        onTriggered: {
-            const upowerCheck = Qt.createQmlObject('import QtQuick; import QtQuick.Controls; Process { id: process; command: "upower -i /org/freedesktop/UPower/devices/battery_BAT0"; stdout: SplitParser { onRead: data => { const lines = data.split("\n"); for (let line of lines) { if (line.includes("present:")) { hasbattery = line.includes("yes"); break; } } } } }', parent)
-            upowerCheck.start()
-            
-            // Wait for the process to finish
-            Qt.callLater(function() {
-                if (upowerCheck.exitCode !== 0) {
-                    // Try BAT1 if BAT0 is not found
-                    upowerCheck.command = "upower -i /org/freedesktop/UPower/devices/battery_BAT1"
-                    upowerCheck.start()
-                }
-            })
-        }
-    }
+
 
     Timer {
         interval: 1

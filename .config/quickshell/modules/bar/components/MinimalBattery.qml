@@ -17,26 +17,25 @@ Rectangle {
     readonly property color batteryLowBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3error : Appearance.m3colors.m3errorContainer
     readonly property color batteryLowOnBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3error
 
-    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
-    implicitHeight: 32
+    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 3
+    implicitHeight: 28
     color: borderless ? "transparent" : Appearance.colors.colLayer1
     radius: Appearance.rounding.small
 
     RowLayout {
         id: rowLayout
         
-        spacing: Appearance.sizes.spacing
-        anchors.centerIn: parent
-        
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            onEntered: ToolTip.show()
-            onExited: ToolTip.hide()
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: ToolTip.show()
+                onExited: ToolTip.hide()
+            }
         }
-
-
-
 
         CircularProgress {
             Layout.alignment: Qt.AlignVCenter
@@ -76,13 +75,8 @@ Rectangle {
                     iconSize: Appearance.font.pixelSize.normal
                     color: Appearance.colors.colOnLayer1
                     visible: Math.round(percentage * 100) >= 100
-                    // anchors.verticalCenterOffset: 0 // Fine-tune vertical position if needed
-                    // anchors.horizontalCenterOffset: -0.00 // Fine-tune horizontal position if needed
                 }
             }
         }
-
     }
-
-
 }
