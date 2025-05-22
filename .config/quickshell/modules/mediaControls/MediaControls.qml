@@ -66,7 +66,8 @@ Scope {
 
             anchors {
                 top: true
-                left: true
+                // left: true
+                
             }
             mask: Region {
                 item: playerColumnLayout

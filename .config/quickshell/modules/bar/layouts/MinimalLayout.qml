@@ -19,44 +19,49 @@ Item {
     id: minimalLayout
     width: parent.width
     height: parent.height
-    
     property var barRoot
-    
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Appearance.rounding.screenRounding
-        anchors.rightMargin: Appearance.rounding.screenRounding
-        spacing: 10
-        
-        // Center - workspaces only
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            
-            Components.Workspaces {
-                anchors.left: parent.left
-                bar: barRoot
+    Components.Workspaces {
+        id: workspaces
+        bar: barRoot
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+    }
+    MouseArea {
+        acceptedButtons: Qt.LeftButton
+        anchors.left: workspaces.right
+        anchors.leftMargin: 10
+        width: parent.width - anchors.leftMargin - workspaces.width
+        height: parent.height
+        onPressed: (event) => {
+            if (event.button === Qt.LeftButton) {
+                Hyprland.dispatch('global quickshell:sidebarLeftToggle')
             }
         }
-        
-        // Right - just clock
-        Item {
-            id: middleSection
-            Layout.fillHeight: true
-            Layout.preferredWidth: Components.ClockWidget.implicitWidth + 20
-            
-            Components.ClockWidget {
-                Layout.alignment: Qt.AlignVCenter
-                anchors.centerIn: parent
+    }
+    MouseArea {
+        anchors.centerIn: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        width: parent.width / 10
+        height: parent.height
+        onPressed: (event) => {
+            if (event.button === Qt.LeftButton) {
+                Hyprland.dispatch('global quickshell:overviewToggle')
+            }
+            else if (event.button === Qt.RightButton) {
+                Hyprland.dispatch('global quickshell:mediaControlsToggle')
             }
         }
-        
-    // Right side container - ensure MouseArea captures all events
+    }
+    Components.ClockWidget {
+        id: clockWidget
+        Layout.alignment: Qt.AlignVCenter
+        anchors.centerIn: parent
+    }
     MouseArea { 
         id: barRightSideMouseArea
-        anchors.right: parent.right
+        anchors.left: clockWidget.right
         implicitHeight: barHeight
-        width: (parent.width - middleSection.width) / 2
+        width: parent.width / 2
         
         property bool hovered: false
         property real lastScrollX: 0
@@ -113,17 +118,16 @@ Item {
             }
         }
         
-        Item {
-            anchors.fill: parent
-            implicitHeight: rightSectionRowLayout.implicitHeight 
-            implicitWidth: rightSectionRowLayout.implicitWidth
-            
             RowLayout {
                 id: rightSectionRowLayout
-                anchors.fill: parent
-                spacing: 5
                 layoutDirection: Qt.RightToLeft
-                anchors.rightMargin:  - 0.5 * Appearance.rounding.screenRounding                
+                height: parent.height
+                anchors {
+                    right: parent.right
+                    rightMargin: 80 + Appearance.rounding.screenRounding
+                }
+                Layout.fillWidth: true
+                
                 Rectangle {
                     Layout.margins: 4
                     Layout.rightMargin: Appearance.rounding.screenRounding
@@ -214,5 +218,4 @@ Item {
             }
             }
         }
-    }
-}
+

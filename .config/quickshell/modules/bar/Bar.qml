@@ -83,7 +83,7 @@ Scope {
             screen: modelData
             WlrLayershell.namespace: "quickshell:bar"
             implicitHeight: barHeight + Appearance.rounding.screenRounding
-            exclusiveZone: showBarBackground ? barHeight : (barHeight - 4)
+            exclusiveZone: barLayouts[currentBarLayout] === 'none' ? 0 : (showBarBackground ? barHeight : (barHeight - 4))
             mask: Region {
                 item: barContent
             }
@@ -103,7 +103,7 @@ Scope {
                 anchors.top: barPosition === "top" ? parent.top : undefined
                 anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
                 color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
-                height: barHeight
+                height: barLayouts[currentBarLayout] === 'none' ? 0 : barHeight
                 
                 // Layout switching enabled without visual indicator
                 
@@ -158,6 +158,17 @@ Scope {
                         asynchronous: true
                         active: bar.currentBarLayout === 2 || (ConfigOptions.bar.preloadAllLayouts === true)
                         sourceComponent: MediaLayout {}
+                        onLoaded: {
+                            item.barRoot = barRoot;
+                        }
+                    }
+                    Loader {
+                        id: noneLayoutLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        asynchronous: true
+                        active: bar.currentBarLayout === 4 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        sourceComponent: NoneLayout {}
                         onLoaded: {
                             item.barRoot = barRoot;
                         }

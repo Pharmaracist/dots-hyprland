@@ -99,7 +99,8 @@ Singleton {
                 
                 // Add other parameters
                 params.push("ratios=landscape");
-                params.push("categories=111"); // General, Anime, People
+                params.push("atleast=1920x1080");
+                params.push("categories=110"); // General only, no Anime or People
                 
                 // Combine URL
                 return url + "?" + params.join("&");

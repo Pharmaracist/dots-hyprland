@@ -27,8 +27,8 @@ Singleton {
         property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: false
         property bool borderless: true
-        property string defaultLayout: "minimal" // Options: default, minimal, media
-        property var availableLayouts: ["default", "minimal", "media"]
+        property string defaultLayout: "minimal" // Options: default, minimal, media, none
+        property var availableLayouts: ["default", "minimal", "media","none"]
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
             property bool alwaysShowCpu: true
