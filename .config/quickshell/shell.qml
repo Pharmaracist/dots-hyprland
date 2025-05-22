@@ -4,7 +4,7 @@
 
 import "./modules/bar/"
 import "./modules/cheatsheet/"
-import "./modules/dock/"
+// import "./modules/dock/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
@@ -32,7 +32,7 @@ ShellRoot {
     ClockWidget {}
     Cheatsheet {}
     ActivateLinux {}
-    Dock {}
+    // Dock {}
     MediaControls {}
     NotificationPopup {}
     OnScreenDisplayBrightness {}

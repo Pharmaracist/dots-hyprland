@@ -20,57 +20,26 @@ Scope {
     // Core properties
     readonly property int barHeight: Appearance.sizes.barHeight
     readonly property int barCenterSideModuleWidth: Appearance.sizes.barCenterSideModuleWidth
-    readonly property bool showBarBackground: ConfigOptions.bar.showBackground
     readonly property string barPosition: ConfigOptions.bar.position
     readonly property var barLayouts: ConfigOptions.bar.availableLayouts
+    
+    // Layouts that should have rounded corners
+    readonly property var layoutsWithCorners: ['minimal','default', 'media']
+    
+    // Layouts that should float (special handling)
+    readonly property var floatingLayouts: ['floating']
     
     // Layout properties
     property int currentBarLayout: getInitialLayout()
     property bool isTransitioning: false
     
-    // Layout switching function
-    function switchLayout(direction) {
-        if (!ConfigOptions.bar.enableLayoutSwitching || isTransitioning) return;
-        
-        isTransitioning = true;
-        
-        // Update layout index
-        if (direction === "next") {
-            currentBarLayout = (currentBarLayout + 1) % barLayouts.length;
-        } else if (direction === "prev") {
-            currentBarLayout = (currentBarLayout - 1 + barLayouts.length) % barLayouts.length;
-        }
-        
-        // Show notification and reset transition state
-        Hyprland.dispatch('global quickshell:notification "Bar Layout: ' + barLayouts[currentBarLayout] + '"');
-        Qt.callLater(function() { isTransitioning = false; });
-    }
-    
+
     // Get initial layout index
     function getInitialLayout() {
         const index = barLayouts.indexOf(ConfigOptions.bar.defaultLayout);
         return index >= 0 ? index : 0;
     }
-    
-    // Legacy methods for compatibility
-    function switchToNextLayout() { switchLayout("next"); }
-    function switchToPreviousLayout() { switchLayout("prev"); }
-
-    // Basic handler for layout commands
-    Connections {
-        target: Hyprland
         
-        function onDispatch(args) {
-            const dispatch = args.join(" ");
-            
-            if (dispatch === "global quickshell:barlayout next") {
-                switchLayout("next");
-            } else if (dispatch === "global quickshell:barlayout prev") {
-                switchLayout("prev");
-            }
-        }
-    }
-    
     Variants { // For each monitor
         model: Quickshell.screens
 
@@ -83,7 +52,7 @@ Scope {
             screen: modelData
             WlrLayershell.namespace: "quickshell:bar"
             implicitHeight: barHeight + Appearance.rounding.screenRounding
-            exclusiveZone: barLayouts[currentBarLayout] === 'none' ? 0 : (showBarBackground ? barHeight : (barHeight - 4))
+            exclusiveZone: barLayouts[currentBarLayout] === 'none' ? 0 : (bar.floatingLayouts.includes(barLayouts[currentBarLayout]) ? barHeight + Appearance.sizes.floatingMargin * 1.4 : barHeight)
             mask: Region {
                 item: barContent
             }
@@ -96,16 +65,19 @@ Scope {
                 bottom: barPosition === "bottom"
             }
 
-            Rectangle { // Bar background
+            Item { // Bar content container
                 id: barContent
+                
                 anchors.right: parent.right
                 anchors.left: parent.left
                 anchors.top: barPosition === "top" ? parent.top : undefined
                 anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
-                color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
                 height: barLayouts[currentBarLayout] === 'none' ? 0 : barHeight
-                
-                // Layout switching enabled without visual indicator
+                // Special handling for floating layouts
+                anchors.topMargin: bar.floatingLayouts.includes(barLayouts[currentBarLayout]) && barPosition === "top" ? Appearance.sizes.floatingMargin : 0
+                anchors.bottomMargin: bar.floatingLayouts.includes(barLayouts[currentBarLayout]) && barPosition === "bottom" ? Appearance.sizes.floatingMargin : 0
+                anchors.leftMargin: bar.floatingLayouts.includes(barLayouts[currentBarLayout]) ? Appearance.sizes.floatingMargin : 0
+                anchors.rightMargin: bar.floatingLayouts.includes(barLayouts[currentBarLayout]) ? Appearance.sizes.floatingMargin : 0
                 
                 // Simple mouse area for layout switching with middle click
                 MouseArea {
@@ -167,22 +139,27 @@ Scope {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 4 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 3 || (ConfigOptions.bar.preloadAllLayouts === true)
                         sourceComponent: NoneLayout {}
+                        onLoaded: {
+                            item.barRoot = barRoot;
+                        }
+                    }
+
+                    // Layout 4: Floating Layout (lazy-loaded)
+                    Loader {
+                        id: floatingLayoutLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        asynchronous: true
+                        active: bar.currentBarLayout === 4 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        sourceComponent: FloatingLayout {}
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
                     }
                 }
             }
-
-            // Basic layout shortcut (original one from config)
-            Shortcut {
-                sequence: ConfigOptions.bar.layoutSwitchShortcut
-                enabled: ConfigOptions.bar.enableLayoutSwitching
-                onActivated: switchLayout("next")
-            }
-            
             // Round decorators
             Item {
                 anchors.left: parent.left
@@ -190,14 +167,14 @@ Scope {
                 anchors.top: barPosition === "top" ? barContent.bottom : undefined
                 anchors.bottom: barPosition === "bottom" ? barContent.top : undefined
                 height: Appearance.rounding.screenRounding
-
+                visible: bar.layoutsWithCorners.includes(barLayouts[currentBarLayout]) 
                 RoundCorner {
                     anchors.top: barPosition === "top" ? parent.top : undefined
                     anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
                     anchors.left: parent.left
                     size: Appearance.rounding.screenRounding
                     corner: barPosition === "top" ? cornerEnum.topLeft : cornerEnum.bottomLeft
-                    color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
+                    color: Appearance.colors.colLayer0
                 }
                 RoundCorner {
                     anchors.top: barPosition === "top" ? parent.top : undefined
@@ -205,7 +182,7 @@ Scope {
                     anchors.right: parent.right
                     size: Appearance.rounding.screenRounding
                     corner: barPosition === "top" ? cornerEnum.topRight : cornerEnum.bottomRight
-                    color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
+                    color: Appearance.colors.colLayer0
                 }
             }
 

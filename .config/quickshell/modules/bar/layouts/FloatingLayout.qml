@@ -18,32 +18,147 @@ import "../components" as Components
 Item {
     id: minimalLayout
     width: parent.width
-    height: parent.height
+    height: parent.height + 20 
     property var barRoot
- RowLayout {
-    anchors.left: minimalLayout.left
-    anchors.leftMargin: Appearance.rounding.screenRounding 
-    spacing:Appearance.sizes.spacing
-
-    Components.MinimalBattery {
-        visible: hasbattery 
-        id: battery
-    }
-    Components.Workspaces {
-        id: workspaces
-        bar: barRoot
-    }
+    
+Rectangle {
+    anchors.fill: parent
+    radius: Appearance.rounding.screenRounding
+    color: Appearance.colors.colLayer0
+ 
+    Rectangle {
+        id: leftGradientRect
+        anchors.left: parent.left
+        anchors.leftMargin: Appearance.rounding.screenRounding * 0.5
+        radius: Appearance.rounding.full
+        width: leftSection.implicitWidth + 16 // Add some padding
+        height: parent.height * 0.85
+        anchors.verticalCenter: parent.verticalCenter
+        
+        property bool isHovered: false
+        
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { 
+                position: 1.0
+                color: leftGradientRect.isHovered ? Appearance.colors.colLayer2 : Appearance.colors.colLayer2
+                Behavior on color { ColorAnimation { duration: 300 } }
+            }
+            GradientStop { 
+                position: 0.0
+                color: leftGradientRect.isHovered ? Appearance.colors.colTertiaryActive : Appearance.colors.colPrimaryContainerActive
+                Behavior on color { ColorAnimation { duration: 300 } }
+            }
+        }
+        
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onEntered: leftGradientRect.isHovered = true
+            onExited: leftGradientRect.isHovered = false
+            onClicked: (event) => {
+                if (event.button === Qt.LeftButton) {
+                    Hyprland.dispatch('global quickshell:sidebarLeftToggle')
+                }
+                else if (event.button === Qt.RightButton) {
+                    Hyprland.dispatch('global quickshell:overviewToggle')
+                }
+            }
+            // Pass through to inner mouse areas
+            propagateComposedEvents: true
+        }
+        
+        RowLayout {
+            id: leftSection
+            anchors.centerIn: parent
+            spacing: Appearance.sizes.spacing
+            
+            Components.MinimalBattery {
+                visible: hasbattery 
+                id: battery
+                Layout.alignment: Qt.AlignVCenter
+            }
+            Components.Workspaces {
+                id: workspaces
+                bar: barRoot
+                Layout.alignment: Qt.AlignVCenter
+            }
+        
+        }
+        Components.InlineWindowTitle {
+            bar: barRoot
+            anchors.left: leftSection.right
+            anchors.leftMargin:20
+            Layout.alignment: Qt.AlignVCenter
+        }
     }
     MouseArea {
+        id: barLeftSideMouseArea
         acceptedButtons: Qt.LeftButton
-        anchors.left: workspaces.right
+        anchors.left: leftGradientRect.right
         anchors.leftMargin: 10
-        width: parent.width - anchors.leftMargin - workspaces.width
+        width: clockWidget.x - anchors.leftMargin - leftGradientRect.width - leftGradientRect.anchors.leftMargin
         height: parent.height
+        
+        property bool hovered: false
+        property real lastScrollX: 0
+        property real lastScrollY: 0
+        property bool trackingScroll: false
+        property int osdHideMouseMoveThreshold: 20
+        
+        hoverEnabled: true
+        propagateComposedEvents: true
+        
+        onEntered: (event) => {
+            barLeftSideMouseArea.hovered = true
+        }
+        
+        onExited: (event) => {
+            barLeftSideMouseArea.hovered = false
+            barLeftSideMouseArea.trackingScroll = false
+        }
+        
         onPressed: (event) => {
             if (event.button === Qt.LeftButton) {
                 Hyprland.dispatch('global quickshell:sidebarLeftToggle')
             }
+        }
+        
+        // Scroll to change brightness
+        WheelHandler {
+            onWheel: (event) => {
+                if (event.angleDelta.y < 0)
+                    barRoot.brightnessMonitor.setBrightness(barRoot.brightnessMonitor.brightness - 0.05);
+                else if (event.angleDelta.y > 0)
+                    barRoot.brightnessMonitor.setBrightness(barRoot.brightnessMonitor.brightness + 0.05);
+                // Store the mouse position and start tracking
+                barLeftSideMouseArea.lastScrollX = event.x;
+                barLeftSideMouseArea.lastScrollY = event.y;
+                barLeftSideMouseArea.trackingScroll = true;
+            }
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        }
+        
+        onPositionChanged: (mouse) => {
+            if (barLeftSideMouseArea.trackingScroll) {
+                const dx = mouse.x - barLeftSideMouseArea.lastScrollX;
+                const dy = mouse.y - barLeftSideMouseArea.lastScrollY;
+                if (Math.sqrt(dx*dx + dy*dy) > barLeftSideMouseArea.osdHideMouseMoveThreshold) {
+                    Hyprland.dispatch('global quickshell:osdBrightnessHide')
+                    barLeftSideMouseArea.trackingScroll = false;
+                }
+            }
+        }
+        
+        Components.ScrollHint {
+            reveal: barLeftSideMouseArea.hovered
+            icon: "light_mode"
+            tooltipText: qsTr("Scroll to change brightness")
+            side: "left"
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
         }
     }
     MouseArea {
@@ -125,14 +240,54 @@ Item {
                 }
             }
         }
-        
+        Rectangle{
+            id: rightGradientRect
+            anchors.right: parent.right
+            anchors.rightMargin: 90 + Appearance.rounding.screenRounding 
+            radius: Appearance.rounding.full
+            width: rightSectionRowLayout.implicitWidth
+            height: parent.height * 0.85
+            anchors.verticalCenter: parent.verticalCenter
+            
+            property bool isHovered: false
+            
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { 
+                    position: 1.0
+                    color: rightGradientRect.isHovered ? Appearance.colors.colLayer3 : Appearance.colors.colLayer2
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+                GradientStop { 
+                    position: 0.0
+                    color: rightGradientRect.isHovered ? Appearance.colors.colPrimary : Appearance.colors.colPrimaryContainerActive
+                    Behavior on color { ColorAnimation { duration: 300 } }
+                }
+            }
+            
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onEntered: rightGradientRect.isHovered = true
+                onExited: rightGradientRect.isHovered = false
+                onClicked: (event) => {
+                    if (event.button === Qt.LeftButton) {
+                        Hyprland.dispatch('global quickshell:sidebarRightOpen')
+                    }
+                    else if (event.button === Qt.RightButton) {
+                        MprisController.activePlayer.next()
+                    }
+                }
+                // Pass through to inner mouse areas
+                propagateComposedEvents: true
+            }
             RowLayout {
                 id: rightSectionRowLayout
                 layoutDirection: Qt.RightToLeft
                 height: parent.height
                 anchors {
                     right: parent.right
-                    rightMargin: 80 + Appearance.rounding.screenRounding
                 }
                 Layout.fillWidth: true
                 
@@ -142,7 +297,7 @@ Item {
                     Layout.fillHeight: true
                     implicitWidth: indicatorsRowLayout.implicitWidth + 20
                     radius: Appearance.rounding.full
-                    color: (barRightSideMouseArea.pressed || GlobalStates.sidebarRightOpen) ? Appearance.colors.colLayer1Active : barRightSideMouseArea.hovered ? Appearance.colors.colLayer1Hover : "transparent"
+                    color: "transparent"
                     
                     RowLayout {
                         id: indicatorsRowLayout
@@ -223,7 +378,8 @@ Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                 }
-            }
+            }}
             }
         }
 
+}

@@ -251,7 +251,7 @@ Singleton {
     }
 
     sizes: QtObject {
-        property real barHeight: 33
+        property real barHeight: 40
         property real barCenterSideModuleWidth: 300
         property real barPreferredSideSectionWidth: 400
         property real sidebarWidth: 460
@@ -265,6 +265,7 @@ Singleton {
         property real hyprlandGapsOut: 5
         property real elevationMargin: 8
         property real fabShadowRadius: 5
+        property real floatingMargin: 15
         property real fabHoveredShadowRadius: 7
     }
 
