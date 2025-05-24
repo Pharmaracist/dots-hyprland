@@ -53,7 +53,7 @@ Scope {
             screen: modelData
             WlrLayershell.namespace: "quickshell:bar"
             implicitHeight: barHeight + Appearance.rounding.screenRounding
-            exclusiveZone: barLayouts[currentBarLayout] === 'none' ? 0 : (bar.floatingLayouts.includes(barLayouts[currentBarLayout]) ? barHeight + Appearance.sizes.floatingMargin * 1.4 : barHeight)
+            exclusiveZone: barLayouts[currentBarLayout] === 'none' ? 0 : (bar.floatingLayouts.includes(barLayouts[currentBarLayout]) ? barHeight + Appearance.sizes.floatingMargin : barHeight)
             mask: Region {
                 item: barContent
             }

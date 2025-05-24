@@ -8,7 +8,7 @@ import Quickshell.Io
 import Quickshell.Services.Mpris
 
 Rectangle {
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
     implicitHeight: 32
     color: borderless ? "transparent" : Appearance.colors.colLayer1

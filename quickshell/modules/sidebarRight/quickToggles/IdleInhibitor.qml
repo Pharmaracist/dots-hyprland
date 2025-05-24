@@ -12,7 +12,7 @@ QuickToggleButton {
     }
     Process {
         id: idleInhibitor
-        command: ["bash", "-c", "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/scripts/wayland-idle-inhibitor.py"]
+        command: ["bash", "-c","hypridle" ] // "python3 ${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/scripts/wayland-idle-inhibitor.py"
     }
     StyledToolTip {
         content: qsTr("Keep system awake")

@@ -17,7 +17,7 @@ Item {
     id: mediaLayout
     width: parent.width
     height: parent.height
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
 

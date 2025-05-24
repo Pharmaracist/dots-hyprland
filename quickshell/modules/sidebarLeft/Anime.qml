@@ -180,12 +180,18 @@ Item {
 
                 model: ScriptModel {
                     values: {
-                        if(root.responses.length > booruResponseListView.lastResponseLength) {
-                            if (booruResponseListView.lastResponseLength > 0 && root.responses[booruResponseListView.lastResponseLength].provider != "system")
-                                booruResponseListView.contentY = booruResponseListView.contentY + root.scrollOnNewResponse
-                            booruResponseListView.lastResponseLength = root.responses.length
+                        const currentResponseLength = root.responses.length;
+                        if(currentResponseLength > booruResponseListView.lastResponseLength) {
+                            if (booruResponseListView.lastResponseLength > 0 && 
+                                root.responses[booruResponseListView.lastResponseLength - 1].provider != "system") {
+                                // Use Timer to avoid binding loop
+                                Qt.callLater(function() {
+                                    booruResponseListView.contentY += root.scrollOnNewResponse;
+                                });
+                            }
+                            booruResponseListView.lastResponseLength = currentResponseLength;
                         }
-                        return root.responses
+                        return root.responses;
                     }
                 }
                 delegate: BooruResponse {
@@ -208,28 +214,19 @@ Item {
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 10
-                    Rectangle {
-                        id: placeholderBackground
-                        anchors.centerIn: parent
-                        color: Appearance.colors.colSecondaryContainerActive
-                        width: 100
-                        height: 100
-                        radius: 999
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            iconSize: 80
-                            color: Appearance.colors.colSecondaryActive
-                            text: "bookmark_heart"
-                        }
+                    spacing: 5
+
+                    MaterialSymbol {
+                        Layout.alignment: Qt.AlignHCenter
+                        iconSize: 55
+                        color: Appearance.m3colors.m3outline
+                        text: "bookmark_heart"
                     }
                     StyledText {
                         id: widgetNameText
-                        anchors.top: placeholderBackground.bottom
-                        anchors.topMargin: 8
                         Layout.alignment: Qt.AlignHCenter
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
                         text: qsTr("Anime boorus")
                     }
@@ -602,7 +599,8 @@ Item {
 
                 Rectangle { // NSFW toggle
                     implicitWidth: switchesRow.implicitWidth
-
+                    implicitHeight: switchesRow.implicitHeight
+                    color: "transparent"
                     RowLayout {
                         id: switchesRow
                         spacing: 5

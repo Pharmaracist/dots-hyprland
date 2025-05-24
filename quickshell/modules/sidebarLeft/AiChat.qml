@@ -211,7 +211,7 @@ int main(int argc, char* argv[]) {
                 opacity: Ai.messageIDs.length === 0 ? 1 : 0
                 visible: opacity > 0
                 anchors.fill: parent
-                
+
                 Behavior on opacity {
                     animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                 }
@@ -219,28 +219,19 @@ int main(int argc, char* argv[]) {
                 ColumnLayout {
                     anchors.centerIn: parent
                     spacing: 5
-                Rectangle {
-                    id: placeholderBackground
-                    anchors.centerIn: parent
-                    color: Appearance.colors.colSecondaryContainerActive
-                    width: 100
-                    height: 100
-                    radius: 999
-                    
+
                     MaterialSymbol {
-                        anchors.centerIn: placeholderBackground
-                        iconSize: 80
-                        color: Appearance.colors.colSecondaryActive
+                        Layout.alignment: Qt.AlignHCenter
+                        iconSize: 55
+                        color: Appearance.m3colors.m3outline
                         text: "neurology"
                     }
-                }
                     StyledText {
                         id: widgetNameText
                         Layout.alignment: Qt.AlignHCenter
-                        anchors.top: placeholderBackground.bottom
-                        anchors.topMargin: 8
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        color: Appearance.m3colors.m3outline
+                        horizontalAlignment: Text.AlignHCenter
                         text: qsTr("Large language models")
                     }
                 }
@@ -356,8 +347,8 @@ int main(int argc, char* argv[]) {
             implicitHeight: Math.max(inputFieldRowLayout.implicitHeight + inputFieldRowLayout.anchors.topMargin 
                 + commandButtonsRow.implicitHeight + commandButtonsRow.anchors.bottomMargin + columnSpacing, 45)
             clip: true
-            border.color: Appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
-            border.width: Appearance.borderless ? 0 : 1
+            border.color: Appearance.m3colors.m3outlineVariant
+            border.width: 1
 
             Behavior on implicitHeight {
                 animation: Appearance.animation.elementMove.numberAnimation.createObject(this)

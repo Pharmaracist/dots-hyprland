@@ -177,13 +177,11 @@ Rectangle {
         }
         width: Appearance.sizes.barCenterSideModuleWidth * 0.8
         height: leftGradientRect.height
-        radius: Appearance.rounding.full
-        color: Appearance.colors.colPrimaryContainerActive
-    
+         color:"transparent"
+    }
     Components.ClockWidget {
         id: clockWidget
         anchors.centerIn: middleSection
-    }
     }
     Rectangle {
         id: rightGradientRect
@@ -193,7 +191,6 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
         width: rightSectionRowLayout.implicitWidth 
-        radius: Appearance.rounding.full
         height: leftGradientRect.height
         color: isHovered ? 
             (Appearance.colors.colSecondaryContainerActive) : 

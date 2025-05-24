@@ -5,7 +5,7 @@ import QtQuick
 import QtQuick.Layouts
 
 Rectangle {
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 6 // idk, text seems nicer w/ more padding
     implicitHeight: 32
     color: borderless ? "transparent" : Appearance.colors.colLayer1

@@ -8,7 +8,7 @@ import Quickshell.Hyprland
 
 Rectangle {
     id: root
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     Layout.alignment: Qt.AlignVCenter
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
     implicitHeight: 32

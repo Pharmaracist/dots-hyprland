@@ -27,25 +27,33 @@ Scope {
     property int showDelay: 50 // Show timer interval
     property int animationDuration: Appearance.animation.elementMoveFast.duration // Animation speed for dock sliding
     property int approachRegionHeight: 18 // Height of the approach region in pixels
-    
+    property var menuHeight : dockHeight * 0.9
+    property var activeWindows: []
+    property var dockRoot
+    property var dockContainer
     // Property to track if mouse is over any dock item
     property bool mouseOverDockItem: false
     
     // Default pinned apps to use if no saved settings exist
-    readonly property var defaultPinnedApps: []
+    readonly property var defaultPinnedApps: [
+        "nautilus",
+        "clocks",
+        "obsidian",
+        "lollypop",
+]
     
     // Pinned apps list - will be loaded from file
     property var pinnedApps: []
     
     // Settings file path
-    property string configFilePath: `${Quickshell.configDir}/dock_config.json`
-    
+    property string configFilePath: `${XdgDirectories.cache}/dock_config.json`
     function saveConfig() {
         var config = {
             pinnedApps: pinnedApps,
             autoHide: autoHide
         }
         dockConfigView.setText(JSON.stringify(config, null, 2))
+        console.log("[Dock] Config file path: " + configFilePath)
     }
     
     function savePinnedApps() {
@@ -70,9 +78,7 @@ Scope {
         // Save the configuration
         saveConfig()
     }
-    
-    // Add a new app to pinned apps
-    function addPinnedApp(appClass) {
+       function addPinnedApp(appClass) {
         // Check if app is already pinned
         if (!pinnedApps.includes(appClass)) {
             // Create a new array to trigger QML reactivity
@@ -83,7 +89,6 @@ Scope {
         }
     }
     
-    // Remove an app from pinned apps
     function removePinnedApp(appClass) {
         var index = pinnedApps.indexOf(appClass)
         if (index !== -1) {
@@ -106,7 +111,9 @@ Scope {
                 if (config) {
                     // Load pinned apps
                     if (config.pinnedApps) {
-                        dock.pinnedApps = config.pinnedApps
+                        dock.pinnedApps = config.pinnedApps.filter(function(app) {
+                            return typeof app === "string" && app.trim() !== ""
+                        })
                     }
                     
                     // Load auto-hide setting if available
@@ -114,10 +121,8 @@ Scope {
                         dock.autoHide = config.autoHide
                     }
                 }
-                console.log("[Dock] Config loaded")
             } catch (e) {
                 console.log("[Dock] Error parsing config: " + e)
-                // Initialize with defaults on parsing error
                 dock.pinnedApps = defaultPinnedApps
                 savePinnedApps()
             }
@@ -125,7 +130,6 @@ Scope {
         
         onLoadFailed: (error) => {
             console.log("[Dock] Config load failed: " + error)
-            // Initialize with defaults if file doesn't exist
             dock.pinnedApps = defaultPinnedApps
             savePinnedApps()
         }
@@ -208,18 +212,66 @@ Scope {
                 // With the new format, we just use the Icons helper directly
                 return Icons.noKnowledgeIconGuess(windowClass) || windowClass.toLowerCase()
             }
-            
             function isWindowActive(windowClass) {
-                return activeWindows.some(w => 
-                    w.class.toLowerCase() === windowClass.toLowerCase())
+                if (!windowClass) return false;
+                const targetClass = windowClass.toLowerCase();
+                return activeWindows.some(w => {
+                    const c = w.class;
+                    return typeof c === "string" && c.toLowerCase() === targetClass;
+                });
             }
-            
-            function focusOrLaunchApp(appInfo) {
-                Hyprland.dispatch(isWindowActive(appInfo.class) ?
-                    `focuswindow class:${appInfo.class}` :
-                    `exec ${appInfo.command}`)
-            }
-            
+
+function isGtk(appInfo) {
+  // Ensure appInfo and appInfo.class are valid before proceeding
+  if (!appInfo || typeof appInfo.class !== 'string') {
+    console.error("Invalid appInfo or appInfo.class provided to isGtk");
+    return false;
+  }
+  const lowerCaseClass = appInfo.class.toLowerCase();
+  return (
+    lowerCaseClass.startsWith("org.gtk.") ||
+    lowerCaseClass.startsWith("org.gtk3.") ||
+    lowerCaseClass.startsWith("org.gtk4.") ||
+    lowerCaseClass.startsWith("org.gnome.")
+  );
+}
+function focusOrLaunchApp(appInfo) {
+  // Ensure appInfo and appInfo.class are valid
+  if (!appInfo || typeof appInfo.class !== 'string') {
+    console.error("Invalid appInfo or appInfo.class provided to focusOrLaunchApp");
+    return;
+  }
+
+  if (typeof isWindowActive !== 'function') {
+    console.error("isWindowActive function is not defined. Please define it.");
+    // Fallback: attempt to launch if isWindowActive is missing, to prevent complete failure.
+    // This might lead to duplicate instances if the app is already running.
+     const launchCommand = isGtk(appInfo) ?
+      `exec bash -c 'gtk-launch ${appInfo.class}'` :
+      `exec bash -c '${appInfo.class}'`;
+    console.warn(`Hyprland.dispatch call: ${launchCommand} (isWindowActive missing)`);
+    // Hyprland.dispatch(launchCommand); // Uncomment when Hyprland is available
+    return;
+  }
+
+  const command = isWindowActive(appInfo.class)
+    ? `focuswindow class:${appInfo.class}`
+    : isGtk(appInfo)
+    ? `exec bash -c 'gtk-launch ${appInfo.class}'`
+    : `exec bash -c '${appInfo.class}'`;
+
+  // Placeholder for Hyprland.dispatch.
+  // Replace this with your actual Hyprland binding.
+  // Example: const Hyprland = { dispatch: (cmd) => console.log(`Dispatching: ${cmd}`) };
+  if (typeof Hyprland !== 'object' || typeof Hyprland.dispatch !== 'function') {
+      console.error("Hyprland.dispatch function is not defined. Please define it.");
+      console.warn(`Intended Hyprland.dispatch call: ${command}`);
+      return;
+  }
+
+  Hyprland.dispatch(command);
+}
+
             // Set anchors
             anchors.left: false
             anchors.right: false
@@ -344,7 +396,7 @@ Scope {
                             anchors.fill: parent
                             anchors.margins: 6
                             radius: Appearance.rounding.full
-                            color: autoHide ? "transparent" : Appearance.colors.colPrimary
+                            color: "transparent"
                             opacity: pinMouseArea.containsMouse ? 0.8 : 0.5
                             
                             // Pin icon using MaterialSymbol component
@@ -380,18 +432,25 @@ Scope {
                         
                         MouseArea {
                             id: pinMouseArea
-                            anchors.fill: parent
+                            anchors.fill: pinButton
                             hoverEnabled: true
-                            
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton
                             // Track hover state to prevent auto-hide
                             onEntered: dock.mouseOverDockItem = true
                             onExited: dock.mouseOverDockItem = false
-                            
+                            onPressed: (event) => {
+                                if (event.button === Qt.MiddleButton) {
+                                    Hyprland.dispatch("exec kitty nvim ~/.config/quickshell/modules/common/ConfigOptions.qml")
+                                } else if (event.button === Qt.BackButton) {
+                                    Hyprland.dispatch("global quickshell:sidebarLeftOpen")
+                                } else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) {
+                                    Hyprland.dispatch("global quickshell:sidebarRightOpen")
+                                }
+                            }
                             // Toggle auto-hide when clicked
                             onClicked: {
                                 dock.toggleDockExclusive()
                             }
-                            
                             // Show tooltip on hover
                             ToolTip.visible: containsMouse
                             ToolTip.text: autoHide ? "Pin dock (always visible)" : "Unpin dock (auto-hide)"
@@ -412,42 +471,52 @@ Scope {
                     Repeater {
                         model: dock.pinnedApps
                         
-                        DockItem {
-                            icon: Icons.noKnowledgeIconGuess(modelData) || modelData.toLowerCase()
-                            tooltip: modelData
-                            isActive: dockRoot.isWindowActive(modelData)
-                            onClicked: dockRoot.focusOrLaunchApp({
-                                class: modelData,
-                                command: modelData.toLowerCase()
-                            })
-                            
+                    DockItem {
+    icon: Icons.noKnowledgeIconGuess(modelData) || (typeof modelData === "string" ? modelData.toLowerCase() : modelData.class.toLowerCase())
+    tooltip: typeof modelData === "string" ? modelData : modelData.class
+    isActive: dockRoot.isWindowActive(typeof modelData === "string" ? modelData : modelData.class)
+    onClicked: dockRoot.focusOrLaunchApp({
+        class: typeof modelData === "string" ? modelData : modelData.class,
+        command: (typeof modelData === "string" ? modelData : modelData.class).toLowerCase()
+    })
+        
                             // Add right-click menu for pinned apps
-                       MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.RightButton | Qt.MiddleButton
-                                onClicked: {
-                                    // Create a context menu for the app
-                                    var component = Qt.createComponent("DockItemMenu.qml")
-                                    if (component.status === Component.Ready) {
-                                        var menu = component.createObject(null, {
-                                            "appInfo": modelData,
-                                            "isPinned": false,
-                                            "menuHeight": menuHeight,
-                                            "dockRoot": dockRoot
-                                        })
+                     MouseArea {
+    anchors.fill: parent
+    acceptedButtons: Qt.RightButton | Qt.MiddleButton
+    onClicked: (mouse) => {
+        // Create a context menu for the app
+        var component = Qt.createComponent("DockItemMenu.qml")
+        if (component.status === Component.Ready) {
+            var isPinned = dock.pinnedApps.some(pinnedClass => 
+    typeof pinnedClass === "string" &&
+    pinnedClass.toLowerCase() === (typeof modelData === "string" ? modelData.toLowerCase() : modelData.class.toLowerCase())
+);
 
-                                        
-                                        // Handle unpin app action
-                                        menu.unpinApp.connect(function() {
-                                            // Remove from pinned apps
-                                            dock.removePinnedApp(modelData)
-                                        })
-                                        
-                                        // Position relative to mouse cursor
-                                        menu.popup(Qt.point(mouse.x, mouse.y))
-                                    }
-                                }
-                            } 
+var menu = component.createObject(parent, {
+    "appInfo": {
+    class: typeof modelData === "string" ? modelData : modelData.class,
+    command: typeof modelData === "string" ? modelData.toLowerCase() : modelData.command
+}
+,
+    "isPinned": isPinned,
+    "isRunning": dockRoot.isWindowActive(modelData),
+    "menuHeight": menuHeight,
+    "dockRoot": dockRoot
+})
+
+            // Handle unpin app action
+            menu.unpinApp.connect(function() {
+                // Remove from pinned apps
+                dock.removePinnedApp(modelData)
+            })
+
+            // Position relative to mouse cursor
+            menu.popup(Qt.point(mouse.x, mouse.y))
+        }
+    }
+}
+
                         }
                     }
                     
@@ -471,7 +540,9 @@ Scope {
                                 var isPinned = false
                                 
                                 for (var j = 0; j < dock.pinnedApps.length; j++) {
-                                    if (dock.pinnedApps[j].toLowerCase() === activeWindow.class.toLowerCase()) {
+                              if (typeof dock.pinnedApps[j] === "string" && typeof activeWindow.class === "string" &&
+    dock.pinnedApps[j].toLowerCase() === activeWindow.class.toLowerCase()) {
+
                                         isPinned = true
                                         break
                                     }

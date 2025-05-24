@@ -46,7 +46,6 @@ Singleton {
                 case "kali": distroIcon = "debian-symbolic"; break;
                 default: distroIcon = "arch-symbolic"; break;
             }
-        console.log(Quickshell.screens[0])
             // Check for battery presence
             checkBatteryScript.running = true
         }

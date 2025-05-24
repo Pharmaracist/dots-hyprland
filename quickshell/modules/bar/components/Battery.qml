@@ -8,7 +8,7 @@ import Quickshell.Services.UPower
 
 Rectangle {
     id: root
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     readonly property var chargeState: UPower.displayDevice.state
     readonly property bool isCharging: chargeState == UPowerDeviceState.Charging
     readonly property bool isPluggedIn: isCharging || chargeState == UPowerDeviceState.PendingCharge

@@ -64,8 +64,8 @@ Scope { // Scope
                 property real padding: 30
                 implicitWidth: cheatsheetColumnLayout.implicitWidth + padding * 2
                 implicitHeight: cheatsheetColumnLayout.implicitHeight + padding * 2
-                border.color: ConfigOptions.appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
-                border.width: ConfigOptions.appearance.borderless ? 0 : 1
+                border.color: ConfigOptions.appea.borderless ? "transparent" : Appearance.colors.colLayer2Hover
+                border.width: ConfigOptions.appea.borderless ? 0 : 1
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     source: cheatsheetBackground

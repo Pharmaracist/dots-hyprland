@@ -57,6 +57,13 @@ Item { // Wrapper
                 Todo.addTask(args)
             }
         },
+        {
+            action: "bw",
+            execute: (args) => {
+                Hyprland.dispatch(`exec matugen color hex "#000000" -t scheme-monochrome`)
+                Hyprland.dispatch(`exec notify-send "Quickshell" "Monochrome mode enabled"`)
+            }
+        }
     ]
 
     function focusFirstItemIfNeeded() {

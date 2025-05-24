@@ -142,7 +142,7 @@ Singleton {
         property real sidebarWidth: 460
         property real sidebarWidthExtended: 750
         property real osdWidth: 200
-        property real mediaControlsWidth: 800
+        property real mediaControlsWidth: 450
         property real mediaControlsHeight: 160
         property real notificationPopupWidth: 410
         property real searchWidthCollapsed: 260
@@ -150,7 +150,7 @@ Singleton {
         property real hyprlandGapsOut: 5
         property real elevationMargin: 8
         property real fabShadowRadius: 5
-        property real floatingMargin: 7
+        property real floatingMargin: 5
         property real fabHoveredShadowRadius: 7
     }
 

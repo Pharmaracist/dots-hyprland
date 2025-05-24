@@ -86,7 +86,7 @@ Item {
         }
         
         Item {  // Left section
-            visible: Quickshell.screens.indexOf(barRoot.modelData) === 1
+            visible: Quickshell.screens.indexOf(barRoot.modelData) === 0
             anchors.fill: parent
             implicitHeight: leftSectionRowLayout.implicitHeight
             implicitWidth: leftSectionRowLayout.implicitWidth
@@ -168,11 +168,14 @@ Item {
                 bar: barRoot
                 MouseArea { // Right-click to toggle overview
                     anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
+                    acceptedButtons: Qt.RightButton | Qt.MiddleButton       
                     
                     onPressed: (event) => {
                         if (event.button === Qt.RightButton) {
                             Hyprland.dispatch('global quickshell:overviewToggle')
+                        }
+                        else if (event.button === Qt.MiddleButton) {
+                            Hyprland.dispatch('workspace special')
                         }
                     }
                 }
@@ -272,7 +275,7 @@ Item {
             }
             
             RowLayout {
-                visible: Quickshell.screens.indexOf(barRoot.modelData) === 1
+                visible: Quickshell.screens.indexOf(barRoot.modelData) === 0
                 id: rightSectionRowLayout
                 anchors.fill: parent
                 spacing: 5
