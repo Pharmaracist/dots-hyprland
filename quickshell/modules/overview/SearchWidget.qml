@@ -44,6 +44,18 @@ Item { // Wrapper
             }
         },
         {
+            action: "dyt",
+            execute: (args) => {
+                YTMusic.downloadSong(args)
+            }
+        },
+        {
+            action: "yt",
+            execute: (args) => {
+                YTMusic.playSong(args)
+            }
+        },
+        {
             action: "accentcolor",
             execute: (args) => {
                 executor.executeCommand(
