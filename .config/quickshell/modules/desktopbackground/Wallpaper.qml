@@ -155,6 +155,10 @@ Scope {
                         id: runner
 
                         function runMatugen(path) {
+                            // Close widget immediately
+                            wallpaperScope.isOpen = false;
+                            
+                            // Run matugen in background
                             Hyprland.dispatch(`exec matugen image ${path}`);
                             try {
                                 var process = Qt.createQmlObject('import QtQuick; QtObject { Component.onCompleted: { console.log("Running matugen image ' + path + '"); } }', wallpaperPanel, "dynamicProcess");

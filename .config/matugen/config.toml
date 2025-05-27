@@ -65,3 +65,38 @@ post_hook = 'pywalfox update'
 input_path = "~/.config/matugen/templates/qtct-colors.conf"
 output_path = "~/.config/qt6ct/colors/matugen.conf"
 post_hook = 'ratbagctl "Logitech G102 LIGHTSYNC Gaming Mouse" led 0 set color "{{colors.primary_container.default.hex_stripped}}" &'
+
+[templates.cursor]
+input_path = "~/.config/matugen/templates/applications/vscode-color-theme.json"
+output_path = "~/.config/cursor/user/settings.json"
+post_hook = '''
+(
+THEME_DIR="$HOME/.config/cursor/extensions/material-you-theme"
+mkdir -p "$THEME_DIR/themes"
+cp "$HOME/.config/cursor/user/settings.json" "$THEME_DIR/themes/material-you-color-theme.json"
+
+cat > "$THEME_DIR/package.json" << 'EOF'
+{
+    "name": "material-you-theme",
+    "displayName": "Material You Theme",
+    "version": "1.0.0",
+    "engines": {"vscode": "*"},
+    "categories": ["Themes"],
+    "contributes": {
+        "themes": [{
+            "label": "Material You",
+            "uiTheme": "vs-dark",
+            "path": "./themes/material-you-color-theme.json"
+        }]
+    }
+}
+EOF
+
+if command -v cursor >/dev/null 2>&1; then
+    # Use --no-sandbox to prevent launching a new window
+    ELECTRON_RUN_AS_NODE=1 cursor --no-sandbox --install-extension "$THEME_DIR" --force
+else
+    echo "Cursor not found in PATH"
+fi
+) &
+'''
