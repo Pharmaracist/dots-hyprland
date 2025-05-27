@@ -16,7 +16,11 @@ import Quickshell.Hyprland
 Scope { // Scope
     id: root
     property int sidebarPadding: 15
-    property var tabButtonList: [{"icon": "neurology", "name": qsTr("Intelligence")}, {"icon": "bookmark_heart", "name": qsTr("Anime")}]
+    property var tabButtonList: [
+        {"icon": "neurology", "name": qsTr("Intelligence")},
+        {"icon": "bookmark_heart", "name": qsTr("Anime")},
+        {"icon": "menu_book", "name": qsTr("Quran")}
+    ]
 
     Loader {
         id: sidebarLoader
@@ -161,6 +165,9 @@ Scope { // Scope
                             panelWindow: sidebarRoot
                         }
                         Anime {
+                            panelWindow: sidebarRoot
+                        }
+                        Quran {
                             panelWindow: sidebarRoot
                         }
                     }
