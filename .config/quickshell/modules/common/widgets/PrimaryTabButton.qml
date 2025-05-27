@@ -126,7 +126,7 @@ TabButton {
         anchors.centerIn: buttonBackground
         RowLayout {
             anchors.centerIn: parent
-            spacing: 0
+            spacing: 10
             MaterialSymbol {
                 visible: buttonIcon?.length > 0
                 Layout.alignment: Qt.AlignHCenter
