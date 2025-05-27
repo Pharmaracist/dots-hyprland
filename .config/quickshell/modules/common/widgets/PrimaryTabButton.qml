@@ -124,7 +124,7 @@ TabButton {
     
     contentItem: Item {
         anchors.centerIn: buttonBackground
-        ColumnLayout {
+        RowLayout {
             anchors.centerIn: parent
             spacing: 0
             MaterialSymbol {
