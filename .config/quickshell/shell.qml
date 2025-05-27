@@ -13,6 +13,7 @@ import "./modules/session/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/dock/"
+import "./modules/desktopbackground/"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -41,5 +42,8 @@ ShellRoot {
     Session {}
     SidebarLeft {}
     SidebarRight {}
+    // Wallpaper {}
+    ClockWidget {}
+    ActivateLinux {}
 }
 
