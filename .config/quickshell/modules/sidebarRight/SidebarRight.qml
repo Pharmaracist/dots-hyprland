@@ -74,6 +74,8 @@ Scope {
                     implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
                     implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
                     color: Appearance.colors.colLayer0
+                    border.color: ConfigOptions.appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
+                    border.width: ConfigOptions.appearance.borderless ? 0 : 1
                     radius: Appearance.rounding.screenRounding - Appearance.sizes.elevationMargin + 1
 
                     Keys.onPressed: (event) => {

@@ -84,6 +84,8 @@ Scope { // Scope
                 color: Appearance.colors.colLayer0
                 radius: Appearance.rounding.screenRounding - Appearance.sizes.elevationMargin + 1
                 focus: sidebarRoot.visible
+                border.color: ConfigOptions.appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
+                border.width: ConfigOptions.appearance.borderless ? 0 : 1
 
                 Behavior on width {
                     animation: Appearance.animation.elementMove.numberAnimation.createObject(this)

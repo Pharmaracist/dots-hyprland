@@ -10,6 +10,7 @@ Singleton {
 
     property QtObject appearance: QtObject {
         property int fakeScreenRounding: 1 // 0: None | 1: Always | 2: When not fullscreen
+        property bool borderless: false
     }
 
     property QtObject apps: QtObject {
