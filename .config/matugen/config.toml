@@ -92,11 +92,24 @@ cat > "$THEME_DIR/package.json" << 'EOF'
 }
 EOF
 
-if command -v cursor >/dev/null 2>&1; then
-    # Use --no-sandbox to prevent launching a new window
-    ELECTRON_RUN_AS_NODE=1 cursor --no-sandbox --install-extension "$THEME_DIR" --force
-else
-    echo "Cursor not found in PATH"
-fi
 ) &
 '''
+
+[templates.heroic]
+input_path = "~/.config/matugen/templates/applications/heroic-theme.css"
+output_path = "~/.cache/qui/user/generated/heroic-colors.css"
+
+[templates.Telegram]
+input_path = "~/.config/matugen/templates/applications/telegram-colors.tdesktop-theme"
+output_path = "~/.config/telegram-desktop/themes/material-you.tdesktop-theme"
+
+[templates.spicetify]
+input_path = "~/.config/matugen/templates/applications/spicetify-colors.ini"
+output_path = "~/.config/spicetify/Themes/Comfy/colors.ini"
+
+[templates.discord]
+input_path = "~/.config/matugen/templates/applications/discord.css"
+output_path = "~/.config/vesktop/themes/HyprNoon.css"
+# [templates.obsidian]
+# input_path = "~/.config/matugen/templates/applications/obsidian.css"
+# output_path = "/run/media/pc/Data/General-Archive/obsidian/.obsidian/snippets/HyprNoon.css"
