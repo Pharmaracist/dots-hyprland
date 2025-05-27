@@ -15,7 +15,7 @@ import Quickshell.Hyprland
 
 Item { // Wrapper
     id: root
-    readonly property string xdgConfigHome: XdgDirectories.config
+    readonly property string xdgConfigHome: Directories.config
     property string searchingText: ""
     property bool showResults: searchingText != ""
     property real searchBarHeight: searchBar.height + Appearance.sizes.elevationMargin * 2
@@ -294,7 +294,7 @@ Item { // Wrapper
                 clip: true
                 topMargin: 10
                 bottomMargin: 10
-                spacing: 0
+                spacing: 2
                 KeyNavigation.up: searchBar
 
                 onFocusChanged: {
@@ -324,11 +324,13 @@ Item { // Wrapper
                             const searchString = root.searchingText.slice(ConfigOptions.search.prefix.clipboard.length);
                             return Cliphist.fuzzyQuery(searchString).map(entry => {
                                 return {
+                                    cliphistRawString: entry,
                                     name: entry.replace(/^\s*\S+\s+/, ""),
-                                    clickActionName: qsTr("Copy"),
+                                    clickActionName: "",
                                     type: `#${entry.match(/^\s*(\S+)/)?.[1] || ""}`,
                                     execute: () => {
                                         Hyprland.dispatch(`exec echo '${StringUtils.shellSingleQuoteEscape(entry)}' | cliphist decode | wl-copy`);
+                                        Cliphist.refresh()
                                     }
                                 };
                             }).filter(Boolean);
