@@ -16,17 +16,12 @@ import "root:/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
+import "root:/modules/common/functions/file_utils.js" as FileUtils
 
 Scope {
     id: wallpaperScope
-    property bool wallpaperSelectorOpen: false
-
-    Component.onCompleted: {
-        if (typeof GlobalStates.wallpaperSelectorOpen === "undefined") {
-            GlobalStates.wallpaperSelectorOpen = false;
-        }
-    }
+    property string wallpaperPath: "/home/pc/Pictures/Wallpapers"
+    
 
     PanelWindow {
         id: wallpaperRoot
@@ -67,7 +62,8 @@ Scope {
 
         Loader {
             id: wallpaperContentLoader
-            active: GlobalStates.wallpaperSelectorOpen
+            active: true
+            visible: GlobalStates.wallpaperSelectorOpen
             anchors.centerIn: parent
             width: wallpaperRoot.width
             height: wallpaperRoot.height
@@ -81,7 +77,7 @@ Scope {
                     radius: wallpaperRoot.radius
                     blur: 1.2 * Appearance.sizes.elevationMargin
                     spread: 1
-                    color: Appearance.colors.colShadow
+                    color:  Appearance.colors.colShadow
                 }
 
                 Rectangle {
@@ -89,8 +85,8 @@ Scope {
                     width: Screen.width
                     anchors.top: parent.top
                     color: Appearance.colors.colLayer0
-                    border.color: Appearance.colors.m3outline
-                    border.width: 1
+                    border.color: ConfigOptions.appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
+                    border.width: ConfigOptions.appearance.borderless ? 0 : 1
                     radius: Appearance.rounding.normal
                     implicitHeight: wallpaperRoot.height
 
@@ -106,7 +102,7 @@ Scope {
                         width: 300
                         height: 150
                         color: Appearance.colors.colLayer1
-                        border.color: Appearance.colors.m3outline
+                        border.color: Appearance.colors.colOutline
                         border.width: 1
                         radius: Appearance.rounding.small
                         visible: false
@@ -133,7 +129,7 @@ Scope {
 
                     FolderListModel {
                         id: folderModel
-                        folder: "/home/pc/Pictures/Wallpapers"
+                        folder: XdgDirectories.pictures + "/Wallpapers" 
                         nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.svg", "*.webp"]
                         showDirs: false
                         showFiles: true
@@ -166,10 +162,11 @@ Scope {
                         anchors.fill: parent
                         anchors.margins: 10
                         spacing: 8
-                        cacheBuffer: 2000
-                        boundsBehavior: Flickable.StopAtBounds
-                        snapMode: ListView.SnapToItem
-
+                        clip: true
+                        
+                        cacheBuffer: width
+                        reuseItems: true
+                        
                         delegate: Item {
                             width: 260
                             height: 155
@@ -181,7 +178,11 @@ Scope {
                                 source: fileUrl
                                 asynchronous: true
                                 cache: false
+                                mipmap: true
+                                retainWhileLoading: true
                                 layer.enabled: true
+                                sourceSize.width: 260
+                                sourceSize.height: 155
                                 layer.effect: OpacityMask {
                                     maskSource: Rectangle {
                                         width: imageObject.width
@@ -194,7 +195,7 @@ Scope {
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
+                                // cursorShape: Qt.PointingHandCursor
                                 onClicked: {
                                     var path = fileUrl.toString().replace("file://", "");
                                     runner.runMatugen(path);
@@ -202,10 +203,10 @@ Scope {
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    color: parent.containsMouse ? Appearance.m3colors.m3surface : "transparent"
-                                    opacity: 0.5
-                                    border.color: parent.containsMouse ? Appearance.m3colors.m3outline : "transparent"
-                                    border.width: 1
+                                    color: parent.containsMouse ? Appearance.colors.colLayer0 : "transparent"
+                                    opacity: parent.containsMouse ? 0.3 : 0
+                                    border.color: parent.containsMouse ? Appearance.colors.colPrimaryActive : "transparent"
+                                    border.width: parent.containsMouse ? 1 : 0
                                     radius: Appearance.rounding.small
                                     visible: parent.containsMouse
                                 }
@@ -238,9 +239,6 @@ Scope {
         description: qsTr("Toggles wallpaper selector on press")
 
         onPressed: {
-            if (typeof GlobalStates.wallpaperSelectorOpen === "undefined") {
-                GlobalStates.wallpaperSelectorOpen = false;
-            }
             GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen;
         }
     }
