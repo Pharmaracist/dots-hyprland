@@ -42,7 +42,7 @@ ShellRoot {
     Session {}
     SidebarLeft {}
     SidebarRight {}
-    // Wallpaper {}
+    Wallpaper {}
     ClockWidget {}
     ActivateLinux {}
 }
