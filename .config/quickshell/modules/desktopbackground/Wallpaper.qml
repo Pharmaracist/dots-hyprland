@@ -21,14 +21,17 @@ import "root:/modules/common/functions/file_utils.js" as FileUtils
 Scope {
     id: wallpaperScope
     property string wallpaperPath: "/home/pc/Pictures/Wallpapers"
-    
+    property bool isOpen: false  // Local state
+
+    // Bind local state to global state
+    onIsOpenChanged: GlobalStates.wallpaperSelectorOpen = isOpen
 
     PanelWindow {
         id: wallpaperRoot
-        visible: GlobalStates.wallpaperSelectorOpen
+        visible: wallpaperScope.isOpen
 
         function hide() {
-            wallpaperRoot.visible = false;
+            wallpaperScope.isOpen = false;
         }
 
         exclusiveZone: 0
@@ -228,15 +231,15 @@ Scope {
         target: "wallpaperSelector"
 
         function toggle(): void {
-            GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen;
+            wallpaperScope.isOpen = !wallpaperScope.isOpen;
         }
 
         function close(): void {
-            GlobalStates.wallpaperSelectorOpen = false;
+            wallpaperScope.isOpen = false;
         }
 
         function open(): void {
-            GlobalStates.wallpaperSelectorOpen = true;
+            wallpaperScope.isOpen = true;
         }
     }
 
@@ -245,7 +248,7 @@ Scope {
         description: qsTr("Toggles wallpaper selector on press")
 
         onPressed: {
-            GlobalStates.wallpaperSelectorOpen = !GlobalStates.wallpaperSelectorOpen;
+            wallpaperScope.isOpen = !wallpaperScope.isOpen;
         }
     }
 
@@ -254,7 +257,7 @@ Scope {
         description: qsTr("Opens wallpaper selector on press")
 
         onPressed: {
-            GlobalStates.wallpaperSelectorOpen = true;
+            wallpaperScope.isOpen = true;
         }
     }
 
@@ -263,7 +266,7 @@ Scope {
         description: qsTr("Closes wallpaper selector on press")
 
         onPressed: {
-            GlobalStates.wallpaperSelectorOpen = false;
+            wallpaperScope.isOpen = false;
         }
     }
 }
