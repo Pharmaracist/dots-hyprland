@@ -29,15 +29,12 @@ output_path = '~/.config/gtk-3.0/gtk.css'
 input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
 output_path = '~/.config/gtk-4.0/gtk.css'
 
-[templates.ags_source_view]
-input_path = '~/.config/matugen/templates/ags/sourceviewtheme.xml'
-output_path = '~/.config/ags/assets/themes/sourceviewtheme.xml'
+[templates.pywalfox]
+input_path = '~/.config/matugen/templates/applications/pywalfox-colors.json'
+output_path = '~/.cache/wal/colors.json'
+post_hook = 'pywalfox update'
 
-[templates.ags_source_view_light]
-input_path = '~/.config/matugen/templates/ags/sourceviewtheme-light.xml'
-output_path = '~/.config/ags/assets/themes/sourceviewtheme-light.xml'
-
-[templates.ags_scss]
-input_path = '~/.config/matugen/templates/ags/_material.scss'
-output_path = '~/.local/state/ags/scss/_material.scss'
-post_hook = 'pidof gjs && agsv1 run-js "handleStyles(false)"'
+[templates.qt6ct]
+input_path = "~/.config/matugen/templates/qtct-colors.conf"
+output_path = "~/.config/qt6ct/colors/matugen.conf"
+post_hook = 'ratbagctl "Logitech G102 LIGHTSYNC Gaming Mouse" led 0 set color "{{colors.primary_container.default.hex_stripped}}" &'
