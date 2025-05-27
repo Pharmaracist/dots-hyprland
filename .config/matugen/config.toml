@@ -3,11 +3,38 @@ version_check = false
 
 [config.wallpaper]
 command = "swww"
-arguments = ["img", "--transition-step", "100", "--transition-fps", "120", "--transition-type", "grow", "--transition-angle", "30", "--transition-duration", "1"]
+arguments = [
+    "img",
+    "--transition-step",
+    "100",
+    "--transition-fps",
+    "120",
+    "--transition-type",
+    "grow",
+    "--transition-angle",
+    "30",
+    "--transition-duration",
+    "1"
+]
 
 [templates.m3colors]
 input_path = '~/.config/matugen/templates/colors.json'
 output_path = '~/.local/state/quickshell/user/generated/colors.json'
+
+[templates.terminal_sequences]
+input_path = '~/.config/matugen/templates/terminal/sequences.txt'
+output_path = '~/.local/state/quickshell/user/generated/terminal/sequences.txt'
+post_hook = '''
+sequences=$(cat ~/.local/state/quickshell/user/generated/terminal/sequences.txt | tr -d '\n')
+for pid in $(pgrep fish); do
+    echo -en "$sequences" > /proc/$pid/fd/1 2>/dev/null || true
+done
+'''
+
+[templates.starship]
+input_path = '~/.config/matugen/templates/starship.toml'
+output_path = '~/.config/starship.toml'
+post_hook = "starship init zsh > ~/.zshrc"
 
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland/colors.conf'
