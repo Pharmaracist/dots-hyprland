@@ -133,11 +133,18 @@ Scope {
                         nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.svg", "*.webp"]
                         showDirs: false
                         showFiles: true
-                        sortField: FolderListModel.Name
+                        sortField: FolderListModel.Unsorted
 
-                        onStatusChanged: {
-                            if (status === FolderListModel.Ready && count === 0)
-                                console.warn("No wallpapers found. Place images in:", folder);
+                        property var randomIndices: []
+
+                        onCountChanged: {
+                            if (count > 0) {
+                                randomIndices = Array.from({length: count}, (_, i) => i);
+                                for (let i = randomIndices.length - 1; i > 0; i--) {
+                                    const j = Math.floor(Math.random() * (i + 1));
+                                    [randomIndices[i], randomIndices[j]] = [randomIndices[j], randomIndices[i]];
+                                }
+                            }
                         }
                     }
 
@@ -157,7 +164,7 @@ Scope {
 
                     ListView {
                         id: wallpaperList
-                        model: folderModel
+                        model: folderModel.count > 0 ? folderModel.count : 0
                         orientation: ListView.Horizontal
                         anchors.fill: parent
                         anchors.margins: 10
@@ -175,14 +182,13 @@ Scope {
                                 id: imageObject
                                 anchors.fill: parent
                                 fillMode: Image.PreserveAspectCrop
-                                source: fileUrl
+                                source: folderModel.get(folderModel.randomIndices[index], "fileUrl")
                                 asynchronous: true
-                                cache: false
+                                cache: true
                                 mipmap: true
-                                retainWhileLoading: true
-                                layer.enabled: true
                                 sourceSize.width: 260
                                 sourceSize.height: 155
+                                layer.enabled: true
                                 layer.effect: OpacityMask {
                                     maskSource: Rectangle {
                                         width: imageObject.width
@@ -197,7 +203,7 @@ Scope {
                                 hoverEnabled: true
                                 // cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    var path = fileUrl.toString().replace("file://", "");
+                                    var path = folderModel.get(folderModel.randomIndices[index], "fileUrl").toString().replace("file://", "");
                                     runner.runMatugen(path);
                                 }
 
