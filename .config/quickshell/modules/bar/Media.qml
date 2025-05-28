@@ -1,24 +1,30 @@
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import "root:/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import QtQuick
-import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
-import Quickshell.Services.Mpris
 import Quickshell.Hyprland
+import Quickshell.Services.Mpris
+import Quickshell.Io
+import QtNetwork
+import "root:/modules/common/functions/string_utils.js" as StringUtils
 
 Item {
-    id: root
-    property bool borderless: ConfigOptions.bar.borderless
+    id: mediaLayout
+    width: parent.width
+    height: parent.height
+    property bool borderless : ConfigOptions.appearance.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
 
-    Layout.fillHeight: true
-    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
-    implicitHeight: 40
-
+Rectangle {
+    width: parent.width
+    height: parent.height
+    color: "black"
     Timer {
         running: activePlayer?.playbackState == MprisPlaybackState.Playing
         interval: 1000
@@ -41,15 +47,6 @@ Item {
             }
         }
     }
-
-    Rectangle { // Background
-        anchors.centerIn: parent
-        width: parent.width
-        implicitHeight: 32
-        color: borderless ? "transparent" : Appearance.colors.colLayer1
-        radius: Appearance.rounding.small
-    }
-
     RowLayout { // Real content
         id: rowLayout
 
@@ -87,5 +84,6 @@ Item {
         }
 
     }
+}
 
 }

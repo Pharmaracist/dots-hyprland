@@ -53,6 +53,7 @@ input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
 output_path = '~/.config/gtk-3.0/gtk.css'
 
 [templates.gtk4]
+pre_hook = 'rm -rf ~/.config/gtk-4.0 && mkdir -p ~/.config/gtk-4.0'
 input_path = '~/.config/matugen/templates/gtk/gtk-colors.css'
 output_path = '~/.config/gtk-4.0/gtk.css'
 
@@ -97,19 +98,21 @@ EOF
 
 [templates.heroic]
 input_path = "~/.config/matugen/templates/applications/heroic-theme.css"
-output_path = "~/.cache/qui/user/generated/heroic-colors.css"
+output_path = "~/.cache/quickshell/user/generated/heroic-colors.css"
 
 [templates.Telegram]
 input_path = "~/.config/matugen/templates/applications/telegram-colors.tdesktop-theme"
 output_path = "~/.config/telegram-desktop/themes/material-you.tdesktop-theme"
 
 [templates.spicetify]
-input_path = "~/.config/matugen/templates/applications/spicetify-colors.ini"
-output_path = "~/.config/spicetify/Themes/Comfy/colors.ini"
+input_path = "~/.config/matugen/templates/applications/colors.ini"
+output_path = "~/.config/spicetify/Themes/Comfy/color.ini"
+post_hook = "spicetify config current_theme Comfy && pgrep -x spotify >/dev/null && spicetify apply & disown"
 
 [templates.discord]
 input_path = "~/.config/matugen/templates/applications/discord.css"
 output_path = "~/.config/vesktop/themes/HyprNoon.css"
-# [templates.obsidian]
-# input_path = "~/.config/matugen/templates/applications/obsidian.css"
-# output_path = "/run/media/pc/Data/General-Archive/obsidian/.obsidian/snippets/HyprNoon.css"
+
+[templates.obsidian]
+input_path = "~/.config/matugen/templates/applications/obsidian.css"
+output_path = "/run/media/pc/Data/General-Archive/obsidian/.obsidian/snippets/HyprNoon.css"

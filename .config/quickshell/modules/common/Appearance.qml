@@ -266,7 +266,7 @@ Singleton {
 
     sizes: QtObject {
         property real barHeight: 40
-        property real barCenterSideModuleWidth: 360
+        property real barCenterSideModuleWidth: 320
         property real barCenterSideModuleWidthShortened: 280
         property real barCenterSideModuleWidthHellaShortened: 190
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value
@@ -283,7 +283,8 @@ Singleton {
         property real elevationMargin: 8
         property real fabShadowRadius: 5
         property real fabHoveredShadowRadius: 7
-    }
+        property real floatingMargin: 5
+     }
 
     syntaxHighlightingTheme: Appearance.m3colors.darkmode ? "Monokai" : "ayu Light"
 }

@@ -9,7 +9,7 @@ import QtQuick;
 
 Singleton {
     id: root
-    property var filePath: `${XdgDirectories.state}/user/todo.md`
+    property var filePath: `${Directories.state}/user/todo.md`
     property var list: []
 
     function listToMarkdown() {

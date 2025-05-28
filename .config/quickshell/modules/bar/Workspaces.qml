@@ -15,7 +15,7 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     required property var bar
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless : ConfigOptions.appearance.borderless
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bar.screen)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
     
@@ -196,7 +196,11 @@ Item {
                                 Appearance.colors.colOnLayer1Inactive)
 
                         Behavior on opacity {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                            }
                         }
 
                     }
@@ -219,16 +223,32 @@ Item {
                             implicitSize: (!GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? workspaceIconSize : workspaceIconSizeShrinked
 
                             Behavior on opacity {
-                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                NumberAnimation {
+                                    duration: Appearance.animation.elementMoveFast.duration
+                                    easing.type: Appearance.animation.elementMoveFast.type
+                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                                }
                             }
                             Behavior on anchors.bottomMargin {
-                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                NumberAnimation {
+                                    duration: Appearance.animation.elementMoveFast.duration
+                                    easing.type: Appearance.animation.elementMoveFast.type
+                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                                }
                             }
                             Behavior on anchors.rightMargin {
-                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                NumberAnimation {
+                                    duration: Appearance.animation.elementMoveFast.duration
+                                    easing.type: Appearance.animation.elementMoveFast.type
+                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                                }
                             }
                             Behavior on implicitSize {
-                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                NumberAnimation {
+                                    duration: Appearance.animation.elementMoveFast.duration
+                                    easing.type: Appearance.animation.elementMoveFast.type
+                                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                                }
                             }
                         }
                     }

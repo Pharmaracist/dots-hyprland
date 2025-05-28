@@ -48,9 +48,10 @@ Scope {
         }
 
         margins {
-            left: 10
-            top: 10
-            right: 10
+            left: Appearance.sizes.floatingMargin   
+            top: Appearance.sizes.floatingMargin
+            right: Appearance.sizes.floatingMargin
+            bottom: Appearance.sizes.floatingMargin
         }
 
         HyprlandFocusGrab {
@@ -80,15 +81,15 @@ Scope {
                     radius: wallpaperRoot.radius
                     blur: 1.2 * Appearance.sizes.elevationMargin
                     spread: 1
-                    color:  Appearance.colors.colShadow
+                    color: Appearance.colors.colShadow
                 }
 
                 Rectangle {
                     id: wallpaperPanel
                     width: Screen.width
                     anchors.top: parent.top
-                    color: Appearance.colors.colLayer0
-                    border.color: ConfigOptions.appearance.borderless ? "transparent" : Appearance.colors.colLayer2Hover
+                    color: Appearance.colors.colLayer0 || "#2d2d2d"
+                    border.color: ConfigOptions.appearance.borderless ? "transparent" : (Appearance.colors.colOutline || "#404040")
                     border.width: ConfigOptions.appearance.borderless ? 0 : 1
                     radius: Appearance.rounding.normal
                     implicitHeight: wallpaperRoot.height
@@ -132,7 +133,7 @@ Scope {
 
                     FolderListModel {
                         id: folderModel
-                        folder: XdgDirectories.pictures + "/Wallpapers" 
+                        folder: Directories.pictures + "/Wallpapers" 
                         nameFilters: ["*.png", "*.jpg", "*.jpeg", "*.svg", "*.webp"]
                         showDirs: false
                         showFiles: true
@@ -161,7 +162,7 @@ Scope {
                             // Run matugen in background
                             Hyprland.dispatch(`exec matugen image ${path}`);
                             try {
-                                var process = Qt.createQmlObject('import QtQuick; QtObject { Component.onCompleted: { console.log("Running matugen image ' + path + '"); } }', wallpaperPanel, "dynamicProcess");
+                                var process = Qt.createQmlObject('import QtQuick; QtObject { }', wallpaperPanel, "dynamicProcess");
                             } catch (error) {
                                 console.error("Failed to run matugen:", error);
                                 errorDialog.show("Failed to apply wallpaper: " + error);
@@ -218,7 +219,7 @@ Scope {
                                     anchors.fill: parent
                                     color: parent.containsMouse ? Appearance.colors.colLayer0 : "transparent"
                                     opacity: parent.containsMouse ? 0.3 : 0
-                                    border.color: parent.containsMouse ? Appearance.colors.colPrimaryActive : "transparent"
+                                    border.color: parent.containsMouse ? Appearance.colors.colSecondaryActive : "transparent"
                                     border.width: parent.containsMouse ? 1 : 0
                                     radius: Appearance.rounding.small
                                     visible: parent.containsMouse

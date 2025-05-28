@@ -1,0 +1,4 @@
+[[shades]]
+name = "vibrance"
+default = true # will be activated when no other shader is scheduled
+strength = 1

@@ -24,6 +24,11 @@ Singleton {
 
     property QtObject bar: QtObject {
         property int batteryLowThreshold: 20
+        property bool enableLayoutSwitching: true
+        property string position: "top"
+        property bool preloadAllLayouts: false
+        property string defaultLayout: "media" // Options: default, minimal, media, none, floating
+        property var availableLayouts: ["default", "minimal", "media", "none", "floating"]
         property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: true
         property bool borderless: false
