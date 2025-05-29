@@ -19,20 +19,64 @@ Scope {
     readonly property int barHeight: Appearance.sizes.barHeight
     readonly property int barCenterSideModuleWidth: Appearance.sizes.barCenterSideModuleWidth
     readonly property string barPosition: ConfigOptions.bar.position
-    readonly property var barLayouts: ConfigOptions.bar.availableLayouts
     readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly || false
-    // Layouts that should have rounded corners
-    readonly property var layoutsWithCorners: ['minimal', 'default']
-    // Layouts that should float (special handling)
-    readonly property var floatingLayouts: ['floating', 'media', 'knocks']
+    // Layout definitions
+    readonly property var barLayouts: ["default", "minimal", "media", "none", "floating", "knocks"]
+    readonly property var layoutsWithCorners: ["minimal", "default"]
+    readonly property var floatingLayouts: ["floating", "media", "knocks"]
     // Layout properties
-    property int currentBarLayout: getInitialLayout()
+    property int currentBarLayout: PersistentStates.bar.currentLayout
     property bool isTransitioning: false
+    // Animation properties
+    property int transitionDuration: 200
+    property int fadeOutDuration: 100
+    property int fadeInDuration: 100
 
-    // Get initial layout index
-    function getInitialLayout() {
-        const index = barLayouts.indexOf(ConfigOptions.bar.defaultLayout);
-        return index >= 0 ? index : 0;
+    // Layout switching with animation
+    function switchLayout(direction) {
+        if (!PersistentStates.bar.enableLayoutSwitching)
+            return ;
+
+        isTransitioning = true;
+        PersistentStateManager.setState("bar.currentLayout", (currentBarLayout + (direction === "next" ? 1 : -1) + barLayouts.length) % barLayouts.length);
+        transitionTimer.restart();
+    }
+
+    Component.onCompleted: {
+        Object.assign(PersistentStates.bar, {
+            "availableLayouts": barLayouts,
+            "layoutsWithCorners": layoutsWithCorners,
+            "floatingLayouts": floatingLayouts
+        });
+        if (PersistentStates.bar.currentLayout === -1)
+            PersistentStateManager.setState("bar.currentLayout", 0);
+
+    }
+
+    Timer {
+        id: transitionTimer
+
+        interval: Appearance.animation.elementMoveFast.duration
+        repeat: false
+        onTriggered: isTransitioning = false
+    }
+
+    // Keybinding for layout switching
+    GlobalShortcut {
+        name: "barLayoutSwitch"
+        description: qsTr("Switch bar layout")
+        onPressed: {
+            switchLayout("next");
+        }
+    }
+
+    // Watch for persistent state changes
+    Connections {
+        function onCurrentLayoutChanged() {
+            currentBarLayout = PersistentStates.bar.currentLayout;
+        }
+
+        target: PersistentStates.bar
     }
 
     // For each monitor
@@ -78,7 +122,7 @@ Scope {
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.MiddleButton
-                    enabled: ConfigOptions.bar.enableLayoutSwitching
+                    enabled: PersistentStates.bar.enableLayoutSwitching
                     onClicked: {
                         switchLayout("next");
                     }
@@ -90,7 +134,7 @@ Scope {
 
                     anchors.fill: parent
                     currentIndex: bar.currentBarLayout
-                    opacity: bar.isTransitioning ? 0.8 : 1
+                    opacity: bar.isTransitioning ? 0.85 : 1
 
                     // Layout 1: Default Layout
                     DefaultLayout {
@@ -106,7 +150,7 @@ Scope {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 1 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 1 || ConfigOptions.bar.preloadAllLayouts
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
@@ -123,7 +167,7 @@ Scope {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 2 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 2 || ConfigOptions.bar.preloadAllLayouts
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
@@ -133,13 +177,14 @@ Scope {
 
                     }
 
+                    // Layout 4: None Layout (lazy-loaded)
                     Loader {
                         id: noneLayoutLoader
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 3 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 3 || ConfigOptions.bar.preloadAllLayouts
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
@@ -149,14 +194,14 @@ Scope {
 
                     }
 
-                    // Layout 4: Floating Layout (lazy-loaded)
+                    // Layout 5: Floating Layout (lazy-loaded)
                     Loader {
                         id: floatingLayoutLoader
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 4 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 4 || ConfigOptions.bar.preloadAllLayouts
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
@@ -166,14 +211,14 @@ Scope {
 
                     }
 
-                    // Layout 5: Knocks Layout (lazy-loaded)
+                    // Layout 6: Knocks Layout (lazy-loaded)
                     Loader {
                         id: knocksLayoutLoader
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         asynchronous: true
-                        active: bar.currentBarLayout === 5 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        active: bar.currentBarLayout === 5 || ConfigOptions.bar.preloadAllLayouts
                         onLoaded: {
                             item.barRoot = barRoot;
                         }
@@ -183,9 +228,40 @@ Scope {
 
                     }
 
+                    // Add scale and opacity behaviors
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: 100
+                            duration: Appearance.animation.elementMoveFast.duration
+                            easing.type: Appearance.animation.elementMoveFast.type
+                            easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                        }
+
+                    }
+
+                    transform: Scale {
+                        id: layoutScale
+
+                        origin.x: barLayoutStack.width / 2
+                        origin.y: barLayoutStack.height / 2
+                        xScale: bar.isTransitioning ? 0.97 : 1
+                        yScale: bar.isTransitioning ? 0.97 : 1
+
+                        Behavior on xScale {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                            }
+
+                        }
+
+                        Behavior on yScale {
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration
+                                easing.type: Appearance.animation.elementMoveFast.type
+                                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                            }
+
                         }
 
                     }
@@ -196,12 +272,7 @@ Scope {
 
             // Round decorators
             Item {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: barPosition === "top" ? barContent.bottom : undefined
-                anchors.bottom: barPosition === "bottom" ? barContent.top : undefined
-                height: Appearance.rounding.screenRounding
-                visible: {
+                property bool shouldBeVisible: {
                     // Use a completely defensive approach to avoid any undefined errors
                     if (!barLayouts)
                         return true;
@@ -219,6 +290,14 @@ Scope {
                     return bar.layoutsWithCorners.indexOf(currentLayout) >= 0;
                 }
 
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: barPosition === "top" ? barContent.bottom : undefined
+                anchors.bottom: barPosition === "bottom" ? barContent.top : undefined
+                height: Appearance.rounding.screenRounding
+                opacity: shouldBeVisible ? 1 : 0
+                visible: opacity > 0
+
                 RoundCorner {
                     anchors.top: barPosition === "top" ? parent.top : undefined
                     anchors.bottom: barPosition === "bottom" ? parent.bottom : undefined
@@ -235,6 +314,15 @@ Scope {
                     size: Appearance.rounding.screenRounding
                     corner: barPosition === "top" ? cornerEnum.topRight : cornerEnum.bottomRight
                     color: Appearance.colors.colLayer0
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Appearance.animation.elementMoveFast.duration
+                        easing.type: Appearance.animation.elementMoveFast.type
+                        easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                    }
+
                 }
 
             }

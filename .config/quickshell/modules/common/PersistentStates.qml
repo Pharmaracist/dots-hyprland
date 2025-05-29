@@ -20,4 +20,11 @@ Singleton {
         property string provider: "yandere"
     }
 
+    property QtObject bar: QtObject {
+        property int currentLayout: -1  // -1 means use first layout until user changes it
+        property var availableLayouts
+        property var layoutsWithCorners
+        property var floatingLayouts
+        property bool enableLayoutSwitching: true
+    }
 }

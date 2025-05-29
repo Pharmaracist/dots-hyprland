@@ -16,7 +16,6 @@ Rectangle {
         id: columnLayout
 
         spacing: 0
-        anchors.left: parent.left
 
         StyledText {
             id: timeText

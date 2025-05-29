@@ -152,47 +152,51 @@ Item {
                 width: defaultBorderWidth
             }
 
+            MouseArea {
+                implicitWidth: parent.width
+                implicitHeight: parent.height
+                acceptedButtons: Qt.LeftButton
+                onClicked: (event) => {
+                    if (event.button === Qt.LeftButton)
+                        Hyprland.dispatch('global quickshell:sidebarRightToggle');
+
+                }
+            }
+
             RowLayout {
                 id: rightChunkRow
 
                 width: chunkWidth
                 height: chunkHeight
-                spacing: 20
 
-                MouseArea {
-                    width: rightChunk.width
-                    height: rightChunk.height
-                    acceptedButtons: Qt.LeftButton
-                    onClicked: (event) => {
-                        if (event.button === Qt.LeftButton)
-                            Hyprland.dispatch('global quickshell:sidebarRightToggle');
+                RowLayout {
+                    Layout.alignment: Qt.AlignCenter
 
+                    Components.StackedClockWidget {
+                        color: "transparent"
                     }
-                }
 
-                Components.StackedClockWidget {
-                    color: "transparent"
-                }
+                    Components.StatusIcons {
+                        id: statusIcons
 
-                Components.StatusIcons {
-                    id: statusIcons
+                        width: Appearance.sizes.barCenterSideModuleWidth
+                        height: chunkHeight
+                        commonIconColor: Appearance.colors.colOnLayer1
+                    }
 
-                    width: Appearance.sizes.barCenterSideModuleWidth
-                    height: chunkHeight
-                    commonIconColor: Appearance.colors.colOnLayer1
-                }
+                    Components.Resources {
+                        Layout.preferredHeight: chunkHeight
+                        width: Appearance.sizes.barCenterSideModuleWidth
+                        height: parent.height
+                        color: "transparent"
+                    }
 
-                Components.Resources {
-                    Layout.preferredHeight: chunkHeight
-                    width: Appearance.sizes.barCenterSideModuleWidth
-                    height: parent.height
-                    color: "transparent"
-                }
+                    Components.MinimalBattery {
+                        visible: UPower.displayDevice.isLaptopBattery
+                        width: Appearance.sizes.barCenterSideModuleWidth
+                        height: parent.height
+                    }
 
-                Components.MinimalBattery {
-                    visible: UPower.displayDevice.isLaptopBattery
-                    width: Appearance.sizes.barCenterSideModuleWidth
-                    height: parent.height
                 }
 
             }
