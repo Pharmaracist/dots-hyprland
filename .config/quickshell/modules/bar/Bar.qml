@@ -24,7 +24,7 @@ Scope {
     // Layouts that should have rounded corners
     readonly property var layoutsWithCorners: ['minimal', 'default']
     // Layouts that should float (special handling)
-    readonly property var floatingLayouts: ['floating', 'media']
+    readonly property var floatingLayouts: ['floating', 'media', 'knocks']
     // Layout properties
     property int currentBarLayout: getInitialLayout()
     property bool isTransitioning: false
@@ -162,6 +162,23 @@ Scope {
                         }
 
                         sourceComponent: FloatingLayout {
+                        }
+
+                    }
+
+                    // Layout 5: Knocks Layout (lazy-loaded)
+                    Loader {
+                        id: knocksLayoutLoader
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        asynchronous: true
+                        active: bar.currentBarLayout === 5 || (ConfigOptions.bar.preloadAllLayouts === true)
+                        onLoaded: {
+                            item.barRoot = barRoot;
+                        }
+
+                        sourceComponent: KnocksLayout {
                         }
 
                     }

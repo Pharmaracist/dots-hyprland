@@ -19,7 +19,7 @@ Scope { // Scope
     property var tabButtonList: [
         {"icon": "neurology", "name": qsTr("Intelligence")},
         {"icon": "bookmark_heart", "name": qsTr("Anime")},
-        {"icon": "menu_book", "name": qsTr("Quran")}
+        // {"icon": "menu_book", "name": qsTr("Quran")}
     ]
 
     Loader {

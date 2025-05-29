@@ -1,21 +1,23 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
+import "root:/modules/common"
+import "root:/modules/common/widgets"
 
 Item {
     required property string iconName
     required property double percentage
     property bool shown: true
+
     clip: true
     implicitWidth: resourceRowLayout.x < 0 ? 0 : childrenRect.width
     implicitHeight: childrenRect.height
 
     RowLayout {
-        spacing: 4
         id: resourceRowLayout
+
+        spacing: 4
         x: shown ? 0 : -resourceRowLayout.width
 
         CircularProgress {
@@ -54,5 +56,7 @@ Item {
             easing.type: Appearance.animation.elementMove.type
             easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
         }
+
     }
+
 }
