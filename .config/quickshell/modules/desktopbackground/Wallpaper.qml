@@ -203,9 +203,9 @@ Scope {
                         function runMatugen(path) {
                             asynchronous:true
                             try {
-                                // const command = `exec bash -c "${wallpaperSelector} ${path} &"`
+                                const command = `exec bash -c "${wallpaperSelector} ${path} &"`
                                 // var command = `exec matugen ${path}`
-                                Hyprland.dispatch(`exec matugen image "${path}"`)
+                                Hyprland.dispatch(command)
                                 
                                 console.log("running on",path)
                             } catch (error) {
