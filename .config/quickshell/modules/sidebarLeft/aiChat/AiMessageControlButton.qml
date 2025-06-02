@@ -17,7 +17,7 @@ GroupButton {
 
     contentItem: MaterialSymbol {
         horizontalAlignment: Text.AlignHCenter
-        iconSize: Appearance.font.pixelSize.larger
+        font.pixelSize: Appearance.font.pixelSize.large
         text: buttonIcon
         color: button.activated ? Appearance.m3colors.m3onPrimary :
             button.enabled ? Appearance.m3colors.m3onSurface :

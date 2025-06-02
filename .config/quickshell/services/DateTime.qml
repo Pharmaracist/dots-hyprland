@@ -9,7 +9,7 @@ pragma ComponentBehavior: Bound
  * A nice wrapper for date and time strings.
  */
 Singleton {
-    property string time: Qt.formatDateTime(clock.date, "hh:mm")
+    property string time: Qt.formatDateTime(clock.date, ConfigOptions.bar.timeFormat)
     property string date: Qt.formatDateTime(clock.date, "dddd, dd/MM")
     property string day: Qt.formatDateTime(clock.date, "dd")
     property string month: Qt.formatDateTime(clock.date, "MMMM")

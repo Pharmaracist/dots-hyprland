@@ -47,6 +47,25 @@ Item { // Wrapper
             }
         },
         {
+            action: "dyt",
+            execute: (args) => {
+                YTMusic.downloadSong(args)
+            }
+        },
+        {
+            action: "bw",
+            execute: (args) => {
+                Hyprland.dispatch(`exec matugen color hex "#000000" -t scheme-monochrome`)
+                Hyprland.dispatch(`exec notify-send "Quickshell" "Monochrome mode enabled"`)
+            }
+        },
+        {
+            action: "yt",
+            execute: (args) => {
+                YTMusic.playSong(args)
+            }
+        },
+        {
             action: "dark",
             execute: () => {
                 executor.executeCommand(`${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`)

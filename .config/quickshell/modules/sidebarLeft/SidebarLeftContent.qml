@@ -14,15 +14,9 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 
 Item {
-    id: root
+    id: sidebarLeftBackground
     required property var scopeRoot
     anchors.fill: parent
-    property var tabButtonList: [
-        {"icon": "neurology", "name": qsTr("Intelligence")}, 
-        {"icon": "translate", "name": qsTr("Translator")},
-        {"icon": "bookmark_heart", "name": qsTr("Anime")},
-    ]
-    property int selectedTab: 0
 
     function focusActiveItem() {
         swipeView.currentItem.forceActiveFocus()
@@ -31,19 +25,19 @@ Item {
     Keys.onPressed: (event) => {
         if (event.modifiers === Qt.ControlModifier) {
             if (event.key === Qt.Key_PageDown) {
-                root.selectedTab = Math.min(root.selectedTab + 1, root.tabButtonList.length - 1)
+                scopeRoot.selectedTab = Math.min(scopeRoot.selectedTab + 1, scopeRoot.tabButtonList.length - 1)
                 event.accepted = true;
             } 
             else if (event.key === Qt.Key_PageUp) {
-                root.selectedTab = Math.max(root.selectedTab - 1, 0)
+                scopeRoot.selectedTab = Math.max(scopeRoot.selectedTab - 1, 0)
                 event.accepted = true;
             }
             else if (event.key === Qt.Key_Tab) {
-                root.selectedTab = (root.selectedTab + 1) % root.tabButtonList.length;
+                scopeRoot.selectedTab = (scopeRoot.selectedTab + 1) % scopeRoot.tabButtonList.length;
                 event.accepted = true;
             }
             else if (event.key === Qt.Key_Backtab) {
-                root.selectedTab = (root.selectedTab - 1 + root.tabButtonList.length) % root.tabButtonList.length;
+                scopeRoot.selectedTab = (scopeRoot.selectedTab - 1 + scopeRoot.tabButtonList.length) % scopeRoot.tabButtonList.length;
                 event.accepted = true;
             }
         }
@@ -57,10 +51,10 @@ Item {
 
         PrimaryTabBar { // Tab strip
             id: tabBar
-            tabButtonList: root.tabButtonList
-            externalTrackedTab: root.selectedTab
+            tabButtonList: scopeRoot.tabButtonList
+            externalTrackedTab: scopeRoot.selectedTab
             function onCurrentIndexChanged(currentIndex) {
-                root.selectedTab = currentIndex
+                scopeRoot.selectedTab = currentIndex
             }
         }
 
@@ -74,7 +68,7 @@ Item {
             currentIndex: tabBar.externalTrackedTab
             onCurrentIndexChanged: {
                 tabBar.enableIndicatorAnimation = true
-                root.selectedTab = currentIndex
+                scopeRoot.selectedTab = currentIndex
             }
 
             clip: true
@@ -88,7 +82,6 @@ Item {
             }
 
             AiChat {}
-            Translator {}
             Anime {}
         }
         

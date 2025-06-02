@@ -10,6 +10,7 @@ Singleton {
 
     property QtObject appearance: QtObject {
         property int fakeScreenRounding: 1 // 0: None | 1: Always | 2: When not fullscreen
+        property bool borderless: true
     }
 
     property QtObject apps: QtObject {
@@ -28,13 +29,18 @@ Singleton {
     }
 
     property QtObject bar: QtObject {
-        property bool bottom: false // Instead of top
-        property bool borderless: true
-        property string topLeftIcon: "spark" // Options: distro, spark
+        property string timeFormat: "h:mm AP" // Options: 24H hh:mm,12H h:mm AP
+        property int batteryLowThreshold: 20
+        property string position: "top"
+        property string city: "Cairo"
+        property bool desaturateTray: false
+        property bool showOnMainScreenOnly: false
+        property string topLeftIcon: "distro" // Options: distro, spark
         property bool showBackground: true
+        property bool borderless: false
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
-            property bool alwaysShowCpu: false
+            property bool alwaysShowCpu: true
         }
         property QtObject workspaces: QtObject {
             property int shown: 10
@@ -90,9 +96,6 @@ Singleton {
     }
 
     property QtObject sidebar: QtObject {
-        property QtObject translator: QtObject {
-            property int delay: 100 // Delay before sending request. Reduces (potential) rate limits and lag.
-        }
         property QtObject booru: QtObject {
             property bool allowNsfw: false
             property string defaultProvider: "yandere"
@@ -104,7 +107,7 @@ Singleton {
     }
 
     property QtObject hacks: QtObject {
-        property int arbitraryRaceConditionDelay: 20 // milliseconds
+        property int arbitraryRaceConditionDelay: 500 // milliseconds
     }
 
 }

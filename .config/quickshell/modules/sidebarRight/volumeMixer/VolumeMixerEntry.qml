@@ -1,23 +1,28 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Pipewire
+import Quickshell.Widgets
+import "root:/modules/common"
+import "root:/modules/common/widgets"
+import "root:/services"
 
 Item {
     id: root
-    required property PwNode node;
-	PwObjectTracker { objects: [ node ] }
+
+    required property PwNode node
 
     implicitHeight: rowLayout.implicitHeight
 
+    PwObjectTracker {
+        objects: [node]
+    }
+
     RowLayout {
         id: rowLayout
+
         anchors.fill: parent
         spacing: 10
 
@@ -37,11 +42,15 @@ Item {
                         return media != undefined ? `${app} • ${media}` : app;
                     }
                 }
+
             }
 
             RowLayout {
+                spacing: 10
+
                 Image {
                     property real size: slider.trackHeight * 1.3
+
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     visible: source != ""
                     sourceSize.width: size
@@ -49,17 +58,25 @@ Item {
                     source: {
                         let icon;
                         icon = AppSearch.guessIcon(root.node.properties["application.icon-name"]);
-                        if (AppSearch.iconExists(icon)) return Quickshell.iconPath(icon, "image-missing");
+                        if (AppSearch.iconExists(icon))
+                            return Quickshell.iconPath(icon, "image-missing");
+
                         icon = AppSearch.guessIcon(root.node.properties["node.name"]);
                         return Quickshell.iconPath(icon, "image-missing");
                     }
                 }
+
                 StyledSlider {
                     id: slider
+
                     value: root.node.audio.volume
                     onValueChanged: root.node.audio.volume = value
                 }
+
             }
+
         }
+
     }
+
 }

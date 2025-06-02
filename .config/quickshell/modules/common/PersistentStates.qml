@@ -12,6 +12,9 @@ Singleton {
         property QtObject bottomGroup: QtObject {
             property bool collapsed: false
         }
+        property QtObject centerGroup: QtObject {
+            property int selectedTab: 0
+        }
     }
 
     property QtObject booru: QtObject {
@@ -19,4 +22,7 @@ Singleton {
         property string provider: "yandere"
     }
 
+    property QtObject bar: QtObject {
+        property int currentLayout: -1  // -1 means use first layout until user changes it
+    }
 }

@@ -159,6 +159,7 @@ Singleton {
             property string iconNerd: "SpaceMono NF"
             property string monospace: "JetBrains Mono NF"
             property string reading: "Readex Pro"
+            property string niche: "Nothing Font (5x7)"
         }
         property QtObject pixelSize: QtObject {
             property int smallest: 10
@@ -273,9 +274,9 @@ Singleton {
 
     sizes: QtObject {
         property real barHeight: 40
-        property real barCenterSideModuleWidth: 360
-        property real barCenterSideModuleWidthShortened: 280
-        property real barCenterSideModuleWidthHellaShortened: 190
+        property real barCenterSideModuleWidth: 300
+        property real barCenterSideModuleWidthShortened: 260
+        property real barCenterSideModuleWidthHellaShortened: 200
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value
         property real barHellaShortenScreenWidthThreshold: 1000 // Shorten even more...
         property real sidebarWidth: 460
@@ -286,11 +287,12 @@ Singleton {
         property real notificationPopupWidth: 410
         property real searchWidthCollapsed: 260
         property real searchWidth: 450
-        property real hyprlandGapsOut: 5
+        property real hyprlandGapsOut: 10
         property real elevationMargin: 8
         property real fabShadowRadius: 5
         property real fabHoveredShadowRadius: 7
-    }
+        property real floatingMargin: 10
+     }
 
     syntaxHighlightingTheme: Appearance.m3colors.darkmode ? "Monokai" : "ayu Light"
 }

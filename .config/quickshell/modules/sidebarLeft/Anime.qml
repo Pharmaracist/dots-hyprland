@@ -137,7 +137,7 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            StyledListView { // Booru responses
+            ListView { // Booru responses
                 id: booruResponseListView
                 anchors.fill: parent
                 spacing: 10
@@ -161,6 +161,14 @@ Item {
                         easing.type: Appearance.animation.scroll.type
                         easing.bezierCurve: Appearance.animation.scroll.bezierCurve
                     }
+                }
+
+                add: Transition {
+                    animations: [Appearance.animation.elementMoveEnter.numberAnimation.createObject(this, {
+                        property: "opacity",
+                        from: 0,
+                        to: 1
+                    })]
                 }
 
                 model: ScriptModel {
@@ -205,7 +213,6 @@ Item {
                         id: widgetNameText
                         Layout.alignment: Qt.AlignHCenter
                         font.pixelSize: Appearance.font.pixelSize.larger
-                        font.family: Appearance.font.family.title
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
                         text: qsTr("Anime boorus")
@@ -374,14 +381,17 @@ Item {
                 anchors.topMargin: 5
                 spacing: 0
 
-                StyledTextArea { // The actual TextArea
+                TextArea { // The actual TextArea
                     id: tagInputField
                     wrapMode: TextArea.Wrap
                     Layout.fillWidth: true
                     padding: 10
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
                     renderType: Text.NativeRendering
+                    selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
+                    selectionColor: Appearance.m3colors.m3secondaryContainer
                     placeholderText: StringUtils.format(qsTr('Enter tags, or "{0}" for commands'), root.commandPrefix)
+                    placeholderTextColor: Appearance.m3colors.m3outline
 
                     background: null
 

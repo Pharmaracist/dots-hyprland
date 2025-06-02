@@ -9,19 +9,19 @@ import Quickshell.Widgets
 // Material 3 slider. See https://m3.material.io/components/sliders/overview
 Slider {
     id: root
-    property real scale: 0.85
+    property real scale: 1
     property real backgroundDotSize: 4 * scale
     property real backgroundDotMargins: 4 * scale
-    // property real handleMargins: 0 * scale
-    property real handleMargins: (root.pressed ? 0 : 2) * scale
-    property real handleWidth: (root.pressed ? 3 : 5) * scale
+    property real handleMargins: 0 * scale
+    // property real handleMargins: (root.pressed ? 0 : 2) * scale
+    property real handleWidth: (root.pressed ? 3 : 0) * scale
     property real handleHeight: 44 * scale
     property real handleLimit: root.backgroundDotMargins
     property real trackHeight: 30 * scale
     property color highlightColor: Appearance.colors.colPrimary
     property color trackColor: Appearance.m3colors.m3secondaryContainer
-    property color handleColor: Appearance.m3colors.m3onSecondaryContainer
-    property real trackRadius: Appearance.rounding.verysmall * scale
+    property color handleColor:  (root.pressed ? Appearance.m3colors.m3onSecondaryContainer : Appearance.colors.colLayer0)
+    property real trackRadius: Appearance.rounding.normal * scale
     property real unsharpenRadius: Appearance.rounding.unsharpen
 
     property real limitedHandleRangeWidth: (root.availableWidth - handleWidth - root.handleLimit * 2)
@@ -60,11 +60,16 @@ Slider {
             anchors.left: parent.left
             width: root.handleLimit * 2 + root.visualPosition * root.limitedHandleRangeWidth - (root.handleMargins + root.handleWidth / 2)
             height: trackHeight
-            color: root.highlightColor
             topLeftRadius: root.trackRadius
             bottomLeftRadius: root.trackRadius
             topRightRadius: root.unsharpenRadius
             bottomRightRadius: root.unsharpenRadius
+               gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: root.trackColor }
+                GradientStop { position: 0.33; color: Appearance.colors.colPrimaryContainerActive }
+                GradientStop { position: 1.0; color: Appearance.colors.colPrimaryActive }
+            }
         }
 
         // Fill right
@@ -84,7 +89,7 @@ Slider {
         Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: root.backgroundDotMargins
+            anchors.rightMargin: root.backgroundDotMargins * 5
             width: root.backgroundDotSize
             height: root.backgroundDotSize
             radius: Appearance.rounding.full
@@ -97,7 +102,7 @@ Slider {
         x: root.leftPadding + root.handleLimit + root.visualPosition * root.limitedHandleRangeWidth
         y: root.topPadding + root.availableHeight / 2 - height / 2
         implicitWidth: root.handleWidth
-        implicitHeight: root.handleHeight
+        implicitHeight: root.trackHeight
         radius: Appearance.rounding.full
         color: root.handleColor
 

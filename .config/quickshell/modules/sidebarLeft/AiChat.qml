@@ -171,6 +171,21 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+                add: Transition {
+                    animations: [Appearance.animation.elementMoveEnter.numberAnimation.createObject(this, {
+                        property: "opacity",
+                        from: 0,
+                        to: 1
+                    })]
+                }
+                remove: Transition {
+                    animations: [Appearance.animation.elementMoveEnter.numberAnimation.createObject(this, {
+                        property: "opacity",
+                        from: 1,
+                        to: 0
+                    })]
+                }
+
                 model: ScriptModel {
                     values: Ai.messageIDs.filter(id => {
                         const message = Ai.messageByID[id];
@@ -339,13 +354,17 @@ int main(int argc, char* argv[]) {
                 anchors.topMargin: 5
                 spacing: 0
 
-                StyledTextArea { // The actual TextArea
+                TextArea { // The actual TextArea
                     id: messageInputField
                     wrapMode: TextArea.Wrap
                     Layout.fillWidth: true
                     padding: 10
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
+                    renderType: Text.NativeRendering
+                    selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
+                    selectionColor: Appearance.m3colors.m3secondaryContainer
                     placeholderText: StringUtils.format(qsTr('Message the model... "{0}" for commands'), root.commandPrefix)
+                    placeholderTextColor: Appearance.m3colors.m3outline
 
                     background: null
 

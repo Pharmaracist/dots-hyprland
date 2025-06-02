@@ -23,7 +23,7 @@ Item {
     property Item lastHoveredButton
     property bool buttonHovered: false
     property bool requestDockShow: previewPopup.show
-    property real popupX: parentWindow.mapFromItem(root.lastHoveredButton, root.lastHoveredButton.width / 2, root.lastHoveredButton.height / 2).x - implicitWidth / 2
+    property real popupX: parent.mapFromItem(root.lastHoveredButton, root.lastHoveredButton.width / 2, root.lastHoveredButton.height / 2).x - implicitWidth / 2
 
     implicitWidth: rowLayout.implicitWidth
     implicitHeight: rowLayout.implicitHeight
@@ -183,7 +183,7 @@ Item {
                                     WrapperRectangle {
                                         Layout.fillWidth: true
                                         color: ColorUtils.transparentize(Appearance.m3colors.m3surfaceContainer)
-                                        radius: Appearance.rounding.small
+                                        radius: Appearance.rounding.normal
                                         margin: 5
                                         StyledText {
                                             Layout.fillWidth: true
@@ -225,7 +225,7 @@ Item {
                                         maskSource: Rectangle {
                                             width: screencopyView.width
                                             height: screencopyView.height
-                                            radius: Appearance.rounding.small
+                                            radius: Appearance.rounding.normal
                                         }
                                     }
                                 }

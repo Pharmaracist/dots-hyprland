@@ -47,7 +47,7 @@ Singleton {
                 case "debian":
                 case "raspbian":
                 case "kali": distroIcon = "debian-symbolic"; break;
-                default: distroIcon = "linux-symbolic"; break;
+                default: distroIcon = "arch-symbolic"; break;
             }
         }
     }

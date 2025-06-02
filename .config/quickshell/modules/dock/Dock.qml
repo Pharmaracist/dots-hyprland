@@ -82,7 +82,7 @@ Scope { // Scope
                             anchors.topMargin: margin
                             anchors.bottomMargin: margin
                             color: Appearance.colors.colLayer0
-                            radius: Appearance.rounding.large
+                            radius: Appearance.rounding.normal
                         }
 
                         RowLayout {
@@ -95,34 +95,34 @@ Scope { // Scope
 
                             VerticalButtonGroup {
                                 GroupButton { // Pin button
-                                    baseWidth: 35
-                                    baseHeight: 35
+                                    baseWidth: dockRoot.height * 0.6
+                                    baseHeight: dockRoot.height * 0.6
                                     clickedWidth: baseWidth
-                                    clickedHeight: baseHeight + 20
+                                    clickedHeight: baseHeight
                                     buttonRadius: Appearance.rounding.normal
                                     toggled: root.pinned
                                     onClicked: root.pinned = !root.pinned
                                     contentItem: MaterialSymbol {
                                         text: "keep"
                                         horizontalAlignment: Text.AlignHCenter
-                                        iconSize: Appearance.font.pixelSize.larger
+                                        iconSize: Appearance.font.pixelSize.hugeass
                                         color: root.pinned ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer0
                                     }
                                 }
                             }
                             DockSeparator {}
                             DockApps { id: dockApps }
-                            DockSeparator {}
-                            DockButton {
-                                onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
-                                contentItem: MaterialSymbol {
-                                    anchors.centerIn: parent
-                                    horizontalAlignment: Text.AlignHCenter
-                                    font.pixelSize: parent.width / 2
-                                    text: "apps"
-                                    color: Appearance.colors.colOnLayer0
-                                }
-                            }
+                            // DockSeparator {}
+                            // DockButton {
+                            //     onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
+                            //     contentItem: MaterialSymbol {
+                            //         anchors.centerIn: parent
+                            //         horizontalAlignment: Text.AlignHCenter
+                            //         font.pixelSize: parent.width / 2
+                            //         text: "apps"
+                            //         color: Appearance.colors.colOnLayer0
+                            //     }
+                            // }
                         }
                     }    
                 }
