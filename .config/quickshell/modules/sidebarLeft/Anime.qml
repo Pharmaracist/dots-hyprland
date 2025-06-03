@@ -137,7 +137,7 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            ListView { // Booru responses
+            StyledListView { // Booru responses
                 id: booruResponseListView
                 anchors.fill: parent
                 spacing: 10
@@ -161,14 +161,6 @@ Item {
                         easing.type: Appearance.animation.scroll.type
                         easing.bezierCurve: Appearance.animation.scroll.bezierCurve
                     }
-                }
-
-                add: Transition {
-                    animations: [Appearance.animation.elementMoveEnter.numberAnimation.createObject(this, {
-                        property: "opacity",
-                        from: 0,
-                        to: 1
-                    })]
                 }
 
                 model: ScriptModel {
@@ -381,7 +373,7 @@ Item {
                 anchors.topMargin: 5
                 spacing: 0
 
-                TextArea { // The actual TextArea
+                StyledTextArea { // The actual TextArea
                     id: tagInputField
                     wrapMode: TextArea.Wrap
                     Layout.fillWidth: true
