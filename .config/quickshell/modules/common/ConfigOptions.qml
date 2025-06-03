@@ -108,6 +108,7 @@ Singleton {
 
     property QtObject hacks: QtObject {
         property int arbitraryRaceConditionDelay: 500 // milliseconds
+        property string phoneLocalIP: "192.168.1.9" // critical for scrcpy wireless connection
     }
 
 }

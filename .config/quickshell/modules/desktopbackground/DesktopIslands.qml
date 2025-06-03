@@ -159,31 +159,43 @@ ShellRoot {
                         }
 
                     }
+                Timer {
+                        id: refreshTimer
+                        interval: 50000  // 5 minutes
+                        running: true
+                        repeat: true
+                        onTriggered: {
+                            // Force reload by updating the source URL
+                            galleryContent.source = ""
+                            galleryContent.source = Directories.pictures + "/gallery?" + Qt.formatDate(new Date(), "yyyyMMddHHmmss")
+                        }
+                    }
 
                     Image {
-                        id: gallaryContent
+                        id: galleryContent
 
                         anchors.centerIn: parent
                         anchors.fill: parent
-                        source: Directories.pictures + "/gallary"
+
+                        // Initial source path
+                        source: Directories.pictures + "/gallery"
+
                         fillMode: Image.PreserveAspectCrop
-                        sourceSize.width: gallaryContainer.width - 20
-                        sourceSize.height: gallaryContainer.height - 20
+                        sourceSize.width: galleryContainer.width - 20
+                        sourceSize.height: galleryContainer.height - 20
                         asynchronous: true
+                        cache: false  // Disable caching to avoid old images being retained
                         antialiasing: true
+
                         // Rounded corners mask
                         layer.enabled: true
-
                         layer.effect: OpacityMask {
-
                             maskSource: Rectangle {
-                                width: gallaryContent.width
-                                height: gallaryContent.height
+                                width: galleryContent.width
+                                height: galleryContent.height
                                 radius: commonRadius
                             }
-
                         }
-
                     }
 
                 }

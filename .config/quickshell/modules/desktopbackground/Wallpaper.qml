@@ -116,7 +116,7 @@ Scope {
                     Timer {
                         id: autoScrollTimer
                         interval: 1000
-                        running: true
+                        running: false
                         repeat: true
                         onTriggered: {
                             if (wallpaperList.contentX >= wallpaperList.contentWidth - wallpaperList.width) {

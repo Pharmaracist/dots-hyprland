@@ -45,7 +45,6 @@ ShellRoot {
     property bool enableActivateLinux: true
     property bool enableSecondaryClockWidget: false
     property bool enableScreenTime: true
-    property bool enableDesktopIcons: true
 
     // Force initialization of some singletons
     Component.onCompleted: {
@@ -76,5 +75,4 @@ ShellRoot {
     Loader { active: enableActivateLinux; sourceComponent: ActivateLinux {} }
     Loader { active: enableSecondaryClockWidget; sourceComponent: SecondaryClockWidget {} }
     Loader { active: enableDesktopIslands; sourceComponent: DesktopIslands {} }
-    Loader { active: enableDesktopIcons; sourceComponent: DesktopIcons {} }
 }

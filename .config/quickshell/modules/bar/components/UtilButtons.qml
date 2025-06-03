@@ -10,13 +10,13 @@ Rectangle {
     id: root
 
     property bool borderless: ConfigOptions.appearance.borderless
+    property string ip:ConfigOptions.hacks.phoneLocalIP
 
     Layout.alignment: Qt.AlignVCenter
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
     implicitHeight: parent.height
     color: borderless ? "transparent" : Appearance.colors.colLayer1
     radius: Appearance.rounding.small
-
     RowLayout {
         id: rowLayout
 
@@ -61,6 +61,18 @@ Rectangle {
                 fill: 1
                 text: "dashboard"
                 iconSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnLayer2
+            }
+
+        }
+        CircleUtilButton {
+            Layout.alignment: Qt.AlignVCenter
+            onClicked: Hyprland.dispatch(`exec killall scrcpy || adb connect ip:5555 && scrcpy --video-codec=h265 -m1920 --max-fps=73 -K`)
+            MaterialSymbol {
+                horizontalAlignment: Qt.AlignHCenter
+                fill: 0
+                text: "phone_iphone"
+                iconSize: Appearance.font.pixelSize.large
                 color: Appearance.colors.colOnLayer2
             }
 

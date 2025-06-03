@@ -87,11 +87,4 @@ ColumnLayout {
             }
         }
     }
-
-    Rectangle { // Tabbar bottom border
-        id: tabBarBottomBorder
-        Layout.fillWidth: true
-        implicitHeight: 1
-        color: root.colBorder
-    }
 }

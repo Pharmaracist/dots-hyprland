@@ -141,6 +141,7 @@ Scope {
                             NightLight {}
                             GameMode {}
                             IdleInhibitor {}
+                            SyncAudio {}
                         }
 
                         // Center widget group
