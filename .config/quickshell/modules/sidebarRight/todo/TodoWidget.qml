@@ -6,6 +6,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 Item {
     id: root
@@ -134,7 +135,7 @@ Item {
             TaskList {
                 listBottomPadding: root.fabSize + root.fabMargins * 2
                 emptyPlaceholderIcon: "check_circle"
-                emptyPlaceholderText: qsTr("Nothing here!")
+                emptyPlaceholderText: qsTr("Add TODOs to Obsidian")
                 taskList: Todo.list
                     .map(function(item, i) { return Object.assign({}, item, {originalIndex: i}); })
                     .filter(function(item) { return !item.done; })
@@ -179,11 +180,14 @@ Item {
             }
         }
 
-        contentItem: MaterialSymbol {
-            text: "add"
-            horizontalAlignment: Text.AlignHCenter
-            iconSize: Appearance.font.pixelSize.huge
-            color: Appearance.m3colors.m3onPrimaryContainer
+        contentItem: CustomIcon {
+            source: "obsidian-symbolic"
+            height:80
+            width:80
+            ColorOverlay {
+                anchors.fill : parent
+                color:Appearance.colors.colPrimaryActive
+            }
         }
     }
 
