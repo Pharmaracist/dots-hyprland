@@ -96,6 +96,9 @@ Singleton {
     }
 
     property QtObject sidebar: QtObject {
+        property QtObject translator: QtObject {
+            property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
+        }
         property QtObject booru: QtObject {
             property bool allowNsfw: false
             property string defaultProvider: "yandere"

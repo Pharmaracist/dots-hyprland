@@ -231,6 +231,11 @@ Item { // Wrapper
                     Layout.rightMargin: 15
                     padding: 15
                     renderType: Text.NativeRendering
+                    font {
+                        family: Appearance?.font.family.main ?? "sans-serif"
+                        pixelSize: Appearance?.font.pixelSize.small ?? 15
+                        hintingPreference: Font.PreferFullHinting
+                    }
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
                     selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
                     selectionColor: Appearance.m3colors.m3secondaryContainer
@@ -352,13 +357,13 @@ Item { // Wrapper
                             }
                         }
                         const commandResultObject = {
-                            name: searchingText,
+                            name: searchingText.replace("file://", ""),
                             clickActionName: qsTr("Run"),
                             type: qsTr("Run command"),
                             fontType: "monospace",
                             materialSymbol: 'terminal',
                             execute: () => {
-                                executor.executeCommand(searchingText.startsWith('sudo') ? `${ConfigOptions.apps.terminal} fish -C '${root.searchingText}'` : root.searchingText);
+                                executor.executeCommand(searchingText.startsWith('sudo') ? `${ConfigOptions.apps.terminal} fish -C '${root.searchingText.replace("file://", "")}'` : root.searchingText.replace("file://", ""));
                             }
                         }
                         const launcherActionObjects = root.searchActions
