@@ -10,7 +10,7 @@ Rectangle {
     id: root
 
     property bool borderless: ConfigOptions.appearance.borderless
-    property string ip:ConfigOptions.hacks.phoneLocalIP
+    property string phoneLocalIP: ConfigOptions.hacks.phoneLocalIP
 
     Layout.alignment: Qt.AlignVCenter
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
@@ -67,7 +67,7 @@ Rectangle {
         }
         CircleUtilButton {
             Layout.alignment: Qt.AlignVCenter
-            onClicked: Hyprland.dispatch(`exec killall scrcpy || adb connect ip:5555 && scrcpy --video-codec=h265 -m1920 --max-fps=73 -K`)
+            onClicked: Hyprland.dispatch(`exec killall scrcpy &&  scrcpy --tcpip='${phoneLocalIP}:5555' --audio-codec=opus --video-codec=h265 --max-fps=60 -K`)
             MaterialSymbol {
                 horizontalAlignment: Qt.AlignHCenter
                 fill: 0

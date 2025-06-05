@@ -177,7 +177,7 @@ Item {
         }
         
         RowLayout {
-            Layout.preferredWidth: Appearance.sizes.barCenterSideModuleWidth
+            Layout.preferredWidth: Appearance.sizes.barCenterSideModuleWidth + 30 
             Layout.fillHeight: true
             spacing: 4
             

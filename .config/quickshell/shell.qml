@@ -27,7 +27,7 @@ ShellRoot {
     // Enable/disable modules here
     property bool enableBar: true
     property bool enableCheatsheet: false
-    property bool enableDock: true
+    property bool enableDock: false
     property bool enableGlance: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
@@ -42,7 +42,7 @@ ShellRoot {
     property bool enableSidebarLeft: true
     property bool enableSidebarRight: true
     property bool enableClockWidget: true
-    property bool enableActivateLinux: true
+    property bool enableActivateLinux: false
     property bool enableSecondaryClockWidget: false
     property bool enableScreenTime: true
 
@@ -52,12 +52,12 @@ ShellRoot {
         ConfigLoader.loadConfig()
         PersistentStateManager.loadStates()
         Cliphist.refresh()
-        // FirstRunExperience.load()
+        FirstRunExperience.load()
     }
 
     Loader { active: enableBar; sourceComponent: Bar {} }
     Loader { active: enableCheatsheet; sourceComponent: Cheatsheet {} }
-    Loader { active: enableDock || ConfigOptions?.dock.enable; sourceComponent: Dock {} }
+    Loader { active: enableDock || ConfigOptions.dock.enable; sourceComponent: Dock {} }
     Loader { active: enableGlance; sourceComponent: Glance {} }
     Loader { active: enableMediaControls; sourceComponent: MediaControls {} }
     Loader { active: enableNotificationPopup; sourceComponent: NotificationPopup {} }

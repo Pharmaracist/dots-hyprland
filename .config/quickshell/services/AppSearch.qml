@@ -40,6 +40,10 @@ Singleton {
         {
             "regex": /gcr.prompter/,
             "replace": "system-lock-screen"
+        },
+        {
+            "regex": /quickshell.*/,
+            "replace": "quickshell-symbolic"
         }
     ]
 

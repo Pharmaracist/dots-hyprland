@@ -5,7 +5,9 @@ pragma ComponentBehavior: Bound
 
 Singleton {
     property QtObject ai: QtObject {
-        property string systemPrompt: qsTr("Use casual tone. No user knowledge is to be assumed except basic Linux literacy. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. When making changes to the user's config, you must get the config to know what values there are before setting.")
+       // property string systemPrompt: qsTr("Use casual tone. No user knowledge is to be assumed except basic Linux literacy. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. When making changes to the user's config, you must get the config to know what values there are before setting.")
+          property string systemPrompt: qsTr("Use casual fun tone. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. use arabic egyptian dilect only  as well and funny simple way")
+
     }
 
     property QtObject appearance: QtObject {
@@ -56,6 +58,7 @@ Singleton {
         property bool pinnedOnStartup: false
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
+            "obsidian"
         ]
     }
 
@@ -97,6 +100,7 @@ Singleton {
 
     property QtObject sidebar: QtObject {
         property QtObject translator: QtObject {
+            property string targetLanguage : "ar" // eg."en" , "tr"
             property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
         }
         property QtObject booru: QtObject {

@@ -17,7 +17,7 @@ Item {
     id: root
     property var inputField: inputTextArea
     property var outputField: outputTextArea
-
+    property string targetLanguage : ConfigOptions.sidebar.translator.targetLanguage
     property bool translationFor: false // Indicates if the translation is for an autocorrected text
     property string translatedText: ""
 
@@ -44,7 +44,8 @@ Item {
 
     Process {
         id: translateProc
-        command: ["bash", "-c", `trans -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
+        
+        command: ["bash", "-c", `trans -t '${targetLanguage}' -no-bidi -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
         property string buffer: ""
         stdout: SplitParser {
             onRead: data => {

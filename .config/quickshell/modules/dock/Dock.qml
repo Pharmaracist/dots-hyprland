@@ -22,7 +22,6 @@ Scope { // Scope
             required property var modelData
             id: dockRoot
             screen: modelData
-            
             property bool reveal: root.pinned || dockMouseArea.containsMouse || dockApps.requestDockShow
 
             anchors {
@@ -40,7 +39,7 @@ Scope { // Scope
             WlrLayershell.namespace: "quickshell:dock"
             color: "transparent"
 
-            implicitHeight: (ConfigOptions?.dock.height ?? 70) + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut
+            implicitHeight: (ConfigOptions?.dock.height ?? 70) + Appearance.sizes.elevationMargin
 
             mask: Region {
                 item: dockMouseArea
@@ -63,6 +62,35 @@ Scope { // Scope
                     id: dockHoverRegion
                     anchors.fill: parent
 
+                RoundCorner {
+                    size: Appearance.rounding.screenRounding
+                    corner: cornerEnum.bottomRight
+                    color: Appearance.colors.colLayer0
+
+                    anchors {
+                        bottom: parent.bottom
+                        right:dockBackground.left
+                    }
+                    StyledRectangularShadow {
+                            target:parent
+                    }
+
+                }
+                RoundCorner {
+                    size: Appearance.rounding.screenRounding
+                    corner: cornerEnum.bottomLeft
+                    color: Appearance.colors.colLayer0
+
+                    anchors {
+                        bottom: parent.bottom
+                        left:dockBackground.right
+                    }
+
+                    StyledRectangularShadow {
+                        target:parent
+                    }
+                }
+
                     Item {
                         id: dockBackground
                         anchors.top: parent.top
@@ -80,9 +108,9 @@ Scope { // Scope
                             property real margin: Appearance.sizes.elevationMargin
                             anchors.fill: parent
                             anchors.topMargin: margin
-                            anchors.bottomMargin: margin
                             color: Appearance.colors.colLayer0
-                            radius: Appearance.rounding.normal
+                            topLeftRadius: Appearance.rounding.normal
+                            topRightRadius: Appearance.rounding.normal
                         }
 
                         RowLayout {
@@ -94,9 +122,10 @@ Scope { // Scope
                             property real padding: 5
 
                             VerticalButtonGroup {
+
                                 GroupButton { // Pin button
-                                    baseWidth: dockRoot.height * 0.6
-                                    baseHeight: dockRoot.height * 0.6
+                                    baseWidth: dockRoot.height * 0.7
+                                    baseHeight: dockRoot.height * 0.7
                                     clickedWidth: baseWidth
                                     clickedHeight: baseHeight
                                     buttonRadius: Appearance.rounding.normal
@@ -112,17 +141,17 @@ Scope { // Scope
                             }
                             DockSeparator {}
                             DockApps { id: dockApps }
-                            // DockSeparator {}
-                            // DockButton {
-                            //     onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
-                            //     contentItem: MaterialSymbol {
-                            //         anchors.centerIn: parent
-                            //         horizontalAlignment: Text.AlignHCenter
-                            //         font.pixelSize: parent.width / 2
-                            //         text: "apps"
-                            //         color: Appearance.colors.colOnLayer0
-                            //     }
-                            // }
+                            DockSeparator {}
+                            DockButton {
+                                onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
+                                contentItem: MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    horizontalAlignment: Text.AlignHCenter
+                                    font.pixelSize: parent.width / 2
+                                    text: "apps"
+                                    color: Appearance.colors.colOnLayer0
+                                }
+                            }
                         }
                     }    
                 }

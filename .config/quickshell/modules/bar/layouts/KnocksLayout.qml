@@ -19,8 +19,7 @@ import "root:/services"
 Item {
     id: knocksLayout
 
-    // Common properties
-    property var barRoot
+     property var barRoot
     property int chunkWidth: 350
     property int chunkHeight: parent.height
     property real sideMargin: Appearance.rounding.screenRounding
@@ -35,23 +34,23 @@ Item {
 
         width: chunkWidth
         height: parent.height
+            anchors.leftMargin: -Appearance.rounding.screenRounding
 
-        MouseArea {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.leftMargin: sideMargin
-            acceptedButtons: Qt.LeftButton
-            onClicked: (event) => {
-                if (event.button === Qt.LeftButton)
-                    Hyprland.dispatch('global quickshell:sidebarLeftToggle');
-
-            }
 
             Components.ActiveWindow {
+                id:activeWindow
                 bar: barRoot
-                anchors.leftMargin: -Appearance.rounding.screenRounding
-                anchors.left: parent.left
+                implicitWidth:chunkWidth
+
             }
+
+                    MouseArea {
+                        anchors.fill:parent
+                        acceptedButtons: Qt.LeftButton
+                        onClicked: (event) => {
+                            if (event.button === Qt.LeftButton)
+                                Hyprland.dispatch('global quickshell:sidebarLeftToggle');
+                        }
 
         }
 
@@ -79,7 +78,7 @@ Item {
                 blur: 1.2 * Appearance.sizes.elevationMargin
                 spread: 2
                 color: Appearance.colors.colShadow
-                cached: true
+                
             }
 
             RowLayout {
@@ -130,7 +129,7 @@ Item {
                 blur: 1.2 * Appearance.sizes.elevationMargin
                 spread: 2
                 color: Appearance.colors.colShadow
-                cached: true
+                
             }
 
             MouseArea {
@@ -162,7 +161,7 @@ Item {
         Rectangle {
             id: rightChunk
 
-            Layout.preferredWidth: chunkWidth + (sysTrayRevealer.reveal ? sysTrayRevealer.width : 0)
+            Layout.preferredWidth: chunkWidth + (sysTrayRevealer.reveal ? sysTrayRevealer.width + 16 : 0)
             Layout.preferredHeight: chunkHeight
             color: Appearance.colors.colLayer0
             radius: commonRadius
@@ -172,8 +171,7 @@ Item {
                 radius: knocksLayout.radius
                 blur: 1.2 * Appearance.sizes.elevationMargin
                 spread: 2
-                color: Appearance.colors.colShadow
-                cached: false
+                color: Appearance.colors.colShadow                
             }
 
             Components.StackedClockWidget {
@@ -240,7 +238,8 @@ Item {
                         Revealer {
                             id: sysTrayRevealer
 
-                            Layout.rightMargin: reveal ? 15 : 0
+                            Layout.rightMargin: reveal ? 10 : 0
+                            Layout.leftMargin: reveal ? 10 : 0
                             reveal: false
                             Layout.fillWidth: true
                             height: parent.height

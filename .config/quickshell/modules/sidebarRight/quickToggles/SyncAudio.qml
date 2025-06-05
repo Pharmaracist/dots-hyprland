@@ -16,7 +16,7 @@ QuickToggleButton {
     onClicked: {
         syncAudio.enabled = !syncAudio.enabled;
         if (enabled)
-            Hyprland.dispatch(`exec adb connect phoneLocalIP:5555 && scrcpy --no-video --no-control`)
+            Hyprland.dispatch(`exec scrcpy --no-video --audio-codec=opus --tcpip='${phoneLocalIP}:5555' --no-control`)
         else
             Hyprland.dispatch('exec killall scrcpy')
     }

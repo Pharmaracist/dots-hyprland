@@ -44,7 +44,6 @@ Scope {
 
         anchors {
             top: true
-            bottom: false
             right: true
             left: true
         }
@@ -203,11 +202,11 @@ Scope {
                         function runMatugen(path) {
                             asynchronous:true
                             try {
-                                const command = `exec bash -c "${wallpaperSelector} ${path} &"`
                                 // var command = `exec matugen ${path}`
+                                const command = `exec bash -c "${wallpaperSelector} ${path} &"`
                                 Hyprland.dispatch(command)
-                                
-                                console.log("running on",path)
+                                Hyprland.dispatch('global quickshell:wallpaperSelectorClose')
+
                             } catch (error) {
                                 console.error("Failed to run matugen:", error);
                                 errorDialog.show("Failed to apply wallpaper: " + error);
