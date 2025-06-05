@@ -113,6 +113,12 @@ Singleton {
         }
     }
 
+    property QtObject time: QtObject {
+        // https://doc.qt.io/qt-6/qtime.html#toString
+        property string format: "hh:mm"
+        property string dateFormat: "dddd, dd/MM"
+    }
+
     property QtObject hacks: QtObject {
         property int arbitraryRaceConditionDelay: 500 // milliseconds
         property string phoneLocalIP: "192.168.1.9" // critical for scrcpy wireless connection
