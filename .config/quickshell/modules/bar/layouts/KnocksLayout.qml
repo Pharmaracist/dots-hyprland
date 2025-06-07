@@ -19,7 +19,7 @@ import "root:/services"
 Item {
     id: knocksLayout
 
-     property var barRoot
+    property var barRoot
     property int chunkWidth: 350
     property int chunkHeight: parent.height
     property real sideMargin: Appearance.rounding.screenRounding
@@ -44,14 +44,19 @@ Item {
 
             }
 
-                    MouseArea {
-                        anchors.fill:parent
-                        acceptedButtons: Qt.LeftButton
-                        onClicked: (event) => {
-                            if (event.button === Qt.LeftButton)
-                                Hyprland.dispatch('global quickshell:sidebarLeftToggle');
-                        }
+           MouseArea {
+               anchors.fill:parent
+               acceptedButtons: Qt.LeftButton | Qt.RightButton 
+               onClicked: (event) => {
+                   if (event.button === Qt.LeftButton)
+                       Hyprland.dispatch('global quickshell:sidebarLeftToggle');
+                   if (event.button === Qt.RightButton)
+                       Hyprland.dispatch('global quickshell:sidebarLeftClose');
+                       Hyprland.dispatch('global quickshell:sidebarLeftToggleDetach');
+                       Hyprland.dispatch('global quickshell:sidebarLeftOpen');
 
+
+               }
         }
 
     }

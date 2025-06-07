@@ -143,7 +143,7 @@ TabButton {
         anchors.centerIn: buttonBackground
         RowLayout {
             anchors.centerIn: parent
-            spacing: 10
+            spacing: 5
             MaterialSymbol {
                 visible: buttonIcon?.length > 0
                 Layout.alignment: Qt.AlignHCenter
@@ -160,7 +160,9 @@ TabButton {
                 id: buttonTextWidget
                 Layout.alignment: Qt.AlignHCenter
                 horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: Appearance?.font.pixelSize.small
+                font.family:Appearance.font.family.monospace
+                font.pixelSize: Appearance?.font.pixelSize.smallest + 3
+                font.weight:Font.Bold
                 color: selected ? button.colActive : button.colInactive
                 text: buttonText
                 Behavior on color {
