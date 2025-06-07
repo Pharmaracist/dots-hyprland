@@ -77,9 +77,6 @@ Scope { // Scope
                         bottom: parent.bottom
                         right:dockBackground.left
                     }
-                    StyledRectangularShadow {
-                            target:parent
-                    }
 
                 }
                 RoundCorner {
@@ -92,9 +89,6 @@ Scope { // Scope
                         left:dockBackground.right
                     }
 
-                    StyledRectangularShadow {
-                        target:parent
-                    }
                 }
 
                     Item { // Wrapper for the dock background

@@ -10,5 +10,5 @@ Text {
         family: Appearance?.font.family.main ?? "sans-serif"
         pixelSize: Appearance?.font.pixelSize.small ?? 15
     }
-    color: Appearance?.m3colors.m3onBackground ?? "black"
+    color: Appearance?.colors.colOnLayer0 ?? "black"
 }

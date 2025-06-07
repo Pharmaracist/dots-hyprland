@@ -67,7 +67,7 @@ Singleton {
         property bool hoverToReveal: false // When false, only reveals on empty workspace
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
-            "obsidian"
+            "obsidian",
             "kitty",
         ]
     }

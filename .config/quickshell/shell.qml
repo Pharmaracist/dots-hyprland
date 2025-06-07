@@ -27,7 +27,7 @@ ShellRoot {
     // Enable/disable modules here
     property bool enableBar: true
     property bool enableCheatsheet: false
-    property bool enableDock: false
+    property bool enableDock: true
     property bool enableGlance: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
@@ -45,7 +45,7 @@ ShellRoot {
     property bool enableActivateLinux: false
     property bool enableSecondaryClockWidget: false
     property bool enableScreenTime: true
-
+    property bool enableDesktopIslands : false
     // Force initialization of some singletons
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()
@@ -58,7 +58,7 @@ ShellRoot {
     Loader { active: enableBar; sourceComponent: Bar {} }
     Loader { active: enableCheatsheet; sourceComponent: Cheatsheet {} }
     Loader { active: enableGlance; sourceComponent: Glance {} }
-    Loader { active: (enableDock && ConfigOptions?.dock.enable); sourceComponent: Dock {} }
+    Loader { active: enableDock ; sourceComponent: Dock {} }
     Loader { active: enableMediaControls; sourceComponent: MediaControls {} }
     Loader { active: enableNotificationPopup; sourceComponent: NotificationPopup {} }
     Loader { active: enableOnScreenDisplayBrightness; sourceComponent: OnScreenDisplayBrightness {} }

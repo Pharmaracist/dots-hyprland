@@ -37,21 +37,21 @@ Revealer { // Scroll hint
                 Layout.rightMargin: 5
                 text: "keyboard_arrow_up"
                 iconSize: 14
-                color: Appearance.colors.colSubtext
+                color: Appearance.colors.colSubtext ?? "black"
             }
             MaterialSymbol {
                 Layout.leftMargin: 5
                 Layout.rightMargin: 5
                 text: root.icon
                 iconSize: 14
-                color: Appearance.colors.colSubtext
+                color: Appearance.colors.colSubtext ?? "black"
             }
             MaterialSymbol {
                 Layout.leftMargin: 5
                 Layout.rightMargin: 5
                 text: "keyboard_arrow_down"
                 iconSize: 14
-                color: Appearance.colors.colSubtext
+                color: Appearance.colors.colSubtext ?? "black"
             }
         }
     }
