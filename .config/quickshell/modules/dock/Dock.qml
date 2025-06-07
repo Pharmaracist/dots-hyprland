@@ -22,7 +22,11 @@ Scope { // Scope
             required property var modelData
             id: dockRoot
             screen: modelData
-            property bool reveal: root.pinned || dockMouseArea.containsMouse || dockApps.requestDockShow
+            
+            property bool reveal: root.pinned 
+                || (ConfigOptions?.dock.hoverToReveal && dockMouseArea.containsMouse) 
+                || dockApps.requestDockShow 
+                || (!ToplevelManager.activeToplevel?.activated)
 
             anchors {
                 bottom: true
@@ -33,7 +37,9 @@ Scope { // Scope
             function hide() {
                 cheatsheetLoader.active = false
             }
-            exclusiveZone: root.pinned ? implicitHeight - Appearance.sizes.hyprlandGapsOut : 0
+            exclusiveZone: root.pinned ? implicitHeight 
+                - (Appearance.sizes.hyprlandGapsOut) 
+                - (Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut) : 0
 
             implicitWidth: dockBackground.implicitWidth
             WlrLayershell.namespace: "quickshell:dock"
@@ -91,11 +97,13 @@ Scope { // Scope
                     }
                 }
 
-                    Item {
+                    Item { // Wrapper for the dock background
                         id: dockBackground
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors {
+                            top: parent.top
+                            bottom: parent.bottom
+                            horizontalCenter: parent.horizontalCenter
+                        }
 
                         implicitWidth: dockRow.implicitWidth + 5 * 2
                         height: parent.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
@@ -103,7 +111,7 @@ Scope { // Scope
                         StyledRectangularShadow {
                             target: dockVisualBackground
                         }
-                        Rectangle {
+                        Rectangle { // The real rectangle that is visible
                             id: dockVisualBackground
                             property real margin: Appearance.sizes.elevationMargin
                             anchors.fill: parent
@@ -140,6 +148,26 @@ Scope { // Scope
                                 }
                             }
                             DockSeparator {}
+                            // Pinned apps
+                            Repeater {
+                                model: ConfigOptions?.dock.pinnedApps ?? []
+                                
+                                DockButton {
+                                    id: pinnedAppButton
+                                    required property string modelData
+                                    property DesktopEntry entry: DesktopEntries.byId(modelData)
+                                    onClicked: {
+                                        pinnedAppButton?.entry.execute();
+                                    }
+                                    contentItem: IconImage {
+                                        anchors.centerIn: parent
+                                        source: Quickshell.iconPath(AppSearch.guessIcon(modelData), "image-missing")
+                                    }
+                                }
+                            }
+                            
+                            DockSeparator { visible: (ConfigOptions?.dock.pinnedApps ?? []).length > 0 }
+                            
                             DockApps { id: dockApps }
                             DockSeparator {}
                             DockButton {

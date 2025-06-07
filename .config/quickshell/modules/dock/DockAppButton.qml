@@ -2,6 +2,7 @@ import "root:/"
 import "root:/services"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
+import "root:/modules/common/functions/color_utils.js" as ColorUtils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
@@ -17,6 +18,11 @@ DockButton {
     required property var appToplevel
     property var appListRoot
     property int lastFocused: -1
+    property real iconSize: 35
+    property real countDotWidth: 10
+    property real countDotHeight: 4
+    property bool appIsActive: appToplevel.toplevels.find(t => (t.activated == true)) !== undefined
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -37,8 +43,38 @@ DockButton {
         lastFocused = (lastFocused + 1) % appToplevel.toplevels.length
         appToplevel.toplevels[lastFocused].activate()
     }
-    contentItem: IconImage {
-        id: iconImage
-        source: Quickshell.iconPath(AppSearch.guessIcon(appToplevel.appId), "image-missing")
+    contentItem: Item {
+        anchors.centerIn: parent
+
+        IconImage {
+            id: iconImage
+            anchors {
+                left: parent.left
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            source: Quickshell.iconPath(AppSearch.guessIcon(appToplevel.appId), "image-missing")
+            implicitSize: appButton.iconSize
+        }
+
+        RowLayout {
+            spacing: 3
+            anchors {
+                top: iconImage.bottom
+                topMargin: 2
+                horizontalCenter: parent.horizontalCenter
+            }
+            Repeater {
+                model: Math.min(appToplevel.toplevels.length, 3)
+                delegate: Rectangle {
+                    required property int index
+                    radius: Appearance.rounding.full
+                    implicitWidth: (appToplevel.toplevels.length <= 3) ? 
+                        appButton.countDotWidth : appButton.countDotHeight // Circles when too many
+                    implicitHeight: appButton.countDotHeight
+                    color: appIsActive ? Appearance.m3colors.m3primary : ColorUtils.transparentize(Appearance.colors.colOnLayer0, 0.4)
+                }
+            }
+        }
     }
 }

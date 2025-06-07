@@ -15,6 +15,14 @@ Singleton {
         property bool borderless: true
     }
 
+    property QtObject audio: QtObject { // Values in %
+        property QtObject protection: QtObject { // Prevent sudden bangs
+            property bool enable: true
+            property real maxAllowedIncrease: 10
+            property real maxAllowed: 90 // Realistically should already provide some protection when it's 99...
+        }
+    }
+
     property QtObject apps: QtObject {
         property string bluetooth: "better-control --bluetooth"
         property string imageViewer: "loupe"
@@ -52,13 +60,15 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
-        property bool enable: false
+        property bool enable: true
         property real height: 60
         property real hoverRegionHeight: 3
         property bool pinnedOnStartup: false
+        property bool hoverToReveal: false // When false, only reveals on empty workspace
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
             "obsidian"
+            "kitty",
         ]
     }
 

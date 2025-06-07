@@ -57,8 +57,8 @@ ShellRoot {
 
     Loader { active: enableBar; sourceComponent: Bar {} }
     Loader { active: enableCheatsheet; sourceComponent: Cheatsheet {} }
-    Loader { active: enableDock || ConfigOptions.dock.enable; sourceComponent: Dock {} }
     Loader { active: enableGlance; sourceComponent: Glance {} }
+    Loader { active: (enableDock && ConfigOptions?.dock.enable); sourceComponent: Dock {} }
     Loader { active: enableMediaControls; sourceComponent: MediaControls {} }
     Loader { active: enableNotificationPopup; sourceComponent: NotificationPopup {} }
     Loader { active: enableOnScreenDisplayBrightness; sourceComponent: OnScreenDisplayBrightness {} }
