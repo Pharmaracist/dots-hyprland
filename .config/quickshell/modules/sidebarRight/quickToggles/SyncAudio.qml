@@ -10,13 +10,15 @@ QuickToggleButton {
 
     property bool enabled: false
     property string phoneLocalIP: ConfigOptions.hacks.phoneLocalIP
+    property string phoneLocalPort: ConfigOptions.hacks.phoneLocalPort
+
 
     toggled: enabled
     buttonIcon: "equalizer"
     onClicked: {
         syncAudio.enabled = !syncAudio.enabled;
         if (enabled)
-            Hyprland.dispatch(`exec scrcpy --no-video --audio-codec=opus --tcpip='${phoneLocalIP}:5555' --no-control`)
+            Hyprland.dispatch(`exec scrcpy --no-video --audio-codec=opus --tcpip='${phoneLocalIP}:${phoneLocalPort}' --no-control`)
         else
             Hyprland.dispatch('exec killall scrcpy')
     }
