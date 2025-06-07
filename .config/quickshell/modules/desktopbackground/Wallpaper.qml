@@ -8,6 +8,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.Mpris
+import QtMultimedia
 import Quickshell.Services.UPower
 import Quickshell.Wayland
 import Quickshell.Widgets
@@ -179,7 +180,7 @@ Scope {
                     FolderListModel {
                         id: folderModel
                         folder: Directories.pictures + "/Wallpapers" 
-                        nameFilters: ["*.png", "*.jpg", "*.jpeg","*.svg", "*.webp"]
+                        nameFilters: ["*.png", "*.jpg", "*.mp4", "*.mkv", "*.jpeg","*.svg", "*.webp"]
                         showDirs: false
                         showFiles: true
                         sortField: FolderListModel.Unsorted
@@ -271,31 +272,65 @@ Scope {
                             width: wallpaperPanel.itemWidth
                             height: 155
 
-                            Image {
-                                id: imageObject
-                                anchors.fill: parent
-                                fillMode: Image.PreserveAspectCrop
-                                source: folderModel.get(folderModel.randomIndices[index], "fileUrl")
-                                
-                                // Image optimization
-                                asynchronous: true
-                                cache: true
-                                mipmap: true
-                                sourceSize {
-                                    width: wallpaperPanel.itemWidth
-                                    height: 155
-                                }
+                          Loader {
+    id: loader
+    anchors.fill: parent
+    
+        property string fileUrl: folderModel.get(folderModel.randomIndices[index], "fileUrl").toString()
+        sourceComponent: {
+            const url = loader.fileUrl.toLowerCase()
+            return (url.endsWith(".mp4") || url.endsWith(".mkv") || url.endsWith(".webm"))
+                ? videoPreview
+                : imagePreview
+        }
+}
+Component {
+    id: imagePreview
+    Image {
+        id: imageObject
+        anchors.fill: parent
+        fillMode: Image.PreserveAspectCrop
+        source: loader.fileUrl
+        asynchronous: true
+        cache: true
+        mipmap: true
+        sourceSize {
+            width: wallpaperPanel.itemWidth
+            height: 155
+        }
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            maskSource: Rectangle {
+                width: imageObject.width
+                height: imageObject.height
+                radius: Appearance.rounding.small
+            }
+        }
+    }
+}
 
-                                // Rounded corners mask
-                                layer.enabled: true
-                                layer.effect: OpacityMask {
-                                    maskSource: Rectangle {
-                                        width: imageObject.width
-                                        height: imageObject.height
-                                        radius: Appearance.rounding.small
-                                    }
-                                }
-                            }
+Component {
+    id: videoPreview
+    Video {
+        id: videoObject
+        anchors.fill: parent
+        source: loader.fileUrl
+        autoPlay: true
+        loops: MediaPlayer.Infinite
+        muted: true
+        fillMode: VideoOutput.PreserveAspectCrop
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            maskSource: Rectangle {
+                width: videoObject.width
+                height: videoObject.height
+                radius: Appearance.rounding.small
+            }
+        }
+    }
+}
+
+
 
                             MouseArea {
                                 anchors.fill: parent

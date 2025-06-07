@@ -27,7 +27,7 @@ Item {
             id: distroIcon
 
             anchors.centerIn: parent
-            width: parent.height * 0.5
+            width: parent.height * 0.6
             height: parent.height * 0.5
             source: ConfigOptions.bar.topLeftIcon != 'distro' ? SystemInfo.distroIcon : "spark-symbolic"
         }

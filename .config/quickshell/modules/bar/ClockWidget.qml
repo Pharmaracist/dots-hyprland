@@ -8,7 +8,7 @@ Rectangle {
     property bool borderless: ConfigOptions.bar.borderless
     property bool showDate: true
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 6 // idk, text seems nicer w/ more padding
-    implicitHeight: 32
+    implicitHeight: rowLayout.implicitHeight
     color: borderless ? "transparent" : Appearance.colors.colLayer1
     radius: Appearance.rounding.small
 
