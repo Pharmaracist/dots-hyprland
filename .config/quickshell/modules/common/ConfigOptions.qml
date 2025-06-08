@@ -62,13 +62,16 @@ Singleton {
     property QtObject dock: QtObject {
         property bool enable: true
         property real height: 60
+        property bool exclusiveDock: true
         property real hoverRegionHeight: 3
         property bool pinnedOnStartup: false
-        property bool hoverToReveal: false // When false, only reveals on empty workspace
+        property bool hoverToReveal: true // When false, only reveals on empty workspace
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
             "obsidian",
             "kitty",
+            "code",
+            "systemsettings"
         ]
     }
 

@@ -30,9 +30,9 @@ Item {
 
         onDataLoaded: {
             loadingSpinner.running = false;
-            if (showingSurah && currentSurah)
+            if (showingSurah) {
                 currentSurahData = currentSurah;
-
+            }
         }
         onErrorOccurred: function(message) {
             loadingSpinner.running = false;
@@ -266,14 +266,19 @@ Item {
                                         spacing: 8
                                         layoutDirection: Qt.RightToLeft
 
-                                        Text {
+                                        TextEdit {
                                             text: modelData?.text || ""
                                             color: Appearance.m3colors.m3onSurface
                                             font.family: "Noto Naskh Arabic"
                                             font.pixelSize: Appearance.font.pixelSize.large
                                             Layout.fillWidth: true
                                             wrapMode: Text.WordWrap
-                                            horizontalAlignment: Text.AlignCenter
+                                            horizontalAlignment: TextEdit.AlignCenter
+                                            readOnly: true
+                                            selectByMouse: true
+                                            selectedTextColor: Appearance.m3colors.m3onPrimaryContainer
+                                            selectionColor: Appearance.m3colors.m3primaryContainer
+                                            textFormat: TextEdit.RichText
                                         }
 
                                         Text {

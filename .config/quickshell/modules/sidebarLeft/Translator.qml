@@ -11,101 +11,104 @@ import Quickshell.Io
 import Quickshell.Hyprland
 
 /**
- * Translator widget with the `trans` commandline tool.
- */
+* Translator widget with the `trans` commandline tool.
+*/
 Item {
     id: root
     property var inputField: inputTextArea
-    property var outputField: outputTextArea
-    property string targetLanguage : ConfigOptions.sidebar.translator.targetLanguage
-    property bool translationFor: false // Indicates if the translation is for an autocorrected text
-    property string translatedText: ""
+        property var outputField: outputTextArea
+            property string targetLanguage: ConfigOptions.sidebar.translator.targetLanguagee
+                property bool translationFor: false // Indicates if the translation is for an autocorrected text
+                    property string translatedText: ""
 
-    onFocusChanged: (focus) => {
-        if (focus) {
-            root.inputField.forceActiveFocus()
-        }
-    }
+                        onFocusChanged: (focus) => {
+                        if (focus)
+                        {
+                            root.inputField.forceActiveFocus()
+                        }
+                    }
 
-    Timer {
-        id: translateTimer
-        interval: ConfigOptions.sidebar.translator.delay
-        repeat: false
-        onTriggered: () => {
-            if (inputTextArea.text.trim().length > 0) {
-                translateProc.running = false;
-                translateProc.buffer = ""; // Clear the buffer
-                translateProc.running = true; // Restart the process
-            } else {
-                outputTextArea.text = "";
+                    Timer {
+                        id: translateTimer
+                        interval: ConfigOptions.sidebar.translator.delay
+                        repeat: false
+                        onTriggered: () => {
+                        if (inputTextArea.text.trim().length > 0)
+                        {
+                            translateProc.running = false;
+                            translateProc.buffer = ""; // Clear the buffer
+                            translateProc.running = true; // Restart the process
+                        } else {
+                        outputTextArea.text = "";
+                    }
+                }
+            }
+
+            Process {
+                id: translateProc
+
+                command: ["bash", "-c", `trans -t '${targetLanguage}' -no-bidi -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
+                property string buffer: ""
+                    stdout: SplitParser {
+                        onRead: data => {
+                        translateProc.buffer += data + "\n";
+                    }
+                }
+                onExited: (exitCode, exitStatus) => {
+                // 1. Split into sections by double newlines
+                const sections = translateProc.buffer.trim().split(/\n\s*\n/);
+                // console.log("BUFFER:", translateProc.buffer);
+                // console.log("SECTIONS:", sections);
+
+                // 2. Extract relevant data
+                root.translatedText = sections.length > 1 ? sections[1].trim() : "";
+                root.outputField.text = root.translatedText;
             }
         }
-    }
 
-    Process {
-        id: translateProc
-        
-        command: ["bash", "-c", `trans -t '${targetLanguage}' -no-bidi -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
-        property string buffer: ""
-        stdout: SplitParser {
-            onRead: data => {
-                translateProc.buffer += data + "\n";
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            // 1. Split into sections by double newlines
-            const sections = translateProc.buffer.trim().split(/\n\s*\n/);
-            // console.log("BUFFER:", translateProc.buffer);
-            // console.log("SECTIONS:", sections);
-
-            // 2. Extract relevant data
-            root.translatedText = sections.length > 1 ? sections[1].trim() : "";
-            root.outputField.text = root.translatedText;
-        }
-    }
-    
-    Flickable {
-        anchors.fill: parent
-        contentHeight: contentColumn.implicitHeight
-
-        ColumnLayout {
-            id: contentColumn
+        Flickable {
             anchors.fill: parent
+            contentHeight: contentColumn.implicitHeight
 
-            Rectangle { // INPUT
-                id: inputCanvas
-                Layout.fillWidth: true
-                implicitHeight: Math.max(150, inputColumn.implicitHeight)
-                color: Appearance.colors.colLayer1
-                radius: Appearance.rounding.normal
-                border.color: Appearance.m3colors.m3outlineVariant
-                border.width: 1
+            ColumnLayout {
+                id: contentColumn
+                anchors.fill: parent
 
-                ColumnLayout {
-                    id: inputColumn
-                    anchors.fill: parent
-                    spacing: 0
+                Rectangle { // INPUT
+                    id: inputCanvas
+                    Layout.fillWidth: true
+                    implicitHeight: Math.max(150, inputColumn.implicitHeight)
+                    color: Appearance.colors.colLayer1
+                    radius: Appearance.rounding.normal
+                    border.color:Appearance.colors.colOutline
+                    border.width: 1
 
-                    StyledTextArea { // Input area
-                        id: inputTextArea
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Enter text to translate...")
-                        wrapMode: TextEdit.Wrap
-                        textFormat: TextEdit.PlainText
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colOnLayer1
-                        padding: 15
-                        background: null
-                        onTextChanged: {
-                            if (inputTextArea.text.trim().length > 0) {
-                                translateTimer.restart();
-                            } else {
+                    ColumnLayout {
+                        id: inputColumn
+                        anchors.fill: parent
+                        spacing: 0
+
+                        StyledTextArea { // Input area
+                            id: inputTextArea
+                            Layout.fillWidth: true
+                            placeholderText: qsTr("Enter text to translate...")
+                            wrapMode: TextEdit.Wrap
+                            textFormat: TextEdit.PlainText
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colOnLayer1
+                            padding: 15
+                            background: null
+                            onTextChanged: {
+                                if (inputTextArea.text.trim().length > 0)
+                                {
+                                    translateTimer.restart();
+                                } else {
                                 outputTextArea.text = "";
                             }
                         }
                     }
 
-                    Item { Layout.fillHeight: true } 
+                    Item { Layout.fillHeight: true }
 
                     RowLayout { // Status row
                         Layout.fillWidth: true
@@ -178,7 +181,7 @@ Item {
                         padding: 15
                         text: hasTranslation ? root.translatedText : ""
                     }
-                    Item { Layout.fillHeight: true } 
+                    Item { Layout.fillHeight: true }
                     RowLayout { // Status row
                         Layout.fillWidth: true
                         Layout.margins: 10
@@ -225,6 +228,6 @@ Item {
                     }
                 }
             }
-        }    
+        }
     }
 }

@@ -8,7 +8,7 @@ CACHE_DIR="$XDG_CACHE_HOME/quickshell"
 STATE_DIR="$XDG_STATE_HOME/quickshell"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 terminalscheme="$XDG_CONFIG_HOME/quickshell/scripts/terminal/scheme-base.json"
-
+backgroundMode="crop" # crop , fit , no
 pre_process() {
     local mode_flag="$1"
     # Set GNOME color-scheme if mode_flag is dark or light
@@ -188,7 +188,7 @@ switch() {
             matugen_args=(image "$imgpath")
             generate_colors_material_args=(--path "$imgpath")
             # Set wallpaper with swww
-            swww img "$imgpath" --transition-step 100 --transition-fps 120 \
+            swww img "$imgpath" --resize "${backgroundMode}" --transition-step 100 --transition-fps 120 \
                 --transition-type fade --transition-angle 30 --transition-duration 1.5 \
                 # --transition-pos "$cursorposx, $cursorposy_inverted"
             remove_restore

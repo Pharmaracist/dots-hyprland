@@ -12,7 +12,7 @@ ShellRoot {
 
     PanelWindow {
         exclusiveZone: -1
-        WlrLayershell.layer: WlrLayer.Background
+        WlrLayershell.layer: WlrLayer.Bottom
         color: "transparent"
         implicitHeight: 180
         implicitWidth: 1000
