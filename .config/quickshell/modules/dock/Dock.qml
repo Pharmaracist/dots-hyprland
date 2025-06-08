@@ -29,6 +29,44 @@ Scope { // Scope
                         || dockApps.requestDockShow
                         || (!ToplevelManager.activeToplevel?.activated)
 
+            function hide() {
+                cheatsheetLoader.active = false
+            }
+            exclusiveZone: root.pinned ? implicitHeight 
+                - (Appearance.sizes.hyprlandGapsOut) 
+                - (Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut) : 0
+
+            implicitWidth: dockBackground.implicitWidth
+            WlrLayershell.namespace: "quickshell:dock"
+            color: "transparent"
+
+            implicitHeight: (ConfigOptions?.dock.height ?? 70) + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut
+
+            mask: Region {
+                item: dockMouseArea
+            }
+
+            MouseArea {
+                id: dockMouseArea
+                anchors.top: parent.top
+                height: parent.height
+                anchors.topMargin: dockRoot.reveal ? 0 : 
+                    ConfigOptions?.dock.hoverToReveal ? (dockRoot.implicitHeight + 1) :
+                    (dockRoot.implicitHeight - ConfigOptions.dock.hoverRegionHeight)
+                anchors.left: parent.left
+                anchors.right: parent.right
+                hoverEnabled: true
+
+                Behavior on anchors.topMargin {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
+
+                Item {
+                    id: dockHoverRegion
+                    anchors.fill: parent
+
+                    Item { // Wrapper for the dock background
+                        id: dockBackground
                         anchors {
                             bottom: true
                             left: true

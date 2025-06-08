@@ -109,3 +109,7 @@ post_hook = '~/.config/matugen/templates/kde/kde-material-you-colors-wrapper.sh 
 [templates.zathura]
 input_path = '~/.config/matugen/templates/other/zathura-colors'
 output_path = '~/.config/zathura/zathurarc'
+
+[templates.wallpaper]
+input_path = '~/.config/matugen/templates/wallpaper.txt'
+output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'

@@ -60,7 +60,7 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
-        property bool enable: true
+        property bool enable: false
         property real height: 60
         property bool exclusiveDock: true
         property real hoverRegionHeight: 3

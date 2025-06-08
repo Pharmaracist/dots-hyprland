@@ -2,6 +2,8 @@
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 
+import "./modules/common/"
+import "./modules/backgroundWidgets/"
 import "./modules/bar/"
 import "./modules/cheatsheet/"
 import "./modules/desktopbackground/"
@@ -26,7 +28,8 @@ import Quickshell
 ShellRoot {
     // Enable/disable modules here
     property bool enableBar: true
-    property bool enableCheatsheet: false
+    property bool enableCheatsheet: true
+    property bool enableBackgroundWidgets: true
     property bool enableDock: true
     property bool enableGlance: true
     property bool enableMediaControls: true
@@ -55,24 +58,25 @@ ShellRoot {
         FirstRunExperience.load()
     }
 
-    Loader { active: enableBar; sourceComponent: Bar {} }
-    Loader { active: enableCheatsheet; sourceComponent: Cheatsheet {} }
-    Loader { active: enableGlance; sourceComponent: Glance {} }
-    Loader { active: enableDock ; sourceComponent: Dock {} }
-    Loader { active: enableMediaControls; sourceComponent: MediaControls {} }
-    Loader { active: enableNotificationPopup; sourceComponent: NotificationPopup {} }
-    Loader { active: enableOnScreenDisplayBrightness; sourceComponent: OnScreenDisplayBrightness {} }
-    Loader { active: enableOnScreenDisplayVolume; sourceComponent: OnScreenDisplayVolume {} }
-    Loader { active: enableOnScreenKeyboard; sourceComponent: OnScreenKeyboard {} }
-    Loader { active: enableOverview; sourceComponent: Overview {} }
-    Loader { active: enableReloadPopup; sourceComponent: ReloadPopup {} }
-    Loader { active: enableScreenCorners; sourceComponent: ScreenCorners {} }
-    Loader { active: enableSession; sourceComponent: Session {} }
-    Loader { active: enableSidebarLeft; sourceComponent: SidebarLeft {} }
-    Loader { active: enableSidebarRight; sourceComponent: SidebarRight {} }
-    Loader { active: enableWallpaperSelector; sourceComponent: Wallpaper {} }
-    Loader { active: enableClockWidget; sourceComponent: ClockWidget {} }
-    Loader { active: enableActivateLinux; sourceComponent: ActivateLinux {} }
-    Loader { active: enableSecondaryClockWidget; sourceComponent: SecondaryClockWidget {} }
-    Loader { active: enableDesktopIslands; sourceComponent: DesktopIslands {} }
+LazyLoader { active: enableWallpaperSelector; component: Wallpaper {} }
+LazyLoader { active: enableActivateLinux; component: ActivateLinux {} }
+LazyLoader { active: enableSecondaryClockWidget; component: SecondaryClockWidget {} }
+LazyLoader { active: enableDesktopIslands; component: DesktopIslands {} }
+LazyLoader { active: enableGlance; component: Glance {} }
+LazyLoader { active: enableClockWidget; component: ClockWidget {} }
+    LazyLoader { active: enableBar; component: Bar {} }
+    LazyLoader { active: enableBackgroundWidgets; component: BackgroundWidgets {} }
+    LazyLoader { active: enableCheatsheet; component: Cheatsheet {} }
+    LazyLoader { active: (enableDock && ConfigOptions?.dock.enable); component: Dock {} }
+    LazyLoader { active: enableMediaControls; component: MediaControls {} }
+    LazyLoader { active: enableNotificationPopup; component: NotificationPopup {} }
+    LazyLoader { active: enableOnScreenDisplayBrightness; component: OnScreenDisplayBrightness {} }
+    LazyLoader { active: enableOnScreenDisplayVolume; component: OnScreenDisplayVolume {} }
+    LazyLoader { active: enableOnScreenKeyboard; component: OnScreenKeyboard {} }
+    LazyLoader { active: enableOverview; component: Overview {} }
+    LazyLoader { active: enableReloadPopup; component: ReloadPopup {} }
+    LazyLoader { active: enableScreenCorners; component: ScreenCorners {} }
+    LazyLoader { active: enableSession; component: Session {} }
+    LazyLoader { active: enableSidebarLeft; component: SidebarLeft {} }
+    LazyLoader { active: enableSidebarRight; component: SidebarRight {} }
 }
