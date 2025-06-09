@@ -16,7 +16,7 @@ Singleton {
     property string syntaxHighlightingTheme
 
     // [!] Enabling transparency can affect readability when using light theme.
-    property real transparency: 0
+    property real transparency: PersistentStates.temp.enableTransparency ? 0.6 : 0
     property real contentTransparency: 0
     // property real transparency: 0.15
     // property real contentTransparency: 0.5
@@ -137,6 +137,8 @@ Singleton {
         property color colOnTooltip: "#F8F9FA" // m3colors.m3inverseOnSurface in the specs, but the m3 website actually uses this color
         property color colScrim: ColorUtils.transparentize(m3colors.m3scrim, 0.5)
         property color colShadow: ColorUtils.transparentize(m3colors.m3shadow, 0.7)
+        property color colOutline: ColorUtils.transparentize(m3colors.m3outline, 0.85)
+
     }
 
     rounding: QtObject {
@@ -159,6 +161,8 @@ Singleton {
             property string iconNerd: "SpaceMono NF"
             property string monospace: "JetBrains Mono NF"
             property string reading: "Readex Pro"
+            property string niche: "Nothing Font (5x7)"
+
         }
         property QtObject pixelSize: QtObject {
             property int smallest: 10
@@ -291,6 +295,8 @@ Singleton {
         property real elevationMargin: 10
         property real fabShadowRadius: 5
         property real fabHoveredShadowRadius: 7
+        property real floatingMargin: 7
+
     }
 
     syntaxHighlightingTheme: Appearance.m3colors.darkmode ? "Monokai" : "ayu Light"
