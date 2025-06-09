@@ -145,14 +145,22 @@ Item {
 
             Repeater { // Window repeater
                 model: ScriptModel {
-                    values: windowAddresses.filter((address) => {
-                        var win = windowByAddress[address]
-                        return (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown)
-                    })
+                    values: {
+                        // console.log(JSON.stringify(ToplevelManager.toplevels.values.map(t => t), null, 2))
+                        return ToplevelManager.toplevels.values.filter((toplevel) => {
+                            const address = `0x${toplevel.HyprlandToplevel.address}`
+                            // console.log(`Checking window with address: ${address}`)
+                            var win = windowByAddress[address]
+                            return (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown)
+                        })
+                    }
                 }
                 delegate: OverviewWindow {
+                    required property var modelData
+                    property var address: `0x${modelData.HyprlandToplevel.address}`
                     id: window
-                    windowData: windowByAddress[modelData]
+                    windowData: windowByAddress[address]
+                    toplevel: modelData
                     monitorData: root.monitorData
                     scale: root.scale
                     availableWorkspaceWidth: root.workspaceImplicitWidth
@@ -172,8 +180,8 @@ Item {
                         repeat: false
                         running: false
                         onTriggered: {
-                            window.x = Math.max((windowData?.at[0] - monitorData?.reserved[0]) * root.scale, 0) + xOffset
-                            window.y = Math.max((windowData?.at[1] - monitorData?.reserved[1]) * root.scale, 0) + yOffset
+                            window.x = Math.round(Math.max((windowData?.at[0] - monitorData?.reserved[0]) * root.scale, 0) + xOffset)
+                            window.y = Math.round(Math.max((windowData?.at[1] - monitorData?.reserved[1]) * root.scale, 0) + yOffset)
                         }
                     }
 

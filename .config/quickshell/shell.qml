@@ -67,7 +67,7 @@ LazyLoader { active: enableClockWidget; component: ClockWidget {} }
     LazyLoader { active: enableBar; component: Bar {} }
     LazyLoader { active: enableBackgroundWidgets; component: BackgroundWidgets {} }
     LazyLoader { active: enableCheatsheet; component: Cheatsheet {} }
-    LazyLoader { active: (enableDock && ConfigOptions?.dock.enable); component: Dock {} }
+    LazyLoader { active: enableDock; component: Dock {} }
     LazyLoader { active: enableMediaControls; component: MediaControls {} }
     LazyLoader { active: enableNotificationPopup; component: NotificationPopup {} }
     LazyLoader { active: enableOnScreenDisplayBrightness; component: OnScreenDisplayBrightness {} }

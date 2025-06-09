@@ -24,10 +24,11 @@ Singleton {
     }
 
     property QtObject apps: QtObject {
-        property string bluetooth: "better-control --bluetooth"
+        property string bluetooth: "systemsettings kcm_bluetooth"
         property string imageViewer: "loupe"
-        property string network: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi"
-        property string settings: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center"
+        property string network: "better-control --wifi"
+        property string networkEthernet: "systemsettings kcm_networkmanagement"
+        property string settings: "systemsettings kcm_bluetooth"
         property string taskManager: "plasma-systemmonitor --page-name Processes"
         property string terminal: "kitty -1" // This is only for shell actions
     }
@@ -60,7 +61,6 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
-        property bool enable: false
         property real height: 60
         property bool exclusiveDock: true
         property real hoverRegionHeight: 3
