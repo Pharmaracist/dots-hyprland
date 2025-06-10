@@ -50,7 +50,7 @@ Scope {
                 id: background
                 implicitWidth: Appearance.sizes.mediaControlsWidth
                 implicitHeight: contentContainer.implicitHeight +20
-                color: Appearance.colors.colLayer1
+                color: Appearance.colors.colLayer0
                 radius: Appearance.rounding.windowRounding
                 anchors.rightMargin: widgetWidth
                 anchors.right: parent.right

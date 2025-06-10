@@ -8,6 +8,10 @@ Singleton {
         property string model
         property real temperature: 0.5
         }
+    property QtObject dock: QtObject {
+        property bool pinnedOnStartup:true
+        
+        }
 
         property QtObject sidebar: QtObject {
             property QtObject attachments: QtObject {

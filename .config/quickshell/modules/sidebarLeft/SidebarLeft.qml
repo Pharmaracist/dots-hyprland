@@ -145,7 +145,7 @@ Scope { // Scope
                 Rectangle {
                     id: detachedSidebarBackground
                     anchors.fill: parent
-                    color: Appearance.colors.colLayer0
+                    color: Appearance.m3colors.m3background
 
                     Keys.onPressed: (event) => {
                     if (event.modifiers === Qt.ControlModifier)

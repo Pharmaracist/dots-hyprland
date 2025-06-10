@@ -14,17 +14,17 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property bool pinned: ConfigOptions?.dock.pinnedOnStartup ?? false
-
+    property bool pinned: PersistentStates.dock.pinnedOnStartup
     Variants { // For each monitor
-        model: ConfigOptions?.dock.exclusiveDock? [Quickshell.screens[1]]:Quickshell.screens 
+        model: root.pinned ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
+ 
         PanelWindow { // Window
             required property var modelData
             id: dockRoot
             screen: modelData
             
             property bool reveal: root.pinned 
-                || (ConfigOptions?.dock.hoverToReveal && dockMouseArea.containsMouse) 
+                || ( dockMouseArea.containsMouse) 
                 || dockApps.requestDockShow 
                 || (!ToplevelManager.activeToplevel?.activated)
 
@@ -56,7 +56,6 @@ Scope { // Scope
                 anchors.top: parent.top
                 height: parent.height
                 anchors.topMargin: dockRoot.reveal ? 0 : 
-                    ConfigOptions?.dock.hoverToReveal ? (dockRoot.implicitHeight + 1) :
                     (dockRoot.implicitHeight - ConfigOptions.dock.hoverRegionHeight)
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -91,7 +90,7 @@ Scope { // Scope
                             anchors.topMargin: Appearance.sizes.elevationMargin
                             anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
                             color: Appearance.colors.colLayer0
-                            radius: Appearance.rounding.large
+                            radius: Appearance.rounding.small + 5
                         }
 
                         RowLayout {
@@ -111,7 +110,7 @@ Scope { // Scope
                                     clickedHeight: baseHeight + 20
                                     buttonRadius: Appearance.rounding.normal
                                     toggled: root.pinned
-                                    onClicked: root.pinned = !root.pinned
+                                    onClicked: PersistentStateManager.setState("dock.pinnedOnStartup", !root.pinned) 
                                     contentItem: MaterialSymbol {
                                         text: "keep"
                                         horizontalAlignment: Text.AlignHCenter

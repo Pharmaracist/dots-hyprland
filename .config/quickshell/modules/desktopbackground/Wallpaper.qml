@@ -86,7 +86,7 @@ Scope {
                                 id:widgetContent
                                 Layout.fillWidth:true
                                 Layout.fillHeight:true
-                                spacing:-1
+                                spacing:0
                                 Rectangle {
                                     id: wallpaperPanel
                                     width: Screen.width
