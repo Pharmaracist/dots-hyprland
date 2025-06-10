@@ -88,7 +88,7 @@ Scope { // Scope
                             id: dockVisualBackground
                             property real margin: Appearance.sizes.elevationMargin
                             anchors.fill: parent
-                            anchors.topMargin: margin
+                            anchors.topMargin: Appearance.sizes.elevationMargin
                             anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
                             color: Appearance.colors.colLayer0
                             radius: Appearance.rounding.large
@@ -103,6 +103,7 @@ Scope { // Scope
                             property real padding: 5
 
                             VerticalButtonGroup {
+                                Layout.topMargin: Appearance.sizes.hyprlandGapsOut // why does this work
                                 GroupButton { // Pin button
                                     baseWidth: dockRoot.height * 0.6
                                     baseHeight: dockRoot.height * 0.6
@@ -120,32 +121,13 @@ Scope { // Scope
                                 }
                             }
                             DockSeparator {}
-                            // Pinned apps
-                            Repeater {
-                                model: ConfigOptions?.dock.pinnedApps ?? []
-                                
-                                DockButton {
-                                    id: pinnedAppButton
-                                    required property string modelData
-                                    property DesktopEntry entry: DesktopEntries.byId(modelData)
-                                    onClicked: {
-                                        pinnedAppButton?.entry.execute();
-                                    }
-                                    contentItem: IconImage {
-                                        anchors.centerIn: parent
-                                        source: Quickshell.iconPath(AppSearch.guessIcon(modelData), "image-missing")
-                                    }
-                                }
-                            }
-                            
-                            DockSeparator { visible: (ConfigOptions?.dock.pinnedApps ?? []).length > 0 }
-                            
-                            DockApps { id: dockApps }
+                            DockApps { id: dockApps; }
                             DockSeparator {}
                             DockButton {
+                                Layout.fillHeight: true
                                 onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
                                 contentItem: MaterialSymbol {
-                                    anchors.centerIn: parent
+                                    anchors.fill: parent
                                     horizontalAlignment: Text.AlignHCenter
                                     font.pixelSize: parent.width / 2
                                     text: "apps"
