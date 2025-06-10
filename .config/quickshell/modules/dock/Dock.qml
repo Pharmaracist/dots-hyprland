@@ -14,10 +14,10 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property bool pinned: ConfigOptions?.dock.pinnedOnStartup ?? false
+    property bool pinned: PersistentStates.dock.pinned
 
     Variants { // For each monitor
-        model: Quickshell.screens
+        model: root.pinned ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
 
         Loader {
             id: dockLoader
@@ -108,18 +108,18 @@ Scope { // Scope
                                 VerticalButtonGroup {
                                     Layout.topMargin: Appearance.sizes.hyprlandGapsOut // why does this work
                                     GroupButton { // Pin button
-                                        baseWidth: 35
-                                        baseHeight: 35
+                                        baseWidth: 45
+                                        baseHeight: 45
                                         clickedWidth: baseWidth
                                         clickedHeight: baseHeight + 20
                                         buttonRadius: Appearance.rounding.normal
                                         toggled: root.pinned
-                                        onClicked: root.pinned = !root.pinned
+                                        onClicked: PersistentStateManager.setState("dock.pinned", !root.pinned)
                                         contentItem: MaterialSymbol {
-                                            text: "keep"
+                                            text: "keyboard_command_key"
                                             horizontalAlignment: Text.AlignHCenter
                                             iconSize: Appearance.font.pixelSize.larger
-                                            color: root.pinned ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer0
+                                            color: root.pinned ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1
                                         }
                                     }
                                 }

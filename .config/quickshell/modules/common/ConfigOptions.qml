@@ -64,6 +64,8 @@ Singleton {
         property real height: 60
         property bool exclusiveDock: false
         property real hoverRegionHeight: 5
+        property bool hoverToReveal: true // When false, only reveals on empty workspace
+
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
             "heroic",
@@ -137,8 +139,8 @@ Singleton {
 
     property QtObject hacks: QtObject {
         property int arbitraryRaceConditionDelay: 500 // milliseconds
-        property string phoneLocalIP: "192.168.1.9" // critical for scrcpy wireless connection
-        property string phoneLocalPort: "33285" // critical for scrcpy wireless connection
+        property string phoneLocalIP: "192.168.1.30" // critical for scrcpy wireless connection
+        property int phoneLocalPort: 5555 // critical for scrcpy wireless connection
 
     }
 
