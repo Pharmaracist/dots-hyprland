@@ -81,6 +81,8 @@ Scope {
                             implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
                             color: Appearance.colors.colLayer0
                             radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+                            border.width:1
+                            border.color:Appearance.colors.colOutline
 
                             Keys.onPressed: (event) => {
                             if (event.key === Qt.Key_Escape)

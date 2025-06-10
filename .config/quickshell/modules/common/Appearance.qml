@@ -16,8 +16,8 @@ Singleton {
     property string syntaxHighlightingTheme
 
     // [!] Enabling transparency can affect readability when using light theme.
-    property real transparency: PersistentStates.temp.enableTransparency ? 0.6 : 0
-    property real contentTransparency: PersistentStates.temp.enableTransparency ? 0.9 : 0
+    property real transparency: PersistentStates.temp.enableTransparency ? 0.5 : 0
+    property real contentTransparency: PersistentStates.temp.enableTransparency ? 1 : 0
     // property real transparency: 0.15
     // property real contentTransparency: 0.5
 
@@ -137,7 +137,7 @@ Singleton {
         property color colOnTooltip: "#F8F9FA" // m3colors.m3inverseOnSurface in the specs, but the m3 website actually uses this color
         property color colScrim: ColorUtils.transparentize(m3colors.m3scrim, 0.5)
         property color colShadow: ColorUtils.transparentize(m3colors.m3shadow, 0.7)
-        property color colOutline: ColorUtils.transparentize(m3colors.m3outline, 0.85)
+        property color colOutline: ColorUtils.transparentize(m3colors.m3outline, 0.7)
 
     }
 

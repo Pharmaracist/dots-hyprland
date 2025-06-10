@@ -222,8 +222,7 @@ Scope {
                                                 }
 
                                                 height: Appearance.rounding.screenRounding
-                                                opacity: shouldBeVisible ? 1 : 0
-                                                visible: opacity > 0
+                                                visible: shouldBeVisible
 
                                                 anchors {
                                                     left: parent.left

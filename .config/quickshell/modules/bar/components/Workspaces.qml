@@ -58,6 +58,7 @@ Item {
         implicitWidth: rowLayout.implicitWidth + widgetPadding * 2
         radius: Appearance.rounding.small
         color: borderless ? "transparent" : Appearance.colors.colLayer1
+        
     }
 
     // Scroll to switch workspaces

@@ -22,141 +22,144 @@ Item {
 
     property var barRoot
     property int chunkWidth: 350
-    property int chunkHeight: 40
-    property real sideMargin: Appearance.rounding.screenRounding
-    property real commonSpacing: 10
-    property real commonRadius: Appearance.rounding.normal
+        property int chunkHeight: 40
+            property real sideMargin: Appearance.rounding.screenRounding
+                property real commonSpacing: 10
+                    property real commonRadius: Appearance.rounding.normal
 
-    width: parent.width
-    height: parent.height
+                        width: parent.width
+                        height: parent.height
 
-    RowLayout {
-        width: chunkWidth
-        height: parent.height
-            anchors.leftMargin: -Appearance.rounding.screenRounding
+                        RowLayout {
+                            width: chunkWidth
+                            height: parent.height
+                            anchors.leftMargin: -Appearance.rounding.screenRounding
+
+                            MouseArea {
+                                anchors.fill:parent
+                                acceptedButtons: Qt.LeftButton
+                                onClicked: (event) => {
+                                if (event.button === Qt.LeftButton)
+                                    Hyprland.dispatch('global quickshell:sidebarLeftToggle');
+                            }
+                        }
+
+                    }
+
+                    RowLayout {
+                        width: parent.implicitWidth
+                        height: parent.height
+                        // anchors.centerIn: parent
+                        spacing: commonSpacing
+                        // Circular Icons on Left
+                        Components.Logo {
+                            id:logo
+                            visible:!battery.visible
+                        }
+                        Components.MinimalBattery {
+                            id: battery
+                            visible: UPower.displayDevice.isLaptopBattery
+                        }
+
+                        Rectangle {
+                            id: wsChunk
+
+                            Layout.preferredWidth: workspaces.width + 16
+                            Layout.preferredHeight: chunkHeight
+                            color: Appearance.colors.colLayer0
+                            radius: commonRadius
+
+                            RectangularShadow {
+                                visible: !PersistentStates.temp.enableTransparency
+                                anchors.fill: wsChunk
+                                radius: knocksLayout.radius
+                                blur: 1.2 * Appearance.sizes.elevationMargin
+                                spread: 2
+                                color: Appearance.colors.colShadow
+
+                            }
+
+                            MouseArea {
+                                width: wsChunk.width
+                                height: wsChunk.height
+                                acceptedButtons: Qt.RightButton
+                                onClicked: (event) => {
+                                if (event.button === Qt.RightButton)
+                                    Hyprland.dispatch('global quickshell:overviewToggle');
+
+                            }
+                        }
+
+                        RowLayout {
+                            width: parent.width
+                            height: parent.height
+
+                            Components.Workspaces {
+                                id: workspaces
+
+                                Layout.alignment: Qt.AlignCenter
+                                bar: barRoot
+                            }
+
+                        }
+                    }
+                }
+                Rectangle {
+                    id: centerChunk
+                    width:clock.width + 16
+                    height:chunkHeight
+                    color: Appearance.colors.colLayer0
+                    radius: commonRadius
+                    anchors.centerIn:parent
+                    RectangularShadow {
+                        visible: !PersistentStates.temp.enableTransparency
+                        anchors.fill: parent
+                        radius: parent.radius
+                        blur: 1.2 * Appearance.sizes.elevationMargin
+                        spread: 2
+                        color: Appearance.colors.colShadow
+
+                    }
+
+                    MouseArea {
+                        width: parent.width
+                        height: parent.height
+                        acceptedButtons: Qt.RightButton | Qt.LeftButton
+                        onClicked: (event) => {
+                        if (event.button === Qt.RightButton)
+                            Hyprland.dispatch('global quickshell:overviewToggle');
+                        if (event.button === Qt.LeftButton)
+                            Hyprland.dispatch('global quickshell:glanceToggle');
+
+                    }
+                }
+                Components.ClockWidget {
+                    id :clock
+                    anchors.centerIn:parent.centerIn
+                }
+            }
+            Rectangle {
+                id: rightChunk
+                anchors.right:parent.right
+                width:indicatorsAreaRow.width + 50
+                height:chunkHeight
+                color: Appearance.colors.colLayer0
+                radius: commonRadius
+                RectangularShadow {
+                    visible: !PersistentStates.temp.enableTransparency
+                    anchors.fill: parent
+                    radius: parent.radius
+                    blur: 1.2 * Appearance.sizes.elevationMargin
+                    spread: 2
+                    color: Appearance.colors.colShadow
+
+                }
 
                 MouseArea {
-                    anchors.fill:parent
-                    acceptedButtons: Qt.LeftButton
+                    width: parent.width
+                    height: parent.height
+                    acceptedButtons: Qt.RightButton | Qt.LeftButton
                     onClicked: (event) => {
-                        if (event.button === Qt.LeftButton)
-                            Hyprland.dispatch('global quickshell:sidebarLeftToggle');
-               }
-     }
-
-    }
-
-    RowLayout {
-        width: parent.implicitWidth
-        height: parent.height
-        // anchors.centerIn: parent
-        spacing: commonSpacing
-        // Circular Icons on Left
-        Components.Logo {
-            id:logo
-            visible:!battery.visible 
-        }
-         Components.MinimalBattery {
-            id: battery
-            visible: UPower.displayDevice.isLaptopBattery
-        }
-
-        Rectangle {
-            id: wsChunk
-
-            Layout.preferredWidth: workspaces.width + 16
-            Layout.preferredHeight: chunkHeight
-            color: Appearance.colors.colLayer0
-            radius: commonRadius
-
-            RectangularShadow {
-                anchors.fill: wsChunk
-                radius: knocksLayout.radius
-                blur: 1.2 * Appearance.sizes.elevationMargin
-                spread: 2
-                color: Appearance.colors.colShadow
-                
-            }
-
-            MouseArea {
-                width: wsChunk.width
-                height: wsChunk.height
-                acceptedButtons: Qt.RightButton
-                onClicked: (event) => {
-                    if (event.button === Qt.RightButton)
-                        Hyprland.dispatch('global quickshell:overviewToggle');
-
-                }
-            }
-
-            RowLayout {
-                width: parent.width
-                height: parent.height
-
-                Components.Workspaces {
-                    id: workspaces
-
-                    Layout.alignment: Qt.AlignCenter
-                    bar: barRoot
-                }
-
-            }
-        }   
-    }
-    Rectangle {
-            id: centerChunk
-            width:clock.width + 16
-            height:chunkHeight
-            color: Appearance.colors.colLayer0
-            radius: commonRadius
-            anchors.centerIn:parent
-            RectangularShadow {
-                anchors.fill: parent
-                radius: parent.radius
-                blur: 1.2 * Appearance.sizes.elevationMargin
-                spread: 2
-                color: Appearance.colors.colShadow
-                
-            }
-
-            MouseArea {
-                width: parent.width
-                height: parent.height
-                acceptedButtons: Qt.RightButton | Qt.LeftButton  
-                onClicked: (event) => {
-                    if (event.button === Qt.RightButton)
-                        Hyprland.dispatch('global quickshell:overviewToggle');
-                    if (event.button === Qt.LeftButton)
-                        Hyprland.dispatch('global quickshell:glanceToggle');
-
-                }
-            }
-            Components.ClockWidget {
-              id :clock    
-              anchors.centerIn:parent.centerIn
-            }        
-        }
-        Rectangle {
-            id: rightChunk
-            anchors.right:parent.right
-            width:indicatorsAreaRow.width + 50
-            height:chunkHeight
-            color: Appearance.colors.colLayer0
-            radius: commonRadius
-            RectangularShadow {
-                anchors.fill: parent
-                radius: parent.radius
-                blur: 1.2 * Appearance.sizes.elevationMargin
-                spread: 2
-                color: Appearance.colors.colShadow
-                
-            }
-
-            MouseArea {
-                width: parent.width
-                height: parent.height
-                acceptedButtons: Qt.RightButton | Qt.LeftButton  
-                onClicked: (event) => {
                     if (event.button === Qt.RightButton)
                         Hyprland.dispatch('global quickshell:overviewToggle');
                     if (event.button === Qt.LeftButton)
@@ -169,16 +172,16 @@ Item {
                 spacing: commonSpacing
                 anchors.centerIn:parent
                 Layout.fillWidth:true
-                
-                    Components.SysTray {
-                        bar: barRoot
-                        visible: SystemTray.items.values.length > 0
-                    }
 
-                    Components.StatusIcons {}
+                Components.SysTray {
+                    bar: barRoot
+                    visible: SystemTray.items.values.length > 0
+                }
 
-                    }
+                Components.StatusIcons {}
+
+            }
         }
-    
-}
+
+    }
 

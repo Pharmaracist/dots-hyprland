@@ -45,7 +45,7 @@ Singleton {
         property string position: "top"
         property string city: "Cairo"
         property bool desaturateTray: false
-        property bool showOnMainScreenOnly: false
+        property bool showOnMainScreenOnly: true
         property string topLeftIcon: "distro" // Options: distro, spark
         property bool showBackground: true
         property bool borderless: false
@@ -61,7 +61,7 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
-        property real height: 40
+        property real height: 60
         property bool exclusiveDock: false
         property real hoverRegionHeight: 5
         property list<string> pinnedApps: [ // IDs of pinned entries

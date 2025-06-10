@@ -55,9 +55,7 @@ Scope { // Scope
                 id: dockMouseArea
                 anchors.top: parent.top
                 height: parent.height
-                anchors.topMargin: dockRoot.reveal ? 0 : 
-                    ConfigOptions?.dock.hoverToReveal ? (dockRoot.implicitHeight - ConfigOptions.dock.hoverRegionHeight) :
-                    (dockRoot.implicitHeight + 1)
+                anchors.topMargin: dockRoot.reveal ? 0 : (dockRoot.implicitHeight - ConfigOptions.dock.hoverRegionHeight) 
                     
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -83,6 +81,7 @@ Scope { // Scope
                         height: parent.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
 
                         StyledRectangularShadow {
+                            visible: !PersistentStates.temp.enableTransparency
                             target: dockVisualBackground
                         }
                         Rectangle { // The real rectangle that is visible
@@ -93,6 +92,9 @@ Scope { // Scope
                             anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
                             color: Appearance.colors.colLayer0
                             radius: Appearance.rounding.small + 5
+                            border.width:1
+                            border.color:Appearance.colors.colOutline
+
                         }
 
                         RowLayout {

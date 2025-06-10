@@ -77,6 +77,7 @@ Item {
                         border.color:Appearance.colors.colOutline
 
                         RectangularShadow {
+                            visible: !PersistentStates.temp.enableTransparency
                             anchors.fill: leftChunk
                             radius: knocksLayout.radius
                             blur: 1.2 * Appearance.sizes.elevationMargin
@@ -132,6 +133,7 @@ Item {
                         border.color:Appearance.colors.colOutline
 
                         RectangularShadow {
+                            visible: !PersistentStates.temp.enableTransparency
                             anchors.fill: centerChunk
                             radius: knocksLayout.radius
                             blur: 1.2 * Appearance.sizes.elevationMargin
@@ -177,6 +179,7 @@ Item {
                     border.color:Appearance.colors.colOutline
 
                     RectangularShadow {
+                        visible: !PersistentStates.temp.enableTransparency
                         anchors.fill: rightChunk
                         radius: knocksLayout.radius
                         blur: 1.2 * Appearance.sizes.elevationMargin
