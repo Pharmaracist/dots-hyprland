@@ -17,7 +17,7 @@ Singleton {
 
     // [!] Enabling transparency can affect readability when using light theme.
     property real transparency: PersistentStates.temp.enableTransparency ? 0.6 : 0
-    property real contentTransparency: 0
+    property real contentTransparency: PersistentStates.temp.enableTransparency ? 0.8 : 0
     // property real transparency: 0.15
     // property real contentTransparency: 0.5
 

@@ -17,7 +17,7 @@ Scope { // Scope
     property bool pinned: ConfigOptions?.dock.pinnedOnStartup ?? false
 
     Variants { // For each monitor
-        model: Quickshell.screens
+        model: ConfigOptions?.dock.exclusiveDock? [Quickshell.screens[1]]:Quickshell.screens 
         PanelWindow { // Window
             required property var modelData
             id: dockRoot

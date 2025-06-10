@@ -29,7 +29,7 @@ ShellRoot {
     // Enable/disable modules here
     property bool enableBar: true
     property bool enableCheatsheet: true
-    property bool enableBackgroundWidgets: true
+    property bool enableBackgroundWidgets: false
     property bool enableDock: true
     property bool enableGlance: true
     property bool enableMediaControls: true
