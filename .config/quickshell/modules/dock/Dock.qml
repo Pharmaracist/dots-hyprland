@@ -95,6 +95,8 @@ Scope { // Scope
                                 anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
                                 color: Appearance.colors.colLayer0
                                 radius: Appearance.rounding.large
+                                border.color:Appearance.colors.colOutline
+
                             }
 
                             RowLayout {
