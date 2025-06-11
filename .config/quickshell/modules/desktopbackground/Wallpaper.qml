@@ -293,7 +293,7 @@ Scope {
                                                             fillMode: Image.PreserveAspectCrop
                                                             source: loader.fileUrl
                                                             asynchronous: true
-                                                            cache: true
+                                                            cache: false
                                                             mipmap: true
                                                             sourceSize {
                                                                 width: wallpaperPanel.itemWidth

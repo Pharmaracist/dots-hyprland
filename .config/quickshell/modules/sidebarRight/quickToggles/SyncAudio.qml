@@ -18,7 +18,7 @@ QuickToggleButton {
     onClicked: {
         syncAudio.enabled = !syncAudio.enabled;
         if (enabled)
-            Hyprland.dispatch(`exec scrcpy --no-video --audio-codec=opus --tcpip='${phoneLocalIP}:${phoneLocalPort}' --no-control`)
+            Hyprland.dispatch(`exec scrcpy --no-video --audio-codec=opus --tcpip='${phoneLocalIP}:${phoneLocalPort}'`) // --start-app=+?rimusic 
         else
             Hyprland.dispatch('exec killall scrcpy')
     }

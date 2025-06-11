@@ -34,7 +34,7 @@ ShellRoot {
     property bool enableGlance: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
-    property bool enableOnScreenDisplayBrightness: false
+    property bool enableOnScreenDisplayBrightness: true
     property bool enableOnScreenDisplayVolume: true
     property bool enableOnScreenKeyboard: true
     property bool enableOverview: true
@@ -46,9 +46,9 @@ ShellRoot {
     property bool enableSidebarRight: true
     property bool enableClockWidget: true
     property bool enableActivateLinux: false
-    property bool enableSecondaryClockWidget: false
+    property bool enableSecondaryClockWidget: true
     property bool enableScreenTime: true
-    property bool enableDesktopIslands : false
+    property bool enableDesktopIslands : true
     // Force initialization of some singletons
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()

@@ -257,13 +257,6 @@ Scope {
 
                                                 }
 
-                                                Behavior on opacity {
-                                                NumberAnimation {
-                                                    duration: transitionDuration
-                                                    easing.type: transitionEasing
-                                                    easing.bezierCurve: transitionBezier
-                                                }
-
                                             }
 
                                         }
@@ -271,5 +264,3 @@ Scope {
                                     }
 
                                 }
-
-                            }

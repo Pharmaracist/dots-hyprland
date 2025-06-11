@@ -16,8 +16,9 @@ import Quickshell.Hyprland
 Item {
     id: root
     property var inputField: inputTextArea
+        property string engine: ConfigOptions?.sidebar.translator.engine || "auto"
         property var outputField: outputTextArea
-            property string targetLanguage: ConfigOptions.sidebar.translator.targetLanguage || "en"
+            property string targetLanguage: ConfigOptions?.sidebar.translator.targetLanguage || "en"
                 property bool translationFor: false // Indicates if the translation is for an autocorrected text
                     property string translatedText: ""
 
@@ -47,7 +48,7 @@ Item {
             Process {
                 id: translateProc
 
-                command: ["bash", "-c", `trans -t '${targetLanguage}' -no-bidi -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
+                command: ["bash", "-c", `trans -e '${engine}' -t '${targetLanguage}' -no-bidi -no-theme -no-ansi '${StringUtils.shellSingleQuoteEscape(inputTextArea.text.trim())}'`]
                 property string buffer: ""
                     stdout: SplitParser {
                         onRead: data => {

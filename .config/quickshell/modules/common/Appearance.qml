@@ -277,7 +277,7 @@ Singleton {
     }
 
     sizes: QtObject {
-        property real barHeight: 40
+        property real barHeight: 37
         property real barCenterSideModuleWidth: 360
         property real barCenterSideModuleWidthShortened: 280
         property real barCenterSideModuleWidthHellaShortened: 190

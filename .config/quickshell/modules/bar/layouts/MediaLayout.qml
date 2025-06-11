@@ -22,7 +22,7 @@ Item {
 
     property var barRoot
     property int chunkWidth: 350
-        property int chunkHeight: 40
+        property int chunkHeight: Appearance.sizes.barHeight
             property real sideMargin: Appearance.rounding.screenRounding
                 property real commonSpacing: 10
                     property real commonRadius: Appearance.rounding.normal
@@ -135,7 +135,7 @@ Item {
                 }
                 Components.ClockWidget {
                     id :clock
-                    anchors.centerIn:parent.centerIn
+                    anchors.centerIn:centerChunk
                 }
             }
             Rectangle {

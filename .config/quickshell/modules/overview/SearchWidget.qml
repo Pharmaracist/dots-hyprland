@@ -38,6 +38,19 @@ Item { // Wrapper
         searchInput.text = text;
         root.searchingText = text;
     }
+    function parseDuration(input) {
+        const regex = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?\s*(?:(\d+)\s*s)?/i;
+        const match = input.match(regex);
+    
+        // Return 0 if none of the unit groups are present
+        if (!match || (!match[1] && !match[2] && !match[3])) return 0;
+    
+        const hours = parseInt(match[1] || 0, 10);
+        const minutes = parseInt(match[2] || 0, 10);
+        const seconds = parseInt(match[3] || 0, 10);
+    
+        return hours * 3600 + minutes * 60 + seconds;
+    }
 
     property var searchActions: [
         {
@@ -85,12 +98,25 @@ Item { // Wrapper
                 )
             }
         },
+         {
+        action: "tm",
+        execute: (args) => {
+            const durationInSeconds = parseDuration(args);
+            if (durationInSeconds > 0) {
+                const id = TimerService.addTimer("Timer", durationInSeconds);
+                TimerService.startTimer(id);  // Auto-start the timer
+            } else {
+                console.log("[Timer] Invalid or missing duration units:", args);
+            }
+        }
+        },  
         {
             action: "todo",
             execute: (args) => {
                 Todo.addTask(args)
             }
         },
+
     ]
 
     function focusFirstItemIfNeeded() {

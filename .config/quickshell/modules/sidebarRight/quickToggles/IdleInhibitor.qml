@@ -3,28 +3,16 @@ import "root:/modules/common/widgets"
 import "../"
 import Quickshell.Io
 import Quickshell
-import Quickshell.Hyprland
 
 QuickToggleButton {
-    id: root
     toggled: idleInhibitor.running
     buttonIcon: "coffee"
     onClicked: {
-        if (toggled) {
-            root.toggled = false
-            Hyprland.dispatch("exec pkill wayland-idle") // pkill doesn't accept too long names
-        } else {
-            root.toggled = true
-            Hyprland.dispatch('exec ${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/scripts/wayland-idle-inhibitor.py')
-        }
+        idleInhibitor.running = !idleInhibitor.running
     }
     Process {
-        id: fetchActiveState
-        running: true
-        command: ["bash", "-c", "pidof wayland-idle-inhibitor.py"]
-        onExited: (exitCode, exitStatus) => {
-            root.toggled = exitCode === 0
-        }
+        id: idleInhibitor
+        command: ["bash", "-c", "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/scripts/wayland-idle-inhibitor.py"]
     }
     StyledToolTip {
         content: qsTr("Keep system awake")

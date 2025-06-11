@@ -14,7 +14,7 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property bool pinned: PersistentStates.dock.pinned
+    property bool pinned: PersistentStates?.dock.pinned ? true : false
 
     Variants { // For each monitor
         model: root.pinned ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
