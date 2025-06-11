@@ -115,7 +115,7 @@ Item {
             id: tabBarBottomBorder
             Layout.fillWidth: true
             height: 1
-            color: Appearance.m3colors.m3outlineVariant
+            color: Appearance.colors.colOutlineVariant
         }
 
         SwipeView {
@@ -232,7 +232,7 @@ Item {
             anchors.margins: root.dialogMargins
             implicitHeight: dialogColumnLayout.implicitHeight
 
-            color: Appearance.m3colors.m3surfaceContainerHigh
+            color: Appearance.colors.colSurfaceContainerHigh
             radius: Appearance.rounding.normal
 
             function addTask() {
@@ -268,7 +268,7 @@ Item {
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
                     renderType: Text.NativeRendering
                     selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
-                    selectionColor: Appearance.m3colors.m3secondaryContainer
+                    selectionColor: Appearance.colors.colSecondaryContainer
                     placeholderText: qsTr("Task description")
                     placeholderTextColor: Appearance.m3colors.m3outline
                     focus: root.showAddDialog
