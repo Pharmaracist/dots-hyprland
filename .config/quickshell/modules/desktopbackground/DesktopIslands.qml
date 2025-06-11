@@ -15,6 +15,7 @@ import "root:/services"
 
 ShellRoot {
     property string time
+    property var imagePath
     property ShellScreen modelData: Quickshell.screens[0]
     property int commonRadius: Appearance.rounding.screenRounding
         property bool showResources: false
@@ -36,14 +37,15 @@ ShellRoot {
                         }
 
                         margins {
-                            bottom: Appearance.sizes.hyprlandGapsOut* 2
-                            right: Appearance.sizes.hyprlandGapsOut *3
+                            bottom: Appearance.sizes.hyprlandGapsOut * 2
+                            right: Appearance.sizes.hyprlandGapsOut * 3
                         }
 
                         ColumnLayout {
                             RowLayout {
                                 spacing: 10
 
+                                // Screen Time Box
                                 Rectangle {
                                     id: screenTime
 
@@ -77,7 +79,6 @@ ShellRoot {
 
                                             CustomIcon {
                                                 id: treeIcon
-
                                                 width: parent.width
                                                 height: parent.height
                                                 source: "logo-symbolic"
@@ -88,9 +89,7 @@ ShellRoot {
                                                 source: treeIcon
                                                 color: Appearance.colors.colSecondaryContainerActive
                                             }
-
                                         }
-
                                     }
 
                                     Text {
@@ -98,19 +97,14 @@ ShellRoot {
                                         font.pixelSize: 15
                                         opacity: 0.6
                                         text: "Screen Time"
-
-                                        anchors {
-                                            left: parent.left
-                                            leftMargin: 15
-                                            top: parent.top
-                                            topMargin: 15
-                                        }
-
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 15
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 15
                                     }
 
                                     ColumnLayout {
                                         id: screenTimeContent
-
                                         anchors.bottom: parent.bottom
                                         anchors.bottomMargin: 20
                                         anchors.horizontalCenter: parent.horizontalCenter
@@ -123,11 +117,10 @@ ShellRoot {
                                             opacity: 0.85
                                             textFormat: Text.MarkdownText
                                         }
-
                                     }
-
                                 }
 
+                                // Gallery Box with Random Image
                                 Rectangle {
                                     id: gallaryContainer
 
@@ -153,62 +146,60 @@ ShellRoot {
                                         opacity: 0.6
                                         text: "memories"
                                         z: 100
-
-                                        anchors {
-                                            left: parent.left
-                                            leftMargin: 15
-                                            top: parent.top
-                                            topMargin: 15
-                                        }
-
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 15
+                                        anchors.top: parent.top
+                                        anchors.topMargin: 15
                                     }
-
 
                                     Timer {
                                         id: refreshTimer
-                                        interval: 50000  // 5 minutes
+                                        interval: 50000  // 50 seconds
                                         running: true
                                         repeat: true
+
                                         onTriggered: {
-                                            // Force reload by updating the source URL
-                                            galleryContent.source = ""
-                                            galleryContent.source = Directories.pictures + "/gallery?" + Qt.formatDate(new Date(), "yyyyMMddHHmmss")
+                                            const dir = Directories.pictures + "/gallery/"
+                                            const files = FileUtils.readDir(dir)
+                                            .filter(f => f.endsWith(".jpg") || f.endsWith(".jpeg") || f.endsWith(".png") || f.endsWith(".webp"))
+                                            if (files.length > 0)
+                                            {
+                                                const index = Math.floor(Math.random() * files.length)
+                                                imagePath = dir + "/" + files[index]
+
+                                            }
                                         }
+                                    }
+
+                                    Component.onCompleted: {
+                                        refreshTimer.triggered()
                                     }
 
                                     Image {
                                         id: galleryContent
-
                                         anchors.centerIn: parent
                                         anchors.fill: parent
-
-                                        // Initial source path
-                                        source: Directories.pictures + "/gallery"
-
                                         fillMode: Image.PreserveAspectCrop
-                                        sourceSize.width: galleryContainer.width - 20
-                                        sourceSize.height: galleryContainer.height - 20
+                                        sourceSize.width: gallaryContainer.width - 20
+                                        sourceSize.height: gallaryContainer.height - 20
                                         asynchronous: true
-                                        cache: false  // Disable caching to avoid old images being retained
+                                        cache: false
                                         antialiasing: true
-
-
-                                        // Rounded corners mask
+                                        source: imagePath
                                         layer.enabled: true
                                         layer.effect: OpacityMask {
                                             maskSource: Rectangle {
-                                                id:image
+                                                id: image
                                                 width: galleryContent.width
                                                 height: galleryContent.height
                                                 radius: commonRadius
                                             }
                                         }
                                     }
-
                                 }
-
                             }
 
+                            // Resources Panel
                             Rectangle {
                                 id: resources
 
@@ -242,27 +233,13 @@ ShellRoot {
                                     font.pixelSize: 15
                                     opacity: 0.6
                                     text: "Resources"
-
-                                    anchors {
-                                        left: parent.left
-                                        leftMargin: 15
-                                        top: parent.top
-                                        topMargin: 15
-                                    }
-
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 15
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 15
                                 }
-                                // Resourcess
 
                                 RowLayout {
-                                    // Resource {
-                                    //     iconName: "settings_slow_motion"
-                                    //     percentage: ResourceUsage.cpuUsage
-                                    // }
-                                    // Resource {
-                                    //     iconName: "settings_slow_motion"
-                                    //     percentage: ResourceUsage.cpuUsage
-                                    // }
-
                                     anchors.centerIn: parent
 
                                     Resource {
@@ -279,16 +256,10 @@ ShellRoot {
                                         iconName: "settings_slow_motion"
                                         percentage: ResourceUsage.cpuUsage
                                     }
-
                                 }
-
                             }
-
                         }
 
-                        mask: Region {
-                        }
-
+                        mask: Region {}
                     }
-
                 }

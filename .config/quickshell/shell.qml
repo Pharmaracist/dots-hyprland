@@ -14,6 +14,7 @@ import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
 import "./modules/onScreenKeyboard/"
 import "./modules/overview/"
+import "./modules/verticalBar/"
 import "./modules/screenCorners/"
 import "./modules/session/"
 import "./modules/sidebarLeft/"
@@ -27,7 +28,8 @@ import Quickshell
 
 ShellRoot {
     // Enable/disable modules here
-    property bool enableBar: true
+    property bool enableVerticalBar: ConfigOptions.bar.verticalMode 
+    property bool enableBar:  !enableVerticalBar
     property bool enableCheatsheet: true
     property bool enableBackgroundWidgets: false
     property bool enableDock: true
@@ -57,13 +59,13 @@ ShellRoot {
         Cliphist.refresh()
         FirstRunExperience.load()
     }
-
-LazyLoader { active: enableWallpaperSelector; component: Wallpaper {} }
-LazyLoader { active: enableActivateLinux; component: ActivateLinux {} }
-LazyLoader { active: enableSecondaryClockWidget; component: SecondaryClockWidget {} }
-LazyLoader { active: enableDesktopIslands; component: DesktopIslands {} }
-LazyLoader { active: enableGlance; component: Glance {} }
-LazyLoader { active: enableClockWidget; component: ClockWidget {} }
+    LazyLoader { active: enableVerticalBar; component: VerticalBar {} }
+    LazyLoader { active: enableWallpaperSelector; component: Wallpaper {} }
+    LazyLoader { active: enableActivateLinux; component: ActivateLinux {} }
+    LazyLoader { active: enableSecondaryClockWidget; component: SecondaryClockWidget {} }
+    LazyLoader { active: enableDesktopIslands; component: DesktopIslands {} }
+    LazyLoader { active: enableGlance; component: Glance {} }
+    LazyLoader { active: enableClockWidget; component: ClockWidget {} }
     LazyLoader { active: enableBar; component: Bar {} }
     LazyLoader { active: enableBackgroundWidgets; component: BackgroundWidgets {} }
     LazyLoader { active: enableCheatsheet; component: Cheatsheet {} }

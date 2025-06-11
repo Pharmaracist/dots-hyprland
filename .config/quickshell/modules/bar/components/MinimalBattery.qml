@@ -6,25 +6,16 @@ import Quickshell.Services.UPower
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 
-Rectangle {
-    id: root
-
-    property bool borderless: ConfigOptions.appearance.borderless
-    readonly property var chargeState: UPower.displayDevice.state
-    readonly property bool isCharging: chargeState == UPowerDeviceState.Charging
-    readonly property bool isPluggedIn: isCharging || chargeState == UPowerDeviceState.PendingCharge
-    readonly property real percentage: UPower.displayDevice.percentage
-    readonly property bool isLow: percentage <= ConfigOptions.bar.batteryLowThreshold / 100
-    readonly property color batteryLowBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3error : Appearance.m3colors.m3errorContainer
-    readonly property color batteryLowOnBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3error
-
-    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 3
-    implicitHeight: 28
-    color: borderless ? "transparent" : Appearance.colors.colLayer1
-    radius: Appearance.rounding.small
-
-    RowLayout {
+RowLayout {
         id: rowLayout
+        readonly property var chargeState: UPower.displayDevice.state
+        readonly property bool isCharging: chargeState == UPowerDeviceState.Charging
+        readonly property bool isPluggedIn: isCharging || chargeState == UPowerDeviceState.PendingCharge
+        readonly property real percentage: UPower.displayDevice.percentage
+        readonly property bool isLow: percentage <= ConfigOptions.bar.batteryLowThreshold / 100
+        readonly property color batteryLowBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3error : Appearance.m3colors.m3errorContainer
+        readonly property color batteryLowOnBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3error
+        
 
         Item {
             Layout.fillWidth: true
@@ -40,7 +31,7 @@ Rectangle {
         }
 
         CircularProgress {
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: Qt.AlignHCenter
             lineWidth: 2
             value: percentage
             size: 26
@@ -85,4 +76,3 @@ Rectangle {
 
     }
 
-}

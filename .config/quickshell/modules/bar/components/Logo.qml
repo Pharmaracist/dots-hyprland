@@ -14,13 +14,12 @@ Item {
     property var barRoot
 
     // Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-    Layout.preferredWidth: distroIcon.width + 10
-    Layout.preferredHeight: parent.height * 0.75
-
+    Layout.preferredHeight: distroIcon.width + 12
+    Layout.preferredWidth: distroIcon.width + 12
     Rectangle {
         radius: Appearance.rounding.full
         color: Appearance.colors.colLayer3
-        width: distroIcon.width + 9
+        width: distroIcon.width + 12
         height: distroIcon.height + 9
 
         CustomIcon {
@@ -35,7 +34,7 @@ Item {
         ColorOverlay {
             anchors.fill: distroIcon
             source: distroIcon
-            color: Appearance.colors.colPrimaryActive
+            color: Appearance.m3colors.m3primary
         }
 
     }

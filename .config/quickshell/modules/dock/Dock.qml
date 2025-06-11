@@ -14,8 +14,8 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property bool pinned: PersistentStates?.dock.pinned ? true : false
-
+    property bool pinned: PersistentStates.dock.pinned 
+    property bool cornered: ConfigOptions?.dock.cornered ?? true
     Variants { // For each monitor
         model: root.pinned ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
 
@@ -47,7 +47,7 @@ Scope { // Scope
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
 
-                implicitHeight: (ConfigOptions?.dock.height ?? 70) + Appearance.sizes.elevationMargin + Appearance.sizes.hyprlandGapsOut
+                implicitHeight: (ConfigOptions?.dock.height ?? 70)  + Appearance.sizes.hyprlandGapsOut + (cornered ?? Appearance.sizes.elevationMargin)
 
                 mask: Region {
                     item: dockMouseArea
@@ -72,15 +72,40 @@ Scope { // Scope
                     Item {
                         id: dockHoverRegion
                         anchors.fill: parent
+                        RoundCorner {
+                            visible:cornered
+                            size: Appearance.rounding.screenRounding
+                            corner: cornerEnum.bottomRight
+                            color: Appearance.colors.colLayer0
+        
+                            anchors {
+                                bottom: dockBackground.bottom
+                                right:dockBackground.left
+                            
+                            }
+        
+                        }
+                        RoundCorner {
+                            visible:cornered
+                            size: Appearance.rounding.screenRounding
+                            corner: cornerEnum.bottomLeft
+                            color: Appearance.colors.colLayer0
+        
+                            anchors {
+                                bottom: dockBackground.bottom
+                                left:dockBackground.right
 
+                            }
+        
+                        }
                         Item { // Wrapper for the dock background
                             id: dockBackground
                             anchors {
                                 top: parent.top
                                 bottom: parent.bottom
                                 horizontalCenter: parent.horizontalCenter
-                            }
 
+                            }
                             implicitWidth: dockRow.implicitWidth + 5 * 2
                             height: parent.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
 
@@ -90,20 +115,28 @@ Scope { // Scope
                             Rectangle { // The real rectangle that is visible
                                 id: dockVisualBackground
                                 property real margin: Appearance.sizes.elevationMargin
-                                anchors.fill: parent
-                                anchors.topMargin: Appearance.sizes.elevationMargin
-                                anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
+                                anchors {
+                                    fill: parent
+                                    bottom:parent
+                                    topMargin: Appearance.sizes.elevationMargin
+                                    bottomMargin: -Appearance.sizes.hyprlandGapsOut
+                                
+                                }
                                 color: Appearance.colors.colLayer0
-                                radius: Appearance.rounding.large
-                                border.color:Appearance.colors.colOutline
-
+                                radius: cornered ? 0 : Appearance.rounding.large
+                                topRightRadius:Appearance.rounding.screenRounding
+                                topLeftRadius:Appearance.rounding.screenRounding
+                                border.color:cornered ? "transparent" :Appearance.colors.colOutline
                             }
 
                             RowLayout {
                                 id: dockRow
                                 anchors.top: parent.top
                                 anchors.bottom: parent.bottom
+                                anchors.bottomMargin: cornered ? -Appearance.sizes.elevationMargin : 0
+
                                 anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
                                 spacing: 3
                                 property real padding: 5
 

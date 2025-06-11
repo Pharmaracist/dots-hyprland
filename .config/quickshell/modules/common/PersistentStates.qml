@@ -9,7 +9,7 @@ Singleton {
         property real temperature: 0.5
         }
     property QtObject dock: QtObject {
-        property bool pinned:true
+        property bool pinned:false
         
         }
 

@@ -43,8 +43,9 @@ Singleton {
         property string timeFormat: "h:mm AP" // Options: 24H hh:mm,12H h:mm AP
         property int batteryLowThreshold: 20
         property string position: "top"
+        property bool verticalMode: true
         property string city: "Cairo"
-        property bool desaturateTray: false
+        property bool desaturateTray: true
         property bool showOnMainScreenOnly: true
         property string topLeftIcon: "distro" // Options: distro, spark
         property bool showBackground: true
