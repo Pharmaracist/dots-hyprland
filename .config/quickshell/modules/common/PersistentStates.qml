@@ -20,7 +20,10 @@ Singleton {
 
                 property QtObject bottomGroup: QtObject {
                     property bool collapsed: false
+                    
+                    property int selectedTab: 0
                     }
+            
                     property QtObject centerGroup: QtObject {
                         property int selectedTab: 0
                         }

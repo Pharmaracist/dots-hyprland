@@ -37,7 +37,7 @@ Item {
         anchors.rightMargin: 10
         anchors.bottomMargin: root.listBottomPadding
         cellWidth: Math.floor(width / Math.max(1, Math.floor(width / 160)))
-        cellHeight: 140
+        cellHeight: 100
         model: root.presetList
         clip: true
 
@@ -79,7 +79,7 @@ Item {
                     }
                 }
 
-                ColumnLayout {
+                RowLayout {
                     anchors.fill: parent
                     anchors.margins: 16
                     spacing: 8
