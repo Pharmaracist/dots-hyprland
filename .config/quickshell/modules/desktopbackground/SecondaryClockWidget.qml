@@ -14,7 +14,7 @@ ShellRoot {
     PanelWindow {
         exclusiveZone: -1
         screen: modelData
-        WlrLayershell.layer: WlrLayer.Background
+        WlrLayershell.layer: WlrLayer.Bottom
         color: "transparent"
         implicitWidth: clock.width
         implicitHeight: clock.height
@@ -34,9 +34,9 @@ ShellRoot {
 
             Text {
                 // font
-                font.family: "stretch pro"
-                color: Appearance.colors.colOnLayer2
-                font.pixelSize: 100
+                color: Appearance.colors.colOnLayer1
+                font.weight: 900
+                font.pixelSize: 110
                 opacity: 0.85
                 Layout.alignment: Qt.AlignHCenter
                 text: DateTime.time
@@ -44,8 +44,9 @@ ShellRoot {
 
             Text {
                 // Date
-                font.family: "stretch pro"
+                font.family: Appearance.font.family.title
                 color: Appearance.colors.colOnLayer1
+                font.weight: 900
                 font.pixelSize: 30
                 opacity: 0.6
                 Layout.alignment: Qt.AlignCenter

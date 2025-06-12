@@ -47,7 +47,7 @@ Scope { // Scope
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
 
-                implicitHeight: (ConfigOptions?.dock.height ?? 70)  + Appearance.sizes.hyprlandGapsOut + (cornered ?? Appearance.sizes.elevationMargin)
+                implicitHeight: (ConfigOptions?.dock.height ?? 70)  + Appearance.sizes.hyprlandGapsOut + (cornered ?? Appearance.sizes.frameThickness)
 
                 mask: Region {
                     item: dockMouseArea
@@ -60,7 +60,6 @@ Scope { // Scope
                     anchors.topMargin: dockRoot.reveal ? 0 : 
                         ConfigOptions?.dock.hoverToReveal ? (dockRoot.implicitHeight - ConfigOptions.dock.hoverRegionHeight) :
                         (dockRoot.implicitHeight + 1)
-                        
                     anchors.left: parent.left
                     anchors.right: parent.right
                     hoverEnabled: true
@@ -104,7 +103,7 @@ Scope { // Scope
                                 top: parent.top
                                 bottom: parent.bottom
                                 horizontalCenter: parent.horizontalCenter
-
+                                bottomMargin: Appearance.sizes.frameThickness
                             }
                             implicitWidth: dockRow.implicitWidth + 5 * 2
                             height: parent.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
@@ -134,14 +133,12 @@ Scope { // Scope
                                 anchors.top: parent.top
                                 anchors.bottom: parent.bottom
                                 anchors.bottomMargin: cornered ? -Appearance.sizes.elevationMargin : 0
-
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
                                 spacing: 3
                                 property real padding: 5
 
                                 VerticalButtonGroup {
-                                    Layout.topMargin: Appearance.sizes.hyprlandGapsOut // why does this work
+                                    Layout.topMargin: Appearance.sizes.hyprlandGapsOut  // why does this work
                                     GroupButton { // Pin button
                                         baseWidth: 45
                                         baseHeight: 45
@@ -160,18 +157,6 @@ Scope { // Scope
                                 }
                                 DockSeparator {}
                                 DockApps { id: dockApps; }
-                                DockSeparator {}
-                                DockButton {
-                                    Layout.fillHeight: true
-                                    onClicked: Hyprland.dispatch("global quickshell:overviewToggle")
-                                    contentItem: MaterialSymbol {
-                                        anchors.fill: parent
-                                        horizontalAlignment: Text.AlignHCenter
-                                        font.pixelSize: parent.width / 2
-                                        text: "apps"
-                                        color: Appearance.colors.colOnLayer0
-                                    }
-                                }
                             }
                         }    
                     }

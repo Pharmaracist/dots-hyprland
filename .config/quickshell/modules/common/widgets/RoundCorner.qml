@@ -60,5 +60,6 @@ Item {
     Behavior on size {
         animation: Appearance?.animation.elementMoveFast.numberAnimation.createObject(this)
     }
+    
 
 }

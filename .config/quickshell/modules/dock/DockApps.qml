@@ -32,6 +32,7 @@ Item {
         id: listView
         spacing: 2
         orientation: ListView.Horizontal
+
         anchors {
             top: parent.top
             bottom: parent.bottom
@@ -80,6 +81,7 @@ Item {
             }
         }
         delegate: DockAppButton {
+            anchors.verticalCenter: parent.verticalCenter
             required property var modelData
             appToplevel: modelData
             appListRoot: root

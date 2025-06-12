@@ -145,7 +145,7 @@ Singleton {
         property color colShadow: ColorUtils.transparentize(m3colors.m3shadow, 0.7)
         property color colOutlineVariant: m3colors.m3outlineVariant
         property color colOutline: ColorUtils.transparentize(m3colors.m3outline, 0.7)
-
+    }
 
     rounding: QtObject {
         property int unsharpen: 2
@@ -297,11 +297,12 @@ Singleton {
         property real notificationPopupWidth: 410
         property real searchWidthCollapsed: 260
         property real searchWidth: 450
-        property real hyprlandGapsOut: 5
-        property real elevationMargin: 10
+        property real hyprlandGapsOut: 5 + frameThickness
+        property real elevationMargin: 10 
         property real fabShadowRadius: 5
         property real fabHoveredShadowRadius: 7
         property real floatingMargin: 7
+        property real frameThickness: 7
 
     }
 

@@ -21,6 +21,7 @@ import "root:/modules/common/functions/file_utils.js" as FileUtils
 
 Scope {
     id: wallpaperScope
+    property bool verticalBar : ConfigOptions.bar.verticalMode 
     property string wallpaperPath: Directories.pictures
         property int widgetHeight: 220;
             property string wallpaperSelector: FileUtils.trimFileProtocol(Directories.config + "/quickshell/scripts/switchwall.sh")
@@ -39,18 +40,17 @@ Scope {
                         wallpaperScope.isOpen = false;
                     }
 
-                    exclusiveZone: 0
+                    exclusiveZone: verticalBar ? -1 : 0
                     implicitHeight: widgetHeight
                     implicitWidth:QuickShell.screen.width
                     WlrLayershell.namespace: "quickshell:wallpaperSelector"
                     color: "transparent"
-
                     anchors {
                         top: true
                         right: true
                         left: true
                     }
-                    margins.top:ConfigOptions.bar.verticalMode ? 0 : Appearance.sizes.floatingMargin
+                    margins.top:verticalBar ? 0 : (ConfigOptions.bar.verticalMode ? 0 : Appearance.sizes.floatingMargin)
 
 
 

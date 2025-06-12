@@ -51,6 +51,8 @@ ShellRoot {
     property bool enableSecondaryClockWidget: true
     property bool enableScreenTime: true
     property bool enableDesktopIslands : true
+    property bool enableScreenFrame : enableVerticalBar
+
     // Force initialization of some singletons
     Component.onCompleted: {
         MaterialThemeLoader.reapplyTheme()
@@ -81,4 +83,6 @@ ShellRoot {
     LazyLoader { active: enableSession; component: Session {} }
     LazyLoader { active: enableSidebarLeft; component: SidebarLeft {} }
     LazyLoader { active: enableSidebarRight; component: SidebarRight {} }
+    LazyLoader { active: enableScreenFrame; component: ScreenFrame {} }
+
 }
