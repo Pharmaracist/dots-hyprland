@@ -23,7 +23,7 @@ ShellRoot {
     property bool showScreenTime: true
 
     PanelWindow {
-        exclusiveZone: -1
+        // exclusiveZone: -1
         screen: modelData
         WlrLayershell.layer: WlrLayer.Background
         WlrLayershell.namespace: "quickshell:desktopIslands"

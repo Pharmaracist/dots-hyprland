@@ -15,14 +15,14 @@ ShellRoot {
         color: "transparent"
         implicitWidth: clock.width + 200
         implicitHeight: date.height + clock.height + 5 + Appearance.sizes.hyprlandGapsOut
-
+        exclusiveZone:-1
         anchors {
             left: true
             bottom: true
         }
 
         ColumnLayout {
-            anchors.leftMargin: PersistentStates.bar.verticalMode ? 40 : Appearance.sizes.frameThickness
+            anchors.leftMargin: PersistentStates.bar.verticalMode ? Appearance.sizes.barWidth + Appearance.sizes.hyprlandGapsOut+ Appearance.sizes.frameThickness : Appearance.sizes.frameThickness
             anchors.left: parent.left
             anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut + Appearance.sizes.frameThickness
             anchors.bottom: parent.bottom

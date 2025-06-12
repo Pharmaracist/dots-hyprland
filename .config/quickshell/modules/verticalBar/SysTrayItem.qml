@@ -13,7 +13,7 @@ MouseArea {
     required property var bar
     required property SystemTrayItem item
     property bool targetMenuOpen: false
-        property int trayItemWidth: 16
+    property int trayItemWidth: 18
 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             Layout.fillHeight: true
@@ -37,8 +37,8 @@ MouseArea {
 
         menu: root.item.menu
         anchor.window: bar
-        anchor.rect.x: root.x + bar.width
-        anchor.rect.y: root.y
+        anchor.rect.x: root.x + bar.width 
+        anchor.rect.y: root.y + bar.height / 2.8
         anchor.rect.height: root.height
         anchor.edges: Edges.Bottom
     }

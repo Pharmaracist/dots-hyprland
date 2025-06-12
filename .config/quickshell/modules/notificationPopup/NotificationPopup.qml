@@ -39,7 +39,7 @@ Scope {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 5
+            anchors.topMargin: 6 + Appearance.sizes.frameThickness
             implicitWidth: parent.width - Appearance.sizes.elevationMargin * 2
             popup: true
         }

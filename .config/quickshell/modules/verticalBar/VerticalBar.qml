@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Services.UPower
 import Quickshell.Wayland
+import Quickshell.Services.Mpris
 import "root:/"
 import "root:/modules/bar/components" as NormalComponents
 import "root:/modules/common"
@@ -16,11 +17,12 @@ import "root:/services"
 
 Scope {
     id: bar
-
-    readonly property int barWidth: 40
+    readonly property int barWidth: Appearance.sizes.barWidth
     readonly property int osdHideMouseMoveThreshold: 20
     property bool showBarBackground: ConfigOptions.bar.showBackground
     readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly || false
+    readonly property MprisPlayer activePlayer: MprisController.activePlayer
+    readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
 
     // For each monitor
     Variants {
@@ -85,27 +87,24 @@ Scope {
                     }
 
                     Workspaces {
+                        id:ws
                         bar: barRoot
                     }
 
-                }
-
-                ColumnLayout {
-                    Layout.fillHeight: true
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenter: parent.horizontalCenter
-
+                }  
+                RowLayout {
+                    id:rowLayout
+                    anchors.centerIn: parent
+                    Media {
+                        id:media
+                        visible: MprisController.activePlayer?.trackTitle?.length > 0
+                    }
                     CombinedTitle {
-                        id: widowTitle
-
                         bar: barRoot
-                        anchors.fill: parent
-                        Layout.fillWidth: true
-
-                        transform: Rotation {
-                            angle: -90
-                        }
-
+                        visible:!media.visible
+                    }
+                    transform: Rotation {
+                        angle: -90
                     }
 
                 }

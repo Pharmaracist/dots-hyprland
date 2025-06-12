@@ -16,8 +16,9 @@ Scope { // Scope
     id: root
     property bool pinned: PersistentStates.dock.pinned 
     property bool cornered: ConfigOptions?.dock.cornered ?? true
+    property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
     Variants { // For each monitor
-        model: root.pinned ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
+        model: pinned ? [Quickshell.screens[focusedScreen]]:[focusedScreen]
 
         Loader {
             id: dockLoader
@@ -41,7 +42,7 @@ Scope { // Scope
 
                 exclusiveZone: root.pinned ? implicitHeight 
                     - (Appearance.sizes.hyprlandGapsOut) 
-                    - (Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut) : 0
+                    - (Appearance.sizes.hyprlandGapsOut - Appearance.sizes.frameThickness  ) : 0
 
                 implicitWidth: dockBackground.implicitWidth
                 WlrLayershell.namespace: "quickshell:dock"
@@ -117,7 +118,7 @@ Scope { // Scope
                                 anchors {
                                     fill: parent
                                     bottom:parent
-                                    topMargin: Appearance.sizes.elevationMargin
+                                    topMargin: Appearance.sizes.hyprlandGapsOut + 2
                                     bottomMargin: -Appearance.sizes.hyprlandGapsOut
                                 
                                 }
