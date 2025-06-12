@@ -85,11 +85,23 @@ ColumnLayout {
         }
         iconSize: commonIconSize
         color: commonIconColor
+        MouseArea {
+            anchors.fill:parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: Hyprland.dispatch(`exec ${ConfigOptions.apps.networkEthernet}`)
+        }
     }
 
     MaterialSymbol {
         text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
         iconSize: commonIconSize
         color: commonIconColor
+         MouseArea {
+            anchors.fill:parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: Hyprland.dispatch(`exec ${ConfigOptions.apps.bluetooth}`)
+        }
     }
 }

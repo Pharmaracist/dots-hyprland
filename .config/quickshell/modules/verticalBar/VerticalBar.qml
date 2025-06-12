@@ -17,21 +17,17 @@ import "root:/services"
 Scope {
     id: bar
 
-    readonly property int barWidth: 38
+    readonly property int barWidth: 40
     readonly property int osdHideMouseMoveThreshold: 20
     property bool showBarBackground: ConfigOptions.bar.showBackground
     readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly || false
 
     // For each monitor
     Variants {
-        model: showOnMainScreenOnly ? [Quickshell.screens[0]] : Quickshell.screens
+        model: Quickshell.screens
 
         // Bar window
         PanelWindow {
-            // mask: Region {
-            //     item: barRoot
-            // }
-
             id: barRoot
 
             property ShellScreen modelData
@@ -41,7 +37,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:verticalBar"
             height: screen.height
             width: barContent.width + Appearance.rounding.screenRounding
-            exclusiveZone: barWidth
+            exclusiveZone: barWidth - Appearance.sizes.frameThickness
             color: "transparent"
 
             anchors {
@@ -128,13 +124,6 @@ Scope {
                     }
 
                     StatusIcons {
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Hyprland.dispatch('global quickshell:sidebarRightToggle')
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                        }
-
                     }
 
                     ClockWidget {
@@ -142,7 +131,7 @@ Scope {
 
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: Hyprland.dispatch('global quickshell:sidebarRightToggle')
+                            onClicked: Hyprland.dispatch('exec kclock')
                             cursorShape: Qt.PointingHandCursor
                             hoverEnabled: true
                         }

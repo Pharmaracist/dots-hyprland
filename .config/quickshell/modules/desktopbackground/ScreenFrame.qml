@@ -20,12 +20,12 @@ Scope {
         model: Quickshell.screens
 
         PanelWindow {
-            // WlrLayershell.layer: WlrLayer.Bottom
-            // WlrLayershell.namespace: "quickshell:screenFrame"
             id: root
 
             property ShellScreen modelData
 
+            // WlrLayershell.layer: WlrLayer.Bottom
+            WlrLayershell.namespace: "quickshell:screenFrame"
             exclusiveZone: frameCanvas
             screen: modelData
             color: "transparent"
