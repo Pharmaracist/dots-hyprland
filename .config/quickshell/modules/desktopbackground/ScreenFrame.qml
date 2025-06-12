@@ -22,7 +22,6 @@ Scope {
         PanelWindow {
             // WlrLayershell.layer: WlrLayer.Bottom
             // WlrLayershell.namespace: "quickshell:screenFrame"
-
             id: root
 
             property ShellScreen modelData
@@ -45,32 +44,6 @@ Scope {
                 property real cornerRadius: Appearance.rounding.screenRounding - 2
                 property color frameColor: Appearance.colors.colLayer0
 
-                // Helper function to draw rounded rectangles
-                function roundedRect(ctx, x, y, width, height, radius) {
-                    if (width <= 0 || height <= 0)
-                        return ;
-
-                    if (radius > width / 2)
-                        radius = width / 2;
-
-                    if (radius > height / 2)
-                        radius = height / 2;
-
-                    if (radius < 0)
-                        radius = 0;
-
-                    ctx.moveTo(x + radius, y);
-                    ctx.lineTo(x + width - radius, y);
-                    ctx.arcTo(x + width, y, x + width, y + radius, radius);
-                    ctx.lineTo(x + width, y + height - radius);
-                    ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-                    ctx.lineTo(x + radius, y + height);
-                    ctx.arcTo(x, y + height, x, y + height - radius, radius);
-                    ctx.lineTo(x, y + radius);
-                    ctx.arcTo(x, y, x + radius, y, radius);
-                    ctx.closePath();
-                }
-
                 anchors.fill: parent
                 onPaint: {
                     var ctx = getContext("2d");
@@ -80,11 +53,23 @@ Scope {
                     ctx.lineWidth = frameThickness;
                     ctx.lineCap = "butt";
                     ctx.lineJoin = "miter";
-                    // Calculate adjusted radius for the stroke position
-                    var adjustedRadius = Math.max(0, cornerRadius - frameThickness / 2);
-                    // Draw only the frame border (stroke, not fill)
+                    // Calculate positions
+                    var halfThickness = frameThickness / 2;
+                    var adjustedRadius = Math.max(0, cornerRadius - halfThickness);
+                    // Draw frame without left side and left corners
                     ctx.beginPath();
-                    roundedRect(ctx, frameThickness / 2, frameThickness / 2, width - frameThickness, height - frameThickness, adjustedRadius);
+                    // Top line (from left edge to right, no left corner)
+                    ctx.moveTo(0, halfThickness);
+                    ctx.lineTo(width - halfThickness, halfThickness);
+                    // Top-right corner
+                    ctx.arcTo(width - halfThickness, halfThickness, width - halfThickness, halfThickness + adjustedRadius, adjustedRadius);
+                    // Right line
+                    ctx.lineTo(width - halfThickness, height - halfThickness - adjustedRadius);
+                    // Bottom-right corner
+                    ctx.arcTo(width - halfThickness, height - halfThickness, width - halfThickness - adjustedRadius, height - halfThickness, adjustedRadius);
+                    // Bottom line (from right to left edge, no left corner)
+                    ctx.lineTo(0, height - halfThickness);
+                    // Stop here - no left side or left corners
                     ctx.stroke();
                 }
                 // Redraw when properties change

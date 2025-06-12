@@ -198,6 +198,7 @@ Scope {
                 anchors {
                     top: barContent.top
                     left: barContent.right
+                    topMargin: Appearance.sizes.frameThickness
                 }
 
             }
@@ -210,6 +211,7 @@ Scope {
                 anchors {
                     bottom: barContent.bottom
                     left: barContent.right
+                    bottomMargin: Appearance.sizes.frameThickness
                 }
 
             }
