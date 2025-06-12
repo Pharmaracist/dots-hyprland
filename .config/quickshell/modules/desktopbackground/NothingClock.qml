@@ -11,25 +11,25 @@ ShellRoot {
     property string time
 
     PanelWindow {
-        exclusiveZone: -1
         WlrLayershell.layer: WlrLayer.Bottom
         color: "transparent"
-        implicitHeight: 180
-        implicitWidth: 1000
+        implicitWidth: clock.width + 200
+        implicitHeight: date.height + clock.height + 5 + Appearance.sizes.hyprlandGapsOut
 
         anchors {
             left: true
             bottom: true
         }
 
-        margins {
-            left: 50
-        }
-
         ColumnLayout {
-            spacing: 5
+            anchors.leftMargin: PersistentStates.bar.verticalMode ? 40 : Appearance.sizes.frameThickness
+            anchors.left: parent.left
+            anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut + Appearance.sizes.frameThickness
+            anchors.bottom: parent.bottom
 
             Text {
+                id: clock
+
                 // font
                 font.family: Appearance.font.family.niche
                 color: Appearance.colors.colOnLayer2
@@ -40,6 +40,8 @@ ShellRoot {
             }
 
             Text {
+                id: date
+
                 // Date
                 font.family: Appearance.font.family.niche
                 color: Appearance.colors.colOnLayer1

@@ -14,7 +14,6 @@ import "root:/modules/common/functions/string_utils.js" as StringUtils
 import "root:/modules/bar/components/" 
 Scope {
     id: root
-    property bool visible: false
     readonly property real osdWidth: Appearance.sizes.osdWidth
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
@@ -43,7 +42,6 @@ Scope {
                 top: true
                 right: true
                 left: true
-
             }
 
             Rectangle {
