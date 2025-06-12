@@ -24,7 +24,7 @@ Scope {
 
             property ShellScreen modelData
 
-            // WlrLayershell.layer: WlrLayer.Bottom
+            WlrLayershell.layer: WlrLayer.Bottom
             WlrLayershell.namespace: "quickshell:screenFrame"
             exclusiveZone: frameCanvas
             screen: modelData
@@ -40,8 +40,9 @@ Scope {
             Canvas {
                 id: frameCanvas
 
-                property real frameThickness: Appearance.sizes.frameThickness
+                property real frameThickness: Appearance.sizes.frameThickness - 2 // idk why but its nicer that way
                 property real cornerRadius: Appearance.rounding.screenRounding - 2
+                property real innerRadius: cornerRadius
                 property color frameColor: Appearance.colors.colLayer0
 
                 anchors.fill: parent
@@ -55,21 +56,38 @@ Scope {
                     ctx.lineJoin = "miter";
                     // Calculate positions
                     var halfThickness = frameThickness / 2;
-                    var adjustedRadius = Math.max(0, cornerRadius - halfThickness);
-                    // Draw frame without left side and left corners
+                    var outerRadius = Math.max(0, cornerRadius - halfThickness);
+                    var innerR = Math.max(0, innerRadius);
+                    // Draw outer frame path
                     ctx.beginPath();
                     // Top line (from left edge to right, no left corner)
                     ctx.moveTo(0, halfThickness);
-                    ctx.lineTo(width - halfThickness, halfThickness);
-                    // Top-right corner
-                    ctx.arcTo(width - halfThickness, halfThickness, width - halfThickness, halfThickness + adjustedRadius, adjustedRadius);
+                    ctx.lineTo(width - halfThickness - outerRadius, halfThickness);
+                    // Top-right corner (outer)
+                    ctx.arcTo(width - halfThickness, halfThickness, width - halfThickness, halfThickness + outerRadius, outerRadius);
                     // Right line
-                    ctx.lineTo(width - halfThickness, height - halfThickness - adjustedRadius);
-                    // Bottom-right corner
-                    ctx.arcTo(width - halfThickness, height - halfThickness, width - halfThickness - adjustedRadius, height - halfThickness, adjustedRadius);
+                    ctx.lineTo(width - halfThickness, height - halfThickness - outerRadius);
+                    // Bottom-right corner (outer)
+                    ctx.arcTo(width - halfThickness, height - halfThickness, width - halfThickness - outerRadius, height - halfThickness, outerRadius);
                     // Bottom line (from right to left edge, no left corner)
                     ctx.lineTo(0, height - halfThickness);
-                    // Stop here - no left side or left corners
+                    // Now draw the inner path in reverse to create the frame effect
+                    if (innerR > 0 && frameThickness > 0) {
+                        // Move to inner bottom-left
+                        ctx.lineTo(frameThickness, height - frameThickness);
+                        // Inner bottom line (left to right)
+                        ctx.lineTo(width - frameThickness - innerR, height - frameThickness);
+                        // Inner bottom-right corner
+                        ctx.arcTo(width - frameThickness, height - frameThickness, width - frameThickness, height - frameThickness - innerR, innerR);
+                        // Inner right line
+                        ctx.lineTo(width - frameThickness, frameThickness + innerR);
+                        // Inner top-right corner
+                        ctx.arcTo(width - frameThickness, frameThickness, width - frameThickness - innerR, frameThickness, innerR);
+                        // Inner top line (right to left)
+                        ctx.lineTo(frameThickness, frameThickness);
+                        // Close the path back to start
+                        ctx.lineTo(0, halfThickness);
+                    }
                     ctx.stroke();
                 }
                 // Redraw when properties change

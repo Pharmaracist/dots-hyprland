@@ -23,7 +23,7 @@ Scope {
     id: wallpaperScope
     property bool verticalBar : PersistentStates.bar.verticalMode 
     property string wallpaperPath: Directories.pictures
-        property int widgetHeight: 220;
+        property int widgetHeight: 260;
             property string wallpaperSelector: FileUtils.trimFileProtocol(Directories.config + "/quickshell/scripts/switchwall.sh")
             property bool isOpen: false
                 // Bind local state to global state
@@ -40,9 +40,8 @@ Scope {
                         wallpaperScope.isOpen = false;
                     }
 
-                    exclusiveZone: verticalBar ? -1 : 0
+                    exclusiveZone:  0
                     implicitHeight: widgetHeight
-                    implicitWidth:QuickShell.screen.width
                     WlrLayershell.namespace: "quickshell:wallpaperSelector"
                     color: "transparent"
                     anchors {
@@ -50,7 +49,6 @@ Scope {
                         right: true
                         left: true
                     }
-                    margins.top:verticalBar ? 0 : Appearance.sizes.floatingMargin
 
 
 
@@ -73,17 +71,12 @@ Scope {
                                     spread: 1
                                     color: Appearance.colors.colShadow
                                 }
-                                ColumnLayout {
-                                    id:widgetContent
-                                    Layout.fillWidth:true
-                                    Layout.fillHeight:true
-                                    spacing:0
                                     Rectangle {
                                         id: wallpaperPanel
-                                        width: Screen.width
+                                        anchors.fill: parent
                                         anchors.top: parent.top
-                                        topRightRadius:Appearance.rounding.screenRounding
-                                        topLeftRadius:Appearance.rounding.screenRounding
+                                        anchors.margins:Appearance.sizes.hyprlandGapsOut
+                                        radius:Appearance.rounding.screenRounding
                                         color: Appearance.colors.colLayer0
                                         implicitHeight: wallpaperRoot.height - cornerBox.height
 
@@ -124,7 +117,7 @@ Scope {
                                                             centerIn: wallpaperPanel
                                                             margins: 10
                                                         }
-                                                        height: wallpaperPanel.height + 10
+                                                        height: wallpaperPanel.height
                                                         color: Appearance.colors.colLayer2
                                                         radius: Appearance.rounding.normal
                                                     }
@@ -140,7 +133,7 @@ Scope {
 
                                                         anchors.centerIn: parent
                                                         width: 300
-                                                        height: wallpaperPanel.height * 0.75
+                                                        height: wallpaperPanel.height * 0.9
                                                         color: Appearance.colors.colLayer1
                                                         border.color: Appearance.colors.colOutline
                                                         border.width: 1
@@ -174,7 +167,6 @@ Scope {
                                                         showDirs: false
                                                         showFiles: true
                                                         sortField: FolderListModel.Unsorted
-
                                                         property var randomIndices: []
 
                                                         onCountChanged: {
@@ -212,9 +204,10 @@ Scope {
                                                     model: folderModel.count > 0 ? folderModel.count : 0
                                                     orientation: ListView.Horizontal
                                                     anchors {
-                                                        fill: secondaryContainer
+                                                        fill:secondaryContainer
                                                         margins: 10
                                                     }
+                                                        
 
                                                     // Visual properties
                                                     spacing: wallpaperPanel.itemSpacing
@@ -262,8 +255,9 @@ Scope {
                                                 }
 
                                                 delegate: Item {
-                                                    width: wallpaperPanel.itemWidth
-                                                    height: 155
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: (secondaryContainer.height * 0.9 * 16 ) / 9 
+                                                    height: secondaryContainer.height * 0.9
 
                                                     Loader {
                                                         id: loader
@@ -287,14 +281,14 @@ Scope {
                                                                 cache: false
                                                                 mipmap: true
                                                                 sourceSize {
-                                                                    width: wallpaperPanel.itemWidth
-                                                                    height: wallpaperPanel.height * 0.9
+                                                                    width: (secondaryContainer.height * 0.9 * 16 ) / 9 
+                                                                    height: secondaryContainer.height * 0.9
                                                                 }
                                                                 layer.enabled: true
                                                                 layer.effect: OpacityMask {
                                                                     maskSource: Rectangle {
-                                                                        width: imageObject.width
-                                                                        height: imageObject.height
+                                                                        width: (secondaryContainer.height * 0.9 * 16 ) / 9 
+                                                                        height: secondaryContainer.height * 0.9
                                                                         radius: Appearance.rounding.small
                                                                     }
                                                                 }
@@ -314,8 +308,8 @@ Scope {
                                                                 layer.enabled: true
                                                                 layer.effect: OpacityMask {
                                                                     maskSource: Rectangle {
-                                                                        width: videoObject.width
-                                                                        height: videoObject.height
+                                                                        width: (secondaryContainer.height * 0.9 * 16 ) / 9 
+                                                                        height: secondaryContainer.height
                                                                         radius: Appearance.rounding.small
                                                                     }
                                                                 }
@@ -347,36 +341,9 @@ Scope {
                                                     }
                                                 }
                                             }
-                                        }
-                                        RowLayout {
-                                            id:cornerBox
-                                            Layout.fillHeight:true
-                                            Layout.fillWidth:true
+                                        
+                                        
 
-                                            RoundCorner {
-                                                size: Appearance.rounding.screenRounding
-                                                corner: cornerEnum.topLeft
-                                                color: Appearance.colors.colLayer0
-
-                                                anchors {
-                                                    top: wallpaperPanel.bottom
-                                                    left:wallpaperPanel.left
-                                                }
-
-                                            }
-                                            Item { Layout.fillWidth:true}
-                                            RoundCorner {
-                                                size: Appearance.rounding.screenRounding
-                                                corner: cornerEnum.topRight
-                                                color: Appearance.colors.colLayer0
-
-                                                anchors {
-                                                    top: wallpaperPanel.bottom
-                                                    right:wallpaperPanel.right
-                                                }
-
-                                            }
-                                        }
                                     }
                                 }
 
