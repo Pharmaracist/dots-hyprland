@@ -222,7 +222,7 @@ Item { // Wrapper
         anchors.centerIn: parent
         implicitWidth: columnLayout.implicitWidth
         implicitHeight: columnLayout.implicitHeight
-        radius: !ConfigOptions.overview.enableOverview ? Appearance.rounding.small :Appearance.rounding.large 
+        radius:  Appearance.rounding.normal 
         color: Appearance.colors.colLayer0
 
         ColumnLayout {
@@ -242,7 +242,7 @@ Item { // Wrapper
 
             RowLayout {
                 id: searchBar
-                spacing: 5
+                spacing: 0
                 MaterialSymbol {
                     id: searchIcon
                     Layout.leftMargin: 15
@@ -299,6 +299,7 @@ Item { // Wrapper
                         radius: 1
                     }
                 }
+
             }
 
             ListView { // App results

@@ -158,7 +158,6 @@ Item {
                     height: 40
                     enabled: root.remainingTime > 0
                     PointingHandInteraction {}
-
                     onClicked: {
                         if (root.isRunning) {
                             root.pauseRequested()
@@ -167,26 +166,23 @@ Item {
                         }
                     }
 
-                    background: Rectangle {
-                        anchors.fill: parent
-                        radius: 20
-                        color: {
-                            if (!playPauseButton.enabled) return Appearance.m3colors.m3surfaceContainerHighest
-                            if (playPauseButton.down) return Qt.darker(root.timerColor, 1.2)
-                            if (playPauseButton.hovered) return Qt.lighter(root.timerColor, 1.2)
-                            return root.timerColor
+                    background: BouncyShapeBackground {
+                          anchors.fill: parent
+                          backgroundRadius: root.isRunning ? 12 : 99
+                          backgroundColor: !playPauseButton.enabled
+                              ? Appearance.m3colors.m3surfaceContainerHighest
+                              : playPauseButton.down
+                                  ? Qt.darker(root.timerColor, 1.2)
+                                  : playPauseButton.hovered
+                                      ? Qt.lighter(root.timerColor, 1.2)
+                                      : root.timerColor
+                          backgroundOpacity: playPauseButton.enabled ? 1.0 : 0.3
                         }
-                        opacity: playPauseButton.enabled ? 1.0 : 0.3
-
-                        Behavior on color {
-                            ColorAnimation { duration: 150 }
-                        }
-                    }
 
                     contentItem: MaterialSymbol {
                         text: root.isRunning ? "pause" : "play_arrow"
                         font.pixelSize: 20
-                        color: playPauseButton.enabled ? "white" : Appearance.m3colors.m3outline
+                        color: playPauseButton.enabled ? Appearance.m3colors.m3secondaryContainer : Appearance.m3colors.m3outline
                         anchors.centerIn: parent
                     }
                 }
@@ -205,7 +201,7 @@ Item {
                         anchors.fill: parent
                         radius: 20
                         color: {
-                            if (!resetButton.enabled) return "transparent"
+                            if (!resetButton.enabled) return Appearance.m3colors.m3surfaceContainer
                             if (resetButton.down) return Appearance.m3colors.m3surfaceContainerHigh
                             if (resetButton.hovered) return Appearance.m3colors.m3surfaceContainer
                             return Appearance.m3colors.m3surfaceContainerLow
@@ -239,7 +235,7 @@ Item {
                         color: {
                             if (removeButton.down) return Appearance.m3colors.m3errorContainer
                             if (removeButton.hovered) return Qt.lighter(Appearance.m3colors.m3errorContainer, 1.5)
-                            return "transparent"
+                            return Appearance.m3colors.m3surfaceContainer
                         }
 
                         Behavior on color {

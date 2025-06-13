@@ -22,7 +22,7 @@ Rectangle {
     property var tabs: [
         { "type": "calendar", "name": "Calendar", "icon": "calendar_month", "widget": calendarWidget },
         { "type": "todo", "name": "To Do", "icon": "done_outline", "widget": todoWidget },
-        { "type": "timer", "name": "Timers", "icon": "timer", "widget": timerWidget }
+        { "type": "timer", "name": "Timers", "icon": "hourglass_bottom", "widget": timerWidget }
     ]
 
     Component.onCompleted: {
