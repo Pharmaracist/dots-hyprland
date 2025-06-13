@@ -1,5 +1,6 @@
 import "../"
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import "root:/modules/common"
 import "root:/modules/common/widgets"
@@ -10,27 +11,15 @@ QuickToggleButton {
     property bool darkModeEnabled: false
 
     toggled: darkModeEnabled
-    buttonIcon: "contrast" // Or a relevant icon
+    buttonIcon: toggled ? "dark_mode" : "light_mode" // Or a relevant icon
+    buttonName: toggled ? "Dark" : "Light"
     onClicked: {
         darkModeButton.darkModeEnabled = !darkModeButton.darkModeEnabled;
         if (darkModeEnabled)
-            enableDarkMode.startDetached();
+            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --mode dark`);
         else
-            disableDarkMode.startDetached();
+            Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --mode light`);
     }
-
-    Process {
-        id: enableDarkMode
-
-        command: ["bash", "-c", "/home/pc/.config/quickshell/scripts/switchwall.sh --mode dark --noswitch"]
-    }
-
-    Process {
-        id: disableDarkMode
-
-        command: ["bash", "-c", "/home/pc/.config/quickshell/scripts/switchwall.sh --mode light --noswitch"]
-    }
-    // Detect current dark mode state using gsettings
 
     Process {
         id: updateDarkModeState

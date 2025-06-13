@@ -10,13 +10,13 @@ GroupButton {
     id: button
     property string buttonIcon
     property string buttonName
-    baseWidth: (Appearance.sizes.sidebarWidth / 2) - 40 
+    baseWidth: (Appearance.sizes.sidebarWidth / 2) - 45
     baseHeight: 45
     clickedWidth: baseWidth + 20
     toggled: false
     buttonRadius: (altAction && toggled) ? Appearance.rounding.large : Math.min(baseHeight, baseWidth) / 2
     buttonRadiusPressed: Appearance?.rounding?.small
-
+    color: toggled ? Appearance.m3colors.m3primary : Appearance.colors.colLayer3
     contentItem:RowLayout {
         spacing: 10
         anchors.horizontalCenter: parent.horizontalCenter
@@ -35,7 +35,8 @@ GroupButton {
           }
         StyledText {
                 Layout.fillWidth: true
-                horizontalAlignment: windowRoot.textHorizontalAlignment
+                horizontalAlignment: Text.AlignHLeft
+                elide: Text.ElideRight // Truncates the text on the right
                 font.pixelSize: Appearance.font.pixelSize.normal
                 font.family:Appearance.font.family.title
                 color: toggled ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1

@@ -9,7 +9,7 @@ import "root:/modules/common/widgets"
 import "root:/services"
 
 QuickToggleButton {
-    buttonName: Network.networkName
+    buttonName: `${Network.networkName} `
     toggled: Network.networkName.length > 0 && Network.networkName != "lo"
     buttonIcon: Network.materialSymbol
     onClicked: {

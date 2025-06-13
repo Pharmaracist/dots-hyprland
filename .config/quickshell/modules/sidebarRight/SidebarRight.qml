@@ -17,7 +17,7 @@ import Quickshell.Hyprland
 
 Scope {
     property int sidebarWidth: Appearance.sizes.sidebarWidth
-        property int sidebarPadding: Appearance.sizes.frameThickness
+        property int sidebarPadding: 13
         readonly property bool dockPinned: PersistentStates.dock.pinned
 
             PanelWindow {
@@ -95,96 +95,16 @@ Scope {
                             spacing: sidebarPadding
                             anchors.fill: parent
                             anchors.margins: sidebarPadding
-
-                            RowLayout {
-                                id:upperRow
+                            UpperWidgetGroup {
+                                Layout.alignment: Qt.AlignHCenter
                                 Layout.fillHeight: false
-                                spacing: 10
-                                Layout.margins:20
-
-                                Item {
-                                    implicitWidth: distroIcon.width
-                                    implicitHeight: distroIcon.height
-                                    CustomIcon {
-                                        id: distroIcon
-                                        width: 25
-                                        height: 25
-                                        source: SystemInfo.distroIcon
-                                    }
-                                    ColorOverlay {
-                                        anchors.fill: distroIcon
-                                        source: distroIcon
-                                        color: Appearance.colors.colOnLayer0
-                                    }
-                                }
-
-                                StyledText {
-                                    font.pixelSize: Appearance.font.pixelSize.normal
-                                    color: Appearance.colors.colOnLayer0
-                                    text: StringUtils.format(qsTr("Uptime: {0}"), DateTime.uptime)
-                                    textFormat: Text.MarkdownText
-                                }
-
-                                Item {
-                                    Layout.fillWidth: true
-                                }
-
-                                // ButtonGroup {
-                                //     QuickToggleButton {
-                                //         toggled: false
-                                //         buttonIcon: "restart_alt"
-                                //         onClicked: {
-                                //             Hyprland.dispatch("reload")
-                                //             Quickshell.reload(true)
-                                //         }
-                                //         StyledToolTip {
-                                //             content: qsTr("Reload Hyprland & Quickshell")
-                                //         }
-                                //     }
-                                //     QuickToggleButton {
-                                //         toggled: false
-                                //         buttonIcon: "settings"
-                                //         onClicked: {
-                                //             Hyprland.dispatch(`exec ${ConfigOptions.apps.settings}`)
-                                //             Hyprland.dispatch(`global quickshell:sidebarRightClose`)
-                                //         }
-                                //         StyledToolTip {
-                                //             content: qsTr("Plasma Settings")
-                                //         }
-                                //     }
-                                //     QuickToggleButton {
-                                //         toggled: false
-                                //         buttonIcon: "power_settings_new"
-                                //         onClicked: {
-                                //             Hyprland.dispatch("global quickshell:sessionOpen")
-                                //         }
-                                //         StyledToolTip {
-                                //             content: qsTr("Session")
-                                //         }
-                                //     }
-                                // }
+                                Layout.fillWidth: true
                             }
-
-                           Grid {
-                                id: buttonGrid
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                columns: 2
-                                rowSpacing: 9
-                                columnSpacing: 5
-                               NetworkToggle {}
-                               BluetoothToggle {}
-                               NightLight {}
-                               GameMode {}
-                               IdleInhibitor {}
-                               SyncAudio {}
-                               Transparency {}
-                           }
-          
                             // Center widget group
                             CenterWidgetGroup {
-                                focus: sidebarRoot.visible
                                 Layout.alignment: Qt.AlignHCenter
                                 Layout.fillHeight: true
+                                focus: sidebarRoot.visible
                                 Layout.fillWidth: true
                             }
 

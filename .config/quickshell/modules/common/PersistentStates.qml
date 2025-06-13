@@ -17,6 +17,11 @@ Singleton {
         property QtObject attachments: QtObject {
             property bool extended: false
             property bool pinned: false
+        
+
+            }
+        property QtObject upperGroup: QtObject {
+                property bool collapsed: false
             }
 
         property QtObject bottomGroup: QtObject {

@@ -266,6 +266,12 @@ main() {
                     shift
                 fi
                 ;;
+              --lastused)
+                noswitch_flag="1"
+                imgpath=$(swww query | awk -F 'image: ' '{print $2}' | head -n 1)
+                shift
+                ;;
+
             --noswitch)
                 noswitch_flag="1"
                 imgpath=$(swww query | awk -F 'image: ' '{print $2}')
