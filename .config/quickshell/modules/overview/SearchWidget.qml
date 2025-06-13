@@ -301,18 +301,11 @@ Item { // Wrapper
                 }
             }
 
-            Rectangle { // Separator
-                visible: root.showResults
-                Layout.fillWidth: true
-                height: 1
-                color: Appearance.colors.colOutlineVariant
-            }
-
             ListView { // App results
                 id: appResults
                 visible: root.showResults
                 Layout.fillWidth: true
-                implicitHeight: Math.min(600, appResults.contentHeight + topMargin + bottomMargin)
+                implicitHeight: Math.min(500, appResults.contentHeight + topMargin + bottomMargin)
                 clip: true
                 topMargin: 10
                 bottomMargin: 10

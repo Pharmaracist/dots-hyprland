@@ -18,6 +18,7 @@ import Quickshell.Hyprland
 Scope {
     property int sidebarWidth: Appearance.sizes.sidebarWidth
         property int sidebarPadding: 15
+        readonly property bool dockPinned: PersistentStates.dock.pinned
 
             PanelWindow {
                 id: sidebarRoot
@@ -28,7 +29,7 @@ Scope {
                     GlobalStates.sidebarRightOpen = false
                 }
 
-                exclusiveZone: 0
+                exclusiveZone: dockPinned ? -1 : 0 
                 implicitWidth: sidebarWidth
                 WlrLayershell.namespace: "quickshell:sidebarRight"
                 // Hyprland 0.49: Focus is always exclusive and setting this breaks mouse focus grab

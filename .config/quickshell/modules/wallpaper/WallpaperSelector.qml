@@ -71,10 +71,8 @@ Scope {
             id: wallpaperContent
             
             // Constants
-            readonly property int scrollItemCount: 5
             readonly property int itemWidth: 260
             readonly property int itemSpacing: 8
-            readonly property int scrollAmount: (itemWidth + itemSpacing) * scrollItemCount
             
             // Shadow effect
             RectangularShadow {
@@ -116,40 +114,8 @@ Scope {
                         orientation: ListView.Horizontal
                         spacing: wallpaperContent.itemSpacing
                         clip: true
-                        cacheBuffer: width * 2
+                        cacheBuffer: width * 3
                         reuseItems: true
-                        
-                        // Smooth scrolling
-                        highlightRangeMode: ListView.StrictlyEnforceRange
-                        preferredHighlightBegin: 0
-                        preferredHighlightEnd: width
-                        
-                        Behavior on contentX {
-                            NumberAnimation {
-                                duration: 1500
-                                easing.type: Easing.InOutQuad
-                            }
-                        }
-                        
-                        // Auto-scroll animation
-                        NumberAnimation {
-                            id: scrollAnimation
-                            target: wallpaperList
-                            property: "contentX"
-                            duration: 1500
-                            easing.type: Easing.InOutQuad
-                        }
-                        
-                        // User interaction handlers
-                        onMovementStarted: {
-                            autoScroller.pauseScrolling()
-                        }
-                        
-                        onMovementEnded: {
-                            if (root.isOpen) {
-                                autoScroller.resumeScrolling()
-                            }
-                        }
                         
                         delegate: WallpaperItem {
                             width: (container.height * 0.9 * 16) / 9
@@ -174,40 +140,6 @@ Scope {
                             }
                         }
                     }
-                }
-            }
-            
-            // Auto-scrolling logic
-            QtObject {
-                id: autoScroller
-                
-                property Timer resumeTimer: Timer {
-                    interval: 1000
-                    repeat: true
-                    onTriggered: scrollTimer.restart()
-                }
-                
-                property Timer scrollTimer: Timer {
-                    interval: 1000
-                    running: root.isOpen
-                    repeat: true
-                    onTriggered: {
-                        if (wallpaperList.contentX >= wallpaperList.contentWidth - wallpaperList.width) {
-                            wallpaperList.contentX = 0
-                        } else {
-                            scrollAnimation.to = wallpaperList.contentX + wallpaperContent.scrollAmount
-                            scrollAnimation.start()
-                        }
-                    }
-                }
-                
-                function pauseScrolling() {
-                    resumeTimer.stop()
-                    scrollTimer.stop()
-                }
-                
-                function resumeScrolling() {
-                    resumeTimer.restart()
                 }
             }
             

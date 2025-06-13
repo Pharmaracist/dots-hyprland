@@ -15,7 +15,7 @@ Scope {
     property bool dontAutoCancelSearch: false
     Variants {
         id: overviewVariants
-        model: Quickshell.screens
+        model: !ConfigOptions.overview.showOnMainScreenOnly ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
         PanelWindow {
             id: root
             required property var modelData
@@ -28,7 +28,7 @@ Scope {
 
             WlrLayershell.namespace: "quickshell:overview"
             WlrLayershell.layer: WlrLayer.Overlay
-            // WlrLayershell.keyboardFocus: GlobalStates.overviewOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: GlobalStates.overviewOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
             color: "transparent"
 
             mask: Region {

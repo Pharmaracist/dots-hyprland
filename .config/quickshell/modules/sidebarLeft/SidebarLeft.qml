@@ -49,7 +49,7 @@ Scope { // Scope
         sourceComponent: PanelWindow { // Window
         id: sidebarRoot
         visible: GlobalStates.sidebarLeftOpen
-
+        readonly property bool dockPinned: PersistentStates.dock.pinned
         property bool extend: PersistentStates.sidebar.attachments.extended
             property real sidebarWidth: sidebarRoot.extend ? Appearance.sizes.sidebarWidthExtended : Appearance.sizes.sidebarWidth
                 property var contentParent: sidebarLeftBackground
@@ -59,7 +59,7 @@ Scope { // Scope
                         GlobalStates.sidebarLeftOpen = false
                     }
 
-                    exclusiveZone: 0
+                    exclusiveZone: dockPinned ? -1 : 0
                     implicitWidth: Appearance.sizes.sidebarWidthExtended + Appearance.sizes.elevationMargin
                     WlrLayershell.namespace: "quickshell:sidebarLeft"
                     // Hyprland 0.49: OnDemand is Exclusive, Exclusive just breaks click-outside-to-close
@@ -71,7 +71,9 @@ Scope { // Scope
                         left: true
                         bottom: true
                     }
-
+                    margins {
+                        left: dockPinned ? (Appearance.sizes.barWidth - Appearance.sizes.frameThickness) : 0
+                    }
                     mask: Region {
                         item: sidebarLeftBackground
                     }

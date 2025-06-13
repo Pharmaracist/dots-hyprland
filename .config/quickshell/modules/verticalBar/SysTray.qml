@@ -15,7 +15,7 @@ Item {
     required property var bar
 
     width: parent.width
-    implicitHeight: columnLayout.height + 30
+    implicitHeight: 90
     ColumnLayout {
         id: columnLayout
 
