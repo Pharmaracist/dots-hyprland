@@ -26,7 +26,7 @@ Rectangle {
     onSelectedTabChanged: {
         PersistentStateManager.setState("sidebar.centerGroup.selectedTab", selectedTab);
     }
-    radius: Appearance.rounding.normal
+    radius: Appearance.rounding.screenRounding
     color: Appearance.colors.colLayer1
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp) {

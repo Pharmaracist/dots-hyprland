@@ -10,6 +10,7 @@ QuickToggleButton {
     property bool enabled: false
 
     toggled: enabled
+    buttonName: "NightLight"
     buttonIcon: "nightlight"
     onClicked: {
         nightLightButton.enabled = !nightLightButton.enabled;

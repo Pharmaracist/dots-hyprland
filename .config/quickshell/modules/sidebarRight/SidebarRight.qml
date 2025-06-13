@@ -17,7 +17,7 @@ import Quickshell.Hyprland
 
 Scope {
     property int sidebarWidth: Appearance.sizes.sidebarWidth
-        property int sidebarPadding: 15
+        property int sidebarPadding: Appearance.sizes.frameThickness
         readonly property bool dockPinned: PersistentStates.dock.pinned
 
             PanelWindow {
@@ -97,11 +97,10 @@ Scope {
                             anchors.margins: sidebarPadding
 
                             RowLayout {
+                                id:upperRow
                                 Layout.fillHeight: false
                                 spacing: 10
-                                Layout.margins: 10
-                                Layout.topMargin: 5
-                                Layout.bottomMargin: 0
+                                Layout.margins:20
 
                                 Item {
                                     implicitWidth: distroIcon.width
@@ -130,48 +129,48 @@ Scope {
                                     Layout.fillWidth: true
                                 }
 
-                                ButtonGroup {
-                                    QuickToggleButton {
-                                        toggled: false
-                                        buttonIcon: "restart_alt"
-                                        onClicked: {
-                                            Hyprland.dispatch("reload")
-                                            Quickshell.reload(true)
-                                        }
-                                        StyledToolTip {
-                                            content: qsTr("Reload Hyprland & Quickshell")
-                                        }
-                                    }
-                                    QuickToggleButton {
-                                        toggled: false
-                                        buttonIcon: "settings"
-                                        onClicked: {
-                                            Hyprland.dispatch(`exec ${ConfigOptions.apps.settings}`)
-                                            Hyprland.dispatch(`global quickshell:sidebarRightClose`)
-                                        }
-                                        StyledToolTip {
-                                            content: qsTr("Plasma Settings")
-                                        }
-                                    }
-                                    QuickToggleButton {
-                                        toggled: false
-                                        buttonIcon: "power_settings_new"
-                                        onClicked: {
-                                            Hyprland.dispatch("global quickshell:sessionOpen")
-                                        }
-                                        StyledToolTip {
-                                            content: qsTr("Session")
-                                        }
-                                    }
-                                }
+                                // ButtonGroup {
+                                //     QuickToggleButton {
+                                //         toggled: false
+                                //         buttonIcon: "restart_alt"
+                                //         onClicked: {
+                                //             Hyprland.dispatch("reload")
+                                //             Quickshell.reload(true)
+                                //         }
+                                //         StyledToolTip {
+                                //             content: qsTr("Reload Hyprland & Quickshell")
+                                //         }
+                                //     }
+                                //     QuickToggleButton {
+                                //         toggled: false
+                                //         buttonIcon: "settings"
+                                //         onClicked: {
+                                //             Hyprland.dispatch(`exec ${ConfigOptions.apps.settings}`)
+                                //             Hyprland.dispatch(`global quickshell:sidebarRightClose`)
+                                //         }
+                                //         StyledToolTip {
+                                //             content: qsTr("Plasma Settings")
+                                //         }
+                                //     }
+                                //     QuickToggleButton {
+                                //         toggled: false
+                                //         buttonIcon: "power_settings_new"
+                                //         onClicked: {
+                                //             Hyprland.dispatch("global quickshell:sessionOpen")
+                                //         }
+                                //         StyledToolTip {
+                                //             content: qsTr("Session")
+                                //         }
+                                //     }
+                                // }
                             }
 
-                           ButtonGroup {
-                               id:buttonGroup
-                               Layout.alignment: Qt.AlignHCenter
-                               spacing: 5
-                               padding: 5
-                               color: Appearance.colors.colLayer
+                           Grid {
+                                id: buttonGrid
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                columns: 2
+                                rowSpacing: 9
+                                columnSpacing: 5
                                NetworkToggle {}
                                BluetoothToggle {}
                                NightLight {}

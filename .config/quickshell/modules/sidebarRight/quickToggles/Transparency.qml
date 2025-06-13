@@ -12,6 +12,7 @@ QuickToggleButton {
 
     property real kittyOpacity: root.toggled ? Appearance.transparency : 1
 
+    buttonName: toggled ? "Transluscent" : "opaque"
     toggled: PersistentStates.temp.enableTransparency
     buttonIcon: toggled ? "blur_on" : "blur_off"
     onClicked: {
