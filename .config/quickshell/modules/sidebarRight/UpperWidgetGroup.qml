@@ -16,19 +16,13 @@ import "root:/modules/common/widgets"
 import "root:/services"
 
 Rectangle {
-    // Negative velocity = upward swipe = expand
-    // Fast swipe - use velocity direction
-    // Slow drag - use position threshold
-    // swipe up = expand
-
     id: root
 
     property bool collapsed: PersistentStates.sidebar.upperGroup.collapsed
     property int rowHeight: 50 // Height of one toggle row including spacing
-    property int maxVisibleToggles: collapsed ? 2 : 7 // Show 2 toggles when collapsed, all when expanded
-    property real dragProgress: 0 // 0 = collapsed, 1 = expanded
-    readonly property int collapsedHeight: rowHeight + 64 // Single row + padding + drag bar
-    readonly property int expandedHeight: Math.ceil(togglesList.length / buttonGrid.columns) * rowHeight + 100
+    property int maxVisibleToggles: collapsed ? 2 : 10 // Show 2 toggles when collapsed, all when expanded
+    readonly property int collapsedHeight: rowHeight + 80 // Single row + padding + drag bar
+    readonly property int expandedHeight: Math.ceil(togglesList.length / buttonGrid.columns) * rowHeight + 230
     // List of all toggles for counting
     readonly property var togglesList: ["NetworkToggle", "BluetoothToggle", "NightLight", "GameMode", "IdleInhibitor", "SyncAudio", "Transparency"]
 
@@ -37,25 +31,13 @@ Rectangle {
         collapsed = state;
         // Save the state using PersistentStateManager
         PersistentStateManager.setState("sidebar.upperGroup.collapsed", state);
-        dragProgress = Math.max(0, Math.min(1, (collapsed ? -deltaY : maxDragDistance - deltaY) / maxDragDistance));
-    }
-
-    function handleDragEnd(velocityY) {
-        const progressThreshold = 0;
-        const velocityThreshold = 4;
-        let shouldExpand;
-        if (Math.abs(velocityY) > velocityThreshold)
-            shouldExpand = velocityY < 0;
-        else
-            shouldExpand = dragProgress >= progressThreshold;
-        setCollapsed(!shouldExpand);
     }
 
     Layout.bottomMargin: 0
     radius: Appearance.rounding.normal
     color: "transparent"
     clip: true
-    implicitHeight: dragHandler.active ? collapsedHeight + (expandedHeight - collapsedHeight) * dragProgress : (collapsed ? collapsedHeight : expandedHeight)
+    implicitHeight: collapsed ? collapsedHeight : expandedHeight
 
     Timer {
         id: collapseCleanFadeTimer
@@ -82,18 +64,8 @@ Rectangle {
         height: 10
         color: "transparent"
         z: 100
-        // Visual feedback when dragging
+        // Visual feedback states
         states: [
-            State {
-                when: dragHandler.active
-
-                PropertyChanges {
-                    target: handleRect
-                    opacity: 0.6
-                    color: Appearance.colors.colAccent
-                }
-
-            },
             State {
                 when: dragBar.hovered
 
@@ -114,6 +86,7 @@ Rectangle {
             onHoveredChanged: dragBar.hovered = hovered
         }
 
+        // Click to toggle
         TapHandler {
             acceptedButtons: Qt.LeftButton
             onTapped: root.setCollapsed(!root.collapsed)
@@ -179,45 +152,6 @@ Rectangle {
 
         }
 
-        DragHandler {
-            id: dragHandler
-
-            property real startY: 0
-            property real maxDragDistance: expandedHeight - collapsedHeight
-            property bool hasDragged: false
-
-            target: null
-            yAxis.enabled: true
-            xAxis.enabled: false
-            dragThreshold: 2
-            onActiveChanged: {
-                if (active) {
-                    startY = centroid.position.y;
-                    hasDragged = false;
-                } else {
-                    if (hasDragged)
-                        handleDragEnd(point.velocity.y);
-                    else
-                        root.setCollapsed(!root.collapsed);
-                }
-            }
-            onCentroidChanged: {
-                if (active && maxDragDistance > 0) {
-                    const deltaY = centroid.position.y - startY;
-                    const absDelta = Math.abs(deltaY);
-                    if (absDelta > dragThreshold)
-                        hasDragged = true;
-
-                    if (hasDragged) {
-                        if (collapsed)
-                            dragProgress = Math.max(0, Math.min(1, -deltaY / maxDragDistance));
-                        else
-                            dragProgress = Math.max(0, Math.min(1, 1 - deltaY / (maxDragDistance * 0.6)));
-                    }
-                }
-            }
-        }
-
     }
 
     // Collapsed View - Single row
@@ -235,11 +169,14 @@ Rectangle {
             anchors.margins: 5
 
             RowLayout {
+                // Settings
+
                 id: upperRow
 
                 Layout.fillHeight: false
                 Layout.topMargin: -10
                 Layout.margins: 5
+                spacing: 10
 
                 Item {
                     implicitWidth: distroIcon.width
@@ -248,15 +185,16 @@ Rectangle {
                     CustomIcon {
                         id: distroIcon
 
-                        width: 25
-                        height: 25
+                        anchors.centerIn: parent
+                        width: parent.height
+                        height: parent.height
                         source: SystemInfo.distroIcon
                     }
 
                     ColorOverlay {
                         anchors.fill: distroIcon
                         source: distroIcon
-                        color: Appearance.colors.colOnLayer0
+                        color: Appearance.m3colors.m3primary
                     }
 
                 }
@@ -272,7 +210,6 @@ Rectangle {
                 Item {
                     Layout.fillWidth: true
                 }
-                // Settings
 
                 Button {
                     width: 45
@@ -293,7 +230,7 @@ Rectangle {
 
                     contentItem: MaterialSymbol {
                         text: "settings"
-                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.pixelSize: Appearance.font.pixelSize.larger
                         color: Appearance.m3colors.m3onSurfaceVariant
                         anchors.centerIn: parent
                     }
@@ -316,7 +253,7 @@ Rectangle {
 
                     contentItem: MaterialSymbol {
                         text: "power_settings_new"
-                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.pixelSize: Appearance.font.pixelSize.larger
                         color: Appearance.m3colors.m3onSurface
                         anchors.centerIn: parent
                     }
@@ -342,7 +279,7 @@ Rectangle {
 
                     contentItem: MaterialSymbol {
                         text: "restart_alt"
-                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.pixelSize: Appearance.font.pixelSize.larger + 3
                         color: Appearance.m3colors.m3onSurfaceVariant
                         anchors.centerIn: parent
                     }
@@ -353,7 +290,7 @@ Rectangle {
 
             RowLayout {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 5
+                spacing: 10
                 Layout.fillHeight: false
 
                 // First two toggles
@@ -397,20 +334,66 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.bottomMargin: 10
 
-                StyledText {
-                    text: qsTr("Quick Settings")
-                    font.pixelSize: Appearance.font.pixelSize.huge
-                    font.family: Appearance.font.family.title
-                    color: Appearance.colors.colOnLayer1
+                ColumnLayout {
+                    spacing: 0
+
+                    StyledText {
+                        text: DateTime.time
+                        font.pixelSize: Appearance.font.pixelSize.huge + 5
+                        font.family: Appearance.font.family.title
+                        color: Appearance.colors.colOnLayer1
+                    }
+
+                    StyledText {
+                        text: DateTime.date
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.family: Appearance.font.family.title
+                        color: Appearance.colors.colOnLayer1
+                    }
+
                 }
 
                 Item {
                     Layout.fillWidth: true
                 }
 
+                Item {
+                    Layout.fillWidth: false
+                    Layout.rightMargin: 60
+                    Layout.bottomMargin: 50
+
+                    AnimatedImage {
+                        id: avatar
+
+                        cache: true
+                        mipmap: true
+                        height: 60
+                        width: 60
+                        source: "root:/assets/gif/avatar6.gif"
+                        speed: mouseArea.containsMouse ? 1 : 0.5
+
+                        MouseArea {
+                            id: mouseArea
+
+                            anchors.fill: parent
+                            hoverEnabled: true
+                        }
+
+                    }
+
+                }
+
             }
 
+            BrightnessSlider {
+                Layout.fillWidth: true
+            }
+
+            VolumeSlider {
+                Layout.fillWidth: true
+            }
             // Full grid of toggles
+
             Grid {
                 id: buttonGrid
 

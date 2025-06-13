@@ -42,7 +42,7 @@ Scope {
 
                 property real frameThickness: Appearance.sizes.frameThickness - 2 // idk why but its nicer that way
                 property real cornerRadius: Appearance.rounding.screenRounding - 2
-                property real innerRadius: cornerRadius
+                property real innerRadius: cornerRadius + 2
                 property color frameColor: Appearance.colors.colLayer0
 
                 anchors.fill: parent

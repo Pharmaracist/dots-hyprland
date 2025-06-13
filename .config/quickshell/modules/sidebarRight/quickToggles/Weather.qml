@@ -45,15 +45,15 @@ Item {
         spacing: root.elementSpacing
         MaterialSymbol {
             text: weatherData.currentEmoji
-            iconSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer2
+            iconSize: Appearance.font.pixelSize.large + 3
+            color: Appearance.colors.colOnLayer1
         }
         Text {
             id: temperature
             text:`${weatherData.currentTemp}`
-            font.pixelSize: Appearance.font.pixelSize.large    
-            font.family: Appearance.font.family.niche
-            color: Appearance.colors.colOnLayer0
+            font.pixelSize: Appearance.font.pixelSize.large + 2
+            font.family: Appearance.font.family.title
+            color: Appearance.colors.colOnLayer1
         }
     }
 

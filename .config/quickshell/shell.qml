@@ -17,7 +17,6 @@ import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/verticalBar/"
 import "./modules/wallpaper/"
-
 import "./services/"
 import QtQuick
 import QtQuick.Controls
@@ -32,8 +31,8 @@ ShellRoot {
     property bool enableDock: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
-    property bool enableOnScreenDisplayBrightness: true
-    property bool enableOnScreenDisplayVolume: true
+    property bool enableOnScreenDisplayBrightness: false
+    property bool enableOnScreenDisplayVolume: false
     property bool enableOverview: true
     property bool enableLauncher: true
     property bool enableWallpaperSelector: true
@@ -79,8 +78,6 @@ ShellRoot {
 
     }
 
-    
-    
     LazyLoader {
         active: enableNothingClock
 
@@ -137,7 +134,6 @@ ShellRoot {
 
     }
 
-    
     LazyLoader {
         active: enableOverview
 
@@ -153,6 +149,7 @@ ShellRoot {
         }
 
     }
+
     LazyLoader {
         active: enableReloadPopup
 
