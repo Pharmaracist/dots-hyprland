@@ -171,6 +171,8 @@ Item {
                     StyledText {
                         opacity: (ConfigOptions.bar.workspaces.alwaysShowNumbers || GlobalStates.workspaceShowNumbers || !workspaceButtonBackground.biggestWindow) ? 1 : 0
                         anchors.centerIn: parent
+                        font.family: "Rubik"
+                        font.weight: 400
                         font.pixelSize: Appearance.font.pixelSize.small - ((text.length - 1) * (text !== "10") * 2)
                         text: `${button.workspaceValue}`
                         color: (monitor.activeWorkspace?.id == button.workspaceValue) ? 

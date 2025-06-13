@@ -4,21 +4,20 @@
 
 import "./modules/backgroundWidgets/"
 import "./modules/bar/"
-import "./modules/cheatsheet/"
 import "./modules/common/"
 import "./modules/desktopbackground/"
 import "./modules/dock/"
-import "./modules/glance/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
-import "./modules/onScreenKeyboard/"
 import "./modules/overview/"
 import "./modules/screenCorners/"
 import "./modules/session/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/verticalBar/"
+import "./modules/wallpaper/"
+
 import "./services/"
 import QtQuick
 import QtQuick.Controls
@@ -30,16 +29,13 @@ ShellRoot {
     // Enable/disable modules here
     property bool enableVerticalBar: ConfigOptions.bar.verticalMode | PersistentStates.bar.verticalMode
     property bool enableBar: !enableVerticalBar
-    property bool enableCheatsheet: true
-    property bool enableBackgroundWidgets: false
     property bool enableDock: true
-    property bool enableGlance: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: true
     property bool enableOnScreenDisplayVolume: true
-    property bool enableOnScreenKeyboard: true
     property bool enableOverview: true
+    property bool enableLauncher: true
     property bool enableWallpaperSelector: true
     property bool enableReloadPopup: true
     property bool enableScreenCorners: true
@@ -47,10 +43,7 @@ ShellRoot {
     property bool enableSidebarLeft: true
     property bool enableSidebarRight: true
     property bool enableNothingClock: true
-    property bool enableActivateLinux: false
-    property bool enableSecondaryClockWidget: true
-    property bool enableScreenTime: true
-    property bool enableDesktopIslands: true
+    property bool enableActivateLinux: true
     property bool enableScreenFrame: enableVerticalBar
 
     // Force initialization of some singletons
@@ -73,7 +66,7 @@ ShellRoot {
     LazyLoader {
         active: enableWallpaperSelector
 
-        component: Wallpaper {
+        component: WallpaperSelector {
         }
 
     }
@@ -86,30 +79,8 @@ ShellRoot {
 
     }
 
-    LazyLoader {
-        active: enableSecondaryClockWidget
-
-        component: SecondaryClockWidget {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableDesktopIslands
-
-        component: DesktopIslands {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableGlance
-
-        component: Glance {
-        }
-
-    }
-
+    
+    
     LazyLoader {
         active: enableNothingClock
 
@@ -122,22 +93,6 @@ ShellRoot {
         active: enableBar
 
         component: Bar {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableBackgroundWidgets
-
-        component: BackgroundWidgets {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableCheatsheet
-
-        component: Cheatsheet {
         }
 
     }
@@ -182,14 +137,7 @@ ShellRoot {
 
     }
 
-    LazyLoader {
-        active: enableOnScreenKeyboard
-
-        component: OnScreenKeyboard {
-        }
-
-    }
-
+    
     LazyLoader {
         active: enableOverview
 
@@ -198,6 +146,13 @@ ShellRoot {
 
     }
 
+    LazyLoader {
+        active: enableLauncher
+
+        component: SearchWidget {
+        }
+
+    }
     LazyLoader {
         active: enableReloadPopup
 

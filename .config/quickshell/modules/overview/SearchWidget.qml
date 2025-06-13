@@ -222,7 +222,7 @@ Item { // Wrapper
         anchors.centerIn: parent
         implicitWidth: columnLayout.implicitWidth
         implicitHeight: columnLayout.implicitHeight
-        radius: Appearance.rounding.large
+        radius: !ConfigOptions.overview.enableOverview ? Appearance.rounding.small :Appearance.rounding.large 
         color: Appearance.colors.colLayer0
 
         ColumnLayout {

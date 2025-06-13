@@ -298,8 +298,8 @@ Singleton {
         property real mediaControlsWidth: 440
         property real mediaControlsHeight: 160
         property real notificationPopupWidth: 410
-        property real searchWidthCollapsed: 260
-        property real searchWidth: 450
+        property real searchWidthCollapsed: 450
+        property real searchWidth: 740
         property real hyprlandGapsOut: 14 
         property real elevationMargin: 10 
         property real fabShadowRadius: 5

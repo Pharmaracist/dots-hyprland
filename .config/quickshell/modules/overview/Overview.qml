@@ -22,6 +22,7 @@ Scope {
             property string searchingText: ""
             readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.screen)
             property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor.id)
+            readonly property bool enableOverview: ConfigOptions.overview.enableOverview
             screen: modelData
             visible: GlobalStates.overviewOpen
 
@@ -93,7 +94,8 @@ Scope {
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                     top: !ConfigOptions.bar.bottom ? parent.top : undefined
-                    bottom: ConfigOptions.bar.bottom ? parent.bottom : undefined
+                    topMargin: !enableOverview ? (screen.height / 4) : undefined
+                    bottom: enableOverview ? (ConfigOptions.bar.bottom ? parent.bottom : undefined) : undefined 
                 }
 
                 Keys.onPressed: (event) => {
@@ -117,7 +119,7 @@ Scope {
 
                 Loader {
                     id: overviewLoader
-                    active: GlobalStates.overviewOpen
+                    active: enableOverview
                     sourceComponent: OverviewWidget {
                         panelWindow: root
                         visible: (root.searchingText == "")

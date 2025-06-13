@@ -141,19 +141,24 @@ Scope { // Scope
                                 VerticalButtonGroup {
                                     Layout.topMargin: Appearance.sizes.hyprlandGapsOut  // why does this work
                                     GroupButton { // Pin button
-                                        baseWidth: 45
-                                        baseHeight: 45
+                                        baseWidth: 50
+                                        baseHeight: 50
                                         clickedWidth: baseWidth
-                                        clickedHeight: baseHeight + 20
+                                        clickedHeight: baseHeight 
                                         buttonRadius: Appearance.rounding.normal
                                         toggled: root.pinned
                                         onClicked: PersistentStateManager.setState("dock.pinned", !root.pinned)
-                                        contentItem: MaterialSymbol {
-                                            text: "keyboard_command_key"
-                                            horizontalAlignment: Text.AlignHCenter
-                                            iconSize: Appearance.font.pixelSize.larger
-                                            color: root.pinned ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1
+                                        contentItem:AnimatedImage {
+                                            anchors.fill: parent
+                                            anchors.margins: 4
+                                            cache: true
+                                            mipmap: true
+                                            height: parent.height
+                                            width: parent.width
+                                            source: "root:/assets/gif/avatar.gif"
+                                            speed: root.pinned ? 2 : 1.25
                                         }
+
                                     }
                                 }
                                 DockSeparator {}

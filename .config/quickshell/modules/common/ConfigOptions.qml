@@ -43,10 +43,11 @@ Singleton {
         property int batteryLowThreshold: 20
         property string position: "top"
         property bool verticalMode: true
+        property bool bottom: !verticalMode ?? false 
         property string city: "Cairo"
         property bool desaturateTray: true
         property bool showOnMainScreenOnly: true
-        property string topLeftIcon: "distro" // Options: distro, spark
+        property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: true
         property bool borderless: false
         property QtObject resources: QtObject {
@@ -109,6 +110,7 @@ Singleton {
 
     property QtObject overview: QtObject {
         property real scale: 0.18 // Relative to screen size
+        property bool enableOverview : false 
         property real numOfRows: 2
         property real numOfCols: 5
         property bool showXwaylandIndicator: true

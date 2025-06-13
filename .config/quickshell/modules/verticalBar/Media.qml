@@ -60,6 +60,10 @@ RowLayout {
                     rightMargin: 10
                     fill: parent
                 }
+                Layout.alignment: Qt.AlignVCenter
+                Layout.fillWidth: true // Ensures the text takes up available space
+                Layout.rightMargin: rowLayout.spacing
+                horizontalAlignment: Text.AlignHCenter
                elide: Text.ElideRight // Truncates the text on the right
                color: Appearance.colors.colOnLayer1
                text: `${cleanedTitle}${activePlayer?.trackArtist ? ' • ' + activePlayer.trackArtist : ''}`

@@ -167,38 +167,21 @@ Scope {
                                 }
                             }
 
-                            Rectangle {
-                                width: buttonGroup.width
-                                Layout.alignment: Qt.AlignHCenter
-                                height:buttonGroup.height
-                                color:"transparent"
-                                AnimatedImage {
-                                    anchors.right:parent.right
-                                    anchors.bottomMargin: 10
-                                    anchors.bottom:parent.bottom
-
-                                    id: animation
-                                    width: 75
-                                    height:75
-                                    source: "root:/assets/gif/avatar.gif"
-                                }
-                                ButtonGroup {
-                                    id:buttonGroup
-                                    Layout.alignment: Qt.AlignHCenter
-                                    spacing: 5
-                                    padding: 5
-                                    color: Appearance.colors.colLayer1
-
-                                    NetworkToggle {}
-                                    BluetoothToggle {}
-                                    NightLight {}
-                                    GameMode {}
-                                    IdleInhibitor {}
-                                    SyncAudio {}
-                                    Transparency {}
-                                }
-                            }
-
+                           ButtonGroup {
+                               id:buttonGroup
+                               Layout.alignment: Qt.AlignHCenter
+                               spacing: 5
+                               padding: 5
+                               color: Appearance.colors.colLayer
+                               NetworkToggle {}
+                               BluetoothToggle {}
+                               NightLight {}
+                               GameMode {}
+                               IdleInhibitor {}
+                               SyncAudio {}
+                               Transparency {}
+                           }
+          
                             // Center widget group
                             CenterWidgetGroup {
                                 focus: sidebarRoot.visible
