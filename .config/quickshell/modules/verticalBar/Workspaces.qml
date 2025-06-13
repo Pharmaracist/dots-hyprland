@@ -2,6 +2,7 @@ import "root:/"
 import "root:/services/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
+import "root:/modules/common/functions/color_utils.js" as ColorUtils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -98,7 +99,7 @@ Item {
                 bottomLeftRadius: radiusBottom
                 bottomRightRadius: radiusBottom
 
-                color: Appearance.colors.colLayer2
+                color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.4)
                 opacity: (workspaceOccupied[index] && !(!activeWindow?.activated && monitor.activeWorkspace?.id === index+1)) ? 1 : 0
 
                 Behavior on opacity {
@@ -177,7 +178,7 @@ Item {
                         text: `${button.workspaceValue}`
                         color: (monitor.activeWorkspace?.id == button.workspaceValue) ? 
                             Appearance.m3colors.m3onPrimary : 
-                            (workspaceOccupied[index] ? Appearance.colors.colOnLayer1 : 
+                            (workspaceOccupied[index] ? Appearance.m3colors.m3onSecondaryContainer : 
                                 Appearance.colors.colOnLayer1Inactive)
 
                         Behavior on opacity {

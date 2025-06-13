@@ -14,7 +14,8 @@ Item {
     property int remainingTime: 0
     property bool isRunning: false
     property bool isPaused: false
-    property string timerColor: "#3498db"
+    property color timerColor: Appearance.m3colors.m3primary
+
     property string timerIcon: "timer"
     property real progressPercentage: 0
 
@@ -45,16 +46,19 @@ Item {
         anchors.fill: parent
         radius: Appearance.rounding.normal
         color: Appearance.m3colors.m3surfaceContainerLow
-        border.width: root.isRunning ? 2 : 0
-        border.color: root.timerColor
 
         // Progress bar background
         Rectangle {
             id: progressBackground
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            height: 4
+            anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            leftMargin: 16
+            rightMargin: 16
+            bottomMargin: 16
+            }
+            height: 10
             radius: Appearance.rounding.normal
             color: Appearance.m3colors.m3surfaceContainerHighest
         }
@@ -114,16 +118,14 @@ Item {
                             Layout.fillWidth: true
                             text: root.timerName
                             color: Appearance.m3colors.m3onSurface
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight: Font.Medium
-                            elide: Text.ElideRight
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            // elide: Text.ElideRight
                         }
 
                         StyledText {
                             text: root.formatTime(root.remainingTime)
                             color: root.remainingTime === 0 ? "#e74c3c" : (root.isRunning ? root.timerColor : Appearance.m3colors.m3onSurfaceVariant)
                             font.pixelSize: Appearance.font.pixelSize.large
-                            font.weight: Font.Bold
                         }
                     }
                 }
@@ -208,8 +210,6 @@ Item {
                             if (resetButton.hovered) return Appearance.m3colors.m3surfaceContainer
                             return Appearance.m3colors.m3surfaceContainerLow
                         }
-                        border.width: 1
-                        border.color: resetButton.enabled ? Appearance.m3colors.m3outline : "transparent"
 
                         Behavior on color {
                             ColorAnimation { duration: 150 }
@@ -241,8 +241,6 @@ Item {
                             if (removeButton.hovered) return Qt.lighter(Appearance.m3colors.m3errorContainer, 1.5)
                             return "transparent"
                         }
-                        border.width: 1
-                        border.color: removeButton.hovered ? Appearance.m3colors.m3error : Appearance.m3colors.m3outline
 
                         Behavior on color {
                             ColorAnimation { duration: 150 }

@@ -147,6 +147,35 @@ Item {
                 onPauseTimer: (timerId) => TimerService.pauseTimer(timerId)
                 onResetTimer: (timerId) => TimerService.resetTimer(timerId)
                 onRemoveTimer: (timerId) => TimerService.removeTimer(timerId)
+            ColumnLayout {
+               visible: TimerService.timers.length === 0
+               anchors.centerIn: parent
+               spacing: 8
+               opacity: 0.6
+
+               MaterialSymbol {
+                   text: "timer_off"
+                   font.pixelSize: 48
+                   color: Appearance.m3colors.m3onSurfaceVariant
+                   anchors.horizontalCenter: parent.horizontalCenter
+               }
+
+               StyledText {
+                   text: qsTr("No active timers")
+                   font.pixelSize: Appearance.font.pixelSize.large
+                   color: Appearance.m3colors.m3onSurfaceVariant
+                   horizontalAlignment: Text.AlignHCenter
+                   anchors.horizontalCenter: parent.horizontalCenter
+               }
+
+               StyledText {
+                   text: qsTr("Click the + button to create one.")
+                   font.pixelSize: Appearance.font.pixelSize.normal
+                   color: Appearance.m3colors.m3onSurfaceVariant
+                   horizontalAlignment: Text.AlignHCenter
+                   anchors.horizontalCenter: parent.horizontalCenter
+               }
+            }       
             }
 
             // Presets tab
@@ -310,14 +339,10 @@ Item {
                 RowLayout {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    spacing: 8
-
-                    StyledText {
-                        text: qsTr("Duration:")
-                        color: Appearance.m3colors.m3onSurface
-                    }
-
-                    TextField {
+                    spacing: 15
+                   RowLayout {
+                     spacing:8
+                     TextField {
                         id: timerMinutesInput
                         Layout.preferredWidth: 60
                         padding: 10
@@ -340,8 +365,10 @@ Item {
                         text: qsTr("min")
                         color: Appearance.m3colors.m3onSurfaceVariant
                     }
-
-                    TextField {
+}
+                    RowLayout {
+                        spacing : 8
+                        TextField {
                         id: timerSecondsInput
                         Layout.preferredWidth: 60
                         padding: 10
@@ -361,8 +388,10 @@ Item {
                     }
 
                     StyledText {
+                        Layout.fillWidth:true
                         text: qsTr("sec")
                         color: Appearance.m3colors.m3onSurfaceVariant
+                    }
                     }
                 }
 

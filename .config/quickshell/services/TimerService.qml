@@ -13,8 +13,17 @@ Singleton {
     property int nextTimerId: 1
 
     signal timerFinished(int timerId, string name)
+    readonly property var presets: [
+        { "name": qsTr("Pomodoro"),     "icon": "timer",             "duration": 25 * 60,  "color": Appearance.m3colors.m3primary },
+        { "name": qsTr("Short Break"),  "icon": "coffee",            "duration": 5 * 60,   "color": Appearance.m3colors.m3secondary },
+        { "name": qsTr("Long Break"),   "icon": "bed",               "duration": 15 * 60,  "color": Appearance.m3colors.m3tertiary },
+        { "name": qsTr("Deep Work"),    "icon": "mindfulness",       "duration": 90 * 60,  "color": Appearance.m3colors.m3primaryContainer },
+        { "name": qsTr("Exercise"),     "icon": "fitness_center",    "duration": 30 * 60,  "color": Appearance.m3colors.m3success },
+        { "name": qsTr("Meditation"),   "icon": "self_improvement",  "duration": 10 * 60,  "color": Appearance.m3colors.m3tertiaryContainer },
+        { "name": qsTr("Quick Task"),   "icon": "flash_on",          "duration": 15 * 60,  "color": Appearance.m3colors.m3secondaryContainer },
+        { "name": qsTr("Meeting"),      "icon": "groups",            "duration": 60 * 60,  "color": Appearance.m3colors.m3neutral_variant_paletteKeyColor }
+    ]
 
-    readonly property var presets: ConfigOptions?.sidebar.timer.presets
 
     // Sounds via external commands (if supported)
     function playSound(name) {
@@ -74,7 +83,7 @@ Singleton {
             startTime: 0,
             pausedTime: 0,
             preset: preset || null,
-            color: preset ? preset.color : "#3498db",
+            color: preset ? preset.color : Appearance.m3colors.m3primary,
             icon: preset ? preset.icon : "timer",
             qtTimer: null
         };
@@ -237,7 +246,7 @@ Singleton {
                 startTime: 0,
                 pausedTime: 0,
                 preset: timerData.preset,
-                color: timerData.color || "#3498db",
+                color: timerData.color ||Appearance.m3colors.m3primary,
                 icon: timerData.icon || "timer",
                 qtTimer: null
             }));

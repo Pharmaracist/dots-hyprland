@@ -77,12 +77,6 @@ Scope {
                         visible: !battery.visible
                         anchors.horizontalCenter: parent.horizontalCenter
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Hyprland.dispatch('global quickshell:sidebarLeftToggle')
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                        }
 
                     }
 

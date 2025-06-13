@@ -106,9 +106,9 @@ Scope {
             WlrLayershell.namespace: "quickshell:mediaControls"
 
             anchors {
-                top: !ConfigOptions.bar.bottom
-                bottom: ConfigOptions.bar.bottom
-                left: true
+                bottom: (ConfigOptions.bar.bottom & ConfigOptions.bar.verticalMode) ?? false 
+                top: !(ConfigOptions.bar.bottom & ConfigOptions.bar.verticalMode) ?? false 
+                // left: true
             }
             mask: Region {
                 item: playerColumnLayout

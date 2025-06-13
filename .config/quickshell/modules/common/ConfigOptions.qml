@@ -43,7 +43,7 @@ Singleton {
         property int batteryLowThreshold: 20
         property string position: "top"
         property bool verticalMode: true
-        property bool bottom: !verticalMode ?? false 
+        property bool bottom: false
         property string city: "Cairo"
         property bool desaturateTray: true
         property bool showOnMainScreenOnly: true
@@ -139,19 +139,7 @@ Singleton {
             readonly property string engine : "" // eg."google" , "auto","apertium","aspell","bing","hunspell","spell","yandex"
             readonly property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
         }
-        property QtObject timer: QtObject {
-            readonly property var presets: [
-             {"name": qsTr("Pomodoro"), "icon": "timer", "duration": 25 * 60, "color": "#e74c3c"},
-             {"name": qsTr("Short Break"), "icon": "coffee", "duration": 5 * 60, "color": "#3498db"},
-             {"name": qsTr("Long Break"), "icon": "bed", "duration": 15 * 60, "color": "#2ecc71"},
-             {"name": qsTr("Deep Work"), "icon": "mindfulness", "duration": 90 * 60, "color": "#9b59b6"},
-             {"name": qsTr("Exercise"), "icon": "fitness_center", "duration": 30 * 60, "color": "#e67e22"},
-             {"name": qsTr("Meditation"), "icon": "self_improvement", "duration": 10 * 60, "color": "#1abc9c"},
-             {"name": qsTr("Quick Task"), "icon": "flash_on", "duration": 15 * 60, "color": "#f39c12"},
-             {"name": qsTr("Meeting"), "icon": "groups", "duration": 60 * 60, "color": "#34495e"}
-            ]
-        }
-        
+       
         property QtObject booru: QtObject {
             property bool allowNsfw: false
             property string defaultProvider: "yandere"
