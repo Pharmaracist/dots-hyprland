@@ -15,7 +15,8 @@ Singleton {
 
     property QtObject sidebar: QtObject {
         property QtObject attachments: QtObject {
-            property bool extended: true
+            property bool extended: false
+            property bool pinned: false
             }
 
         property QtObject bottomGroup: QtObject {
