@@ -77,7 +77,7 @@ RippleButton {
 
     implicitHeight: rowLayout.implicitHeight + root.buttonVerticalPadding * 2
     implicitWidth: rowLayout.implicitWidth + root.buttonHorizontalPadding * 2
-    buttonRadius: Appearance.rounding.normal
+    buttonRadius: Appearance.rounding.small /2 
     colBackground: (root.down || root.keyboardDown) ? Appearance.colors.colLayer1Active : 
         ((root.hovered || root.focus) ? Appearance.colors.colLayer1Hover : 
         ColorUtils.transparentize(Appearance.colors.colSurfaceContainerHigh, 1))

@@ -125,7 +125,7 @@ Item {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "..."
+                        text: "󰵸"
                         color: Appearance.colors.colOnLayer1
                         font.pixelSize: 12
                     }
@@ -190,7 +190,7 @@ Item {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "..."
+                        text: "󰋩"
                         color: Appearance.colors.colOnLayer1
                         font.pixelSize: 12
                     }
@@ -287,7 +287,7 @@ Item {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "..."
+                        text: ""
                         color: Appearance.colors.colOnLayer1
                         font.pixelSize: 12
                     }
