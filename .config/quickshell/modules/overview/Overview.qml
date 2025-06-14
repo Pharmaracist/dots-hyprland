@@ -16,7 +16,7 @@ Scope {
     property bool dontAutoCancelSearch: false
     Variants {
         id: overviewVariants
-        model: !ConfigOptions.overview.showOnMainScreenOnly ? Quickshell.screens : focusedScreen
+        model: !ConfigOptions.overview.showOnMainScreenOnly ? Quickshell.screens : [focusedScreen]
         PanelWindow {
             id: root
             required property var modelData
