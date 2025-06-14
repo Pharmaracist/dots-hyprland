@@ -12,10 +12,11 @@ import Quickshell.Hyprland
 
 Scope {
     id: overviewScope
+    property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property bool dontAutoCancelSearch: false
     Variants {
         id: overviewVariants
-        model: !ConfigOptions.overview.showOnMainScreenOnly ? Quickshell.screens : [Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)]
+        model: !ConfigOptions.overview.showOnMainScreenOnly ? Quickshell.screens : focusedScreen
         PanelWindow {
             id: root
             required property var modelData

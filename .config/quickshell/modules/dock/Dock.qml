@@ -17,7 +17,7 @@ Scope { // Scope
     property bool pinned: PersistentStates.dock.pinned 
     property bool cornered: ConfigOptions?.dock.cornered ?? true
     property bool showPowerMenu: false // New property to toggle power menu
-    readonly property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+    property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property var dockRow
     Variants { // For each monitor
         model: pinned ? [Quickshell.screens[focusedScreen]]:[focusedScreen] 
@@ -119,7 +119,7 @@ Scope { // Scope
                                 property real margin: Appearance.sizes.elevationMargin
                                 anchors {
                                     fill: parent
-                                    bottom:parent
+                                    bottom:parent.bottom
                                     topMargin: Appearance.sizes.hyprlandGapsOut + 2
                                 }
                                 color: Appearance.colors.colLayer0
@@ -199,7 +199,7 @@ Scope { // Scope
                                    property: "scale"
                                    to: 0.92
                                    duration: 120
-                                   easing.type: Easing.Standard
+                                //    easing.type: Easing.Standard
                                }
                                ScriptAction {
                                    script: {
@@ -234,7 +234,6 @@ Scope { // Scope
         id: normalDockComponent
         DockApps { 
             id: dockApps
-            property alias requestDockShow: dockApps.requestDockShow
 
         }
     }

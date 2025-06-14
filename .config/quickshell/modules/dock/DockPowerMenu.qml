@@ -1,3 +1,4 @@
+import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -68,11 +69,34 @@ RowLayout {
             Layout.preferredHeight: 50
 
             Rectangle {
+                // ToolTip {
+                //     id: toolTip
+                //     visible: mouseArea.containsMouse
+                //     text: modelData.tooltip
+                //     padding: 8
+                //     font.pixelSize: Appearance.font.family.title
+                //     y: -100
+                //     background: Rectangle {
+                //         radius: Appearance.rounding.verysmall
+                //         color: Appearance.colors.colLayer0
+                //         width: parent.width + 15
+                //         anchors.fill: parent
+                //     }
+                //     // Optional: smooth fade in/out
+                //     Behavior on visible {
+                //         NumberAnimation {
+                //             duration: 150
+                //             easing.type: Easing.InOutQuad
+                //         }
+                //     }
+                // }
+
                 id: button
 
                 anchors.fill: parent
                 radius: Appearance.rounding.normal
                 color: buttonContainer.isHovered ? modelData.hoverContainerColor : modelData.containerColor
+                scale: buttonContainer.isHovered ? 1.2 : 1
 
                 MaterialSymbol {
                     id: icon
@@ -82,6 +106,33 @@ RowLayout {
                     horizontalAlignment: Text.AlignHCenter
                     iconSize: 24
                     text: modelData.icon
+                    rotation: buttonContainer.isHovered ? 15 : 0
+                    scale: buttonContainer.isHovered ? 1.5 : 1
+                    y: buttonContainer.isHovered ? -4 : 0
+
+                    Behavior on rotation {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.InOutQuad
+                        }
+
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.InOutQuad
+                        }
+
+                    }
+
+                    Behavior on y {
+                        NumberAnimation {
+                            duration: 300
+                            easing.type: Easing.OutBounce
+                        }
+
+                    }
 
                     Behavior on color {
                         ColorAnimation {
@@ -95,6 +146,8 @@ RowLayout {
                 }
 
                 MouseArea {
+                    id: mouseArea
+
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
@@ -113,6 +166,14 @@ RowLayout {
                         Hyprland.dispatch(modelData.command);
                         console.log(modelData.tooltip + " clicked");
                     }
+                }
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: 300
+                        easing.type: Easing.InOutQuad
+                    }
+
                 }
 
                 Behavior on color {
