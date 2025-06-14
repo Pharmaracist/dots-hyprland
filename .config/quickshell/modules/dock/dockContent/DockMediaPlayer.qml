@@ -27,6 +27,36 @@ Item {
     implicitWidth: 600
     visible: true
 
+    // ─────── Blurred Background Art ───────
+    Image {
+        id: blurredArt
+        anchors.fill: parent
+        source: player && player.trackArtUrl ? player.trackArtUrl : ""
+        sourceSize.width: width
+        sourceSize.height: height
+        fillMode: Image.PreserveAspectCrop
+        cache: false
+        antialiasing: true
+        asynchronous: true
+        visible: source !== ""
+
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            source: blurredArt
+            saturation: 0.1
+            blurEnabled: true
+            blurMax: 60
+            blur: 1
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.25)
+            radius: Appearance.rounding.screenRounding
+        }
+    }
+
+    // ─────── Your Existing Content (everything below remains unchanged) ───────
     component DockMediaButton: RippleButton {
         implicitWidth: 25; implicitHeight: 25; buttonRadius: 11
         property string iconName: ""
@@ -49,8 +79,16 @@ Item {
     }
 
     Rectangle {
-        id: background
-        anchors.fill: parent
+        id: slider
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom:parent.bottom
+            leftMargin: 8
+            rightMargin: 8
+            bottomMargin: - 5
+        }
+        height: 5
         color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.3)
         radius: Appearance.rounding.screenRounding
 
@@ -69,23 +107,21 @@ Item {
     RowLayout {
         id: contentRow
         anchors {
-                fill: parent
-                leftMargin: 10
-                rightMargin: 10
-            }
-            spacing: 8
-
+            left:parent.left
+            right: parent.right
+            leftMargin:8
+            rightMargin:8
+        }
+        spacing: 8
         Rectangle {
             id: coverArtContainer
-            Layout.preferredWidth: 36
-            Layout.preferredHeight: 36
-            Layout.minimumWidth: 32
-            Layout.minimumHeight: 32
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 40
+            antialiasing: true
             radius: Appearance.rounding.normal
             color: Appearance.m3colors.m3secondaryContainer
             clip: true
 
-            // Show actual cover art when available:
             Image {
                 anchors.fill: parent
                 source: player && player.trackArtUrl ? player.trackArtUrl : ""
@@ -93,18 +129,17 @@ Item {
                 cache: false
                 fillMode: Image.PreserveAspectCrop
                 visible: source !== ""
-                antialiasing: true            
+                antialiasing: true
                 layer.enabled: true
-                   layer.effect: OpacityMask {
-                       maskSource: Rectangle {
-                           width: coverArtContainer.width
-                           height: coverArtContainer.height
-                           radius: Appearance.rounding.small
-                       }
-                   }
+                layer.effect: OpacityMask {
+                    maskSource: Rectangle {
+                        width: coverArtContainer.width
+                        height: coverArtContainer.height
+                        radius: Appearance.rounding.small
+                    }
+                }
             }
 
-            // Fallback icon:
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: "music_note"
@@ -123,8 +158,7 @@ Item {
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.Medium
                 elide: Text.ElideRight
-                color: (progressRatio > 0.15) ? Appearance.colors.colLayer0 : Appearance.colors.colOnLayer0
-                Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuad } }
+                color:  Appearance.colors.colOnLayer0
                 text: player && player.trackTitle
                       ? StringUtils.cleanMusicTitle(player.trackTitle)
                       : "No Media Playing"
@@ -134,7 +168,7 @@ Item {
                 Layout.fillWidth: true; Layout.minimumWidth: 1
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 elide: Text.ElideRight
-                color: (progressRatio > 0.15) ? Appearance.colors.colLayer0 : Appearance.colors.colSubtext
+                color:  Appearance.colors.colSubtext
                 Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuad } }
                 text: player && player.trackArtist
                       ? player.trackArtist
