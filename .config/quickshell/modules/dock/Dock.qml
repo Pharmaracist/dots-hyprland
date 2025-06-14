@@ -16,9 +16,11 @@ Scope { // Scope
     id: root
     property bool pinned: PersistentStates.dock.pinned 
     property bool cornered: ConfigOptions?.dock.cornered ?? true
-    property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+    property bool showPowerMenu: false // New property to toggle power menu
+    readonly property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+    property var dockRow
     Variants { // For each monitor
-        model: pinned ? [Quickshell.screens[focusedScreen]]:[focusedScreen]
+        model: pinned ? [Quickshell.screens[focusedScreen]]:[focusedScreen] 
 
         Loader {
             id: dockLoader
@@ -31,7 +33,7 @@ Scope { // Scope
                 
                 property bool reveal: root.pinned 
                     || (ConfigOptions?.dock.hoverToReveal && dockMouseArea.containsMouse) 
-                    || dockApps.requestDockShow 
+                    || (contentLoader.item && contentLoader.item.requestDockShow)
                     || (!ToplevelManager.activeToplevel?.activated)
 
                 anchors {
@@ -42,7 +44,7 @@ Scope { // Scope
 
                 exclusiveZone: root.pinned ? implicitHeight 
                     - (Appearance.sizes.hyprlandGapsOut) 
-                    - (Appearance.sizes.hyprlandGapsOut - Appearance.sizes.frameThickness  ) : 0
+                    - (Appearance.sizes.hyprlandGapsOut - Appearance.sizes.frameThickness  ) : -1 // To Ignore other Exclusive Windows
 
                 implicitWidth: dockBackground.implicitWidth
                 WlrLayershell.namespace: "quickshell:dock"
@@ -119,8 +121,6 @@ Scope { // Scope
                                     fill: parent
                                     bottom:parent
                                     topMargin: Appearance.sizes.hyprlandGapsOut + 2
-                                    bottomMargin: -Appearance.sizes.hyprlandGapsOut
-                                
                                 }
                                 color: Appearance.colors.colLayer0
                                 radius: cornered ? 0 : Appearance.rounding.large
@@ -133,22 +133,34 @@ Scope { // Scope
                                 id: dockRow
                                 anchors.top: parent.top
                                 anchors.bottom: parent.bottom
-                                anchors.bottomMargin: cornered ? -Appearance.sizes.elevationMargin : 0
+                                anchors.bottomMargin: cornered ? - Appearance.sizes.elevationMargin -6  -Appearance.sizes.frameThickness : 0
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 spacing: 3
-                                property real padding: 5
 
                                 VerticalButtonGroup {
-                                    Layout.topMargin: Appearance.sizes.hyprlandGapsOut  // why does this work
                                     GroupButton { // Pin button
+                                        id:pinButton
                                         baseWidth: 50
                                         baseHeight: 50
                                         clickedWidth: baseWidth
                                         clickedHeight: baseHeight 
                                         buttonRadius: Appearance.rounding.normal
                                         toggled: root.pinned
-                                        onClicked: PersistentStateManager.setState("dock.pinned", !root.pinned)
-                                        contentItem:AnimatedImage {
+                                        
+                                        // Add right-click functionality
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                            onPressed:(event) => {
+                                                if (event.button === Qt.RightButton) {
+                                                    root.showPowerMenu = !root.showPowerMenu
+                                                }if (event.button === Qt.LeftButton) {
+                                                    PersistentStateManager.setState("dock.pinned", !root.pinned)
+                                                }
+                                            }
+                                        }
+                                        
+                                        contentItem: AnimatedImage {
                                             anchors.fill: parent
                                             anchors.margins: 4
                                             cache: true
@@ -158,17 +170,80 @@ Scope { // Scope
                                             source: "root:/assets/gif/avatar.gif"
                                             speed: root.pinned ? 2 : 1.25
                                         }
-
                                     }
                                 }
-                                DockSeparator {}
-                                DockApps { id: dockApps; }
+                                
+                                // Conditional content based on showPowerMenu
+                        Loader {
+                           id: contentLoader
+                           Layout.fillWidth: true
+                           sourceComponent: root.showPowerMenu ? powerMenuComponent : normalDockComponent
+                           scale: 1.0
+                           transformOrigin: Item.Center
+
+                           // Trigger scale-out before switching components
+                           Connections {
+                               target: root
+                               function onShowPowerMenuChanged() {
+                                   m3ScaleOut.start()
+                               }
+                           }
+
+                           // Animate scale-in when new content is loaded
+                           onLoaded: m3ScaleIn.start()
+
+                           SequentialAnimation {
+                               id: m3ScaleOut
+                               PropertyAnimation {
+                                   target: contentLoader
+                                   property: "scale"
+                                   to: 0.92
+                                   duration: 120
+                                   easing.type: Easing.Standard
+                               }
+                               ScriptAction {
+                                   script: {
+                                       contentLoader.sourceComponent = root.showPowerMenu
+                                           ? powerMenuComponent
+                                           : normalDockComponent
+                                   }
+                               }
+                           }
+
+                           PropertyAnimation {
+                               id: m3ScaleIn
+                               target: contentLoader
+                               property: "scale"
+                               from: 1.08
+                               to: 1.0
+                               duration: 180
+                               easing.type: Easing.OutBack // Emulates M3's emphasized curve
+                           }
+                        }                       
+
                             }
                         }    
                     }
-
                 }
             }
+        }
+    }
+    
+    // Component for normal dock content
+    Component {
+        id: normalDockComponent
+        DockApps { 
+            id: dockApps
+            property alias requestDockShow: dockApps.requestDockShow
+
+        }
+    }
+    
+    // Component for power menu
+    Component {
+        id: powerMenuComponent
+        DockPowerMenu {
+            id: dockPowerMenu
         }
     }
 }

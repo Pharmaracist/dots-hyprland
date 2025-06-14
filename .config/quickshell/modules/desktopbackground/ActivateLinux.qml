@@ -3,52 +3,49 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
-ShellRoot {
-    PanelWindow {
-        id: w
+// Component to show a translucent activation reminder per screen
+PanelWindow {
+    id: w
 
-        property var modelData
+    WlrLayershell.layer: WlrLayer.Background
+    color: "transparent"
+    exclusiveZone: -1
+    implicitWidth: content.implicitWidth
+    implicitHeight: content.implicitHeight
 
-        WlrLayershell.layer: WlrLayer.Background
-        screen: modelData
-        implicitWidth: content.width
-        implicitHeight: content.height
-        color: "transparent"
-        exclusiveZone: -1
+    anchors {
+        right: true
+        bottom: true
+    }
 
-        // Use the wlroots specific layer property to ensure it displays over
-        // fullscreen windows.
-        anchors {
-            right: true
-            bottom: true
+    margins {
+        right: 50
+        bottom: 45
+    }
+
+    ColumnLayout {
+        id: content
+
+        spacing: 8
+
+        Text {
+            text: "Activate Linux"
+            color: "#50ffffff"
+            font.pointSize: 22
+            horizontalAlignment: Text.AlignHCenter
         }
 
-        margins {
-            right: 50
-            bottom: 50
+        Text {
+            text: "Go to Settings to activate Linux"
+            color: "#50ffffff"
+            font.pointSize: 14
+            horizontalAlignment: Text.AlignHCenter
         }
 
-        ColumnLayout {
-            id: content
+    }
 
-            Text {
-                text: "Activate Linux"
-                color: "#50ffffff"
-                font.pointSize: 22
-            }
-
-            Text {
-                text: "Go to Settings to activate Linux"
-                color: "#50ffffff"
-                font.pointSize: 14
-            }
-
-        }
-
-        // Give the window an empty click mask so all clicks pass through it.
-        mask: Region {
-        }
-
+    // Make the panel click-through
+    mask: Region {
     }
 
 }

@@ -11,31 +11,23 @@ import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtNetwork
-
 ColumnLayout {
     id: indicatorsColumnLayout
 
-    // Common properties
+    Layout.alignment: Qt.AlignHCenter
+    spacing: 0
+
     property real iconSpacing: 15
     property real commonIconSize: Appearance.font.pixelSize.larger
     property color commonIconColor: Appearance.colors.colOnLayer1
     property int animationDuration: Appearance.animation.elementMoveFast.duration
     property int animationType: Appearance.animation.elementMoveFast.type
     property var animationCurve: Appearance.animation.elementMoveFast.bezierCurve
-    anchors.horizontalCenter: parent.horizontalCenter
-
-    spacing: 0
-
-    // KeyboardLayout {
-    //     Layout.bottomMargin: iconSpacing
-    //     commonIconSize: indicatorsColumnLayout.commonIconSize
-    //     commonIconColor: indicatorsColumnLayout.commonIconColor
-    // }
 
     Revealer {
         reveal: Audio.sink?.audio.muted ?? false
-        Layout.fillWidth: true
         Layout.bottomMargin: reveal ? iconSpacing : 0
+
         Behavior on Layout.bottomMargin {
             NumberAnimation {
                 duration: animationDuration
@@ -43,6 +35,7 @@ ColumnLayout {
                 easing.bezierCurve: animationCurve
             }
         }
+
         MaterialSymbol {
             text: "volume_off"
             iconSize: commonIconSize
@@ -52,8 +45,8 @@ ColumnLayout {
 
     Revealer {
         reveal: Audio.source?.audio?.muted ?? false
-        Layout.fillWidth: true
         Layout.bottomMargin: reveal ? iconSpacing : 0
+
         Behavior on Layout.bottomMargin {
             NumberAnimation {
                 duration: animationDuration
@@ -61,6 +54,7 @@ ColumnLayout {
                 easing.bezierCurve: animationCurve
             }
         }
+
         MaterialSymbol {
             text: "mic_off"
             iconSize: commonIconSize
@@ -72,21 +66,22 @@ ColumnLayout {
         Layout.bottomMargin: iconSpacing
         text: {
             if (NetworkInformation.TransportMedium.Ethernet) {
-                return "lan";
+                return "lan"
             } else if (Network.networkName.length > 0 && Network.networkName !== "lo") {
                 return Network.networkStrength > 80 ? "signal_wifi_4_bar" :
-                    Network.networkStrength > 60 ? "network_wifi_3_bar" :
-                    Network.networkStrength > 40 ? "network_wifi_2_bar" :
-                    Network.networkStrength > 20 ? "network_wifi_1_bar" :
-                    "signal_wifi_0_bar";
+                       Network.networkStrength > 60 ? "network_wifi_3_bar" :
+                       Network.networkStrength > 40 ? "network_wifi_2_bar" :
+                       Network.networkStrength > 20 ? "network_wifi_1_bar" :
+                       "signal_wifi_0_bar"
             } else {
-                return "signal_wifi_off";
+                return "signal_wifi_off"
             }
         }
         iconSize: commonIconSize
         color: commonIconColor
+
         MouseArea {
-            anchors.fill:parent
+            anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
             onClicked: Hyprland.dispatch(`exec ${ConfigOptions.apps.networkEthernet}`)
@@ -94,11 +89,14 @@ ColumnLayout {
     }
 
     MaterialSymbol {
-        text: Bluetooth.bluetoothConnected ? "bluetooth_connected" : Bluetooth.bluetoothEnabled ? "bluetooth" : "bluetooth_disabled"
+        text: Bluetooth.bluetoothConnected ? "bluetooth_connected"
+             : Bluetooth.bluetoothEnabled ? "bluetooth"
+             : "bluetooth_disabled"
         iconSize: commonIconSize
         color: commonIconColor
-         MouseArea {
-            anchors.fill:parent
+
+        MouseArea {
+            anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
             onClicked: Hyprland.dispatch(`exec ${ConfigOptions.apps.bluetooth}`)

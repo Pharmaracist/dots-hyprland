@@ -17,28 +17,28 @@ import "root:/services"
 
 Scope {
     id: bar
-    readonly property int barWidth: Appearance.sizes.barWidth
+    readonly property real padding: 0.8
+    property int barWidth: Appearance?.sizes.barWidth ?? 37
     readonly property int osdHideMouseMoveThreshold: 20
     property bool showBarBackground: ConfigOptions.bar.showBackground
     readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly || false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
 
-    // For each monitor
     Variants {
         model: Quickshell.screens
 
-        // Bar window
         PanelWindow {
             id: barRoot
 
             property ShellScreen modelData
+            readonly property real padding: bar.padding
 
             WlrLayershell.layer: WlrLayer.Top
             screen: modelData
             WlrLayershell.namespace: "quickshell:verticalBar"
-            height: screen.height
-            width: barContent.width + Appearance.rounding.screenRounding
+            implicitHeight: screen.height
+            implicitWidth: barWidth + Appearance.rounding.screenRounding
             exclusiveZone: barWidth - Appearance.sizes.frameThickness
             color: "transparent"
 
@@ -48,158 +48,80 @@ Scope {
                 left: true
             }
 
-            // Bar background
+            // Background rectangle (behind content)
             Rectangle {
-                id: barContent
-
-                color: Appearance.colors.colLayer0
-                width: barWidth
-
+                id: barBackground
                 anchors {
                     top: parent.top
                     bottom: parent.bottom
                     left: parent.left
                 }
+                width: barWidth
+                color: Appearance.colors.colLayer0
+            
 
+            // Main content layout
+            ColumnLayout {
+                id: barContent
+                anchors.fill: parent
+                anchors.margins: padding 
+                anchors.bottomMargin:10 
+                anchors.topMargin: 10
                 ColumnLayout {
-                    spacing: 10
-                    anchors.top: parent.top
-                    anchors.topMargin: Appearance.rounding.screenRounding
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    id: topArea
+                    spacing: padding * 10
+                    Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
 
                     NormalComponents.MinimalBattery {
                         id: battery
-
                         visible: UPower.displayDevice.isLaptopBattery
                     }
 
                     NormalComponents.Logo {
                         visible: !battery.visible
-                        anchors.horizontalCenter: parent.horizontalCenter
-
-
                     }
 
                     Workspaces {
-                        id:ws
                         bar: barRoot
                     }
-
-                }  
-                RowLayout {
-                    id:rowLayout
-                    anchors.centerIn: parent
-                    Media {
-                        id:media
-                        visible: MprisController.activePlayer?.trackTitle?.length > 0
-                    }
-                    CombinedTitle {
-                        bar: barRoot
-                        visible:!media.visible
-                    }
-                    transform: Rotation {
-                        angle: -90
-                    }
-
                 }
 
                 ColumnLayout {
                     id: bottomArea
+                    spacing: padding * 10
+                    Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                    Layout.fillWidth: true
 
-                    spacing: 20
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 1.75 * Appearance.rounding.screenRounding
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    implicitWidth: parent.width * 0.69
+                    StatusIcons {}
 
-                    SysTray {
-                        bar: barRoot
-                    }
+                    ClockWidget {}
 
-                    StatusIcons {
-                    }
-
-                    ClockWidget {
-                        id: clock
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: Hyprland.dispatch('exec kclock')
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                        }
-
-                    }
-
-                    Item {
-                        id: powerButton
-
-                        anchors {
-                            top: clock.bottom
-                            topMargin: Appearance.rounding.screenRounding / 2.5
-                            bottom: parent.bottom
-                            bottomMargin: Appearance.rounding.screenRounding
-                        }
-
-                        Rectangle {
-                            radius: Appearance.rounding.full
-                            width: powerIcon.width + 8
-                            height: powerIcon.height + 8
-                            color: Appearance.colors.colLayer1
-
-                            MaterialSymbol {
-                                id: powerIcon
-
-                                text: "power_settings_new"
-                                font.pixelSize: Appearance.font.pixelSize.large
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                anchors.centerIn: parent
-                                color: Appearance.m3colors.m3error
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-                                onClicked: Hyprland.dispatch('global quickshell:sessionToggle')
-                            }
-
-                        }
-
-                    }
-
+                    PowerButton {}
                 }
-
             }
-
+            }
+            // Rounded corners (top left & bottom left)
             RoundCorner {
                 size: Appearance.rounding.screenRounding
                 corner: cornerEnum.topLeft
                 color: Appearance.colors.colLayer0
-
                 anchors {
-                    top: barContent.top
-                    left: barContent.right
+                    top: barBackground.top
+                    left: barBackground.right
                     topMargin: Appearance.sizes.frameThickness
                 }
-
             }
 
             RoundCorner {
                 size: Appearance.rounding.screenRounding
                 corner: cornerEnum.bottomLeft
                 color: Appearance.colors.colLayer0
-
                 anchors {
-                    bottom: barContent.bottom
-                    left: barContent.right
+                    bottom: barBackground.bottom
+                    left: barBackground.right
                     bottomMargin: Appearance.sizes.frameThickness
                 }
-
             }
-
         }
-
     }
-
 }

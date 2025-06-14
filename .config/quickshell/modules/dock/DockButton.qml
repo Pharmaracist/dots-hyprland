@@ -10,6 +10,6 @@ RippleButton {
     Layout.topMargin: Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
     implicitWidth: implicitHeight - topInset - bottomInset
     buttonRadius: Appearance.rounding.normal
-    topInset: Appearance.sizes.hyprlandGapsOut + dockRow.padding
-    bottomInset: Appearance.sizes.hyprlandGapsOut + dockRow.padding
+    topInset: Appearance.sizes.hyprlandGapsOut - 15
+    bottomInset: Appearance.sizes.hyprlandGapsOut - 15
 }

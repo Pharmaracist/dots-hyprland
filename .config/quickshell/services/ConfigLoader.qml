@@ -43,7 +43,7 @@ Singleton {
             }
         } catch (e) {
             console.error("[ConfigLoader] Error reading file:", e);
-            console.log("[ConfigLoader] File content was:", fileContent);
+            // console.log("[ConfigLoader] File content was:", fileContent);
             Hyprland.dispatch(`exec notify-send "${qsTr("Shell configuration failed to load")}" "${root.filePath}"`)
             return;
 

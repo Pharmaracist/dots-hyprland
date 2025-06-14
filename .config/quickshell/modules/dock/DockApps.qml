@@ -45,40 +45,46 @@ Item {
 
         model: ScriptModel {
             objectProp: "appId"
-            values: {
-                var map = new Map();
+         values: {
+    const pinned = ConfigOptions?.dock.pinnedApps ?? [];
+    const values = [];
+    const pinnedSet = new Set();
 
-                // Pinned apps
-                const pinnedApps = ConfigOptions?.dock.pinnedApps ?? [];
-                for (const appId of pinnedApps) {
-                    if (!map.has(appId.toLowerCase())) map.set(appId.toLowerCase(), ({
-                        pinned: true,
-                        toplevels: []
-                    }));
-                }
+    // Add pinned apps
+    for (const appId of pinned) {
+        const id = appId.toLowerCase();
+        pinnedSet.add(id);
+        values.push({
+            appId: id,
+            pinned: true,
+            toplevels: ToplevelManager.toplevels.values.filter(t => t.appId.toLowerCase() === id)
+        });
+    }
 
-                // Separator
-                if (pinnedApps.length > 0) {
-                    map.set("SEPARATOR", { pinned: false, toplevels: [] });
-                }
-                
-                // Open windows
-                for (const toplevel of ToplevelManager.toplevels.values) {
-                    if (!map.has(toplevel.appId.toLowerCase())) map.set(toplevel.appId.toLowerCase(), ({
-                        pinned: false,
-                        toplevels: []
-                    }));
-                    map.get(toplevel.appId.toLowerCase()).toplevels.push(toplevel);
-                }
+    // Check if there are unpinned open apps
+    const unpinnedApps = ToplevelManager.toplevels.values.filter(t => !pinnedSet.has(t.appId.toLowerCase()));
 
-                var values = [];
+    if (pinned.length > 0 && unpinnedApps.length > 0) {
+        values.push({ appId: "SEPARATOR", pinned: false, toplevels: [] });
+    }
 
-                for (const [key, value] of map) {
-                    values.push({ appId: key, toplevels: value.toplevels, pinned: value.pinned });
-                }
+    // Add unpinned open apps
+    const seen = new Set();
+    for (const toplevel of unpinnedApps) {
+        const id = toplevel.appId.toLowerCase();
+        if (!seen.has(id)) {
+            seen.add(id);
+            values.push({
+                appId: id,
+                pinned: false,
+                toplevels: unpinnedApps.filter(t => t.appId.toLowerCase() === id)
+            });
+        }
+    }
 
-                return values;
-            }
+    return values;
+}
+
         }
         delegate: DockAppButton {
             anchors.verticalCenter: parent.verticalCenter
@@ -238,7 +244,7 @@ Item {
                                 }
                                 ScreencopyView {
                                     id: screencopyView
-                                    captureSource: previewPopup ? windowButton.modelData : null
+                                    captureSource: previewPopup ? windowButton.modelData : undefined
                                     live: true
                                     paintCursor: true
                                     constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)

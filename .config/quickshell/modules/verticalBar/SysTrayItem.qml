@@ -7,7 +7,7 @@ import Quickshell.Widgets
 import "root:/modules/common/"
 import "root:/modules/common/functions/color_utils.js" as ColorUtils
 
-MouseArea {
+Item {
     id: root
 
     required property var bar
@@ -15,21 +15,28 @@ MouseArea {
     property bool targetMenuOpen: false
     property int trayItemWidth: 18
 
-            acceptedButtons: Qt.LeftButton | Qt.RightButton
-            Layout.fillHeight: true
-            implicitWidth: trayItemWidth
-            onClicked: (event) => {
+    implicitWidth: trayItemWidth
+    implicitHeight: trayItemWidth // Assume square tray item
+    Layout.alignment: Qt.AlignHCenter
+
+    MouseArea {
+        id: clickArea
+
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: (event) => {
             switch (event.button) {
             case Qt.LeftButton:
-            item.activate();
-            break;
+                item.activate();
+                break;
             case Qt.RightButton:
-            if (item.hasMenu)
-                menu.open();
+                if (item.hasMenu)
+                    menu.open();
 
-            break;
+                break;
+            }
+            event.accepted = true;
         }
-        event.accepted = true;
     }
 
     QsMenuAnchor {
@@ -37,7 +44,7 @@ MouseArea {
 
         menu: root.item.menu
         anchor.window: bar
-        anchor.rect.x: root.x + bar.width 
+        anchor.rect.x: root.x + bar.width
         anchor.rect.y: root.y + bar.height / 2.8
         anchor.rect.height: root.height
         anchor.edges: Edges.Bottom
@@ -46,25 +53,23 @@ MouseArea {
     IconImage {
         id: trayIcon
 
-        visible: false // There's already color overlay
+        anchors.fill: parent
         source: root.item.icon
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
+        visible: !ConfigOptions.bar.desaturateTray
     }
 
     Desaturate {
         id: desaturatedIcon
 
-        visible: false // There's already color overlay
-        anchors.fill: trayIcon
+        anchors.fill: parent
         source: trayIcon
-        desaturation: ConfigOptions.bar.desaturateTray ? 1 : 0 // 1.0 means fully grayscale
+        desaturation: 1
+        visible: ConfigOptions.bar.desaturateTray
     }
 
     ColorOverlay {
-        anchors.fill: desaturatedIcon
-        source: desaturatedIcon
+        anchors.fill: parent
+        source: ConfigOptions.bar.desaturateTray ? desaturatedIcon : trayIcon
         color: ColorUtils.transparentize(Appearance.m3colors.m3primary, 0.3)
     }
 

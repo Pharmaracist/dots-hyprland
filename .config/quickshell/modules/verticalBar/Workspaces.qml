@@ -82,15 +82,17 @@ Item {
         z: 1
         spacing: 0
         anchors.fill: parent
-        
+
         Repeater {
             model: ConfigOptions.bar.workspaces.shown
+
             Rectangle {
                 z: 1
-                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.alignment: Qt.AlignHCenter
                 implicitHeight: workspaceButtonHeight
-                implicitWidth: parent.width * 0.75
+                implicitWidth: 32 * 0.75
                 radius: Appearance.rounding.full
+
                 property var radiusTop: (workspaceOccupied[index-1] && !(!activeWindow?.activated && monitor.activeWorkspace?.id === index)) ? 0 : Appearance.rounding.full
                 property var radiusBottom: (workspaceOccupied[index+1] && !(!activeWindow?.activated && monitor.activeWorkspace?.id === index+2)) ? 0 : Appearance.rounding.full
 
@@ -152,13 +154,14 @@ Item {
                 id: button
                 property int workspaceValue: workspaceGroup * ConfigOptions.bar.workspaces.shown + index + 1
                 Layout.fillWidth: true
-                onPressed: Hyprland.dispatch(`workspace ${workspaceValue}`)
                 height: workspaceButtonHeight
+                onPressed: Hyprland.dispatch(`workspace ${workspaceValue}`)
 
                 background: Item {
                     id: workspaceButtonBackground
-                    implicitWidth: parent.width
+                    // ❌ Removed `implicitWidth: parent.width` to fix binding loop
                     implicitHeight: workspaceButtonHeight
+
                     property var biggestWindow: {
                         const windows = HyprlandData.windowList.filter(w => w.workspace.id == button.workspaceValue)
                         return windows.reduce((maxWin, win) => {
@@ -167,6 +170,7 @@ Item {
                             return winArea > maxArea ? win : maxWin
                         }, null)
                     }
+
                     property var mainAppIconSource: Quickshell.iconPath(AppSearch.guessIcon(biggestWindow?.class), "image-missing")
 
                     StyledText {
@@ -178,8 +182,7 @@ Item {
                         text: `${button.workspaceValue}`
                         color: (monitor.activeWorkspace?.id == button.workspaceValue) ? 
                             Appearance.m3colors.m3onPrimary : 
-                            (workspaceOccupied[index] ? Appearance.m3colors.m3onSecondaryContainer : 
-                                Appearance.colors.colOnLayer1Inactive)
+                            (workspaceOccupied[index] ? Appearance.m3colors.m3onSecondaryContainer : Appearance.colors.colOnLayer1Inactive)
 
                         Behavior on opacity {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

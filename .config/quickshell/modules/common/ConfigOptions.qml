@@ -135,9 +135,9 @@ Singleton {
 
     property QtObject sidebar: QtObject {
         property QtObject translator: QtObject {
-            readonly property string targetLanguage : "en" // eg."en" , "tr"
-            readonly property string engine : "" // eg."google" , "auto","apertium","aspell","bing","hunspell","spell","yandex"
-            readonly property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
+            property string targetLanguage : "en" // eg."en" , "tr"
+            property string engine : "" // eg."google" , "auto","apertium","aspell","bing","hunspell","spell","yandex"
+            property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
         }
        
         property QtObject booru: QtObject {

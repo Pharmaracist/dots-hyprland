@@ -12,7 +12,6 @@ import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
 import "./modules/overview/"
 import "./modules/screenCorners/"
-import "./modules/session/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/verticalBar/"
@@ -38,7 +37,6 @@ ShellRoot {
     property bool enableWallpaperSelector: true
     property bool enableReloadPopup: true
     property bool enableScreenCorners: true
-    property bool enableSession: true
     property bool enableSidebarLeft: true
     property bool enableSidebarRight: true
     property bool enableNothingClock: true
@@ -162,14 +160,6 @@ ShellRoot {
         active: enableScreenCorners
 
         component: ScreenCorners {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableSession
-
-        component: Session {
         }
 
     }

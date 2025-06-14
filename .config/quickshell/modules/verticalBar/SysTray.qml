@@ -1,14 +1,13 @@
+import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
 import Quickshell.Services.SystemTray
 import Quickshell.Wayland
 import Quickshell.Widgets
-import Qt5Compat.GraphicalEffects
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 
-// TODO: More fancy animation
 Item {
     id: root
 
@@ -16,6 +15,7 @@ Item {
 
     width: parent.width
     implicitHeight: 90
+
     ColumnLayout {
         id: columnLayout
 
@@ -26,12 +26,13 @@ Item {
             model: SystemTray.items
 
             SysTrayItem {
-                id: sysTrayIcon
                 required property SystemTrayItem modelData
-                anchors.horizontalCenter: parent.horizontalCenter
+
+                Layout.alignment: Qt.AlignHCenter
                 bar: root.bar
                 item: modelData
             }
+
         }
 
         StyledText {
@@ -41,5 +42,7 @@ Item {
             text: "•"
             visible: SystemTray.items.values.length > 0
         }
+
     }
+
 }
