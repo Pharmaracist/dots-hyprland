@@ -52,13 +52,13 @@ Item {
     readonly property string displayName: currentAppId ? (appSubstitutions[currentAppId] || currentAppId) : qsTr("󰟪 Desktop")
     readonly property string appIcon: currentAppId ? (appIcons[currentAppId] || "") : ""
 
-    height: parent.height
-    Layout.alignment: Qt.AlignVCenter
-
+    implicitHeight:barWidth * padding
+    implicitWidth: barWidth * padding
+    Layout.alignment: Qt.AlignHCenter
     RowLayout {
+        id: rowLayout
         anchors.centerIn: parent
         spacing: 6 * bar.padding
-
         StyledText {
             font.pixelSize: Appearance.font.pixelSize.large + 2
             font.family: Appearance.font.family.iconNerd
@@ -76,8 +76,6 @@ Item {
             color: Appearance.colors.colOnLayer1
             text: root.displayName
             elide: Text.ElideRight
-            // Optional width clamp to avoid overflow in narrow bars
-            // width: bar.barWidth * 0.7
         }
     }
 }

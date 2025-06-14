@@ -14,9 +14,6 @@ Item {
     property bool borderless : ConfigOptions.appearance.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
-
-    Layout.alignment: Qt.AlignVCenter
-    
     Timer {
         running: activePlayer?.playbackState == MprisPlaybackState.Playing
         interval: 1000
@@ -25,9 +22,9 @@ Item {
     }
     Rectangle {
     id:background
-      anchors.centerIn: parent
-        implicitWidth: 300
-        implicitHeight: barWidth * 0.8
+        anchors.centerIn: parent
+        implicitWidth: 340
+        implicitHeight:barWidth * padding
         radius: Appearance.rounding.small
         color: Appearance.colors.colLayer1
 
@@ -55,20 +52,17 @@ RowLayout {
 
         }
         StyledText {
-            anchors {
-                    leftMargin: 42
-                    rightMargin: 10
-                    fill: parent
-                }
-                Layout.alignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignVCenter |Qt.AlignHCenter  
                 Layout.fillWidth: true // Ensures the text takes up available space
-                Layout.rightMargin: rowLayout.spacing
+                Layout.fillHeight:true
+                Layout.rightMargin: 10
                 horizontalAlignment: Text.AlignHCenter
                elide: Text.ElideRight // Truncates the text on the right
                color: Appearance.colors.colOnLayer1
                text: `${cleanedTitle}${activePlayer?.trackArtist ? ' • ' + activePlayer.trackArtist : ''}`
              }
              
+        }        
          MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
@@ -84,7 +78,6 @@ RowLayout {
                 }
             }
     }
-}        
 
 
 }

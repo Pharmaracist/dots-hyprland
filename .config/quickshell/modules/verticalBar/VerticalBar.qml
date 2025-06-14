@@ -60,13 +60,32 @@ Scope {
                 color: Appearance.colors.colLayer0
             
 
-            // Main content layout
+            ColumnLayout {
+                    id: middleArea
+                    anchors.centerIn: parent
+                    CombinedTitle {
+                        bar:barRoot
+                        visible:!media.visible
+                    }
+                    Media {
+                        id:media
+                        visible:MprisController.activePlayer?.trackTitle?.length > 0
+                    
+                    }
+                    transform: Rotation {
+                        angle: - 90
+                    }
+            }
+
             ColumnLayout {
                 id: barContent
-                anchors.fill: parent
-                anchors.margins: padding 
-                anchors.bottomMargin:10 
-                anchors.topMargin: 10
+                spacing: 0
+                anchors {
+                    fill: parent
+                    margins: padding 
+                    bottomMargin:10 
+                    topMargin: 10
+                }
                 ColumnLayout {
                     id: topArea
                     spacing: padding * 10
@@ -85,6 +104,10 @@ Scope {
                         bar: barRoot
                     }
                 }
+
+
+                
+
 
                 ColumnLayout {
                     id: bottomArea
