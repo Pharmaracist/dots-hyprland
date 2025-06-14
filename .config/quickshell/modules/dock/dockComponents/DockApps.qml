@@ -86,7 +86,6 @@ Item {
         }
         
         delegate: DockAppButton {
-            anchors.verticalCenter: parent.verticalCenter
             required property var modelData
             appToplevel: modelData
             appListRoot: root

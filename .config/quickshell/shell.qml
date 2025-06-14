@@ -30,7 +30,7 @@ ShellRoot {
     property bool enableVerticalBar: ConfigOptions.bar.verticalMode | PersistentStates.bar.verticalMode
     property bool enableBar: !enableVerticalBar
     property bool enableDock: true
-    property bool enableMediaControls: true
+    property bool enableMediaControls: false
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: false
     property bool enableOnScreenDisplayVolume: false

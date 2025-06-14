@@ -3,6 +3,7 @@ import "root:/modules/common/widgets"
 import "root:/services"
 import "root:/modules/common/functions/string_utils.js" as StringUtils
 import "root:/modules/common/functions/color_utils.js" as ColorUtils
+import "root:/modules/common/functions/file_utils.js" as FileUtils
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Effects
@@ -14,223 +15,183 @@ import Quickshell.Services.Mpris
 import Quickshell.Widgets
 
 Item {
-    id: dockPlayer
-    required property MprisPlayer player
-    
-    property var artUrl: player?.trackArtUrl
-    property string artDownloadLocation: Directories.coverArt
-    property string artFileName: Qt.md5(artUrl) + ".jpg"
-    property string artFilePath: `${artDownloadLocation}/${artFileName}`
-    property color artDominantColor: colorQuantizer?.colors[0] || Appearance.m3colors.m3secondaryContainer
-    property bool downloaded: false
-    
-    implicitHeight: 50
-    implicitWidth: Math.max(320, contentRow.implicitWidth + 20)
+    id: dockMediaPlayer
 
-    component DockButton: RippleButton {
-        implicitWidth: 32
-        implicitHeight: 32
-        buttonRadius: 16
-        
-        property string iconName
-        colBackground: ColorUtils.transparentize(blendedColors.colSecondaryContainer, 0.8)
-        colBackgroundHover: blendedColors.colSecondaryContainerHover
-        colRipple: blendedColors.colSecondaryContainerActive
+    property MprisPlayer player: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
+    property real progressRatio: {
+        if (!player || !player.length || player.length <= 0 || !player.position) return 0
+        return Math.max(0, Math.min(1, player.position / player.length))
+    }
+
+    implicitHeight: 80
+    implicitWidth: 600
+    visible: true
+
+    component DockMediaButton: RippleButton {
+        implicitWidth: 25; implicitHeight: 25; buttonRadius: 11
+        property string iconName: ""
+        colBackground: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.7)
+        colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+        colRipple: Appearance.colors.colSecondaryContainerActive
 
         contentItem: MaterialSymbol {
             iconSize: Appearance.font.pixelSize.normal
             horizontalAlignment: Text.AlignHCenter
-            color: blendedColors.colOnSecondaryContainer
+            color: Appearance.m3colors.m3onSecondaryContainer
             text: iconName
         }
     }
 
-    onArtUrlChanged: {
-        if (artUrl?.length) {
-            downloaded = false
-            coverArtDownloader.running = true
-        } else {
-            artDominantColor = Appearance.m3colors.m3secondaryContainer
-        }
-    }
-
-    Process {
-        id: coverArtDownloader
-        command: ["bash", "-c", `[ -f ${artFilePath} ] || curl -sSL '${artUrl}' -o '${artFilePath}'`]
-        onExited: downloaded = true
-    }
-
-    ColorQuantizer {
-        id: colorQuantizer
-        source: downloaded ? Qt.resolvedUrl(artFilePath) : ""
-        depth: 0
-        rescaleSize: 1
-    }
-
-    property QtObject blendedColors: QtObject {
-        property color colLayer0: ColorUtils.mix(Appearance.colors.colLayer0, artDominantColor, 0.3)
-        property color colOnLayer0: ColorUtils.mix(Appearance.colors.colOnLayer0, artDominantColor, 0.4)
-        property color colSubtext: ColorUtils.mix(Appearance.colors.colOnLayer1, artDominantColor, 0.3)
-        property color colPrimary: ColorUtils.mix(Appearance.colors.colPrimary, artDominantColor, 0.4)
-        property color colPrimaryHover: ColorUtils.mix(Appearance.colors.colPrimaryHover, artDominantColor, 0.3)
-        property color colPrimaryActive: ColorUtils.mix(Appearance.colors.colPrimaryActive, artDominantColor, 0.3)
-        property color colSecondaryContainer: ColorUtils.mix(Appearance.m3colors.m3secondaryContainer, artDominantColor, 0.2)
-        property color colSecondaryContainerHover: ColorUtils.mix(Appearance.colors.colSecondaryContainerHover, artDominantColor, 0.2)
-        property color colSecondaryContainerActive: ColorUtils.mix(Appearance.colors.colSecondaryContainerActive, artDominantColor, 0.3)
-        property color colOnPrimary: ColorUtils.mix(Appearance.m3colors.m3onPrimary, artDominantColor, 0.4)
-        property color colOnSecondaryContainer: ColorUtils.mix(Appearance.m3colors.m3onSecondaryContainer, artDominantColor, 0.2)
+    Timer {
+        running: player && player.playbackState === MprisPlaybackState.Playing
+        interval: 1000; repeat: true
+        onTriggered: if (player && typeof player.positionChanged === 'function') player.positionChanged()
     }
 
     Rectangle {
         id: background
         anchors.fill: parent
-        color: blendedColors.colLayer0
-        radius: Appearance.rounding.normal
-        
-        // Subtle background art
-        Image {
-            anchors.fill: parent
-            source: downloaded ? Qt.resolvedUrl(artFilePath) : ""
-            fillMode: Image.PreserveAspectCrop
-            opacity: 0.1
-            
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                saturation: 0.3
-                blurEnabled: true
-                blur: 0.8
+        color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.3)
+        radius: Appearance.rounding.screenRounding
+
+        Rectangle {
+            id: progressBar
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: parent.width * progressRatio
+            height: parent.height
+            color: Appearance.colors.colPrimary
+            radius: parent.radius
+            Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutQuart } }
+        }
+    }
+
+    RowLayout {
+        id: contentRow
+        anchors {
+                fill: parent
+                leftMargin: 10
+                rightMargin: 10
+            }
+            spacing: 8
+
+        Rectangle {
+            id: coverArtContainer
+            Layout.preferredWidth: 36
+            Layout.preferredHeight: 36
+            Layout.minimumWidth: 32
+            Layout.minimumHeight: 32
+            radius: Appearance.rounding.normal
+            color: Appearance.m3colors.m3secondaryContainer
+            clip: true
+
+            // Show actual cover art when available:
+            Image {
+                anchors.fill: parent
+                source: player && player.trackArtUrl ? player.trackArtUrl : ""
+                asynchronous: true
+                cache: false
+                fillMode: Image.PreserveAspectCrop
+                visible: source !== ""
+                antialiasing: true            
+                layer.enabled: true
+                   layer.effect: OpacityMask {
+                       maskSource: Rectangle {
+                           width: coverArtContainer.width
+                           height: coverArtContainer.height
+                           radius: Appearance.rounding.small
+                       }
+                   }
+            }
+
+            // Fallback icon:
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: "music_note"
+                color: Appearance.m3colors.m3onSecondaryContainer
+                iconSize: Appearance.font.pixelSize.normal
+                visible: !player || !player.trackArtUrl
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true; Layout.fillHeight: true
+            Layout.minimumWidth: 120; spacing: 1
+
+            StyledText {
+                Layout.fillWidth: true; Layout.minimumWidth: 1
+                font.pixelSize: Appearance.font.pixelSize.small
+                font.weight: Font.Medium
+                elide: Text.ElideRight
+                color: (progressRatio > 0.15) ? Appearance.colors.colLayer0 : Appearance.colors.colOnLayer0
+                Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuad } }
+                text: player && player.trackTitle
+                      ? StringUtils.cleanMusicTitle(player.trackTitle)
+                      : "No Media Playing"
+            }
+
+            StyledText {
+                Layout.fillWidth: true; Layout.minimumWidth: 1
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                elide: Text.ElideRight
+                color: (progressRatio > 0.15) ? Appearance.colors.colLayer0 : Appearance.colors.colSubtext
+                Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuad } }
+                text: player && player.trackArtist
+                      ? player.trackArtist
+                      : "Select a media player"
             }
         }
 
         RowLayout {
-            id: contentRow
-            anchors {
-                fill: parent
-                margins: 8
-            }
-            spacing: 8
+            Layout.minimumWidth: 96; spacing: 3
 
-            // Album art
-            Rectangle {
-                Layout.preferredWidth: 34
-                Layout.preferredHeight: 34
-                radius: Appearance.rounding.small
-                color: blendedColors.colSecondaryContainer
-                
-                Image {
-                    anchors.fill: parent
-                    source: downloaded ? Qt.resolvedUrl(artFilePath) : ""
-                    fillMode: Image.PreserveAspectCrop
-                    
-                    layer.enabled: true
-                    layer.effect: OpacityMask {
-                        maskSource: Rectangle {
-                            width: parent.width
-                            height: parent.height
-                            radius: parent.radius
-                        }
-                    }
-                }
-                
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    visible: !downloaded
-                    text: "music_note"
-                    color: blendedColors.colOnSecondaryContainer
+            DockMediaButton {
+                iconName: "skip_previous"
+                enabled: !!player; opacity: player ? 1 : 0.5
+                onClicked: player && player.previous()
+            }
+
+            RippleButton {
+                implicitWidth: 32; implicitHeight: 32
+                buttonRadius: hovered ? 15 : 7
+                enabled: !!player; opacity: player ? 1 : 0.5
+
+                colBackground: player && player.playbackState === MprisPlaybackState.Playing
+                              ? (progressRatio > 0.85
+                                 ? Appearance.colors.colLayer0
+                                 : Appearance.colors.colSecondary)
+                              : Appearance.colors.colSecondaryContainer
+                colBackgroundHover: player && player.playbackState === MprisPlaybackState.Playing
+                                   ? Appearance.colors.colPrimaryHover
+                                   : Appearance.colors.colSecondaryContainerHover
+                colRipple: player && player.playbackState === MprisPlaybackState.Playing
+                           ? Appearance.colors.colPrimaryActive
+                           : Appearance.colors.colSecondaryContainerActive
+
+                onClicked: player && player.togglePlaying()
+                Behavior on buttonRadius { animation: Appearance.animation.elementMove.numberAnimation.createObject(this) }
+
+                contentItem: MaterialSymbol {
                     iconSize: Appearance.font.pixelSize.normal
+                    fill: 1
+                    horizontalAlignment: Text.AlignHCenter
+                    color: player && player.playbackState === MprisPlaybackState.Playing
+                           ? (progressRatio > 0.85
+                              ? Appearance.m3colors.m3secondary
+                              : Appearance.m3colors.m3secondaryContainer)
+                           : Appearance.m3colors.m3onSecondaryContainer
+                    text: player && player.playbackState === MprisPlaybackState.Playing
+                          ? "pause" : "play_arrow"
                 }
             }
 
-            // Track info
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: 0
-
-                StyledText {
-                    Layout.fillWidth: true
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    font.weight: Font.Medium
-                    color: blendedColors.colOnLayer0
-                    elide: Text.ElideRight
-                    text: StringUtils.cleanMusicTitle(player?.trackTitle) || "No Title"
-                }
-                
-                StyledText {
-                    Layout.fillWidth: true
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: blendedColors.colSubtext
-                    elide: Text.ElideRight
-                    text: player?.trackArtist || "Unknown Artist"
-                }
-            }
-
-            // Progress indicator (mini)
-            Rectangle {
-                Layout.preferredWidth: 2
-                Layout.fillHeight: true
-                color: blendedColors.colSecondaryContainer
-                radius: 1
-                
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: parent.width
-                    height: parent.height * (player?.position / Math.max(player?.length, 1) || 0)
-                    color: blendedColors.colPrimary
-                    radius: parent.radius
-                    
-                    Behavior on height {
-                        NumberAnimation { duration: 200 }
-                    }
-                }
-            }
-
-            // Controls
-            RowLayout {
-                spacing: 4
-                
-                DockButton {
-                    iconName: "skip_previous"
-                    onClicked: player?.previous()
-                }
-                
-                RippleButton {
-                    implicitWidth: 36
-                    implicitHeight: 36
-                    buttonRadius: 18
-                    
-                    colBackground: player?.isPlaying ? blendedColors.colPrimary : blendedColors.colSecondaryContainer
-                    colBackgroundHover: player?.isPlaying ? blendedColors.colPrimaryHover : blendedColors.colSecondaryContainerHover
-                    colRipple: player?.isPlaying ? blendedColors.colPrimaryActive : blendedColors.colSecondaryContainerActive
-                    
-                    onClicked: player?.togglePlaying()
-                    
-                    contentItem: MaterialSymbol {
-                        iconSize: Appearance.font.pixelSize.large
-                        horizontalAlignment: Text.AlignHCenter
-                        color: player?.isPlaying ? blendedColors.colOnPrimary : blendedColors.colOnSecondaryContainer
-                        text: player?.isPlaying ? "pause" : "play_arrow"
-                    }
-                }
-                
-                DockButton {
-                    iconName: "skip_next"
-                    onClicked: player?.next()
-                }
+            DockMediaButton {
+                iconName: "skip_next"
+                enabled: !!player; opacity: player ? 1 : 0.5
+                onClicked: player && player.next()
             }
         }
     }
-    
-    // Hover effect for more info
-    MouseArea {
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.NoButton
-        
-        ToolTip {
-            visible: parent.containsMouse && player?.trackTitle
-            text: `${player?.trackTitle || "Unknown"}\n${player?.trackArtist || "Unknown Artist"}\n${StringUtils.friendlyTimeForSeconds(player?.position)} / ${StringUtils.friendlyTimeForSeconds(player?.length)}`
-            delay: 800
-        }
-    }
+
+    Behavior on implicitWidth { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 }

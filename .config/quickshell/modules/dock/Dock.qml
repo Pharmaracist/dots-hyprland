@@ -1,4 +1,4 @@
-// Refactored Dock.qml - Cleaner and more concise
+// Fixed Dock.qml with proper auto-hide behavior
 import "root:/"
 import "root:/services"
 import "root:/modules/common"
@@ -19,10 +19,13 @@ Scope {
     id: root
     
     property bool pinned: PersistentStates.dock.pinned
-    property bool showPowerMenu: false
+    property int currentContent: 0 // 0: media player, 1: apps, 2: power menu
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-    property real commonRadius:Appearance.rounding.screenRounding + 5
+    property real commonRadius: Appearance.rounding.screenRounding + 5
+    
+    readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu]
+    
     Variants {
         model: pinned ? Quickshell.screens : [focusedScreen]
 
@@ -37,7 +40,7 @@ Scope {
                 
                 property bool shouldReveal: root.pinned
                     || (ConfigOptions?.dock.hoverToReveal && mouseArea.containsMouse)
-                    || (contentLoader.item?.requestDockShow)
+                    || (contentLoader.item && contentLoader.item.requestDockShow === true)
                     || (!ToplevelManager.activeToplevel?.activated)
 
                 anchors { bottom: true; left: true; right: true }
@@ -109,9 +112,12 @@ Scope {
                                 spacing: 5
 
                                 DockPinButton {
+                                    visible: root.currentContent == 1 // Hide when showing apps
                                     pinned: root.pinned
                                     onTogglePin: PersistentStateManager.setState("dock.pinned", !root.pinned)
-                                    onTogglePowerMenu: root.showPowerMenu = !root.showPowerMenu
+                                    onTogglePowerMenu: {
+                                        root.currentContent = (root.currentContent + 1) % root.contentComponents.length
+                                    }
                                 }
 
                                 Loader {
@@ -121,11 +127,13 @@ Scope {
                                     Layout.minimumHeight: 45
                                     Layout.preferredHeight: 40
                                     
-                                    sourceComponent: root.showPowerMenu ? powerMenu : normalDock
+                                    sourceComponent: root.contentComponents[root.currentContent]
                                     
                                     Connections {
                                         target: root
-                                        function onShowPowerMenuChanged() { switchContent.start() }
+                                        function onCurrentContentChanged() { 
+                                            switchContent.start() 
+                                        }
                                     }
 
                                     onLoaded: scaleIn.start()
@@ -135,12 +143,14 @@ Scope {
                                         PropertyAnimation {
                                             target: contentLoader
                                             property: "scale"
-                                            from:0.9
+                                            from: 0.9
                                             to: 1
                                             duration: 100
                                         }
                                         ScriptAction {
-                                            script: contentLoader.sourceComponent = root.showPowerMenu ? powerMenu : normalDock
+                                            script: {
+                                                contentLoader.sourceComponent = root.contentComponents[root.currentContent]
+                                            }
                                         }
                                     }
 
@@ -148,7 +158,8 @@ Scope {
                                         id: scaleIn
                                         target: contentLoader
                                         property: "scale"
-                                        from: 0.2; to: 1.0
+                                        from: 0.2
+                                        to: 1.0
                                         duration: 100
                                         easing.type: Easing.OutBack
                                     }
@@ -183,10 +194,10 @@ Scope {
             }
         }
     }
+    
     GlobalShortcut {
         name: "dockPinToggle"
-        description: qsTr("Toggle Dock Content")
-
+        description: qsTr("Toggle Dock Pin")
         onPressed: {
             PersistentStateManager.setState("dock.pinned", !root.pinned)
         }
@@ -194,22 +205,50 @@ Scope {
 
     GlobalShortcut {
         name: "dockContentToggle"
-        description: qsTr("Toggle Dock Content")
-
+        description: qsTr("Cycle Dock Content")
         onPressed: {
-            root.showPowerMenu = !root.showPowerMenu
+            root.currentContent = (root.currentContent + 1) % root.contentComponents.length
         }
     }
+    
+    GlobalShortcut {
+        name: "dockMediaControlToggle"
+        description: qsTr("Toggle Media Player")
+        onPressed: {
+            root.currentContent = root.currentContent === 0 ? 1 : 0
+        }
+    }
+
+    GlobalShortcut {
+        name: "dockSessionToggle"
+        description: qsTr("Toggle Power Menu")
+        onPressed: {
+            root.currentContent = root.currentContent === 2 ? 1 : 2
+        }
+    }
+    
     // Components
     Component {
         id: normalDock
-        DockApps { anchors.fill: parent }
+        DockApps { 
+            anchors.fill: parent
+            property bool requestDockShow: false
+        }
     }
 
     Component {
         id: powerMenu
-        DockPowerMenu { anchors.fill: parent }
+        DockPowerMenu { 
+            anchors.fill: parent
+            property bool requestDockShow: false
+        }
     }
-
-
+    
+    Component {
+        id: mediaPlayer
+        DockMediaPlayer { 
+            anchors.fill: parent
+            property bool requestDockShow: true
+        }
+    }
 }
