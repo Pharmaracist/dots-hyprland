@@ -23,10 +23,10 @@ Item {
     property list<bool> workspaceOccupied: []
     property int widgetPadding: 0
     property int workspaceButtonHeight: 27
-    property real workspaceIconSize: workspaceButtonHeight * 0.66
-    property real workspaceIconSizeShrinked: workspaceButtonHeight * 0.55
+    property real workspaceIconSize: workspaceButtonHeight * 0.6
+    property real workspaceIconSizeShrinked: workspaceButtonHeight * 0.5 
     property real workspaceIconOpacityShrinked: 1
-    property real workspaceIconMarginShrinked: -3
+    property real workspaceIconMarginShrinked: -6 // how far will the icon goes
     property int workspaceIndexInGroup: (monitor.activeWorkspace?.id - 1) % ConfigOptions.bar.workspaces.shown
 
     function updateWorkspaceOccupied() {
@@ -194,9 +194,9 @@ Item {
                         anchors.bottom: parent.bottom
                         anchors.right: parent.right
                         anchors.bottomMargin: (!GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
-                            (workspaceButtonHeight - workspaceIconSize) / 1.5 : workspaceIconMarginShrinked
+                            (workspaceButtonHeight - workspaceIconSize) / 1.8 : workspaceIconMarginShrinked
                         anchors.rightMargin: (!GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
-                            (workspaceButtonHeight - workspaceIconSize) / 0.75 : workspaceIconMarginShrinked
+                            (workspaceButtonHeight - workspaceIconSize) / 1.2 : workspaceIconMarginShrinked
 
                         opacity: (workspaceButtonBackground.biggestWindow && !GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
                             1 : workspaceButtonBackground.biggestWindow ? workspaceIconOpacityShrinked : 0
