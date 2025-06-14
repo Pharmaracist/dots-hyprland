@@ -46,18 +46,17 @@ Item {
             updateWorkspaceOccupied();
         }
     }
-
-    Layout.fillHeight: true
+    
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
-    implicitHeight: 40
+    implicitHeight: barHeight
 
     // Background
     Rectangle {
         z: 0
         anchors.centerIn: parent
-        implicitHeight: 32
-        implicitWidth: rowLayout.implicitWidth + widgetPadding * 2
-        radius: Appearance.rounding.small
+        implicitHeight: barHeight
+        implicitWidth: rowLayout.implicitWidth + widgetPadding * 3
+        radius: commonRadius ?? Appearance.rounding.small
         color: borderless ? "transparent" : Appearance.colors.colLayer1
     }
 

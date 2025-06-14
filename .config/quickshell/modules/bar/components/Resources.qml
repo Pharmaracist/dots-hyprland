@@ -10,7 +10,7 @@ import Quickshell.Services.Mpris
 Rectangle {
     property bool borderless : ConfigOptions.appearance.borderless
     implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
-    implicitHeight: 32
+    implicitHeight: barHeight
     color: borderless ? "transparent" : Appearance.colors.colLayer1
     radius: Appearance.rounding.small
 
@@ -19,8 +19,8 @@ Rectangle {
 
         spacing: 0
         anchors.fill: parent
-        anchors.leftMargin: 4
-        anchors.rightMargin: 4
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
 
         Resource {
             iconName: "memory"

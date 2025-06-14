@@ -10,9 +10,9 @@ import Quickshell.Services.Pipewire
 Rectangle {
     id: root
     property bool borderless: ConfigOptions.bar.borderless
-    Layout.alignment: Qt.AlignVCenter
+    Layout.alignment: Qt.AlignVCenter 
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
-    implicitHeight: 32
+    implicitHeight: barHeight
     color: borderless ? "transparent" : Appearance.colors.colLayer1
     radius: Appearance.rounding.small
 
@@ -53,22 +53,6 @@ Rectangle {
                  }
              }
          }
-
-        Loader {
-            active: ConfigOptions.bar.utilButtons.showKeyboardToggle
-            visible: ConfigOptions.bar.utilButtons.showKeyboardToggle
-            sourceComponent: CircleUtilButton {
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: Hyprland.dispatch("global quickshell:oskToggle")
-                MaterialSymbol {
-                    horizontalAlignment: Qt.AlignHCenter
-                    fill: 0
-                    text: "keyboard"
-                    iconSize: Appearance.font.pixelSize.large
-                    color: Appearance.colors.colOnLayer2
-                }
-            }
-        }
 
         Loader {
             active: ConfigOptions.bar.utilButtons.showMicToggle

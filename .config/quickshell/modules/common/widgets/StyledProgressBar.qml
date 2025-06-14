@@ -30,7 +30,7 @@ ProgressBar {
     Behavior on value {
         animation: Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
-    
+
     background: Rectangle {
         anchors.fill: parent
         color: "transparent"
@@ -40,8 +40,7 @@ ProgressBar {
     }
 
     contentItem: Item {
-        implicitWidth: parent.width
-        implicitHeight: parent.height
+        anchors.fill: parent
 
         Canvas {
             id: wavyFill
@@ -68,7 +67,7 @@ ProgressBar {
                 ctx.beginPath();
                 for (var x = ctx.lineWidth / 2; x <= fillWidth; x += 1) {
                     var waveY = centerY + amplitude * Math.sin(frequency * 2 * Math.PI * x / width + phase);
-                    if (x === 0)
+                    if (x === ctx.lineWidth / 2)
                         ctx.moveTo(x, waveY);
                     else
                         ctx.lineTo(x, waveY);
@@ -87,6 +86,7 @@ ProgressBar {
                 onTriggered: wavyFill.requestPaint()
             }
         }
+
         Rectangle { // Right remaining part fill
             anchors.right: parent.right
             width: (1 - root.visualPosition) * parent.width - valueBarGap
@@ -94,6 +94,7 @@ ProgressBar {
             radius: Appearance?.rounding.full ?? 9999
             color: root.trackColor
         }
+
         Rectangle { // Stop point
             anchors.right: parent.right
             width: valueBarGap

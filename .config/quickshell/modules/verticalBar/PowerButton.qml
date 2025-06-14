@@ -17,8 +17,8 @@ Item {
         id: background
 
         radius: Appearance.rounding.full
-        implicitWidth: powerIcon.implicitWidth + 12
-        implicitHeight: powerIcon.implicitHeight + 12
+        implicitWidth: powerIcon.implicitWidth + 10
+        implicitHeight: powerIcon.implicitHeight + 10
         color: hovered ? Qt.darker(Appearance.colors.colLayer1, 1.2) : Appearance.colors.colLayer1
         antialiasing: true
 

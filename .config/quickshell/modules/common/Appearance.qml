@@ -305,7 +305,7 @@ Singleton {
         property real fabShadowRadius: 5
         property real fabHoveredShadowRadius: 7
         property real floatingMargin: 7
-        property real frameThickness: 6
+        property real frameThickness: 7
 
     }
 

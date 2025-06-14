@@ -33,8 +33,6 @@ Item {
         radius: Appearance.rounding.full
         color: Appearance.m3colors.m3secondaryContainer
         scale: hovered ? 1.1 : 1
-        antialiasing: true
-        // ❗ Provide implicit sizing for layout system
         implicitWidth: width
         implicitHeight: height
 

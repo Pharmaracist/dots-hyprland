@@ -11,13 +11,12 @@ import Quickshell.Hyprland
 
 Item {
     id: root
-    property bool borderless : ConfigOptions.appearance.borderless
+    property bool borderless : false // ConfigOptions.appearance.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || qsTr("No media")
 
     Layout.fillHeight: true
-    implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
-    implicitHeight: 40
+    Layout.fillWidth: true
 
     Timer {
         running: activePlayer?.playbackState == MprisPlaybackState.Playing
@@ -42,13 +41,6 @@ Item {
         }
     }
 
-    Rectangle { // Background
-        anchors.centerIn: parent
-        width: parent.width
-        implicitHeight: 32
-        color: borderless ? "transparent" : Appearance.colors.colLayer1
-        radius: Appearance.rounding.small
-    }
 
     RowLayout { // Real content
         id: rowLayout

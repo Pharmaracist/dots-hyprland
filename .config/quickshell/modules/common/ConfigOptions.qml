@@ -68,7 +68,6 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
-        property real height: 60
         property bool exclusiveDock: false
         property real hoverRegionHeight: 5
         property bool hoverToReveal: true // When false, only reveals on empty workspace

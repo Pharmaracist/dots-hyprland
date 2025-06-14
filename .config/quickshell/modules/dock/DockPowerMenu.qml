@@ -10,8 +10,6 @@ import "root:/modules/common/widgets"
 RowLayout {
     id: powerMenuRoot
 
-    property real padding: 20
-
     spacing: 8
 
     Repeater {

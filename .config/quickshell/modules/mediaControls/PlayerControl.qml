@@ -140,9 +140,9 @@ Item { // Player instance
             layer.enabled: true
             layer.effect: MultiEffect {
                 source: blurredArt
-                saturation: 0.2
+                saturation: 0.4
                 blurEnabled: true
-                blurMax: 100
+                blurMax: 30
                 blur: 1
             }
 
