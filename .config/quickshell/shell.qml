@@ -7,6 +7,7 @@ import "./modules/bar/"
 import "./modules/common/"
 import "./modules/desktopbackground/"
 import "./modules/dock/"
+import "./modules/launcher/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
@@ -25,6 +26,7 @@ import Quickshell
 
 ShellRoot {
     // Enable/disable modules here
+    property bool enableLauncher: true
     property bool enableVerticalBar: ConfigOptions.bar.verticalMode | PersistentStates.bar.verticalMode
     property bool enableBar: !enableVerticalBar
     property bool enableDock: true
@@ -33,7 +35,6 @@ ShellRoot {
     property bool enableOnScreenDisplayBrightness: false
     property bool enableOnScreenDisplayVolume: false
     property bool enableOverview: true
-    property bool enableLauncher: true
     property bool enableWallpaperSelector: true
     property bool enableReloadPopup: true
     property bool enableScreenCorners: true
@@ -84,6 +85,13 @@ ShellRoot {
 
     }
 
+    LazyLoader {
+        active: enableLauncher
+
+        component: Launcher {
+        }
+
+    }
     LazyLoader {
         active: enableBar
 

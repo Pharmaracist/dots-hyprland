@@ -47,48 +47,9 @@ Scope {
                 bottom: true
             }
 
-            HyprlandFocusGrab {
-                id: grab
-                windows: [ root ]
-                property bool canBeActive: root.monitorIsFocused
-                active: false
-                onCleared: () => {
-                    if (!active) GlobalStates.overviewOpen = false
-                }
-            }
-
-            Connections {
-                target: GlobalStates
-                function onOverviewOpenChanged() {
-                    if (!GlobalStates.overviewOpen) {
-                        searchWidget.disableExpandAnimation()
-                        overviewScope.dontAutoCancelSearch = false;
-                    } else {
-                        if (!overviewScope.dontAutoCancelSearch) {
-                            searchWidget.cancelSearch()
-                        }
-                        delayedGrabTimer.start()
-                    }
-                }
-            }
-
-            Timer {
-                id: delayedGrabTimer
-                interval: ConfigOptions.hacks.arbitraryRaceConditionDelay
-                repeat: false
-                onTriggered: {
-                    if (!grab.canBeActive) return
-                    grab.active = GlobalStates.overviewOpen
-                }
-            }
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-
-            function setSearchingText(text) {
-                searchWidget.setSearchingText(text);
-            }
-
             ColumnLayout {
                 id: columnLayout
                 visible: GlobalStates.overviewOpen
@@ -110,17 +71,9 @@ Scope {
                     width: 1 // Prevent Wayland protocol error
                 }
 
-                SearchWidget {
-                    id: searchWidget
-                    Layout.alignment: Qt.AlignHCenter
-                    onSearchingTextChanged: (text) => {
-                        root.searchingText = searchingText
-                    }
-                }
-
                 Loader {
                     id: overviewLoader
-                    active: enableOverview
+                    active: true
                     sourceComponent: OverviewWidget {
                         panelWindow: root
                         visible: (root.searchingText == "")

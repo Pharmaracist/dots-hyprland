@@ -324,16 +324,6 @@ Item {
             anchors.centerIn: parent
             spacing: 8
             
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: {
-                    if (root.isVideo) return "🎥"
-                    if (root.isGif) return "🎞️"
-                    return "🖼️"
-                }
-                font.pixelSize: 24
-                color: Appearance.colors.colOnLayer1
-            }
             
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter

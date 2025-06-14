@@ -3,6 +3,8 @@ import "root:/"
 import "root:/services"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
+import "root:/modules/dock/dockComponents"
+import "root:/modules/dock/dockContent"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
@@ -20,7 +22,7 @@ Scope {
     property bool showPowerMenu: false
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-
+    property real commonRadius:Appearance.rounding.screenRounding + 5
     Variants {
         model: pinned ? Quickshell.screens : [focusedScreen]
 
@@ -95,8 +97,8 @@ Scope {
                             
                             color: Appearance.colors.colLayer0
                             radius: 0
-                            topRightRadius: Appearance.rounding.screenRounding
-                            topLeftRadius: Appearance.rounding.screenRounding
+                            topRightRadius: commonRadius
+                            topLeftRadius: commonRadius
 
                             RowLayout {
                                 id: dockRow
@@ -116,8 +118,8 @@ Scope {
                                     id: contentLoader
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    Layout.minimumHeight: ConfigOptions.dock.height ?? 50
-                                    Layout.preferredHeight: ConfigOptions.dock.height ?? 50
+                                    Layout.minimumHeight: 45
+                                    Layout.preferredHeight: 40
                                     
                                     sourceComponent: root.showPowerMenu ? powerMenu : normalDock
                                     
@@ -133,8 +135,9 @@ Scope {
                                         PropertyAnimation {
                                             target: contentLoader
                                             property: "scale"
-                                            to: 0.94
-                                            duration: 120
+                                            from:0.9
+                                            to: 1
+                                            duration: 100
                                         }
                                         ScriptAction {
                                             script: contentLoader.sourceComponent = root.showPowerMenu ? powerMenu : normalDock
@@ -145,8 +148,8 @@ Scope {
                                         id: scaleIn
                                         target: contentLoader
                                         property: "scale"
-                                        from: 1.08; to: 1.0
-                                        duration: 180
+                                        from: 0.2; to: 1.0
+                                        duration: 100
                                         easing.type: Easing.OutBack
                                     }
                                 }
@@ -155,7 +158,7 @@ Scope {
 
                         // Corner decorations
                         RoundCorner {
-                            size: Appearance.rounding.screenRounding
+                            size: commonRadius
                             corner: cornerEnum.bottomLeft
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -166,7 +169,7 @@ Scope {
                         }
 
                         RoundCorner {
-                            size: Appearance.rounding.screenRounding
+                            size: commonRadius
                             corner: cornerEnum.bottomRight
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -180,7 +183,23 @@ Scope {
             }
         }
     }
+    GlobalShortcut {
+        name: "dockPinToggle"
+        description: qsTr("Toggle Dock Content")
 
+        onPressed: {
+            PersistentStateManager.setState("dock.pinned", !root.pinned)
+        }
+    }
+
+    GlobalShortcut {
+        name: "dockContentToggle"
+        description: qsTr("Toggle Dock Content")
+
+        onPressed: {
+            root.showPowerMenu = !root.showPowerMenu
+        }
+    }
     // Components
     Component {
         id: normalDock
@@ -191,4 +210,6 @@ Scope {
         id: powerMenu
         DockPowerMenu { anchors.fill: parent }
     }
+
+
 }

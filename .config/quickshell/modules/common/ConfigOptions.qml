@@ -109,11 +109,13 @@ Singleton {
 
     property QtObject overview: QtObject {
         property real scale: 0.18 // Relative to screen size
-        property bool enableOverview : false 
         property bool showOnMainScreenOnly : true 
         property real numOfRows: 2
         property real numOfCols: 5
         property bool showXwaylandIndicator: true
+    }
+    property QtObject launcher: QtObject {
+        property bool showOnMainScreenOnly : true 
     }
 
     property QtObject resources: QtObject {

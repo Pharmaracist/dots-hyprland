@@ -246,8 +246,9 @@ Item { // Wrapper
                 MaterialSymbol {
                     id: searchIcon
                     Layout.leftMargin: 15
-                    iconSize: Appearance.font.pixelSize.huge
-                    color: Appearance.m3colors.m3onSurface
+                    iconSize: Appearance.font.pixelSize.huge + 10
+                    color: Appearance.m3colors.m3onSurfaceVariant
+                    opacity: 0.8
                     text: root.searchingText.startsWith(ConfigOptions.search.prefix.clipboard) ? 'content_paste_search' : 'search'
                 }
                 TextField { // Search box
@@ -301,7 +302,22 @@ Item { // Wrapper
                 }
 
             }
-
+            Rectangle {
+                id:resultSeparator
+                Layout.fillWidth:true
+                implicitHeight:1
+                Layout.leftMargin: 15
+                Layout.rightMargin: 15
+                color:Appearance.m3colors.m3outline
+                opacity: root.showResults ? 0.3 : 0
+        
+                Behavior on opacity {
+                   NumberAnimation {
+                       duration: 600
+                       easing.type: Easing.InOutQuad
+                   }
+                }       
+            }
             ListView { // App results
                 id: appResults
                 visible: root.showResults

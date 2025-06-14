@@ -24,9 +24,10 @@ Scope {
 
     // Properties
     property string wallpaperPath: Directories.pictures
-    property int widgetHeight: 260
+    property int widgetHeight: expand ? 400 : 260  // Dynamic height based on expand state
     property string wallpaperSelector: FileUtils.trimFileProtocol(Directories.config + "/quickshell/scripts/switchwall.sh")
     property bool isOpen: false
+    property bool expand: true
 
     // Bind local state to global state
     onIsOpenChanged: GlobalStates.wallpaperSelectorOpen = isOpen
@@ -49,6 +50,7 @@ Scope {
             top: true
             right: true
             left: true
+            bottom: expand ?? false
         }
 
         // Content loader
@@ -60,7 +62,6 @@ Scope {
             anchors.fill: parent
             sourceComponent: wallpaperContentComponent
         }
-
     }
 
     // Main wallpaper content component
@@ -71,8 +72,10 @@ Scope {
             id: wallpaperContent
 
             // Constants
-            readonly property int itemWidth: 260
+            readonly property int itemWidth: 200
+            readonly property int itemHeight: 120
             readonly property int itemSpacing: 8
+            readonly property int columns: Math.floor((container.width - 20) / (itemWidth + itemSpacing))
 
             // Shadow effect
             RectangularShadow {
@@ -106,45 +109,89 @@ Scope {
                         margins: 10
                     }
 
-                    // Wallpaper list
-                    ListView {
-                        id: wallpaperList
-
-                        model: wallpaperModel.count
-                        orientation: ListView.Horizontal
-                        spacing: wallpaperContent.itemSpacing
-                        clip: true
-                        cacheBuffer: 3
-                        reuseItems: true
-
+                    // Conditional view based on expand state
+                    Loader {
+                        id: viewLoader
                         anchors {
                             fill: parent
                             margins: 10
                         }
+                        sourceComponent: root.expand ? gridViewComponent : listViewComponent
+                    }
+                }
+            }
 
-                        delegate: WallpaperItem {
-                            width: (container.height * 0.9 * 16) / 9
-                            height: container.height * 0.9
-                            fileUrl: wallpaperModel.getRandomFile(index)
-                            // Lazy loading - only load when item is visible in viewport
-                            isVisible: {
-                                const itemX = x;
-                                const itemRight = x + width;
-                                const viewLeft = wallpaperList.contentX;
-                                const viewRight = wallpaperList.contentX + wallpaperList.width;
-                                // Item is visible if it overlaps with the viewport
-                                return itemRight > viewLeft && itemX < viewRight;
-                            }
-                            onClicked: {
-                                const path = fileUrl.toString().replace("file://", "");
-                                wallpaperRunner.runWallpaperScript(path);
-                            }
+            // List view component (single row when not expanded)
+            Component {
+                id: listViewComponent
+                
+                ListView {
+                    id: wallpaperList
+
+                    model: wallpaperModel.count
+                    orientation: ListView.Horizontal
+                    spacing: wallpaperContent.itemSpacing
+                    clip: true
+                    cacheBuffer: 0  // No caching
+                    reuseItems: false  // Don't reuse items
+
+                    delegate: WallpaperItem {
+                        width: (parent.height * 0.9 * 16) / 9
+                        height: parent.height * 0.9
+                        fileUrl: wallpaperModel.getRandomFile(index)
+                        // Always visible - no lazy loading
+                        isVisible: true
+                        onClicked: {
+                            const path = fileUrl.toString().replace("file://", "");
+                            wallpaperRunner.runWallpaperScript(path);
                         }
+                    }
+                }
+            }
 
+            // Grid view component (multiple rows when expanded)
+            Component {
+                id: gridViewComponent
+                
+                GridView {
+                    id: wallpaperGrid
+
+                    model: wallpaperModel.count
+                    cellWidth: wallpaperContent.itemWidth + wallpaperContent.itemSpacing
+                    cellHeight: wallpaperContent.itemHeight + wallpaperContent.itemSpacing
+                    clip: true
+                    cacheBuffer: 0  // No caching buffer
+                    reuseItems: false  // Don't reuse items to avoid loading delays
+                    
+                    // Enable smooth scrolling
+                    flickDeceleration: 3000
+                    maximumFlickVelocity: 5000
+
+                    // Scrollbar
+                    ScrollBar.vertical: ScrollBar {
+                        policy: wallpaperGrid.contentHeight > wallpaperGrid.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                        anchors.right: parent.right
+                        anchors.rightMargin: 2
                     }
 
-                }
+                    delegate: WallpaperItem {
+                        width: wallpaperContent.itemWidth
+                        height: wallpaperContent.itemHeight
+                        fileUrl: wallpaperModel.getRandomFile(index)
+                        
+                        // Always visible - no lazy loading
+                        isVisible: true
+                        
+                        onClicked: {
+                            const path = fileUrl.toString().replace("file://", "");
+                            wallpaperRunner.runWallpaperScript(path);
+                        }
+                    }
 
+                    // Grid flow from left to right, top to bottom
+                    flow: GridView.FlowLeftToRight
+                    layoutDirection: Qt.LeftToRight
+                }
             }
 
             // Error dialog
@@ -160,7 +207,7 @@ Scope {
 
                 anchors.centerIn: parent
                 width: 300
-                height: mainPanel.height * 0.9
+                height: mainPanel.height * 0.6
                 color: Appearance.colors.colLayer1
                 border.color: Appearance.colors.colOutline
                 border.width: 1
@@ -187,13 +234,9 @@ Scope {
                             GlobalStates.wallpaperSelectorOpen = false;
                         }
                     }
-
                 }
-
             }
-
         }
-
     }
 
     // Wallpaper model
@@ -201,6 +244,7 @@ Scope {
         id: wallpaperModel
 
         property var randomIndices: []
+        property bool shuffled: false
 
         function getRandomFile(index) {
             if (index >= 0 && index < randomIndices.length)
@@ -214,14 +258,16 @@ Scope {
         showDirs: false
         showFiles: true
         sortField: FolderListModel.Unsorted
+        
         onCountChanged: {
-            if (count > 0) {
+            if (count > 0 && !shuffled) {
+                shuffled = true;
                 randomIndices = Array.from({
                     "length": count
                 }, (_, i) => {
                     return i;
                 });
-                // Fisher-Yates shuffle
+                // Fisher-Yates shuffle - only done once
                 for (let i = randomIndices.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [randomIndices[i], randomIndices[j]] = [randomIndices[j], randomIndices[i]];
@@ -243,10 +289,8 @@ Scope {
                 console.error("Failed to run wallpaper script:", error);
                 if (contentLoader.item && contentLoader.item.errorDialog)
                     contentLoader.item.errorDialog.show("Failed to apply wallpaper: " + error);
-
             }
         }
-
     }
 
     // Error handler
@@ -256,9 +300,7 @@ Scope {
         function showError(message) {
             if (contentLoader.item && contentLoader.item.errorDialog)
                 contentLoader.item.errorDialog.show(message);
-
         }
-
     }
 
     // IPC Handler
@@ -297,4 +339,9 @@ Scope {
         onPressed: root.isOpen = false
     }
 
+    GlobalShortcut {
+        name: "wallpaperSelectorExpand"
+        description: qsTr("Expand wallpaper selector on press")
+        onPressed: root.expand = !root.expand
+    }
 }
