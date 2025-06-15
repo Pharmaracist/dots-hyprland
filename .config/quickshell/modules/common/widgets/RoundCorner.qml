@@ -1,4 +1,6 @@
 import QtQuick 2.9
+import "root:/modules/common"
+
 Item {
     id: root
     property int size: 25

@@ -1,4 +1,4 @@
-// Fixed Dock.qml with proper auto-hide behavior
+// Fixed Dock.qml with proper overview sizing
 import "root:/"
 import "root:/services"
 import "root:/modules/common"
@@ -19,12 +19,14 @@ Scope {
     id: root
     
     property bool pinned: PersistentStates.dock.pinned
-    property int currentContent: 0 // 0: media player, 1: apps, 2: power menu
+    property int currentContent: 4 // 0: media player, 1: apps, 2: power menu 3: overview 4: wallpaper selector
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-    property real commonRadius: Appearance.rounding.screenRounding + 5
-    
-    readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu]
+    property real commonRadius: Appearance.rounding.screenRounding + 10
+    property int overviewHeight: 400
+    property int overviewWidth: 1400
+
+    readonly property var contentComponents: [ mediaPlayer,normalDock,powerMenu, overview,wallpaperSelector]
     
     Variants {
         model: pinned ? Quickshell.screens : [focusedScreen]
@@ -45,12 +47,13 @@ Scope {
 
                 anchors { bottom: true; left: true; right: true }
                 
-                exclusiveZone: root.pinned 
+                exclusiveZone:(root.currentContent == 3)? -1 : root.pinned 
                     ? implicitHeight - (Appearance.sizes.hyprlandGapsOut * 2) + frameThickness
                     : -1
                 
+                // Dynamic sizing based on content
                 implicitWidth: background.implicitWidth
-                implicitHeight: 75 + Appearance.sizes.hyprlandGapsOut - frameThickness
+                implicitHeight: background.implicitHeight +  Appearance.sizes.hyprlandGapsOut + frameThickness
                 
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
@@ -83,8 +86,10 @@ Scope {
                     Item {
                         id: background
                         anchors.fill: parent
-                        implicitWidth: dockRow.implicitWidth + 16
-                        implicitHeight: dockRow.implicitHeight + 10
+                        
+                        // Dynamic sizing based on content // 1386 , 340
+                        implicitWidth: ([3, 4].includes(root.currentContent)) ? 1386  : dockRow.implicitWidth + 16
+                        implicitHeight:([3, 4].includes(root.currentContent)) ? 200 : dockRow.implicitHeight + 10
 
                         StyledRectangularShadow { target: dockRect }
 
@@ -100,34 +105,51 @@ Scope {
                             
                             color: Appearance.colors.colLayer0
                             radius: 0
-                            topRightRadius: commonRadius
-                            topLeftRadius: commonRadius
+                            topRightRadius:(root.currentContent == 3) ? 1.25 * commonRadius : commonRadius
+                            topLeftRadius: (root.currentContent == 3) ? 1.25 * commonRadius : commonRadius
 
-                            RowLayout {
-                                id: dockRow
-                                anchors {
-                                    bottom: parent.bottom
-                                    horizontalCenter: parent.horizontalCenter
-                                }
-                                spacing: 5
+                            // Use different layouts for overview vs normal content
+                            Item {
+                                anchors.fill: parent
+                                
+                                // Normal dock row (hidden when showing overview)
+                                RowLayout {
+                                    id: dockRow
+                                    anchors {
+                                        bottom: parent.bottom
+                                        horizontalCenter: parent.horizontalCenter
+                                    }
+                                    spacing: 5
+                                    visible: !([3, 4].includes(root.currentContent))
 
-                                DockPinButton {
-                                    visible: root.currentContent == 1 // Hide when showing apps
-                                    pinned: root.pinned
-                                    onTogglePin: PersistentStateManager.setState("dock.pinned", !root.pinned)
-                                    onTogglePowerMenu: {
-                                        root.currentContent = (root.currentContent + 1) % root.contentComponents.length
+                                    DockPinButton {
+                                        visible: root.currentContent == 1 // Show when showing apps
+                                        pinned: root.pinned
+                                        onTogglePin: PersistentStateManager.setState("dock.pinned", !root.pinned)
+                                        onTogglePowerMenu: {
+                                            root.currentContent = (root.currentContent + 1) % root.contentComponents.length
+                                        }
+                                    }
+
+                                    Loader {
+                                        id: normalContentLoader
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+                                        Layout.minimumHeight: 45
+                                        Layout.preferredHeight: 40
+                                        
+                                        sourceComponent: !([3, 4].includes(root.currentContent)) ? root.contentComponents[root.currentContent] : null
                                     }
                                 }
-
+                                
+                                // Overview content (full size)
                                 Loader {
                                     id: contentLoader
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    Layout.minimumHeight: 45
-                                    Layout.preferredHeight: 40
+                                    anchors.fill: parent
+                                    anchors.margins: ([3, 4].includes(root.currentContent)) ? 10 : 0
                                     
-                                    sourceComponent: root.contentComponents[root.currentContent]
+                                    sourceComponent: ([3, 4].includes(root.currentContent)) ? root.contentComponents[root.currentContent] : null
+                                    visible: ([3, 4].includes(root.currentContent))
                                     
                                     Connections {
                                         target: root
@@ -136,8 +158,13 @@ Scope {
                                         }
                                     }
 
-                                    onLoaded: scaleIn.start()
-
+                                    onLoaded: {
+                                           if (item && root.currentContent === 3)
+                                               item.panelWindow = dock
+                                                root.overviewHeight = (dock.screen.height / 5) ?? 1410
+                                                root.overviewWidth = (dock.screen.width * 1.34) ?? 330
+                                                GlobalStates.overviewOpen = true
+                                       }
                                     SequentialAnimation {
                                         id: switchContent
                                         PropertyAnimation {
@@ -146,11 +173,6 @@ Scope {
                                             from: 0.9
                                             to: 1
                                             duration: 100
-                                        }
-                                        ScriptAction {
-                                            script: {
-                                                contentLoader.sourceComponent = root.contentComponents[root.currentContent]
-                                            }
                                         }
                                     }
 
@@ -167,9 +189,9 @@ Scope {
                             }
                         }
 
-                        // Corner decorations
+                        // Corner decorations (only show for normal dock)
                         RoundCorner {
-                            size: commonRadius
+                            size: (root.currentContent == 3) ? 1.76 * commonRadius : commonRadius
                             corner: cornerEnum.bottomLeft
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -180,7 +202,7 @@ Scope {
                         }
 
                         RoundCorner {
-                            size: commonRadius
+                            size: (root.currentContent == 3) ? 1.76 * commonRadius : commonRadius
                             corner: cornerEnum.bottomRight
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -195,6 +217,7 @@ Scope {
         }
     }
     
+    // Shortcuts remain the same...
     GlobalShortcut {
         name: "dockPinToggle"
         description: qsTr("Toggle Dock Pin")
@@ -202,7 +225,22 @@ Scope {
             PersistentStateManager.setState("dock.pinned", !root.pinned)
         }
     }
+     GlobalShortcut {
+        name: "overviewToggle"
+        description: qsTr("Toggle Overveiw Pin")
+        onPressed: {
+            root.currentContent = root.currentContent === 0 ? 3 : 0
+        }
+    }
+    GlobalShortcut {
+        name: "wallpaperSelectorToggle"
+        description: qsTr("Toggle Dock Pin")
+        onPressed: {
+            root.currentContent = root.currentContent === 0 ? 4 : 0
 
+        }
+    }
+    
     GlobalShortcut {
         name: "dockContentToggle"
         description: qsTr("Cycle Dock Content")
@@ -231,7 +269,6 @@ Scope {
     Component {
         id: normalDock
         DockApps { 
-            anchors.fill: parent
             property bool requestDockShow: false
         }
     }
@@ -239,14 +276,29 @@ Scope {
     Component {
         id: powerMenu
         DockPowerMenu { 
-            anchors.fill: parent
             property bool requestDockShow: false
+        }
+    }
+
+    Component {
+        id: overview
+        OverviewWidget {
+            panelWindow: dock
+            property bool requestDockShow: true
+            anchors.centerIn: parent
         }
     }
     
     Component {
         id: mediaPlayer
         DockMediaPlayer { 
+            property bool requestDockShow: true
+        }
+    }
+
+    Component {
+        id: wallpaperSelector
+        WallpaperSelector { 
             anchors.fill: parent
             property bool requestDockShow: true
         }

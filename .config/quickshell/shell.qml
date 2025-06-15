@@ -34,7 +34,6 @@ ShellRoot {
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: false
     property bool enableOnScreenDisplayVolume: false
-    property bool enableOverview: true
     property bool enableWallpaperSelector: true
     property bool enableReloadPopup: true
     property bool enableScreenCorners: true
@@ -136,14 +135,6 @@ ShellRoot {
         active: enableOnScreenDisplayVolume
 
         component: OnScreenDisplayVolume {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableOverview
-
-        component: Overview {
         }
 
     }

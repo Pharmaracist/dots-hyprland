@@ -2,6 +2,7 @@ import "root:/"
 import "root:/services/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
+import "root:/modules/dock/dockComponents"
 import "root:/modules/common/functions/color_utils.js" as ColorUtils
 import Qt5Compat.GraphicalEffects
 import QtQuick
@@ -50,7 +51,7 @@ Item { // Window
         maskSource: Rectangle {
             width: root.width
             height: root.height
-            radius: Appearance.rounding.windowRounding * root.scale
+            radius: Appearance.rounding.windowRounding 
         }
     }
 
@@ -75,7 +76,7 @@ Item { // Window
 
         Rectangle {
             anchors.fill: parent
-            radius: Appearance.rounding.windowRounding * root.scale
+            radius: Appearance.rounding.windowRounding 
             color: pressed ? ColorUtils.transparentize(Appearance.colors.colLayer2Active, 0.5) : 
                 hovered ? ColorUtils.transparentize(Appearance.colors.colLayer2Hover, 0.7) : 
                 ColorUtils.transparentize(Appearance.colors.colLayer2)

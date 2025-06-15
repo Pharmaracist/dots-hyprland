@@ -23,29 +23,31 @@ Item {
         return Math.max(0, Math.min(1, player.position / player.length))
     }
 
-    implicitHeight: 80
-    implicitWidth: 600
+    implicitHeight: 43
+    implicitWidth: 450
     visible: true
 
     // ─────── Blurred Background Art ───────
     Image {
         id: blurredArt
         anchors.fill: parent
+        anchors.margins:3
         source: player && player.trackArtUrl ? player.trackArtUrl : ""
         sourceSize.width: width
         sourceSize.height: height
         fillMode: Image.PreserveAspectCrop
         cache: false
-        antialiasing: true
+        antialiasing: false
         asynchronous: true
+        mipmap: true
         visible: source !== ""
 
         layer.enabled: true
         layer.effect: MultiEffect {
             source: blurredArt
-            saturation: 0.1
+            saturation: 0.05
             blurEnabled: true
-            blurMax: 60
+            blurMax: 30
             blur: 1
         }
 
@@ -210,10 +212,8 @@ Item {
                     fill: 1
                     horizontalAlignment: Text.AlignHCenter
                     color: player && player.playbackState === MprisPlaybackState.Playing
-                           ? (progressRatio > 0.85
-                              ? Appearance.m3colors.m3secondary
-                              : Appearance.m3colors.m3secondaryContainer)
-                           : Appearance.m3colors.m3onSecondaryContainer
+                           ? Appearance.m3colors.m3onSecondary
+                              : Appearance.m3colors.m3onSecondaryContainer
                     text: player && player.playbackState === MprisPlaybackState.Playing
                           ? "pause" : "play_arrow"
                 }

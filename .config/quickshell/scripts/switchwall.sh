@@ -202,7 +202,7 @@ switch() {
             generate_colors_material_args=(--path "$imgpath")
             # Set wallpaper with swww
             swww img "$imgpath" --resize "${backgroundMode}" --transition-step 100 --transition-fps 120 \
-                --transition-type fade --transition-angle 30 --transition-duration 1.5 \
+                --transition-type fade --transition-duration 0.3 \
                 # --transition-pos "$cursorposx, $cursorposy_inverted"
             remove_restore
         fi
