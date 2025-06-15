@@ -74,7 +74,7 @@ RowLayout {
                 } else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) {
                     activePlayer.next();
                 } else if (event.button === Qt.LeftButton) {
-                    Hyprland.dispatch("global quickshell:mediaControlsToggle")
+                    Hyprland.dispatch("global quickshell:quickshell:dockMediaControlToggle")
                 }
             }
     }
