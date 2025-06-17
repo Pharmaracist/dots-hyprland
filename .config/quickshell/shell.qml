@@ -11,12 +11,10 @@ import "./modules/launcher/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
-import "./modules/overview/"
 import "./modules/screenCorners/"
 import "./modules/sidebarLeft/"
 import "./modules/sidebarRight/"
 import "./modules/verticalBar/"
-import "./modules/wallpaper/"
 import "./services/"
 import QtQuick
 import QtQuick.Controls
@@ -34,13 +32,12 @@ ShellRoot {
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: false
     property bool enableOnScreenDisplayVolume: false
-    property bool enableWallpaperSelector: true
     property bool enableReloadPopup: true
     property bool enableScreenCorners: true
     property bool enableSidebarLeft: true
     property bool enableSidebarRight: true
-    property bool enableNothingClock: true
-    property bool enableActivateLinux: true
+    property bool enableNothingClock: false
+    property bool enableActivateLinux: false
     property bool enableScreenFrame: enableVerticalBar
 
     // Force initialization of some singletons
@@ -56,14 +53,6 @@ ShellRoot {
         active: enableVerticalBar
 
         component: VerticalBar {
-        }
-
-    }
-
-    LazyLoader {
-        active: enableWallpaperSelector
-
-        component: WallpaperSelector {
         }
 
     }

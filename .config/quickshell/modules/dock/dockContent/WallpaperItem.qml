@@ -4,6 +4,7 @@ import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import QtQuick.Effects
 import "root:/modules/common"
+import "root:/"
 
 Item {
     id: root

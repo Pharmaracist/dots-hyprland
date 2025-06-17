@@ -1,4 +1,4 @@
-// Performance-optimized Dock.qml with minimal, essential animations
+// Performance-optimized Dock.qml with fixed toggles and refactored structure
 import "root:/"
 import "root:/services"
 import "root:/modules/common"
@@ -18,32 +18,78 @@ import Quickshell.Hyprland
 Scope {
     id: root
     
+    // Default sizes for normal content
+    property int defaultDockWidth: 380
+    property int defaultDockHeight: 72
+    property int defaultBackgroundWidth: 400
+    property int defaultBackgroundHeight: 60
+    
+    // Core properties
     property bool pinned: PersistentStates.dock.pinned
-    property int currentContent: 1 // 0: media player, 1: apps, 2: power menu 3: overview 4: wallpaper selector
-    property int defaultContent: 1 // Default mode to return to
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-    property real commonRadius: Appearance.rounding.screenRounding + 10
-    property int overviewHeight: 400
-    property int overviewWidth: 1400
-    property bool animating: false // Prevent multiple animations
+    property real commonRadius: Appearance.rounding.screenRounding 
     
-    // Auto-return timer configuration
-    property int autoReturnDelay: 3000
-    property var autoReturnExceptions: [1, 3] // Modes that don't auto-return (apps, overview)
+    // Content management
+    property int currentContent: contentType.apps
+    property int previousContent: contentType.apps
+    readonly property int defaultContent: contentType.apps
     
+    // Content type enumeration for better maintainability
+    readonly property QtObject contentType: QtObject {
+        readonly property int mediaPlayer: 0
+        readonly property int apps: 1
+        readonly property int powerMenu: 2
+        readonly property int overview: 3
+        readonly property int wallpaperSelector: 4
+    }
+    
+    // Auto-return configuration
+    property int autoReturnDelay: 10000
+    readonly property var autoReturnExceptions: [contentType.apps, contentType.overview]
+    
+    // Content components array
     readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu, overview, wallpaperSelector]
     
-    // Timer for auto-return to default mode
+    // Computed properties for layout
+    readonly property bool isSpecialContent: currentContent === contentType.overview || currentContent === contentType.wallpaperSelector
+    readonly property bool isOverviewMode: currentContent === contentType.overview
+    readonly property bool isWallpaperMode: currentContent === contentType.wallpaperSelector
+    
+    // Content management functions
+    function switchToContent(newContent) {
+        if (newContent !== currentContent) {
+            previousContent = currentContent
+            currentContent = newContent
+        }
+    }
+    
+    function toggleContent(targetContent) {
+        if (currentContent === targetContent) {
+            switchToContent(defaultContent)
+        } else {
+            switchToContent(targetContent)
+        }
+    }
+    
+    function cycleContent() {
+        const nextContent = (currentContent + 1) % contentComponents.length
+        switchToContent(nextContent)
+    }
+    
+    function resetToDefault() {
+        switchToContent(defaultContent)
+    }
+    
+    // Auto-return timer management
     Timer {
         id: autoReturnTimer
         interval: root.autoReturnDelay
         repeat: false
-        running: false
         
         onTriggered: {
             if (!root.autoReturnExceptions.includes(root.currentContent)) {
-                root.currentContent = root.defaultContent
+                root.resetToDefault()
             }
         }
     }
@@ -56,8 +102,28 @@ Scope {
         }
     }
     
+    // Auto-reset timer when content changes
     onCurrentContentChanged: {
         resetAutoReturnTimer()
+        
+        // Handle special state changes
+        if (currentContent === contentType.overview) {
+            GlobalStates.overviewOpen = true
+        } else if (previousContent === contentType.overview) {
+            GlobalStates.overviewOpen = false
+        }
+    }
+    
+    function calculateCornerSize() {
+        return isOverviewMode ? 1.76 * commonRadius : commonRadius
+    }
+    
+    function calculateTopLeftRadius() {
+        return isOverviewMode ? 1.25 * commonRadius : commonRadius
+    }
+    
+    function calculateTopRightRadius() {
+        return isOverviewMode ? 1.25 * commonRadius : commonRadius
     }
     
     Variants {
@@ -79,21 +145,24 @@ Scope {
 
                 anchors { bottom: true; left: true; right: true }
                 
-                // Simplified exclusiveZone - no elevation issues
                 exclusiveZone: root.pinned 
                     ? implicitHeight - (Appearance.sizes.hyprlandGapsOut * 2) + frameThickness
                     : -1
                 
-                // Animated sizing for smooth transitions
+                // Dynamic sizing based on content
                 implicitWidth: {
-                    if (root.currentContent == 3) return 1386
-                    if (root.currentContent == 4) return 1440
-                    return (dockRow.implicitWidth + 16)
+                    switch (root.currentContent) {
+                        case root.contentType.overview: return 1386
+                        case root.contentType.wallpaperSelector: return (screen.width * 0.9)
+                        default: return Math.max(dockRow.implicitWidth + 16, root.defaultDockWidth)
+                    }
                 }
                 implicitHeight: {
-                    if (root.currentContent == 3) return 355
-                    if (root.currentContent == 4) return 200
-                    return (dockRow.implicitHeight + 20)
+                    switch (root.currentContent) {
+                        case root.contentType.overview: return 370
+                        case root.contentType.wallpaperSelector: return 230
+                        default: return Math.max(dockRow.implicitHeight + 32, root.defaultDockHeight)
+                    }
                 }
                 
                 WlrLayershell.namespace: "quickshell:dock"
@@ -122,39 +191,38 @@ Scope {
                         return dock.implicitHeight + 1
                     }
 
-                    // Main dock container
                     Item {
                         id: background
-                        anchors.fill:  parent
-                        // Animated size calculation
+                        anchors.fill: parent
+                        
+                        // Dynamic background sizing
                         implicitWidth: {
-                            if (root.currentContent == 3) return 1386
-                            if (root.currentContent == 4) return 1440
-                            return (dockRow.implicitWidth + 16)
+                            switch (root.currentContent) {
+                                case root.contentType.overview: return 1386
+                                case root.contentType.wallpaperSelector: return (screen.width * 0.9)
+                                default: return Math.max(dockRow.implicitWidth + 16, root.defaultBackgroundWidth)
+                            }
                         }
                         implicitHeight: {
-                            if (root.currentContent == 3) return 355
-                            if (root.currentContent == 4) return 200
-                            return (dockRow.implicitHeight + 20)
+                            switch (root.currentContent) {
+                                case root.contentType.overview: return 355
+                                case root.contentType.wallpaperSelector: return 200
+                                default: return Math.max(dockRow.implicitHeight + 20, root.defaultBackgroundHeight)
+                            }
                         }
                         
-                        // Smooth background size transitions
                         Behavior on implicitWidth {
-                                                       NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration 
-                                    easing.type: Appearance.animation.elementMove.bezierCurve 
-                                }
-
-                       
-                       
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration - 50
+                                easing.type: Appearance.animation.elementMove.bezierCurve 
+                            }
                         }
                         
                         Behavior on implicitHeight {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration
-                                    easing.type: Appearance.animation.elementMove.bezierCurve 
-                                }
-
+                            NumberAnimation {
+                                duration: Appearance.animation.elementMoveFast.duration - 50 
+                                easing.type: Appearance.animation.elementMove.bezierCurve 
+                            }
                         }
                         
                         StyledRectangularShadow { target: dockRect }
@@ -165,53 +233,50 @@ Scope {
                                 bottom: parent.bottom
                                 horizontalCenter: parent.horizontalCenter
                             }
-                            // Animated binding for smooth size changes
                             width: background.implicitWidth
                             height: background.implicitHeight
                             
-                            // Smooth dock rectangle size transitions
                             Behavior on width {
                                 NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration + 50
+                                    duration: Appearance.animation.elementMoveFast.duration - 50
                                     easing.type: Appearance.animation.elementMove.bezierCurve 
                                 }
                             }
-                             Behavior on height {
+                            
+                            Behavior on height {
                                 NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration + 50
+                                    duration: Appearance.animation.elementMoveFast.duration - 50
                                     easing.type: Appearance.animation.elementMove.bezierCurve 
                                 }
                             }
                             
                             color: Appearance.colors.colLayer0
-                            topRightRadius: (root.currentContent == 3) ? 1.25 * commonRadius : commonRadius
-                            topLeftRadius: (root.currentContent == 3) ? 1.25 * commonRadius : commonRadius
+                            topRightRadius: root.calculateTopRightRadius()
+                            topLeftRadius: root.calculateTopLeftRadius()
 
-                            // Content container - simplified
                             Item {
                                 anchors.fill: parent
                                 
-                                // Normal dock row
+                                // Normal dock row (apps, media, power menu)
                                 RowLayout {
                                     id: dockRow
                                     anchors {
                                         bottom: parent.bottom
                                         horizontalCenter: parent.horizontalCenter
-                                        bottomMargin:frameThickness                                    
+                                        bottomMargin: frameThickness                                    
                                     }
                                     spacing: 5
-                                    visible: !([3, 4].includes(root.currentContent))
+                                    visible: !root.isSpecialContent
 
                                     DockPinButton {
-                                        visible: root.currentContent == 1
+                                        visible: root.currentContent === contentType.apps
                                         pinned: root.pinned
                                         onTogglePin: {
                                             PersistentStateManager.setState("dock.pinned", !root.pinned)
                                             root.resetAutoReturnTimer()
                                         }
                                         onTogglePowerMenu: {
-                                            root.currentContent = (root.currentContent + 1) % root.contentComponents.length
-                                            root.resetAutoReturnTimer()
+                                            root.toggleContent(contentType.powerMenu)
                                         }
                                     }
 
@@ -222,34 +287,37 @@ Scope {
                                         Layout.minimumHeight: 45
                                         Layout.preferredHeight: 40
                                         
-                                        sourceComponent: !([3, 4].includes(root.currentContent)) ? root.contentComponents[root.currentContent] : null
-                                    
+                                        // Lazy loading - only load when content is active and not special
+                                        asynchronous: true
+                                        active: !root.isSpecialContent && root.contentComponents[root.currentContent]
+                                        sourceComponent: active ? root.contentComponents[root.currentContent] : null
                                     }
                                 }
                                 
-                                // Special content (overview/wallpaper)
+                                // Special content (overview/wallpaper) with lazy loading
                                 Loader {
                                     id: contentLoader
                                     anchors.fill: parent
-                                    anchors.margins: ([3, 4].includes(root.currentContent)) ? 10 : 0
-                                    visible: ([3, 4].includes(root.currentContent))
-                                    sourceComponent: ([3, 4].includes(root.currentContent)) ? root.contentComponents[root.currentContent] : null
+                                    anchors.margins: root.isSpecialContent ? 10 : 0
+                                    visible: root.isSpecialContent
+                                    
+                                    // Lazy loading for special content
+                                    asynchronous: true
+                                    active: root.isSpecialContent && root.contentComponents[root.currentContent]
+                                    sourceComponent: active ? root.contentComponents[root.currentContent] : null
                                     
                                     onLoaded: {
-                                        if (item && root.currentContent === 3) {
+                                        if (item && root.isOverviewMode) {
                                             item.panelWindow = dock
-                                            root.overviewHeight = (dock.screen.height / 5) ?? 1410
-                                            root.overviewWidth = (dock.screen.width * 1.34) ?? 330
-                                            GlobalStates.overviewOpen = true
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // Corner decorations - no animations
+                        // Corner decorations
                         RoundCorner {
-                            size: (root.currentContent == 3) ? 1.76 * commonRadius : commonRadius
+                            size: root.calculateCornerSize()
                             corner: cornerEnum.bottomLeft
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -260,7 +328,7 @@ Scope {
                         }
 
                         RoundCorner {
-                            size: (root.currentContent == 3) ? 1.76 * commonRadius : commonRadius
+                            size: root.calculateCornerSize()
                             corner: cornerEnum.bottomRight
                             color: Appearance.colors.colLayer0
                             anchors {
@@ -275,7 +343,7 @@ Scope {
         }
     }
     
-    // Shortcuts
+    // Global shortcuts with consistent toggle behavior
     GlobalShortcut {
         name: "dockPinToggle"
         description: qsTr("Toggle Dock Pin")
@@ -288,49 +356,34 @@ Scope {
     GlobalShortcut {
         name: "overviewToggle"
         description: qsTr("Toggle Overview")
-        onPressed: {
-            root.currentContent = root.currentContent === 0 ? 3 : 0
-            root.resetAutoReturnTimer()
-        }
+        onPressed: root.toggleContent(contentType.overview)
     }
     
     GlobalShortcut {
         name: "wallpaperSelectorToggle"
         description: qsTr("Toggle Wallpaper Selector")
-        onPressed: {
-            root.currentContent = root.currentContent === 0 ? 4 : 0
-            root.resetAutoReturnTimer()
-        }
+        onPressed: root.toggleContent(contentType.wallpaperSelector)
     }
     
     GlobalShortcut {
         name: "dockContentToggle"
         description: qsTr("Cycle Dock Content")
-        onPressed: {
-            root.currentContent = (root.currentContent + 1) % root.contentComponents.length
-            root.resetAutoReturnTimer()
-        }
+        onPressed: root.cycleContent()
     }
     
     GlobalShortcut {
         name: "dockMediaControlToggle"
         description: qsTr("Toggle Media Player")
-        onPressed: {
-            root.currentContent = root.currentContent === 0 ? 1 : 0
-            root.resetAutoReturnTimer()
-        }
+        onPressed: root.toggleContent(contentType.mediaPlayer)
     }
 
     GlobalShortcut {
         name: "dockSessionToggle"
         description: qsTr("Toggle Power Menu")
-        onPressed: {
-            root.currentContent = root.currentContent === 2 ? 1 : 2
-            root.resetAutoReturnTimer()
-        }
+        onPressed: root.toggleContent(contentType.powerMenu)
     }
     
-    // Components
+    // Content components - simplified without nested loaders
     Component {
         id: normalDock
         DockApps { 
@@ -349,6 +402,7 @@ Scope {
         id: overview
         OverviewWidget {
             panelWindow: dock
+            anchors.fill: parent
             property bool requestDockShow: true
         }
     }

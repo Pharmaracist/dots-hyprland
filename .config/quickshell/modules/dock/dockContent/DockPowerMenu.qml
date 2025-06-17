@@ -11,7 +11,6 @@ RowLayout {
     id: powerMenuRoot
 
     spacing: 8
-
     Repeater {
         id: buttonRepeater
 
@@ -23,6 +22,14 @@ RowLayout {
             "iconColor": Appearance.colors.colOnSecondaryContainer,
             "hoverContainerColor": Appearance.colors.colSecondaryContainerHover,
             "hoverIconColor": Appearance.colors.colOnSecondaryContainer
+        }, {
+            "icon": "arrow_warm_up",
+            "tooltip": qsTr("Reboot to UEFI"),
+            "command": "exec systemctl reboot --firmware-setup",
+            "containerColor": Qt.rgba(Appearance.m3colors.m3error.r, Appearance.m3colors.m3error.g, Appearance.m3colors.m3error.b, 0.15),
+            "iconColor": Appearance.m3colors.m3error,
+            "hoverContainerColor": Qt.rgba(Appearance.m3colors.m3error.r, Appearance.m3colors.m3error.g, Appearance.m3colors.m3error.b, 0.25),
+            "hoverIconColor": Appearance.m3colors.m3error
         }, {
             "icon": "dark_mode",
             "tooltip": qsTr("Sleep"),
@@ -55,7 +62,8 @@ RowLayout {
             "iconColor": Appearance.m3colors.m3error,
             "hoverContainerColor": Qt.rgba(Appearance.m3colors.m3error.r, Appearance.m3colors.m3error.g, Appearance.m3colors.m3error.b, 0.25),
             "hoverIconColor": Appearance.m3colors.m3error
-        }]
+        }
+        ]
 
         delegate: Item {
             id: buttonContainer

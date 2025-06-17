@@ -222,7 +222,7 @@ Item { // Wrapper
         anchors.centerIn: parent
         implicitWidth: columnLayout.implicitWidth
         implicitHeight: columnLayout.implicitHeight
-        radius:  Appearance.rounding.normal 
+        radius:  Appearance.rounding.screenRounding 
         color: Appearance.colors.colLayer0
 
         ColumnLayout {

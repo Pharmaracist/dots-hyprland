@@ -14,7 +14,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 
 Item {
-       id: root
+    id: root
     required property var panelWindow
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
     readonly property var toplevels: ToplevelManager.toplevels
