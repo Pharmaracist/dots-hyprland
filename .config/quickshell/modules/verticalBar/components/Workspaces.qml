@@ -90,7 +90,7 @@ Item {
                 z: 1
                 Layout.alignment: Qt.AlignHCenter
                 implicitHeight: workspaceButtonHeight
-                implicitWidth: 32 * 0.75
+                implicitWidth: 32 * 0.8
                 radius: Appearance.rounding.full
 
                 property var radiusTop: (workspaceOccupied[index-1] && !(!activeWindow?.activated && monitor.activeWorkspace?.id === index)) ? 0 : Appearance.rounding.full
@@ -196,7 +196,7 @@ Item {
                         anchors.bottomMargin: (!GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
                             (workspaceButtonHeight - workspaceIconSize) / 1.8 : workspaceIconMarginShrinked
                         anchors.rightMargin: (!GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
-                            (workspaceButtonHeight - workspaceIconSize) / 1.2 : workspaceIconMarginShrinked
+                            (workspaceButtonHeight - workspaceIconSize) / 0.6 : workspaceIconMarginShrinked
 
                         opacity: (workspaceButtonBackground.biggestWindow && !GlobalStates.workspaceShowNumbers && !ConfigOptions.bar.workspaces.alwaysShowNumbers) ? 
                             1 : workspaceButtonBackground.biggestWindow ? workspaceIconOpacityShrinked : 0

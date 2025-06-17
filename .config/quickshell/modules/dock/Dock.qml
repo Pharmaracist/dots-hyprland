@@ -299,7 +299,7 @@ Scope {
                                     id: contentLoader
                                     anchors.fill: parent
                                     anchors.margins: root.isSpecialContent ? 10 : 0
-                                    visible: root.isSpecialContent
+                                    visible: root.isSpecialContent 
                                     
                                     // Lazy loading for special content
                                     asynchronous: true
