@@ -1,7 +1,7 @@
 //@ pragma UseQApplication
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
 //@ pragma Env QS_NO_RELOAD_POPUP=1
-//@ pragma Env QT_SCALE_FACTOR=0.9
+//@ pragma Env QT_SCALE_FACTOR=1
 import "./modules/backgroundWidgets/"
 import "./modules/bar/"
 import "./modules/common/"

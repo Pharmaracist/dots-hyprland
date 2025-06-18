@@ -37,7 +37,7 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             hoverEnabled: true
-            onClicked: Hyprland.dispatch("global quickshell:sessionToggle")
+            onClicked: Hyprland.dispatch("global quickshell:dockSessionToggle")
             onEntered: hovered = true
             onExited: hovered = false
         }
