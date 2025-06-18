@@ -7,7 +7,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
 
-Rectangle {
+Item {
     id: root
 <<<<<<<< HEAD:.config/quickshell/modules/bar/components/Battery.qml
     property bool borderless : ConfigOptions.appearance.borderless
@@ -29,8 +29,6 @@ Rectangle {
 
     implicitWidth: rowLayout.implicitWidth + rowLayout.spacing * 2
     implicitHeight: 32
-    color: borderless ? "transparent" : Appearance.colors.colLayer1
-    radius: Appearance.rounding.small
 
     RowLayout {
         id: rowLayout

@@ -10,8 +10,9 @@ Singleton {
     }
 
     property QtObject appearance: QtObject {
-        property int fakeScreenRounding: 1 // 0: None | 1: Always | 2: When not fullscreen
         property bool borderless: true
+        property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
+        property bool transparency: false
     }
 
     property QtObject audio: QtObject { // Values in %
@@ -50,10 +51,12 @@ Singleton {
         property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: true
         property bool borderless: false
+        property bool verbose: true
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
             property bool alwaysShowCpu: true
         }
+        property list<string> screenList: [] // List of names, like "eDP-1", find out with 'hyprctl monitors' command
         property QtObject utilButtons: QtObject {
             property bool showScreenSnip: true
             property bool showColorPicker: false
@@ -62,8 +65,9 @@ Singleton {
         }
         property QtObject workspaces: QtObject {
             property int shown: 10
+            property bool showAppIcons: true
             property bool alwaysShowNumbers: false
-            property int showNumberDelay: 150 // milliseconds
+            property int showNumberDelay: 300 // milliseconds
         }
     }
 

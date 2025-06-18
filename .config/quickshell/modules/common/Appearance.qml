@@ -14,12 +14,9 @@ Singleton {
     property QtObject font
     property QtObject sizes
     property string syntaxHighlightingTheme
-
-    // [!] Enabling transparency can affect readability when using light theme.
-    property real transparency: PersistentStates.temp.enableTransparency ? 0.5 : 0
-    property real contentTransparency: m3colors.darkmode ? PersistentStates.temp.enableTransparency ?  1 : 0 :0
-    // property real transparency: 0.15
-    // property real contentTransparency: 0.5
+    // Extremely conservative transparency values for consistency and readability
+    property real transparency: ConfigOptions?.appearance.transparency ? (m3colors.darkmode ? 0.1 : 0) : 0
+    property real contentTransparency: ConfigOptions?.appearance.transparency ? (m3colors.darkmode ? 0.55 : 0) : 0
 
     m3colors: QtObject {
         property bool darkmode: false
@@ -287,7 +284,7 @@ Singleton {
     sizes: QtObject {
         property real barHeight: 37
         property real barWidth: 37 // for vertical Mode
-        property real barCenterSideModuleWidth: 360
+        property real barCenterSideModuleWidth: ConfigOptions?.bar.verbose ? 360 : 140
         property real barCenterSideModuleWidthShortened: 280
         property real barCenterSideModuleWidthHellaShortened: 190
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value
