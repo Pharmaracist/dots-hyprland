@@ -29,7 +29,7 @@ Scope {
     property int frameThickness: Appearance.sizes.frameThickness
     property bool cornered: true
 
-    property int currentContent: contentType.apps
+    property int currentContent: PersistentStates.dock.currentContent ?? contentType.apps
     property int previousContent: contentType.apps
     readonly property int defaultContent: contentType.apps
 
@@ -53,6 +53,7 @@ Scope {
         if (newContent !== currentContent) {
             previousContent = currentContent
             currentContent = newContent
+            PersistentStateManager.setState("dock.currentContent",newContent )
         }
     }
 
@@ -290,38 +291,73 @@ Scope {
                                             item.panelWindow = dock
                                         }
                                     }
-                                   Rectangle {
-                                        id: hoverButton
-                                        color: hovered ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3
-                                        anchors.right: parent.right
-                                        radius: 99
-                                        implicitWidth: 28
-                                        implicitHeight: 28
-                                        z: 9
+                                    RowLayout {
+                                            anchors.right: parent.right
+                                            z: 9
+                                            Rectangle {
+                                            id: hoverButton
+                                            color: hovered ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3
+                                            radius: 99
+                                            implicitWidth: 28
+                                            implicitHeight: 28
 
-                                        property bool hovered: false
+                                            property bool hovered: false
 
-                                        Behavior on color {
-                                            ColorAnimation { duration: 150 }
+                                            Behavior on color {
+                                                ColorAnimation { duration: 150 }
+                                            }
+
+                                            MaterialSymbol {
+                                                anchors.centerIn: parent
+                                                font.pixelSize: parent.width - 8
+                                                text: "keyboard_arrow_down"
+                                                color: Appearance.colors.colOnLayer3
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                onEntered: hoverButton.hovered = true
+                                                onExited: hoverButton.hovered = false
+                                                onClicked: root.resetToDefault()
+                                            }
+                                            StyledRectangularShadow { target: parent }
                                         }
+                                        Rectangle {
+                                            id: shuffleButton
+                                            visible: root.currentContent == 4
+                                            color: hovered ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3
+                                            anchors.right: parent.right
+                                            radius: 99
+                                            implicitWidth: 28
+                                            implicitHeight: 28
+                                            z: 9
 
-                                        MaterialSymbol {
-                                            anchors.centerIn: parent
-                                            font.pixelSize: parent.width - 8
-                                            text: "keyboard_arrow_down"
-                                            color: Appearance.colors.colOnLayer3
-                                        }
+                                            property bool hovered: false
 
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            onEntered: hoverButton.hovered = true
-                                            onExited: hoverButton.hovered = false
-                                            onClicked: root.resetToDefault()
+                                            Behavior on color {
+                                                ColorAnimation { duration: 150 }
+                                            }
+
+                                            MaterialSymbol {
+                                                anchors.centerIn: parent
+                                                font.pixelSize: parent.width - 8
+                                                text: "shuffle"
+                                                color: Appearance.colors.colOnLayer3
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                onEntered: shuffleButton.hovered = true
+                                                onExited: shuffleButton.hovered = false
+                                                onClicked: Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --random`)
+                                            }
+                                            StyledRectangularShadow { target: parent }
                                         }
-                                        StyledRectangularShadow { target: parent }
+                                
                                     }
-                                }
+                                   }
                             }
                         }
 
@@ -421,7 +457,7 @@ Scope {
         id: wallpaperSelector
         WallpaperSelector {
             anchors.fill: parent
-            property bool requestDockShow: false
+            property bool requestDockShow: true
         }
     }
 }

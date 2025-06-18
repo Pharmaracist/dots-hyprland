@@ -271,7 +271,10 @@ main() {
                 imgpath=$(swww query | awk -F 'image: ' '{print $2}' | head -n 1)
                 shift
                 ;;
-
+            --random)
+            imgpath=$(find "$(xdg-user-dir PICTURES)/Wallpapers" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" -o -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.webm" \) | shuf -n 1)
+            shift
+            ;;
             --noswitch)
                 noswitch_flag="1"
                 imgpath=$(swww query | awk -F 'image: ' '{print $2}')
