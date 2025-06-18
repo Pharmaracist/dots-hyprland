@@ -27,7 +27,7 @@ Item {
         if (!player || !player.length || player.length <= 0 || !player.position) return 0
         return Math.max(0, Math.min(1, player.position / player.length))
     }
-    property bool blurArtEnabled: false  // Toggle property for blur art
+    readonly property bool blurArtEnabled: false  // Toggle property for blur art
     property bool showPlayerSelector: true  // Toggle for player selector visibility
     property bool showVisualizer: true     // Toggle for visualizer visibility
     property list<real> visualizerPoints: []
@@ -35,8 +35,8 @@ Item {
     property int visualizerSmoothing: 2
     property bool hasPlasmaIntegration: false
 
-    implicitHeight: 43
-    implicitWidth: 850  // Increased width to accommodate new buttons
+    implicitHeight: 45
+    implicitWidth: ConfigOptions?.dock.mediaPlayer.width ?? 800
     visible: true
 
     // Reset selection when players change
@@ -303,13 +303,13 @@ Item {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: 8
-            rightMargin: 8
-            bottomMargin: -5
+            leftMargin: 4
+            rightMargin: 4
+            bottomMargin: -4
         }
-        height: 5
+        height: 3
         color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.3)
-        radius: Appearance.rounding.screenRounding
+        radius: Appearance.rounding.small
 
         Rectangle {
             id: progressBar
@@ -332,12 +332,11 @@ Item {
             id: seekHandle
             anchors.verticalCenter: parent.verticalCenter
             x: Math.max(width/2, Math.min(parent.width - width/2, (parent.width * progressRatio) - width/2))
-            width: seekArea.pressed ? 16 : (seekArea.containsMouse ? 12 : 8)
-            height: width
-            radius: width / 2
-            color: Appearance.colors.colPrimary
+            width: seekArea.pressed ?  3 : 5
+            height: parent.height
+            radius: 2
+            color: Appearance.colors.colLayer1
             opacity: seekArea.containsMouse || seekArea.pressed ? 1 : 0
-            
             Behavior on width { NumberAnimation { duration: 150; easing.type: Easing.OutQuart } }
             Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuart } }
         }
@@ -345,7 +344,7 @@ Item {
         MouseArea {
             id: seekArea
             anchors.fill: parent
-            anchors.margins: -5 // Expand clickable area
+            anchors.margins: -2 // Expand clickable area
             hoverEnabled: true
             enabled: player && player.canSeek && player.length > 0
 
@@ -385,13 +384,13 @@ Item {
             NumberAnimation { duration: 150; easing.type: Easing.OutQuart }
         }
 
-        states: [
-            State {
-                name: "hovered"
-                when: seekArea.containsMouse
-                PropertyChanges { target: seekbarBackground; height: 7 }
-            }
-        ]
+        // states: [
+        //     State {
+        //         name: "hovered"
+        //         when: seekArea.containsMouse
+        //         PropertyChanges { target: seekbarBackground; height: 7 }
+        //     }
+        // ]
     }
 
     // ─────── Main Content ───────
@@ -515,6 +514,8 @@ Item {
                 implicitWidth: 32
                 implicitHeight: 32
                 buttonRadius: hovered ? 15 : 7
+                Layout.rightMargin: 6
+                Layout.leftMargin: 6
                 enabled: !!player && player.canPause
                 opacity: player && player.canPause ? 1 : 0.5
 

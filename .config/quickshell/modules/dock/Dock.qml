@@ -276,7 +276,6 @@ Scope {
                                    }
                                 }                           
                             }
-
                                 Loader {
                                     id: contentLoader
                                     anchors.fill: parent
@@ -290,6 +289,37 @@ Scope {
                                         if (item && root.isOverviewMode) {
                                             item.panelWindow = dock
                                         }
+                                    }
+                                   Rectangle {
+                                        id: hoverButton
+                                        color: hovered ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3
+                                        anchors.right: parent.right
+                                        radius: 99
+                                        implicitWidth: 28
+                                        implicitHeight: 28
+                                        z: 9
+
+                                        property bool hovered: false
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 150 }
+                                        }
+
+                                        MaterialSymbol {
+                                            anchors.centerIn: parent
+                                            font.pixelSize: parent.width - 8
+                                            text: "keyboard_arrow_down"
+                                            color: Appearance.colors.colOnLayer3
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onEntered: hoverButton.hovered = true
+                                            onExited: hoverButton.hovered = false
+                                            onClicked: root.resetToDefault()
+                                        }
+                                        StyledRectangularShadow { target: parent }
                                     }
                                 }
                             }

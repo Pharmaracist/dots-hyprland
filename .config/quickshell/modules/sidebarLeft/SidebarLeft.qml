@@ -54,12 +54,11 @@ Scope {
             property bool extend: PersistentStates.sidebar.attachments.extended
             property real sidebarWidth: sidebarRoot.extend ? Appearance.sizes.sidebarWidthExtended : Appearance.sizes.sidebarWidth
             property var contentParent: sidebarLeftBackground
-
             function hide() {
                 GlobalStates.sidebarLeftOpen = false
             }
 
-            exclusiveZone: root.pinned ? (sidebarWidth - Appearance.sizes.hyprlandGapsOut) : 0
+            exclusiveZone: root.pinned ? (sidebarWidth - Appearance.sizes.hyprlandGapsOut) : -1
             implicitWidth: Appearance.sizes.sidebarWidthExtended + Appearance.sizes.elevationMargin
             WlrLayershell.namespace: "quickshell:sidebarLeft"
             color: "transparent"
@@ -98,7 +97,7 @@ Scope {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.topMargin: Appearance.sizes.hyprlandGapsOut
-                anchors.leftMargin: Appearance.sizes.hyprlandGapsOut
+                anchors.leftMargin: !root.pinned ?  (Appearance.sizes.barWidth + Appearance.sizes.frameThickness) :  Appearance.sizes.hyprlandGapsOut
                 width: sidebarRoot.sidebarWidth - Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin
                 height: parent.height - Appearance.sizes.hyprlandGapsOut * 2
                 color: Appearance.colors.colLayer0

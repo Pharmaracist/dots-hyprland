@@ -84,6 +84,11 @@ Singleton {
 	    "zen",
 	  //   "claude",
         ]
+        property QtObject mediaPlayer: QtObject {
+            property bool useBlur: false
+            property int width: 950
+
+        }
     }
 
     property QtObject language: QtObject {
