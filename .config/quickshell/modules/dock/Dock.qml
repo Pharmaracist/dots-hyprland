@@ -42,7 +42,7 @@ Scope {
     }
 
     property int autoReturnDelay: 3000
-    readonly property var autoReturnExceptions: [contentType.apps, contentType.overview]
+    readonly property var autoReturnExceptions: [contentType.apps,contentType.mediaPlayer ,contentType.overview]
     readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu, overview, wallpaperSelector]
 
     readonly property bool isSpecialContent: currentContent === contentType.overview || currentContent === contentType.wallpaperSelector
@@ -236,7 +236,7 @@ Scope {
                                             root.resetAutoReturnTimer()
                                         }
                                         onTogglePowerMenu: {
-                                            root.toggleContent(contentType.powerMenu)
+                                            root.toggleContent(contentType.mediaPlayer)
                                         }
                                     }
                                     DockSeparator {
@@ -366,6 +366,7 @@ Scope {
     Component {
         id: powerMenu
         DockPowerMenu {
+            anchors.fill: parent
             property bool requestDockShow: true
         }
     }

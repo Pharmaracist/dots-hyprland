@@ -23,20 +23,20 @@ QuickToggleButton {
     Process {
         id: nightLightOn
 
-        command: ["gammastep"]
+        command: ["bash","-c","hyprsunset -t 5000"]
     }
 
     Process {
         id: nightLightOff
 
-        command: ["pkill", "gammastep"]
+        command: ["pkill", "hyprsunset"]
     }
 
     Process {
         id: updateNightLightState
 
         running: true
-        command: ["pidof", "gammastep"]
+        command: ["pidof", "hyprsunset"]
 
         stdout: SplitParser {
             onRead: (data) => {
