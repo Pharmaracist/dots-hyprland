@@ -1,6 +1,7 @@
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
+import "../dockComponents"
 import "root:/modules/common/functions/string_utils.js" as StringUtils
 import "root:/modules/common/functions/color_utils.js" as ColorUtils
 import "root:/modules/common/functions/file_utils.js" as FileUtils
@@ -448,6 +449,13 @@ Item {
             Layout.fillHeight: true
             Layout.minimumWidth: 120
             spacing: 1
+
+            DockLyrics {
+                Layout.alignment:Qt.AlignHCenter | Qt.AlignHCenter
+                Layout.bottomMargin: -5
+                Layout.leftMargin: -10
+
+            }
 
             StyledText {
                 Layout.fillWidth: true

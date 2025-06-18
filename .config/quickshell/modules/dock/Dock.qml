@@ -1,4 +1,3 @@
-// Performance-optimized Dock.qml with fixed toggles and unpinnable large content
 import "root:/"
 import "root:/services"
 import "root:/modules/common"
@@ -29,7 +28,7 @@ Scope {
     property int frameThickness: Appearance.sizes.frameThickness
     property bool cornered: true
 
-    property int currentContent: PersistentStates.dock.currentContent ?? contentType.apps
+    property int currentContent: MprisController.activePlayer?.trackTitle?.length > 0 ? contentType.mediaPlayer :  PersistentStates.dock.currentContent ?? contentType.apps
     property int previousContent: contentType.apps
     readonly property int defaultContent: contentType.apps
 
