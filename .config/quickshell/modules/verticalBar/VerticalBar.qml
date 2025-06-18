@@ -18,8 +18,6 @@ Scope {
         currentLayout = layoutName
     }
 
-
-
     Variants {
         model: Quickshell.screens
 

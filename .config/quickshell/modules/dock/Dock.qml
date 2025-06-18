@@ -1,4 +1,4 @@
-// Performance-optimized Dock.qml with fixed toggles and refactored structure
+// Performance-optimized Dock.qml with fixed toggles and unpinnable large content
 import "root:/"
 import "root:/services"
 import "root:/modules/common"
@@ -17,24 +17,22 @@ import Quickshell.Hyprland
 
 Scope {
     id: root
-    
-    // Default sizes for normal content
+
     property int defaultDockWidth: 380
     property int defaultDockHeight: 72
     property int defaultBackgroundWidth: 400
     property int defaultBackgroundHeight: 60
-    
-    // Core properties
+
     property bool pinned: PersistentStates.dock.pinned
+    property bool effectivePinned: !isSpecialContent && pinned
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-    
-    // Content management
+    property bool cornered: true
+
     property int currentContent: contentType.apps
     property int previousContent: contentType.apps
     readonly property int defaultContent: contentType.apps
-    
-    // Content type enumeration for better maintainability
+
     readonly property QtObject contentType: QtObject {
         readonly property int mediaPlayer: 0
         readonly property int apps: 1
@@ -42,27 +40,22 @@ Scope {
         readonly property int overview: 3
         readonly property int wallpaperSelector: 4
     }
-    
-    // Auto-return configuration
+
     property int autoReturnDelay: 3000
     readonly property var autoReturnExceptions: [contentType.apps, contentType.overview]
-    
-    // Content components array
     readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu, overview, wallpaperSelector]
-    
-    // Computed properties for layout
+
     readonly property bool isSpecialContent: currentContent === contentType.overview || currentContent === contentType.wallpaperSelector
     readonly property bool isOverviewMode: currentContent === contentType.overview
     readonly property bool isWallpaperMode: currentContent === contentType.wallpaperSelector
-    
-    // Content management functions
+
     function switchToContent(newContent) {
         if (newContent !== currentContent) {
             previousContent = currentContent
             currentContent = newContent
         }
     }
-    
+
     function toggleContent(targetContent) {
         if (currentContent === targetContent) {
             switchToContent(defaultContent)
@@ -70,23 +63,22 @@ Scope {
             switchToContent(targetContent)
         }
     }
-    
+
     function resetToDefault() {
         switchToContent(defaultContent)
     }
-    
+
     Timer {
         id: autoReturnTimer
         interval: root.autoReturnDelay
         repeat: false
-        
         onTriggered: {
             if (!root.autoReturnExceptions.includes(root.currentContent)) {
                 root.resetToDefault()
             }
         }
     }
-    
+
     function resetAutoReturnTimer() {
         if (!root.autoReturnExceptions.includes(root.currentContent)) {
             autoReturnTimer.restart()
@@ -94,19 +86,18 @@ Scope {
             autoReturnTimer.stop()
         }
     }
-    
+
     onCurrentContentChanged: {
         resetAutoReturnTimer()
-        
-        // Handle special state changes
         if (currentContent === contentType.overview) {
             GlobalStates.overviewOpen = true
         } else if (previousContent === contentType.overview) {
             GlobalStates.overviewOpen = false
         }
-    }    
+    }
+
     Variants {
-        model: pinned ? Quickshell.screens : [focusedScreen]
+        model: effectivePinned ? Quickshell.screens : [focusedScreen]
 
         Loader {
             id: dockLoader
@@ -116,19 +107,18 @@ Scope {
             sourceComponent: PanelWindow {
                 id: dock
                 screen: dockLoader.modelData
-                
-                property bool shouldReveal: root.pinned
+
+                property bool shouldReveal: root.effectivePinned
                     || (ConfigOptions?.dock.hoverToReveal && mouseArea.containsMouse)
                     || (contentLoader.item && contentLoader.item.requestDockShow === true)
                     || (!ToplevelManager.activeToplevel?.activated)
 
-                anchors { bottom: true;right:true;left:true }
-                
-                exclusiveZone: root.pinned 
+                anchors { bottom: true; right: true; left: true }
+
+                exclusiveZone: root.effectivePinned 
                     ? implicitHeight - (Appearance.sizes.hyprlandGapsOut * 2) + frameThickness
                     : -1
-                
-                // Dynamic sizing based on content
+
                 implicitWidth: {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 1386
@@ -143,7 +133,7 @@ Scope {
                         default: return Math.max(dockRow.implicitHeight + 32 + Appearance.sizes.hyprlandGapsOut, root.defaultDockHeight)
                     }
                 }
-                
+
                 WlrLayershell.namespace: "quickshell:dock"
                 color: "transparent"
                 mask: Region { item: mouseArea }
@@ -158,7 +148,7 @@ Scope {
                     }
                     height: parent.height
                     hoverEnabled: true
-                    
+
                     onEntered: root.resetAutoReturnTimer()
                     onPositionChanged: root.resetAutoReturnTimer()
 
@@ -169,6 +159,7 @@ Scope {
                         }
                         return dock.implicitHeight + 1
                     }
+
                     Behavior on anchors.topMargin {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                     }
@@ -176,8 +167,7 @@ Scope {
                     Item {
                         id: background
                         anchors.fill: parent
-                        
-                        // Dynamic background sizing
+
                         implicitWidth: {
                             switch (root.currentContent) {
                                 case root.contentType.overview: return 1386
@@ -192,53 +182,55 @@ Scope {
                                 default: return Math.max(dockRow.implicitHeight + 20, root.defaultBackgroundHeight)
                             }
                         }
-                        
+
                         StyledRectangularShadow { target: dockRect }
 
                         Rectangle {
                             id: dockRect
                             anchors {
                                 bottom: parent.bottom
-                                bottomMargin: Appearance.sizes.hyprlandGapsOut
+                                bottomMargin: root.cornered ? 0 : Appearance.sizes.hyprlandGapsOut
                                 horizontalCenter: parent.horizontalCenter
                             }
                             implicitWidth: background.implicitWidth
                             implicitHeight: background.implicitHeight - 5
-                            
+
                             Behavior on width {
                                 NumberAnimation {
                                     duration: Appearance.animation.elementMoveFast.duration - 50
-                                    easing.type: Appearance.animation.elementMove.bezierCurve 
+                                    easing.type: Appearance.animation.elementMove.bezierCurve
                                 }
                             }
-                            
+
                             Behavior on height {
                                 NumberAnimation {
                                     duration: Appearance.animation.elementMoveFast.duration - 50
-                                    easing.type: Appearance.animation.elementMove.bezierCurve 
+                                    easing.type: Appearance.animation.elementMove.bezierCurve
                                 }
                             }
-                            
+
                             color: Appearance.colors.colLayer0
-                            radius:Appearance.rounding.screenRounding
+                            radius: !root.cornered ? Appearance.rounding.screenRounding : undefined
+                            topRightRadius: Appearance.rounding.screenRounding
+                            topLeftRadius: Appearance.rounding.screenRounding
 
                             Item {
                                 anchors.fill: parent
-                                
-                                // Normal dock row (apps, media, power menu)
+
                                 RowLayout {
                                     id: dockRow
                                     anchors {
                                         bottom: parent.bottom
                                         horizontalCenter: parent.horizontalCenter
-                                        bottomMargin: frameThickness                                    
+                                        bottomMargin: frameThickness
                                     }
                                     spacing: 5
                                     visible: !root.isSpecialContent
 
                                     DockPinButton {
-                                        visible: root.currentContent === contentType.apps
+                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
                                         pinned: root.pinned
+                                        enabled: !root.isSpecialContent
                                         onTogglePin: {
                                             PersistentStateManager.setState("dock.pinned", !root.pinned)
                                             root.resetAutoReturnTimer()
@@ -247,29 +239,53 @@ Scope {
                                             root.toggleContent(contentType.powerMenu)
                                         }
                                     }
-
+                                    DockSeparator {
+                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
+                                    }
                                     Loader {
                                         id: normalContentLoader
                                         Layout.fillWidth: true
-                                        Layout.fillHeight: true 
+                                        Layout.fillHeight: true
                                         asynchronous: true
                                         active: !root.isSpecialContent && root.contentComponents[root.currentContent]
                                         sourceComponent: active ? root.contentComponents[root.currentContent] : null
                                     }
-                                }
-                                
-                                // Special content (overview/wallpaper) with lazy loading
+                                    DockSeparator {
+                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
+                                    }
+                                    GroupButton {
+                                       visible: root.currentContent === contentType.apps && !root.isSpecialContent
+                                       baseWidth: 50
+                                       baseHeight: 50
+                                       buttonRadius: Appearance.rounding.normal
+                                       color:  Appearance.colors.colLayer1Hover
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            acceptedButtons: Qt.LeftButton 
+                                            onPressed: Hyprland.dispatch('global quickshell:launcherToggle')
+                                        }
+
+                                   contentItem: MaterialSymbol {
+                                       id: m3Btn
+                                       text: "apps"
+                                       horizontalAlignment: Text.AlignHCenter
+                                       font.pixelSize: 26
+                                       color: Appearance.m3colors.m3outline
+                                       anchors.centerIn: parent
+                                   }
+                                }                           
+                            }
+
                                 Loader {
                                     id: contentLoader
                                     anchors.fill: parent
                                     anchors.margins: root.isSpecialContent ? 10 : 0
-                                    visible: root.isSpecialContent 
-                                    
-                                    // Lazy loading for special content
+                                    visible: root.isSpecialContent
                                     asynchronous: true
                                     active: root.isSpecialContent && root.contentComponents[root.currentContent]
                                     sourceComponent: active ? root.contentComponents[root.currentContent] : null
-                                    
+
                                     onLoaded: {
                                         if (item && root.isOverviewMode) {
                                             item.panelWindow = dock
@@ -279,13 +295,34 @@ Scope {
                             }
                         }
 
+                        RoundCorner {
+                            size: Appearance.rounding.screenRounding
+                            corner: cornerEnum.bottomLeft
+                            color: Appearance.colors.colLayer0
+                            visible: cornered
+                            anchors {
+                                bottom: dockRect.bottom
+                                left: dockRect.right
+                                bottomMargin: Appearance.sizes.frameThickness - 1
+                            }
+                        }
+                        RoundCorner {
+                            visible: cornered
+                            size: Appearance.rounding.screenRounding
+                            corner: cornerEnum.bottomRight
+                            color: Appearance.colors.colLayer0
+                            anchors {
+                                bottom: dockRect.bottom
+                                right: dockRect.left
+                                bottomMargin: Appearance.sizes.frameThickness - 1
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    
-    // Global shortcuts with consistent toggle behavior
+
     GlobalShortcut {
         name: "dockPinToggle"
         description: qsTr("Toggle Dock Pin")
@@ -294,19 +331,19 @@ Scope {
             root.resetAutoReturnTimer()
         }
     }
-    
+
     GlobalShortcut {
         name: "overviewToggle"
         description: qsTr("Toggle Overview")
         onPressed: root.toggleContent(contentType.overview)
     }
-    
+
     GlobalShortcut {
         name: "wallpaperSelectorToggle"
         description: qsTr("Toggle Wallpaper Selector")
         onPressed: root.toggleContent(contentType.wallpaperSelector)
     }
-    
+
     GlobalShortcut {
         name: "dockMediaControlToggle"
         description: qsTr("Toggle Media Player")
@@ -318,18 +355,17 @@ Scope {
         description: qsTr("Toggle Power Menu")
         onPressed: root.toggleContent(contentType.powerMenu)
     }
-    
-    // Content components - simplified without nested loaders
+
     Component {
         id: normalDock
-        DockApps { 
+        DockApps {
             property bool requestDockShow: false
         }
     }
 
     Component {
         id: powerMenu
-        DockPowerMenu { 
+        DockPowerMenu {
             property bool requestDockShow: true
         }
     }
@@ -342,17 +378,17 @@ Scope {
             property bool requestDockShow: true
         }
     }
-    
+
     Component {
         id: mediaPlayer
-        DockMediaPlayer { 
+        DockMediaPlayer {
             property bool requestDockShow: true
         }
     }
 
     Component {
         id: wallpaperSelector
-        WallpaperSelector { 
+        WallpaperSelector {
             anchors.fill: parent
             property bool requestDockShow: false
         }

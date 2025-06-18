@@ -5,6 +5,9 @@ import "root:/"
 import "root:/modules/common"
 
 Rectangle {
-    implicitWidth: 4
+    implicitWidth: 1
+    Layout.topMargin:5
+    Layout.bottomMargin:5
+    Layout.fillHeight:true
     color: Appearance.colors.colOutlineVariant
 }

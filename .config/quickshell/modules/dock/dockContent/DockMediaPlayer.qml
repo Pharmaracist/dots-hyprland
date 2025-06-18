@@ -22,6 +22,7 @@ Item {
         if (!player || !player.length || player.length <= 0 || !player.position) return 0
         return Math.max(0, Math.min(1, player.position / player.length))
     }
+    property bool blurArtEnabled: false  // Toggle property for blur art
 
     implicitHeight: 43
     implicitWidth: 450
@@ -31,8 +32,8 @@ Item {
     Image {
         id: blurredArt
         anchors.fill: parent
-        anchors.margins:3
-        source: player && player.trackArtUrl ? player.trackArtUrl : ""
+        anchors.margins: 3
+        source: player && player.trackArtUrl && blurArtEnabled ? player.trackArtUrl : ""
         sourceSize.width: width
         sourceSize.height: height
         fillMode: Image.PreserveAspectCrop
@@ -40,7 +41,7 @@ Item {
         antialiasing: false
         asynchronous: true
         mipmap: true
-        visible: source !== ""
+        visible: source !== "" && blurArtEnabled
 
         layer.enabled: true
         layer.effect: MultiEffect {
@@ -55,6 +56,23 @@ Item {
             anchors.fill: parent
             color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.25)
             radius: Appearance.rounding.screenRounding
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: 300; easing.type: Easing.OutQuart }
+        }
+    }
+
+    // ─────── Default Background (when blur is disabled) ───────
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 3
+        color: Appearance.colors.colLayer0
+        radius: Appearance.rounding.screenRounding
+        visible: !blurArtEnabled
+        
+        Behavior on opacity {
+            NumberAnimation { duration: 300; easing.type: Easing.OutQuart }
         }
     }
 
