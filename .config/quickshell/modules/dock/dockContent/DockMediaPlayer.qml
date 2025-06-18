@@ -422,6 +422,7 @@ Item {
                 source: player && player.trackArtUrl ? player.trackArtUrl : ""
                 asynchronous: true
                 cache: false
+                mipmap: true
                 fillMode: Image.PreserveAspectCrop
                 visible: source !== ""
                 antialiasing: true

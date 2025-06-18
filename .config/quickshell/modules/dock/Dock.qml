@@ -130,7 +130,7 @@ Scope {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 370
                         case root.contentType.wallpaperSelector: return 230
-                        default: return Math.max(dockRow.implicitHeight + 32 + Appearance.sizes.hyprlandGapsOut, root.defaultDockHeight)
+                        default: return Math.max(dockRow.implicitHeight + Appearance.sizes.hyprlandGapsOut, root.defaultDockHeight)
                     }
                 }
 

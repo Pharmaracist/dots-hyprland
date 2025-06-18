@@ -20,9 +20,9 @@ Item {
 
     Timer {
         id: updateTimer
-        interval: 500
+        interval: 100
         repeat: true
-        running: false
+        running: true
         onTriggered: readLyrics.running = true
     }
 
@@ -50,11 +50,11 @@ Item {
         }
     }
         Text {
-            font.pixelSize: Appearance.font.pixelSize.small
+            font.pixelSize: Appearance.font.pixelSize.normal
             color: Appearance.colors.colOnLayer1
             horizontalAlignment: Text.AlignHCenter
             text: root.lyricsText.length > 0 ? root.lyricsText : undefined
-            font.family:Appearance.font.colOnLayer1
+            font.family:Appearance.font.family.main
             opacity: 0.5
         }
 }
