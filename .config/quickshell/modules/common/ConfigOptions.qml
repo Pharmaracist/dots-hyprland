@@ -46,7 +46,7 @@ Singleton {
         property bool bottom: false
         property string city: "Cairo"
         property bool desaturateTray: true
-        property bool showOnMainScreenOnly: true
+        property bool showOnMainScreenOnly: false
         property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: true
         property bool borderless: false

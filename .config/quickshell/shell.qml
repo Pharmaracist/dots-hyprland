@@ -36,7 +36,7 @@ ShellRoot {
     property bool enableScreenCorners: true
     property bool enableSidebarLeft: true
     property bool enableSidebarRight: true
-    property bool enableNothingClock: false
+    property bool enableNothingClock: true
     property bool enableActivateLinux: false
     property bool enableScreenFrame: enableVerticalBar
 

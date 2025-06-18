@@ -18,9 +18,9 @@ DockButton {
     property var appToplevel
     property var appListRoot
     property int lastFocused: -1
-    property real iconSize: 35
+    property real iconSize: 40
     property real countDotWidth: 10
-    property real countDotHeight: 4
+    property real countDotHeight: 3
     property bool appIsActive: appToplevel.toplevels.find(t => (t.activated == true)) !== undefined
 
     property bool isSeparator: appToplevel.appId === "SEPARATOR"

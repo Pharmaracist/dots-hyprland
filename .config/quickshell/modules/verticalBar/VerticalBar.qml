@@ -9,7 +9,7 @@ import "root:/services"
 
 Scope {
     id: bar
-    readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly || false
+    readonly property bool showOnMainScreenOnly: ConfigOptions.bar.showOnMainScreenOnly 
 
     // Layout switching
     property string currentLayout: "Default"

@@ -81,8 +81,11 @@ Scope {
                     if (active) sidebarLeftBackground.children[0].focusActiveItem()
                 }
                 onCleared: () => {
-                    if (!active) sidebarRoot.hide()
+                if (!root.pinned && !active) {
+                    sidebarRoot.hide();
                 }
+                }
+
             }
 
             StyledRectangularShadow {

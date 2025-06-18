@@ -14,7 +14,7 @@ Singleton {
     property string day: Qt.formatDateTime(clock.date, "dd")
     property string month: Qt.formatDateTime(clock.date, "MMMM")
     property string year: Qt.formatDateTime(clock.date, "yyyy")
-    property string hour: Qt.formatDateTime(clock.date, "hh")
+    property string hour: Qt.formatDateTime(clock.date, "h")
     property string minute: Qt.formatDateTime(clock.date, "mm")
     property string dayTime: Qt.formatDateTime(clock.date, "AP")
     property string uptime: "0h, 0m"

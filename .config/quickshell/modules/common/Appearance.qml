@@ -169,7 +169,7 @@ Singleton {
             property string iconNerd: "SpaceMono NF"
             property string monospace: "JetBrains Mono NF"
             property string reading: "Readex Pro"
-            property string niche: "Nothing Font (5x7)"
+            property string niche: "Anton"
 
         }
         property QtObject pixelSize: QtObject {

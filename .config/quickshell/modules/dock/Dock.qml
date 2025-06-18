@@ -28,7 +28,6 @@ Scope {
     property bool pinned: PersistentStates.dock.pinned
     property var focusedScreen: Quickshell?.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     property int frameThickness: Appearance.sizes.frameThickness
-    property real commonRadius: Appearance.rounding.screenRounding 
     
     // Content management
     property int currentContent: contentType.apps
@@ -45,7 +44,7 @@ Scope {
     }
     
     // Auto-return configuration
-    property int autoReturnDelay: 10000
+    property int autoReturnDelay: 3000
     readonly property var autoReturnExceptions: [contentType.apps, contentType.overview]
     
     // Content components array
@@ -72,16 +71,10 @@ Scope {
         }
     }
     
-    function cycleContent() {
-        const nextContent = (currentContent + 1) % contentComponents.length
-        switchToContent(nextContent)
-    }
-    
     function resetToDefault() {
         switchToContent(defaultContent)
     }
     
-    // Auto-return timer management
     Timer {
         id: autoReturnTimer
         interval: root.autoReturnDelay
@@ -102,7 +95,6 @@ Scope {
         }
     }
     
-    // Auto-reset timer when content changes
     onCurrentContentChanged: {
         resetAutoReturnTimer()
         
@@ -112,20 +104,7 @@ Scope {
         } else if (previousContent === contentType.overview) {
             GlobalStates.overviewOpen = false
         }
-    }
-    
-    function calculateCornerSize() {
-        return isOverviewMode ? 1.76 * commonRadius : commonRadius
-    }
-    
-    function calculateTopLeftRadius() {
-        return isOverviewMode ? 1.25 * commonRadius : commonRadius
-    }
-    
-    function calculateTopRightRadius() {
-        return isOverviewMode ? 1.25 * commonRadius : commonRadius
-    }
-    
+    }    
     Variants {
         model: pinned ? Quickshell.screens : [focusedScreen]
 
@@ -143,7 +122,7 @@ Scope {
                     || (contentLoader.item && contentLoader.item.requestDockShow === true)
                     || (!ToplevelManager.activeToplevel?.activated)
 
-                anchors { bottom: true; left: true; right: true }
+                anchors { bottom: true;right:true;left:true }
                 
                 exclusiveZone: root.pinned 
                     ? implicitHeight - (Appearance.sizes.hyprlandGapsOut * 2) + frameThickness
@@ -154,14 +133,14 @@ Scope {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 1386
                         case root.contentType.wallpaperSelector: return (screen.width * 0.9)
-                        default: return Math.max(dockRow.implicitWidth + 16, root.defaultDockWidth)
+                        default: return Math.max(dockRow.implicitWidth + 36, root.defaultDockWidth)
                     }
                 }
                 implicitHeight: {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 370
                         case root.contentType.wallpaperSelector: return 230
-                        default: return Math.max(dockRow.implicitHeight + 32, root.defaultDockHeight)
+                        default: return Math.max(dockRow.implicitHeight + 32 + Appearance.sizes.hyprlandGapsOut, root.defaultDockHeight)
                     }
                 }
                 
@@ -190,6 +169,9 @@ Scope {
                         }
                         return dock.implicitHeight + 1
                     }
+                    Behavior on anchors.topMargin {
+                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    }
 
                     Item {
                         id: background
@@ -211,30 +193,17 @@ Scope {
                             }
                         }
                         
-                        Behavior on implicitWidth {
-                            NumberAnimation {
-                                duration: Appearance.animation.elementMoveFast.duration - 50
-                                easing.type: Appearance.animation.elementMove.bezierCurve 
-                            }
-                        }
-                        
-                        Behavior on implicitHeight {
-                            NumberAnimation {
-                                duration: Appearance.animation.elementMoveFast.duration - 50 
-                                easing.type: Appearance.animation.elementMove.bezierCurve 
-                            }
-                        }
-                        
                         StyledRectangularShadow { target: dockRect }
 
                         Rectangle {
                             id: dockRect
                             anchors {
                                 bottom: parent.bottom
+                                bottomMargin: Appearance.sizes.hyprlandGapsOut
                                 horizontalCenter: parent.horizontalCenter
                             }
-                            width: background.implicitWidth
-                            height: background.implicitHeight
+                            implicitWidth: background.implicitWidth
+                            implicitHeight: background.implicitHeight - 5
                             
                             Behavior on width {
                                 NumberAnimation {
@@ -251,8 +220,7 @@ Scope {
                             }
                             
                             color: Appearance.colors.colLayer0
-                            topRightRadius: root.calculateTopRightRadius()
-                            topLeftRadius: root.calculateTopLeftRadius()
+                            radius:Appearance.rounding.screenRounding
 
                             Item {
                                 anchors.fill: parent
@@ -283,11 +251,7 @@ Scope {
                                     Loader {
                                         id: normalContentLoader
                                         Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        Layout.minimumHeight: 45
-                                        Layout.preferredHeight: 40
-                                        
-                                        // Lazy loading - only load when content is active and not special
+                                        Layout.fillHeight: true 
                                         asynchronous: true
                                         active: !root.isSpecialContent && root.contentComponents[root.currentContent]
                                         sourceComponent: active ? root.contentComponents[root.currentContent] : null
@@ -315,28 +279,6 @@ Scope {
                             }
                         }
 
-                        // Corner decorations
-                        RoundCorner {
-                            size: root.calculateCornerSize()
-                            corner: cornerEnum.bottomLeft
-                            color: Appearance.colors.colLayer0
-                            anchors {
-                                bottom: parent.bottom
-                                left: dockRect.right
-                                bottomMargin: frameThickness
-                            }
-                        }
-
-                        RoundCorner {
-                            size: root.calculateCornerSize()
-                            corner: cornerEnum.bottomRight
-                            color: Appearance.colors.colLayer0
-                            anchors {
-                                bottom: parent.bottom
-                                right: dockRect.left
-                                bottomMargin: frameThickness
-                            }
-                        }
                     }
                 }
             }
@@ -363,12 +305,6 @@ Scope {
         name: "wallpaperSelectorToggle"
         description: qsTr("Toggle Wallpaper Selector")
         onPressed: root.toggleContent(contentType.wallpaperSelector)
-    }
-    
-    GlobalShortcut {
-        name: "dockContentToggle"
-        description: qsTr("Cycle Dock Content")
-        onPressed: root.cycleContent()
     }
     
     GlobalShortcut {
@@ -418,7 +354,7 @@ Scope {
         id: wallpaperSelector
         WallpaperSelector { 
             anchors.fill: parent
-            property bool requestDockShow: true
+            property bool requestDockShow: false
         }
     }
 }

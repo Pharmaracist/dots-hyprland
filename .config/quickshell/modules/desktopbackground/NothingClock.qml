@@ -14,7 +14,7 @@ ShellRoot {
         WlrLayershell.layer: WlrLayer.Bottom
         color: "transparent"
         implicitWidth: clock.width + 100
-        implicitHeight: date.height + clock.height + Appearance.sizes.hyprlandGapsOut + 30
+        implicitHeight: date.height + clock.height + Appearance.sizes.hyprlandGapsOut 
         exclusiveZone: -1
 
         anchors {
@@ -23,18 +23,19 @@ ShellRoot {
         }
 
         ColumnLayout {
-            anchors.leftMargin: PersistentStates.bar.verticalMode ? Appearance.sizes.barWidth + Appearance.sizes.hyprlandGapsOut + Appearance.sizes.frameThickness + 20 : Appearance.sizes.frameThickness
-            anchors.left: parent.left
-            anchors.bottomMargin: 20 + Appearance.sizes.hyprlandGapsOut + Appearance.sizes.frameThickness
-            anchors.bottom: parent.bottom
-
+            anchors {
+                fill: parent
+                leftMargin: 80
+                bottomMargin: 80
+            }
+            spacing: -20 
             Text {
                 id: clock
 
                 // font
                 font.family: Appearance.font.family.niche
                 color: Appearance.colors.colOnLayer2
-                font.pixelSize: 80
+                font.pixelSize: 100
                 opacity: 0.85
                 Layout.alignment: Qt.AlignLeft
                 text: DateTime.time
