@@ -8,7 +8,6 @@ import "./modules/common/"
 import "./modules/desktopbackground/"
 import "./modules/dock/"
 import "./modules/launcher/"
-import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
 import "./modules/screenCorners/"
@@ -28,7 +27,6 @@ ShellRoot {
     property bool enableVerticalBar: ConfigOptions.bar.verticalMode | PersistentStates.bar.verticalMode
     property bool enableBar: !enableVerticalBar
     property bool enableDock: true
-    property bool enableMediaControls: false
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: false
     property bool enableOnScreenDisplayVolume: false
@@ -95,15 +93,6 @@ ShellRoot {
         }
 
     }
-
-    LazyLoader {
-        active: enableMediaControls
-
-        component: MediaControls {
-        }
-
-    }
-
     LazyLoader {
         active: enableNotificationPopup
 
@@ -136,13 +125,13 @@ ShellRoot {
 
     }
 
-    LazyLoader {
-        active: true
+    // LazyLoader {
+    //     active: true
 
-        component:ResourcesPanel {
-        }
+    //     component:ResourcesPanel {
+    //     }
 
-    }
+    // }
     LazyLoader {
         active: enableReloadPopup
 

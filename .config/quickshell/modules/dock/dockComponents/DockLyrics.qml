@@ -6,91 +6,87 @@ import "root:/modules/common"
 
 Item {
     id: root
-    
-    property string lyricsPath: "/home/pharmaracist/.cache/lrcsync"
-    property string lyrics: readLyrics.buffer
-    
+
+    property string lyrics: ""
+
     Component.onCompleted: {
-        lrcsync.running = true
-        timer.start()
+        readLyrics.running = true
     }
-    
+
     Component.onDestruction: {
-        timer.stop()
-        lrcsync.kill()
         readLyrics.kill()
     }
-    
-    // Start lrcsync process
-    Process {
-        id: lrcsync
-        command: ["lrcsnc", "-p", "-o", root.lyricsPath, "-c", 
-                 "/home/pharmaracist/.config/lrcsync/config.toml"]
-    }
-    
-    // Read lyrics file periodically
-    Timer {
-        id: timer
-        interval: 750
-        repeat: true
-        onTriggered: readLyrics.running = true
-    }
-    
+
+    // Run lrcsnc and read real-time output
     Process {
         id: readLyrics
-        command: ["cat", root.lyricsPath]
+        command: ["lrcsnc"]
         property string buffer: ""
-        
+
         onStarted: buffer = ""
+
         stdout: SplitParser {
-            onRead: data => readLyrics.buffer += data
-        }
-    }
-    
-    // Display lyrics
-    Text {
-        id:lyrics
-        anchors.centerIn: parent
-        text: root.lyrics || ""
-        font.pixelSize: Appearance.font.pixelSize.normal
-        font.family: Appearance.font.family.main
-        color: Appearance.colors.colOnLayer1
-        horizontalAlignment: Text.AlignHCenter
-        opacity: 0.5
-        
-        Behavior on text {
-            SequentialAnimation {
-                ParallelAnimation {
-                    NumberAnimation {
-                        target: lyrics
-                        property: "scale"
-                        to: 1.05
-                        duration: 150
-                        easing.type: Easing.OutQuad
-                    }
-                    ColorAnimation {
-                        target: lyrics
-                        property: "color"
-                        to: Appearance.colors.accent || "#ffffff"
-                        duration: 150
-                    }
-                }
-                ParallelAnimation {
-                    NumberAnimation {
-                        target: lyrics
-                        property: "scale"
-                        to: 1.0
-                        duration: 300
-                        easing.type: Easing.OutElastic
-                    }
-                    ColorAnimation {
-                        target: lyrics
-                        property: "color"
-                        to: Appearance.colors.colOnLayer1
-                        duration: 300
-                    }
-                }
+           onRead: data => {
+                readLyrics.buffer = data
+                root.lyrics = data
             }
         }
     }
+
+    Text {
+    id: lyricsDisplay
+    anchors.centerIn: parent
+    text: root.lyrics || ""
+    font.pixelSize: Appearance.font.pixelSize.normal
+    font.family: Appearance.font.family.main
+    color: Appearance.colors.colOnLayer1
+    horizontalAlignment: Text.AlignHCenter
+    opacity: 0.5
+
+    Behavior on text {
+        SequentialAnimation {
+            // Scale Up
+            NumberAnimation {
+                target: lyricsDisplay
+                property: "scale"
+                from: 1.0
+                to: 1.05
+                duration: Appearance.animation.clickBounce.duration
+                easing.type: Appearance.animation.clickBounce.type
+                easing.bezierCurve: Appearance.animation.clickBounce.bezierCurve
+            }
+
+            // Color Accent Transition
+            ColorAnimation {
+                target: lyricsDisplay
+                property: "color"
+                to: Appearance.colors.colPrimary
+                duration: Appearance.animation.elementMoveFast.duration
+                easing.type: Appearance.animation.elementMoveFast.type
+                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            }
+
+            // Scale Down
+            NumberAnimation {
+                target: lyricsDisplay
+                property: "scale"
+                to: 1.0
+                duration: Appearance.animation.elementMoveEnter.duration
+                easing.type: Appearance.animation.elementMoveEnter.type
+                easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve
+            }
+
+            // Restore Color
+            ColorAnimation {
+                target: lyricsDisplay
+                property: "color"
+                to: Appearance.colors.colOnLayer1
+                duration: Appearance.animation.elementMoveExit.duration
+                easing.type: Appearance.animation.elementMoveExit.type
+                easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve
+            }
+        }
+    }
+}
+
 }

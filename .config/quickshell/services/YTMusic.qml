@@ -14,6 +14,7 @@ Singleton {
     id: ytMusicService
     
     readonly property string downloadDir : FileUtils.trimFileProtocol(Directories.music)
+
     
     // Public API method to play a song
     function playSong(query) {

@@ -1,7 +1,11 @@
+import "root:/modules/common/widgets"
+import "root:/modules/common"
+import "root:/services"
 import QtQuick
 import Quickshell
 pragma Singleton
 pragma ComponentBehavior: Bound
+
 
 Singleton {
     property QtObject ai: QtObject {
@@ -12,7 +16,6 @@ Singleton {
     property QtObject appearance: QtObject {
         property bool borderless: true
         property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
-        property bool transparency: false
     }
 
     property QtObject audio: QtObject { // Values in %

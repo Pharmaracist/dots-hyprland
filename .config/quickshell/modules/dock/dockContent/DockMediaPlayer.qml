@@ -147,7 +147,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         anchors.margins: 3
-        color: Appearance.colors.colLayer0
+        color: "transparent"
         radius: Appearance.rounding.screenRounding
         visible: !blurArtEnabled
         
@@ -500,9 +500,10 @@ Item {
                       : meaningfulPlayers.length > 0 ? "Select a media player" : "No players available"
             }
         }
-
+       
         RowLayout {
-            Layout.minimumWidth: 146  // Increased to accommodate new buttons
+            id:mediaControls
+            Layout.rightMargin: 10
             spacing: 3
              DockMediaButton {
                 iconName: "download"
@@ -546,14 +547,14 @@ Item {
             RippleButton {
                 implicitWidth: 32
                 implicitHeight: 32
-                buttonRadius: hovered ? 15 : 7
+                buttonRadius: hovered ? 15 : 10
                 Layout.rightMargin: 6
                 Layout.leftMargin: 6
                 enabled: !!player && player.canPause
                 opacity: player && player.canPause ? 1 : 0.5
 
                 colBackground: player && player.playbackState === MprisPlaybackState.Playing
-                            ? Appearance.colors.colSecondary
+                            ? Appearance.colors.colPrimary
                             : Appearance.colors.colSecondaryContainer
                 colBackgroundHover: player && player.playbackState === MprisPlaybackState.Playing
                                    ? Appearance.colors.colPrimaryHover
@@ -646,6 +647,5 @@ Item {
             }
         }
     }
-
     Behavior on implicitWidth { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 }

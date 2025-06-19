@@ -25,7 +25,7 @@ QuickToggleButton {
         // Set transparency for specific applications
         if (toggled) {
             // Enable transparency for various apps
-            Hyprland.dispatch(`exec hyprctl setprop class:^.* alpha ${hyprlandOpacity}`);
+            // Hyprland.dispatch(`exec hyprctl setprop class:^.* alpha ${hyprlandOpacity}`);
         } else {
             // Disable transparency (set to opaque)
             Hyprland.dispatch(`exec hyprctl setprop class:kitty alpha 1`);
