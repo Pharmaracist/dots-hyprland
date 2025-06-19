@@ -14,6 +14,7 @@ Singleton {
     readonly property string cache: StandardPaths.standardLocations(StandardPaths.CacheLocation)[0]
     readonly property string pictures: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
     readonly property string downloads: StandardPaths.standardLocations(StandardPaths.DownloadLocation)[0]
+    readonly property string music: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
     
     // Other dirs used by the shell, without "file://"
     property string favicons: FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)

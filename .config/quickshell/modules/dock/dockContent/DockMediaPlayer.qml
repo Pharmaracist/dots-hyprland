@@ -440,14 +440,33 @@ Item {
                     }
                 }
             }
-
-            MaterialSymbol {
-                anchors.centerIn: parent
-                text: "music_note"
-                color: Appearance.m3colors.m3onSecondaryContainer
-                iconSize: Appearance.font.pixelSize.normal
+            Item {
+                anchors.fill: parent
                 visible: !player || !player.trackArtUrl
+
+                RotationAnimator on rotation {
+                    from: 0
+                    to: 360
+                    duration: 5000
+                    loops: Animation.Infinite
+                    running: true
+                }
+
+                transform: Rotation {
+                    id: vinylRotation
+                    origin.x: coverArtContainer.width / 2
+                    origin.y: coverArtContainer.height / 2
+                    angle: 0
+                }
+                
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: "graphic_eq"
+                    color: Appearance.m3colors.m3onSecondaryContainer
+                    iconSize: Appearance.font.pixelSize.huge
+                }
             }
+
         }
 
 

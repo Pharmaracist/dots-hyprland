@@ -66,6 +66,12 @@ Item { // Wrapper
             }
         },
         {
+            action: "lofi",
+            execute: (args) => {
+                executor.executeCommand(`elisa ${Directories.music}`)
+            }
+        },
+        {
             action: "bw",
             execute: (args) => {
                 Hyprland.dispatch(`exec matugen color hex "#000000" -t scheme-monochrome`)
