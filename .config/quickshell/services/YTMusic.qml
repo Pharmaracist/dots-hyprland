@@ -20,7 +20,6 @@ Singleton {
         // 3. Pipes it to VLC with appropriate options
         const command = `pkill vlc 2>/dev/null; yt-dlp -f bestaudio --get-url "ytsearch1:${query}" | xargs -I {} vlc --play-and-exit --audio-visual=visual --extraintf rc --rc-host=localhost:9090 {} &>/dev/null &`
         
-        // Execute the command using Hyprland.dispatch for compatibility with your lofi implementation
         Hyprland.dispatch(`exec ${command}`)
     }
     

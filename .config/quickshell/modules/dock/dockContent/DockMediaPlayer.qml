@@ -395,6 +395,7 @@ Item {
     }
 
     // ─────── Main Content ───────
+
     RowLayout {
         id: contentRow
         anchors {
@@ -407,7 +408,11 @@ Item {
             bottomMargin: 5
         }
         spacing: 8
-
+        DockLyrics {
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottomMargin: parent.height / 1.8
+        }
         Rectangle {
             id: coverArtContainer
             Layout.preferredWidth: 40
@@ -445,18 +450,11 @@ Item {
             }
         }
 
+
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumWidth: 120
             spacing: 1
-
-            DockLyrics {
-                Layout.alignment:Qt.AlignHCenter | Qt.AlignHCenter
-                Layout.bottomMargin: -5
-                Layout.leftMargin: -10
-
-            }
 
             StyledText {
                 Layout.fillWidth: true
@@ -486,7 +484,13 @@ Item {
         RowLayout {
             Layout.minimumWidth: 146  // Increased to accommodate new buttons
             spacing: 3
-
+             DockMediaButton {
+                iconName: "download"
+                enabled: true // todo
+                opacity:  1 //todo
+                onClicked: YTMusic.downloadSong(player.trackTitle)
+                
+            }
             DockMediaButton {
                 iconName: "shuffle"
                 enabled: !!player && player.canControl
