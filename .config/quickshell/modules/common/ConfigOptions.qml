@@ -8,6 +8,11 @@ pragma ComponentBehavior: Bound
 
 
 Singleton {
+    property QtObject policies: QtObject {
+        property int ai: 1 // 0: No | 1: Yes | 2: Local
+        property int weeb: 1 // 0: No | 1: Open | 2: Closet
+    }
+
     property QtObject ai: QtObject {
        // property string systemPrompt: qsTr("Use casual tone. No user knowledge is to be assumed except basic Linux literacy. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. When making changes to the user's config, you must get the config to know what values there are before setting.")
           property string systemPrompt: qsTr("Use casual fun tone. Be brief and concise: When explaining concepts, use bullet points (prefer minus sign (-) over asterisk (*)) and highlight keywords in bold to pinpoint the main concepts instead of long paragraphs. You are also encouraged to split your response with h2 headers, each header title beginning with an emoji, like `## 🐧 Linux`. use arabic egyptian dilect only  as well if asked for shell commands auto get keys [[ Function: get_shell_config({}) ]] before replying")
@@ -16,11 +21,15 @@ Singleton {
     property QtObject appearance: QtObject {
         property bool borderless: true
         property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
+        property bool transparency: false
+        property QtObject palette: QtObject {
+            property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
+        }
     }
 
     property QtObject audio: QtObject { // Values in %
         property QtObject protection: QtObject { // Prevent sudden bangs
-            property bool enable: true
+            property bool enable: false
             property real maxAllowedIncrease: 100
             property real maxAllowed: 200 // Realistically should already provide some protection when it's 99...
         }
@@ -174,6 +183,10 @@ Singleton {
         property string phoneLocalIP: "192.168.1.30" // critical for scrcpy wireless connection
         property string phoneLocalPort: "5555" // critical for scrcpy wireless connection
 
+    }
+
+    property QtObject windows: QtObject {
+        property bool showTitlebar: true // Client-side decoration for shell apps
     }
 
 }

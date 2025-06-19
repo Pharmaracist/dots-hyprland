@@ -38,19 +38,17 @@ Scope {
         readonly property int powerMenu: 2
         readonly property int overview: 3
         readonly property int wallpaperSelector: 4
-        readonly property int whisper: 5
 
     }
 
     property int autoReturnDelay: 3000
-    readonly property var autoReturnExceptions: [contentType.apps,contentType.mediaPlayer ,contentType.overview, contentType.whisper]
-    readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu, overview, wallpaperSelector, whisper]
+    readonly property var autoReturnExceptions: [contentType.apps,contentType.mediaPlayer ,contentType.overview]
+    readonly property var contentComponents: [mediaPlayer, normalDock, powerMenu, overview, wallpaperSelector]
 
-    readonly property bool isSpecialContent: currentContent === contentType.overview || currentContent === contentType.wallpaperSelector || currentContent === contentType.whisper
+    readonly property bool isSpecialContent: currentContent === contentType.overview || currentContent === contentType.wallpaperSelector 
     readonly property bool isOverviewMode: currentContent === contentType.overview
     readonly property bool isWallpaperMode: currentContent === contentType.wallpaperSelector
-    readonly property bool isWhisper: currentContent === contentType.whisper
-
+    
     function switchToContent(newContent) {
         if (newContent !== currentContent) {
             previousContent = currentContent
@@ -126,7 +124,6 @@ Scope {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 1386
                         case root.contentType.wallpaperSelector: return (screen.width * 0.9)
-                        case root.contentType.whisper: return (screen.width * 0.9)
                         default: return Math.max(dockRow.implicitWidth + 36, root.defaultDockWidth)
                     }
                 }
@@ -134,7 +131,6 @@ Scope {
                     switch (root.currentContent) {
                         case root.contentType.overview: return 370
                         case root.contentType.wallpaperSelector: return 230
-                        case root.contentType.whisper: return 300
                         default: return Math.max(dockRow.implicitHeight + Appearance.sizes.hyprlandGapsOut, root.defaultDockHeight)
                     }
                 }
@@ -177,7 +173,6 @@ Scope {
                             switch (root.currentContent) {
                                 case root.contentType.overview: return 1386
                                 case root.contentType.wallpaperSelector: return (screen.width * 0.9)
-                                case root.contentType.whisper: return (screen.width * 0.9)
                                 default: return Math.max(dockRow.implicitWidth + 16, root.defaultBackgroundWidth)
                             }
                         }
@@ -185,7 +180,6 @@ Scope {
                             switch (root.currentContent) {
                                 case root.contentType.overview: return 355
                                 case root.contentType.wallpaperSelector: return 200
-                                case root.contentType.whisper: return 100
                                 default: return Math.max(dockRow.implicitHeight + 20, root.defaultBackgroundHeight)
                             }
                         }
@@ -394,88 +388,15 @@ Scope {
             }
         }
     }
+    GlobalShortcut { name: "dockPinToggle"; description: qsTr("Toggle Dock Pin"); onPressed: { PersistentStateManager.setState("dock.pinned", !root.pinned); root.resetAutoReturnTimer() } }
+    GlobalShortcut { name: "overviewToggle"; description: qsTr("Toggle Overview"); onPressed: root.toggleContent(contentType.overview) }
+    GlobalShortcut { name: "wallpaperSelectorToggle"; description: qsTr("Toggle Wallpaper Selector"); onPressed: root.toggleContent(contentType.wallpaperSelector) }
+    GlobalShortcut { name: "dockMediaControlToggle"; description: qsTr("Toggle Media Player"); onPressed: root.toggleContent(contentType.mediaPlayer) }
+    GlobalShortcut { name: "dockSessionToggle"; description: qsTr("Toggle Power Menu"); onPressed: root.toggleContent(contentType.powerMenu) }
 
-    GlobalShortcut {
-        name: "dockPinToggle"
-        description: qsTr("Toggle Dock Pin")
-        onPressed: {
-            PersistentStateManager.setState("dock.pinned", !root.pinned)
-            root.resetAutoReturnTimer()
-        }
-    }
-
-    GlobalShortcut {
-        name: "overviewToggle"
-        description: qsTr("Toggle Overview")
-        onPressed: root.toggleContent(contentType.overview)
-    }
-
-    GlobalShortcut {
-        name: "wallpaperSelectorToggle"
-        description: qsTr("Toggle Wallpaper Selector")
-        onPressed: root.toggleContent(contentType.wallpaperSelector)
-    }
-
-    GlobalShortcut {
-        name: "dockMediaControlToggle"
-        description: qsTr("Toggle Media Player")
-        onPressed: root.toggleContent(contentType.mediaPlayer)
-    }
-
-    GlobalShortcut {
-        name: "toggleWhisper"
-        description: qsTr("Toggle Whisper")
-        onPressed: root.toggleContent(contentType.whisper)
-    }
-    GlobalShortcut {
-        name: "dockSessionToggle"
-        description: qsTr("Toggle Power Menu")
-        onPressed: root.toggleContent(contentType.powerMenu)
-    }
-
-    Component {
-        id: normalDock
-        DockApps {
-            property bool requestDockShow: false
-        }
-    }
-
-    Component {
-        id: powerMenu
-        DockPowerMenu {
-            anchors.fill: parent
-            property bool requestDockShow: true
-        }
-    }
-
-    Component {
-        id: overview
-        OverviewWidget {
-            panelWindow: dock
-            anchors.fill: parent
-            property bool requestDockShow: true
-        }
-    }
-
-    Component {
-        id: whisper
-        Whisper {
-            anchors.fill: parent
-            property bool requestDockShow: true
-        }
-    }
-    Component {
-        id: mediaPlayer
-        DockMediaPlayer {
-            property bool requestDockShow: true
-        }
-    }
-
-    Component {
-        id: wallpaperSelector
-        WallpaperSelector {
-            anchors.fill: parent
-            property bool requestDockShow: true
-        }
-    }
+    Component { id: normalDock; DockApps {} }
+    Component { id: powerMenu; DockPowerMenu {} }
+    Component { id: overview; OverviewWidget { panelWindow: dock ; property bool requestDockShow: true} }
+    Component { id: mediaPlayer; DockMediaPlayer {} }
+    Component { id: wallpaperSelector; WallpaperSelector {property bool requestDockShow: true} }
 }

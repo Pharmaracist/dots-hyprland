@@ -19,6 +19,7 @@ ProgressBar {
     property color highlightColor: Appearance?.colors.colPrimary ?? "#685496"
     property color trackColor: Appearance?.m3colors.m3secondaryContainer ?? "#F1D3F9"
     property bool sperm: false // If true, the progress bar will have a wavy fill effect
+    property bool animateSperm: true
     property real spermAmplitudeMultiplier: sperm ? 0.5 : 0
     property real spermFrequency: 6
     property real spermFps: 60
@@ -30,7 +31,7 @@ ProgressBar {
     Behavior on value {
         animation: Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
-
+    
     background: Rectangle {
         anchors.fill: parent
         color: "transparent"
@@ -67,7 +68,7 @@ ProgressBar {
                 ctx.beginPath();
                 for (var x = ctx.lineWidth / 2; x <= fillWidth; x += 1) {
                     var waveY = centerY + amplitude * Math.sin(frequency * 2 * Math.PI * x / width + phase);
-                    if (x === ctx.lineWidth / 2)
+                    if (x === 0)
                         ctx.moveTo(x, waveY);
                     else
                         ctx.lineTo(x, waveY);
@@ -81,12 +82,11 @@ ProgressBar {
             }
             Timer {
                 interval: 1000 / root.spermFps
-                running: root.sperm
+                running: root.animateSperm
                 repeat: root.sperm
                 onTriggered: wavyFill.requestPaint()
             }
         }
-
         Rectangle { // Right remaining part fill
             anchors.right: parent.right
             width: (1 - root.visualPosition) * parent.width - valueBarGap
@@ -94,7 +94,6 @@ ProgressBar {
             radius: Appearance?.rounding.full ?? 9999
             color: root.trackColor
         }
-
         Rectangle { // Stop point
             anchors.right: parent.right
             width: valueBarGap

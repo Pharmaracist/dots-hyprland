@@ -215,7 +215,7 @@ Rectangle {
                     width: 45
                     height: 45
                     onClicked: {
-                        Hyprland.dispatch(`exec ${ConfigOptions.apps.settings}`);
+                        Hyprland.dispatch(`exec qs -p '${Directories.settings}'`);
                         Hyprland.dispatch(`global quickshell:sidebarRightClose`);
                     }
 

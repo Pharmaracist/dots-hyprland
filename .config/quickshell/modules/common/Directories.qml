@@ -31,6 +31,8 @@ Singleton {
     property string generatedMaterialThemePath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/colors.json`)
     property string cliphistDecode: FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/scripts/switchwall.sh`)
+    property string settings: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/settings.qml`)
+    
     // Cleanup on init
     Component.onCompleted: {
         Hyprland.dispatch(`exec mkdir -p '${favicons}'`)
