@@ -189,7 +189,7 @@ Item {
         contentItem: MaterialSymbol {
             iconSize: Appearance.font.pixelSize.normal
             horizontalAlignment: Text.AlignHCenter
-            color: parent.isToggled ? 
+            color: !parent.isToggled ? 
                 Appearance.colors.colPrimary : 
                 Appearance.m3colors.m3onSecondaryContainer
             text: iconName
@@ -466,17 +466,18 @@ Item {
                     iconSize: Appearance.font.pixelSize.huge
                 }
             }
-
+            
         }
-
-
+        
+        
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 1
-
+            
             StyledText {
-                Layout.fillWidth: true
+                Layout.maximumWidth: 220  // Increased to accommodate new buttons
+                Layout.fillWidth: false
                 Layout.minimumWidth: 1
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.Medium
@@ -505,8 +506,8 @@ Item {
             spacing: 3
              DockMediaButton {
                 iconName: "download"
-                enabled: true // todo
-                opacity:  1 //todo
+                enabled: true 
+                opacity:  1
                 onClicked: YTMusic.downloadSong(player.trackTitle)
                 
             }
