@@ -505,59 +505,34 @@ RowLayout {
             }
         }
     }
+Component {
+    id: vinylComponent
+    Item {
+        anchors.fill: parent
+        opacity: !coverHovered.containsMouse ? 0.9 : 0
+        visible: opacity > 0.05
 
-    Component {
-        id: vinylComponent
-        Item {
-            anchors.fill: parent
-            opacity: !coverHovered.containsMouse ? 0.9 : 0
+        // transform: Rotation {      // High CPU OverHead
+        //     id: vinylRotation
+        // }
 
-            transform: Rotation {
-                id: vinylRotation
-                origin.x: coverArtContainer.width / 2
-                origin.y: coverArtContainer.height / 2
-                angle: 0
-            }
+        // RotationAnimator on rotation {
+        //     from: 0
+        //     to: 360
+        //     duration: 8000 
+        //     loops: Animation.Infinite
+        //     running: parent.visible && !coverHovered.containsMouse
+        // }
 
-            RotationAnimator on rotation {
-                from: 0
-                to: 360
-                duration: 5000
-                loops: Animation.Infinite
-                running: true
-            }
-
-            Image {
-                source: "root:/assets/icons/vinyl.svg"
-                anchors.centerIn: parent
-                mipmap: true
-                antialiasing: true
-                smooth: true
-
-                layer.enabled: true
-                layer.effect: ColorOverlay {
-                    color: Appearance.m3colors.m3secondary
-                }
-
-                SequentialAnimation on scale {
-                    loops: Animation.Infinite
-                    NumberAnimation {
-                        from: 1.0
-                        to: 1.15
-                        duration: 360
-                        easing.type: Easing.InOutQuad
-                    }
-                    NumberAnimation {
-                        from: 1.15
-                        to: 1.0
-                        duration: 360
-                        easing.type: Easing.InOutQuad
-                    }
-                }
-            }
+        MaterialSymbol {
+            anchors.centerIn: parent
+            text: "graphic_eq"
+            iconSize: Appearance.font.pixelSize.huge
+            color: Appearance.m3colors.m3secondary
         }
     }
-      
+}
+
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
