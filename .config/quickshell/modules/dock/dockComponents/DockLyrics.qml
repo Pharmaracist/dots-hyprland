@@ -22,7 +22,6 @@ Item {
         id: readLyrics
         command: ["lrcsnc","-c","~/.config/lrcsnc/config.toml"]
         property string buffer: ""
-
         onStarted: buffer = ""
 
         stdout: SplitParser {
@@ -33,12 +32,13 @@ Item {
         }
     }
 
-    Text {
+Text {
+    visible:PersistentStates.dock.lyrics
     id: lyricsDisplay
     anchors.centerIn: parent
     text: root.lyrics || ""
-    font.pixelSize: Appearance.font.pixelSize.normal
-    font.family: Appearance.font.family.main
+    font.pixelSize: Appearance.font.pixelSize.small - 1
+    font.family: Appearance.font.family.title
     color: Appearance.colors.colOnLayer1
     horizontalAlignment: Text.AlignHCenter
     opacity: 0.5

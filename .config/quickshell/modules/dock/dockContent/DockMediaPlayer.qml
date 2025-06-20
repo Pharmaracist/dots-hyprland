@@ -24,6 +24,7 @@ Item {
     readonly property var realPlayers: Mpris.players.values.filter(player => isRealPlayer(player))
     readonly property var meaningfulPlayers: filterDuplicatePlayers(realPlayers)
     readonly property MprisPlayer player: meaningfulPlayers.length > 0 ? meaningfulPlayers[selectedPlayerIndex] : null
+    property bool useVinylFallback: PersistentStates.dock.useVinyl
     
     property real progressRatio: {
         if (!player || !player.length || player.length <= 0 || !player.position) return 0
@@ -189,14 +190,14 @@ Item {
             Appearance.colors.colPrimaryHover : 
             Appearance.colors.colSecondaryContainerHover
         colRipple: isToggled ? 
-            Appearance.colors.colPrimaryActive : 
+            Appearance.m3colors.m3secondaryContainer : 
             Appearance.colors.colSecondaryContainerActive
 
         contentItem: MaterialSymbol {
             iconSize: Appearance.font.pixelSize.normal
             horizontalAlignment: Text.AlignHCenter
             color: !parent.isToggled ? 
-                Appearance.colors.colPrimary : 
+                Appearance.m3colors.m3secondary : 
                 Appearance.m3colors.m3onSecondaryContainer
             text: iconName
         }
@@ -399,41 +400,51 @@ Item {
         //     }
         // ]
     }
-
-    // ─────── Main Content ───────
-    DockLyrics {
+    Loader {
+        active: PersistentStates.dock.lyrics
+        asynchronous: true
+        sourceComponent: DockLyrics {}
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: parent.height / 1.8
     }
+
   
-    RowLayout {
-        id: contentRow
-        anchors {
-            left: parent.left
-            right: playerSelectorContainer.visible ? playerSelectorContainer.left : parent.right
-            top: parent.top
-            bottom: seekbarBackground.top
-            leftMargin: 8
-            rightMargin: playerSelectorContainer.visible ? 5 : 8
-            bottomMargin: 5
-        }
-        spacing: 8
-        MouseArea {
-            id:coverHovered
-            anchors.fill: coverArtContainer
-            hoverEnabled:true
-        }
-    
-        Rectangle {
-            id: coverArtContainer
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            antialiasing: true
-            radius: Appearance.rounding.normal
-            color: Appearance.m3colors.m3secondaryContainer
-            clip: true
-          StyledText {
+RowLayout {
+    id: contentRow
+
+    anchors {
+        left: parent.left
+        right: playerSelectorContainer.visible ? playerSelectorContainer.left : parent.right
+        top: parent.top
+        bottom: seekbarBackground.top
+        leftMargin: 8
+        rightMargin: playerSelectorContainer.visible ? 5 : 8
+        bottomMargin: 5
+    }
+
+    spacing: 8
+
+    MouseArea {
+        id: coverHovered
+        anchors.fill: coverArtContainer
+        hoverEnabled: true
+            onPressed: {
+                useVinylFallback = !useVinylFallback ;
+                PersistentStateManager.setState("dock.useVinyl", useVinylFallback);
+            }
+    }
+
+    Rectangle {
+        id: coverArtContainer
+        Layout.preferredWidth: 40
+        Layout.preferredHeight: 40
+        antialiasing: true
+        radius: Appearance.rounding.normal
+        color: Appearance.m3colors.m3secondaryContainer
+        clip: true
+
+        StyledText {
             opacity: coverHovered.containsMouse ? 0.9 : 0
             anchors.centerIn: parent
             text: {
@@ -447,91 +458,105 @@ Item {
             font.pixelSize: Appearance.font.pixelSize.smallest + 1
             font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter
-             Behavior on opacity {
+
+            Behavior on opacity {
                 NumberAnimation {
                     duration: 400
                     easing.type: Easing.InOutQuad
                 }
-        }
             }
+        }
+        Loader {
+            id: coverImageLoader
+            anchors.fill: parent
+            active: true
+            sourceComponent: useVinylFallback ? vinylComponent : artComponent
+        }
+    }
+
+    Component {
+        id: artComponent
+        Image {
+            anchors.fill: parent
+            opacity: !coverHovered.containsMouse ? 0.9 : 0
+            source: player && player.trackArtUrl ? player.trackArtUrl : ""
+            asynchronous: true
+            cache: false
+            mipmap: true
+            fillMode: Image.PreserveAspectCrop
+            visible: source !== ""
+            antialiasing: true
+
+            layer.enabled: true
+            layer.effect: OpacityMask {
+                maskSource: Rectangle {
+                    width: coverArtContainer.width
+                    height: coverArtContainer.height
+                    radius: Appearance.rounding.small
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 300
+                    easing.type: Easing.InOutQuad
+                }
+            }
+        }
+    }
+
+    Component {
+        id: vinylComponent
+        Item {
+            anchors.fill: parent
+            opacity: !coverHovered.containsMouse ? 0.9 : 0
+
+            transform: Rotation {
+                id: vinylRotation
+                origin.x: coverArtContainer.width / 2
+                origin.y: coverArtContainer.height / 2
+                angle: 0
+            }
+
+            RotationAnimator on rotation {
+                from: 0
+                to: 360
+                duration: 5000
+                loops: Animation.Infinite
+                running: true
+            }
+
             Image {
-                opacity : !coverHovered.containsMouse ? 0.9 : 0
-                anchors.fill: parent
-                source: player && player.trackArtUrl ? player.trackArtUrl : ""
-                asynchronous: true
-                cache: false
+                source: "root:/assets/icons/vinyl.svg"
+                anchors.centerIn: parent
                 mipmap: true
-                fillMode: Image.PreserveAspectCrop
-                visible: source !== ""
                 antialiasing: true
+                smooth: true
+
                 layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: coverArtContainer.width
-                        height: coverArtContainer.height
-                        radius: Appearance.rounding.small
+                layer.effect: ColorOverlay {
+                    color: Appearance.m3colors.m3secondary
+                }
+
+                SequentialAnimation on scale {
+                    loops: Animation.Infinite
+                    NumberAnimation {
+                        from: 1.0
+                        to: 1.15
+                        duration: 360
+                        easing.type: Easing.InOutQuad
+                    }
+                    NumberAnimation {
+                        from: 1.15
+                        to: 1.0
+                        duration: 360
+                        easing.type: Easing.InOutQuad
                     }
                 }
-                 Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.InOutQuad
             }
         }
-            }
-           Item {
-                opacity : !coverHovered.containsMouse ? 0.9 : 0
-              anchors.fill: parent
-              visible: !player || !player.trackArtUrl
-            NumberAnimation {
-                duration: 100
-                easing.type: Easing.InOutQuad
-            }
-
-              RotationAnimator on rotation {
-                  from: 0
-                  to: 360
-                  duration: 5000
-                  loops: Animation.Infinite
-                  running: true
-              }
-
-              transform: Rotation {
-                  id: vinylRotation
-                  origin.x: coverArtContainer.width / 2
-                  origin.y: coverArtContainer.height / 2
-                  angle: 0
-              }
-              Image {
-                  source: 'root:/assets/icons/vinyl.svg'
-                  anchors.centerIn: parent
-                  mipmap:true
-                  antialiasing:true        
-                  smooth:true
-
-                  layer.enabled: true
-                  layer.effect: ColorOverlay {
-                      color: Appearance.m3colors.m3secondary
-                  }
-
-                  SequentialAnimation on scale {
-                      loops: Animation.Infinite
-                      NumberAnimation {
-                          from: 1.0
-                          to: 1.15
-                          duration: 360
-                          easing.type: Easing.InOutQuad
-                      }
-                      NumberAnimation {
-                          from: 1.15
-                          to: 1.0
-                          duration: 360
-                          easing.type: Easing.InOutQuad
-                      }
-                      }
-                  }       
-              }
-        }        
+    }
+      
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -657,6 +682,20 @@ Item {
                 }
             }
 
+             DockMediaButton {
+                id:lyrics
+                enabled: !!player && player.canControl
+                isToggled: PersistentStates.dock.lyrics
+                iconName: lyrics.isToggled ? "lyrics" : "subtitles_off"
+                opacity: lyrics.isToggled ? 1 : 0.5
+               property bool showLyrics: PersistentStates.dock.lyrics
+
+                onClicked: {
+                    showLyrics = !showLyrics;
+                    PersistentStateManager.setState("dock.lyrics", showLyrics);
+                }
+
+            }
             DockMediaButton {
                 iconName: {
                     if (!player || !player.loopState) return "repeat";
@@ -695,7 +734,7 @@ Item {
                         }
                     }
                 }
-                
+
                 // Tooltip
                 ToolTip.visible: hovered
                 ToolTip.text: {

@@ -10,7 +10,10 @@ Singleton {
         }
     property QtObject dock: QtObject {
         property bool pinned:false
+        property bool lyrics:true
+        property bool useVinyl:true
         property int currentContent: -1
+
     }
 
     property QtObject sidebar: QtObject {

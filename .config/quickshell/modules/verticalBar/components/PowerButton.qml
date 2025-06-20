@@ -28,7 +28,8 @@ Item {
             text: "power_settings_new"
             font.pixelSize: Appearance.font.pixelSize.large
             anchors.centerIn: parent
-            color: Appearance.m3colors.m3error
+            color: Appearance.m3colors.m3onSecondaryContainer
+        
         }
 
         MouseArea {

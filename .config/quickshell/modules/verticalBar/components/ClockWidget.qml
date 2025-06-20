@@ -24,7 +24,7 @@ Rectangle {
             font.pixelSize: Appearance.font.pixelSize.normal
             font.family: Appearance.font.family.monospace
             font.weight: 700
-            color: Appearance.m3colors.m3secondary
+            color: Appearance.m3colors.m3onSecondaryContainer
             text: DateTime.hour
             Layout.alignment: Qt.AlignHCenter
         }
@@ -33,7 +33,7 @@ Rectangle {
             font.family: Appearance.font.family.monospace
             font.pixelSize: Appearance.font.pixelSize.normal
             font.weight: 700
-            color: Appearance.m3colors.m3primary
+            color: Appearance.m3colors.m3onSecondaryContainer
             text: DateTime.minute
             Layout.alignment: Qt.AlignHCenter
         }
@@ -43,7 +43,7 @@ Rectangle {
             font.family: Appearance.font.family.monospace
             font.pixelSize: Appearance.font.pixelSize.normal
             font.weight: 700
-            color: Appearance.m3colors.m3tertiary
+            color: Appearance.m3colors.m3onSecondaryContainer
             text: DateTime.dayTime
             Layout.alignment: Qt.AlignHCenter
         }
