@@ -608,7 +608,7 @@ Component {
             }
 
             RippleButton {
-                implicitWidth: 32
+                implicitWidth: player && player.playbackState === MprisPlaybackState.Playing ?  100 : 32
                 implicitHeight: 32
                 buttonRadius: hovered ? 15 : 10
                 Layout.rightMargin: 6
@@ -634,6 +634,7 @@ Component {
                     }
                 }
                 Behavior on buttonRadius { animation: Appearance.animation.elementMove.numberAnimation.createObject(this) }
+                Behavior on implicitWidth { animation: Appearance.animation.elementMove.numberAnimation.createObject(this) }
 
                 contentItem: MaterialSymbol {
                     iconSize: Appearance.font.pixelSize.normal

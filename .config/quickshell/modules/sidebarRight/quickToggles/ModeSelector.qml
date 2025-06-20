@@ -56,9 +56,10 @@ Item {
                 }
             }
             }
-            contentItem: Item {
+            contentItem: Rectangle {
                 width: parent.width
                 height: parent.height
+                color:"transparent"
                 RowLayout {
                     id:content
                     anchors.fill: parent
@@ -88,12 +89,21 @@ Item {
             StyledToolTip {
                 content:  getTooltipText(modelData)
             }
-            
-            onClicked: {
+            MouseArea {
+                hoverEnabled:true
+                acceptedButtons: Qt.RightButton | Qt.LeftButton
+                anchors.fill: parent
+                onPressed: (event) => {
+             if (event.button === Qt.LeftButton){
                 currentMode = modelData;
                 modeChanged(modelData);
                 PersistentStateManager.setState("temp.currentScheme", currentMode)
                 Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --type '${currentMode}'&`);
+            } else if (event.button === Qt.RightButton) {
+                Hyprland.dispatch("exec matugen color hex $(hyprpicker -n -f hex -r -d)")
+            }
+        }
+            
             }
             
             function getIcon(mode) {

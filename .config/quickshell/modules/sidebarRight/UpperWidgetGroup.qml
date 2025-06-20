@@ -463,14 +463,22 @@ Rectangle {
                         }
 
                     }
-
+                    StyledText {
+                        id:titleTx
+                        visible:false   // <<<<<<< Disabled
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.fillWidth:true
+                        color:Appearance.m3colors.m3onSurfaceVariant
+                        opacity:0.7
+                        text: "Color Schemes"
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.family: Appearance.font.family.title
+                    }
                     ModeSelector {
                         Layout.alignment: Qt.AlignHCenter
-                        onModeChanged: function(newMode) {
-                            console.log("Theme mode changed to:", newMode);
-                            // Here you would call your matugen service
-                            // For example: MatugenService.setMode(newMode);
-                        }
+                    //     onModeChanged: function(newMode) {
+                    //         Hyprland.dispatch(`global quickshell:sidebarRightClose`);
+                    //    }
                     }
 
                 }

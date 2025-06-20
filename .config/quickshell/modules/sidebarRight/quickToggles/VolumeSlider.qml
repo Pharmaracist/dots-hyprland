@@ -12,6 +12,8 @@ import "root:/services/"
 
 Item {
     id: root
+    Layout.fillWidth: true
+    Layout.preferredHeight: 40
     width: 200
     height: 40
 
@@ -31,9 +33,10 @@ Item {
         anchors.left: volumeSlider.left
         anchors.leftMargin: 10
         opacity: volumeSlider.value > 0.05 ? 1 : 0.3
+
         ColorAnimation {
-                 duration: Appearance.animation.elementMove.duration
-                 easing.type: Appearance.animation.elementMove.type
+            duration: Appearance.animation.elementMove.duration
+            easing.type: Appearance.animation.elementMove.type
         }
     }
 
@@ -41,6 +44,8 @@ Item {
         id: volumeSlider
 
         anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.preferredHeight: 40
         from: 0
         to: 1
         stepSize: 0.01
@@ -53,16 +58,14 @@ Item {
             target: sink?.audio
             ignoreUnknownSignals: true
 
-            onVolumeChanged: {
-                if (!pressed && Math.abs(value - sink.audio.volume) > 0.005) {
+            function onVolumeChanged() {
+                if (!pressed && sink?.audio && Math.abs(value - sink.audio.volume) > 0.005) {
                     value = sink.audio.volume;
                 }
             }
         }
 
-        onPressedChanged: {
-            if (!pressed) userChanging = false;
-        }
+        onPressedChanged: if (!pressed) userChanging = false
 
         onValueChanged: {
             if (pressed && sink?.audio) {
@@ -72,9 +75,8 @@ Item {
         }
 
         Component.onCompleted: {
-            if (sink?.audio) {
+            if (sink?.audio)
                 value = sink.audio.volume;
-            }
         }
     }
 }

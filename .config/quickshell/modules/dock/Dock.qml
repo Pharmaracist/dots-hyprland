@@ -162,7 +162,7 @@ Scope {
                     }
 
                     Behavior on anchors.topMargin {
-                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                         NumberAnimation { duration: 150; easing.type: Easing.OutQuart  }
                     }
 
                     Item {
@@ -196,19 +196,8 @@ Scope {
                             implicitWidth: background.implicitWidth
                             implicitHeight: background.implicitHeight - 5
 
-                            Behavior on width {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration - 50
-                                    easing.type: Appearance.animation.elementMove.bezierCurve
-                                }
-                            }
-
-                            Behavior on height {
-                                NumberAnimation {
-                                    duration: Appearance.animation.elementMoveFast.duration - 50
-                                    easing.type: Appearance.animation.elementMove.bezierCurve
-                                }
-                            }
+                            Behavior on implicitWidth { NumberAnimation { duration: 500 ;easing.type: Easing.InOutBack }}
+                            Behavior on implicitHeight { NumberAnimation { duration: 450 ;easing.type: Easing.InOutBack }}
 
                             color: Appearance.colors.colLayer0
                             radius: !root.cornered ? Appearance.rounding.screenRounding : 0
@@ -240,19 +229,16 @@ Scope {
                                             root.toggleContent(contentType.mediaPlayer)
                                         }
                                     }
-                                    DockSeparator {
-                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
-                                    }
                                     Loader {
                                         id: normalContentLoader
                                         Layout.fillWidth: true
                                         Layout.fillHeight: true
                                         asynchronous: true
-                                        // active: !root.isSpecialContent && root.contentComponents[root.currentContent]
+                                        opacity: active ? 1 : 0.5
+                                        active: !root.isSpecialContent && root.contentComponents[root.currentContent]
                                         sourceComponent: active ? root.contentComponents[root.currentContent] : null
-                                    }
-                                    DockSeparator {
-                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
+                                         Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad} }
+
                                     }
                                     GroupButton {
                                        visible: root.currentContent === contentType.apps && !root.isSpecialContent
@@ -281,11 +267,12 @@ Scope {
                                     id: contentLoader
                                     anchors.fill: parent
                                     anchors.margins: root.isSpecialContent ? 10 : 0
+                                    opacity: active ? 1 : 0.5
                                     visible: root.isSpecialContent
                                     asynchronous: true
                                     active: root.isSpecialContent && root.contentComponents[root.currentContent]
                                     sourceComponent: active ? root.contentComponents[root.currentContent] : null
-
+                                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad} }
                                     onLoaded: {
                                         if (item && root.isOverviewMode) {
                                             item.panelWindow = dock
@@ -351,7 +338,7 @@ Scope {
                                                 hoverEnabled: true
                                                 onEntered: shuffleButton.hovered = true
                                                 onExited: shuffleButton.hovered = false
-                                                onClicked: Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --random`)
+                                                onClicked: Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --random --type ${PersistentStates.temp.currentScheme}`)
                                             }
                                             StyledRectangularShadow { target: parent }
                                         }
@@ -393,6 +380,7 @@ Scope {
     GlobalShortcut { name: "wallpaperSelectorToggle"; description: qsTr("Toggle Wallpaper Selector"); onPressed: root.toggleContent(contentType.wallpaperSelector) }
     GlobalShortcut { name: "dockMediaControlToggle"; description: qsTr("Toggle Media Player"); onPressed: root.toggleContent(contentType.mediaPlayer) }
     GlobalShortcut { name: "dockSessionToggle"; description: qsTr("Toggle Power Menu"); onPressed: root.toggleContent(contentType.powerMenu) }
+    GlobalShortcut { name: "randomWall"; description: qsTr("Random Wallpaper"); onPressed: Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --random --type ${PersistentStates.temp.currentScheme}`) }
 
     Component { id: normalDock; DockApps {} }
     Component { id: powerMenu; DockPowerMenu {} }
