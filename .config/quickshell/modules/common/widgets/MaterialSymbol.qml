@@ -27,8 +27,8 @@ Text {
 
     font.variableAxes: { 
         "FILL": truncatedFill,
-        "wght": font.weight,
-        "GRAD": 0,
+        // "wght": font.weight,
+        // "GRAD": 0,
         "opsz": iconSize,
     }
 }

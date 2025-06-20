@@ -56,7 +56,12 @@ Item {
             !(player.dbusName?.endsWith('.mpd') && !player.dbusName.endsWith('MediaPlayer2.mpd'))
         );
     }
-    
+    function formatTimeSeconds(seconds) {
+        if (!seconds || seconds < 0) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return mins + ":" + (secs < 10 ? "0" + secs : secs);
+    }
     function filterDuplicatePlayers(players) {
         let filtered = [];
         let used = new Set();
@@ -395,7 +400,12 @@ Item {
     }
 
     // ─────── Main Content ───────
-
+    DockLyrics {
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: parent.height / 1.8
+    }
+  
     RowLayout {
         id: contentRow
         anchors {
@@ -408,11 +418,12 @@ Item {
             bottomMargin: 5
         }
         spacing: 8
-        DockLyrics {
-            anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottomMargin: parent.height / 1.8
+        MouseArea {
+            id:coverHovered
+            anchors.fill: coverArtContainer
+            hoverEnabled:true
         }
+    
         Rectangle {
             id: coverArtContainer
             Layout.preferredWidth: 40
@@ -421,8 +432,29 @@ Item {
             radius: Appearance.rounding.normal
             color: Appearance.m3colors.m3secondaryContainer
             clip: true
-
+          StyledText {
+            opacity: coverHovered.containsMouse ? 0.9 : 0
+            anchors.centerIn: parent
+            text: {
+                if (!player || !player.length || player.length <= 0) return "0:00"
+                let totalSeconds = player.length > 1000000 ? player.length / 1000000 : player.length
+                let currentSeconds = player.position || (progressRatio * totalSeconds)
+                let remaining = totalSeconds - currentSeconds
+                return remaining > 0 ? "-" + formatTimeSeconds(remaining) : "0:00"
+            }
+            color: Appearance.m3colors.m3onSecondaryContainer
+            font.pixelSize: Appearance.font.pixelSize.smallest + 1
+            font.weight: Font.Medium
+            horizontalAlignment: Text.AlignHCenter
+             Behavior on opacity {
+                NumberAnimation {
+                    duration: 400
+                    easing.type: Easing.InOutQuad
+                }
+        }
+            }
             Image {
+                opacity : !coverHovered.containsMouse ? 0.9 : 0
                 anchors.fill: parent
                 source: player && player.trackArtUrl ? player.trackArtUrl : ""
                 asynchronous: true
@@ -439,37 +471,66 @@ Item {
                         radius: Appearance.rounding.small
                     }
                 }
+                 Behavior on opacity {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.InOutQuad
             }
-            Item {
-                anchors.fill: parent
-                visible: !player || !player.trackArtUrl
-
-                RotationAnimator on rotation {
-                    from: 0
-                    to: 360
-                    duration: 5000
-                    loops: Animation.Infinite
-                    running: true
-                }
-
-                transform: Rotation {
-                    id: vinylRotation
-                    origin.x: coverArtContainer.width / 2
-                    origin.y: coverArtContainer.height / 2
-                    angle: 0
-                }
-                
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: "graphic_eq"
-                    color: Appearance.m3colors.m3onSecondaryContainer
-                    iconSize: Appearance.font.pixelSize.huge
-                }
-            }
-            
         }
-        
-        
+            }
+           Item {
+                opacity : !coverHovered.containsMouse ? 0.9 : 0
+              anchors.fill: parent
+              visible: !player || !player.trackArtUrl
+            NumberAnimation {
+                duration: 100
+                easing.type: Easing.InOutQuad
+            }
+
+              RotationAnimator on rotation {
+                  from: 0
+                  to: 360
+                  duration: 5000
+                  loops: Animation.Infinite
+                  running: true
+              }
+
+              transform: Rotation {
+                  id: vinylRotation
+                  origin.x: coverArtContainer.width / 2
+                  origin.y: coverArtContainer.height / 2
+                  angle: 0
+              }
+              Image {
+                  source: 'root:/assets/icons/vinyl.svg'
+                  anchors.centerIn: parent
+                  mipmap:true
+                  antialiasing:true        
+                  smooth:true
+
+                  layer.enabled: true
+                  layer.effect: ColorOverlay {
+                      color: Appearance.m3colors.m3secondary
+                  }
+
+                  SequentialAnimation on scale {
+                      loops: Animation.Infinite
+                      NumberAnimation {
+                          from: 1.0
+                          to: 1.15
+                          duration: 360
+                          easing.type: Easing.InOutQuad
+                      }
+                      NumberAnimation {
+                          from: 1.15
+                          to: 1.0
+                          duration: 360
+                          easing.type: Easing.InOutQuad
+                      }
+                      }
+                  }       
+              }
+        }        
         ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true

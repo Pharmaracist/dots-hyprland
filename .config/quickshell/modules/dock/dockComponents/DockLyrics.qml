@@ -20,7 +20,7 @@ Item {
     // Run lrcsnc and read real-time output
     Process {
         id: readLyrics
-        command: ["lrcsnc"]
+        command: ["lrcsnc","-c","~/.config/lrcsnc/config.toml"]
         property string buffer: ""
 
         onStarted: buffer = ""
