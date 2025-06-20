@@ -20,6 +20,8 @@ Item {
         "scheme-fruit-salad"
     ]
     property string currentMode: PersistentStates.temp.currentScheme
+    property string shellMode:PersistentStates.temp.enableDarkMode ? "dark" : "light"
+
     signal modeChanged(string mode)
     
     implicitWidth: parent.width
@@ -36,12 +38,8 @@ Item {
             required property string modelData
             width:  modelData === currentMode ? 150 : 45
             height: 45
-            Behavior on width {
-                NumberAnimation {
-                   easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline
-                   easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]      
-                }
-            }
+            Behavior on width { NumberAnimation { duration:300;  easing.type: Easing.OutQuart }}
+
             background: Rectangle {
                 id: bg
                 radius: modelData === currentMode ? 25 : width / 4
@@ -49,12 +47,8 @@ Item {
                     Appearance.m3colors.m3primary :
                     Appearance.m3colors.m3surfaceContainer
             
-            Behavior on radius {
-                NumberAnimation {
-                   easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline
-                   easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]      
-                }
-            }
+                Behavior on radius { NumberAnimation { duration:300;  easing.type: Easing.OutQuart }}
+
             }
             contentItem: Rectangle {
                 width: parent.width
@@ -97,8 +91,9 @@ Item {
              if (event.button === Qt.LeftButton){
                 currentMode = modelData;
                 modeChanged(modelData);
-                PersistentStateManager.setState("temp.currentScheme", currentMode)
-                Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --type '${currentMode}'&`);
+                const command = `${Directories.wallpaperSwitchScriptPath} --mode '${shellMode}' --lastused --type '${currentMode}'`
+                PersistentStateManager.setState("temp.currentScheme", currentMode);
+                Hyprland.dispatch(`exec ${command}`);
             } else if (event.button === Qt.RightButton) {
                 Hyprland.dispatch("exec matugen color hex $(hyprpicker -n -f hex -r -d)")
             }

@@ -298,4 +298,4 @@ main() {
     switch "$imgpath" "$mode_flag" "$type_flag" "$color_flag" "$color" 
 }
 
-main "$@" &
+main "$@" 

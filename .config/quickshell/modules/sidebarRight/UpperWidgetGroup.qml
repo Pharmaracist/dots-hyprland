@@ -119,9 +119,9 @@ Rectangle {
             anchors.bottom: parent.bottom
             width: collapsed ? 40 : 200
             height: 4
-            radius: 2
-            color: Appearance.m3colors.m3onSurfaceVariant
-            opacity: 0.3
+            radius: 3
+            color: collapsed ? Appearance.m3colors.m3onSurfaceVariant : Appearance.m3colors.m3primary 
+            opacity:  collapsed ? 0.3 : 0.99
 
             DropShadow {
                 anchors.fill: handleRect
@@ -129,46 +129,16 @@ Rectangle {
                 verticalOffset: 1
                 radius: 6
                 samples: 15
-                color: "#60000000"
+                color: Appearance.m3colors.m3shadow
                 source: handleRect
                 visible: hoverHandler.hovered
             }
 
-            Behavior on height {
-                NumberAnimation {
-                    duration: 150
-                }
-
-            }
-
             Behavior on radius {
-                NumberAnimation {
-                    duration: 150
-                }
-
+                NumberAnimation {  easing.type: Easing.OutQuart }
             }
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 150
-                }
-
-            }
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: 150
-                }
-
-            }
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 150
-                }
-
-            }
-
+            Behavior on width { NumberAnimation { duration:800 ;easing.type: Easing.OutQuart }}
         }
 
     }

@@ -43,6 +43,7 @@ Singleton {
         }
         property QtObject temp: QtObject {
             property bool enableTransparency: false
+            property bool enableDarkMode: true
             property string currentScheme: ""
 
         }
