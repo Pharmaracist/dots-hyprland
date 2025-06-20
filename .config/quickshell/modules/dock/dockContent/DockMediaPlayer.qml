@@ -30,13 +30,21 @@ Item {
         if (!player || !player.length || player.length <= 0 || !player.position) return 0
         return Math.max(0, Math.min(1, player.position / player.length))
     }
-    readonly property bool blurArtEnabled: false  // Toggle property for blur art
+    property bool blurArtEnabled: PersistentStates.dock.useBlur ?? false  // Toggle property for blur art AND color generation
     property bool showPlayerSelector: true  // Toggle for player selector visibility
     property bool showVisualizer: true     // Toggle for visualizer visibility
     property list<real> visualizerPoints: []
     property real maxVisualizerValue: 1000
     property int visualizerSmoothing: 2
     property bool hasPlasmaIntegration: false
+
+    // ─────── Adaptive Colors Properties ───────
+    property var artUrl: player?.trackArtUrl
+    property string artDownloadLocation: Directories.coverArt
+    property string artFileName: Qt.md5(artUrl) + ".jpg"
+    property string artFilePath: `${artDownloadLocation}/${artFileName}`
+    property color artDominantColor: colorQuantizer?.colors[0] || Appearance.m3colors.m3secondaryContainer
+    property bool downloaded: true
 
     implicitHeight: 45
     implicitWidth: ConfigOptions?.dock.mediaPlayer.width ?? 800
@@ -47,6 +55,87 @@ Item {
         if (selectedPlayerIndex >= meaningfulPlayers.length) {
             selectedPlayerIndex = 0;
         }
+    }
+
+    // ─────── Cover Art Download Management ───────
+    onArtUrlChanged: {
+        if (dockMediaPlayer.artUrl.length == 0 || !blurArtEnabled) {
+            dockMediaPlayer.artDominantColor = Appearance.m3colors.m3secondaryContainer
+            return;
+        }
+        dockMediaPlayer.downloaded = false
+        coverArtDownloader.running = true
+    }
+
+    // Also reset colors when blur is disabled
+    onBlurArtEnabledChanged: {
+        if (!blurArtEnabled) {
+            dockMediaPlayer.artDominantColor = Appearance.m3colors.m3secondaryContainer
+        } else if (dockMediaPlayer.artUrl.length > 0) {
+            // Re-trigger color extraction when blur is re-enabled
+            dockMediaPlayer.downloaded = false
+            coverArtDownloader.running = true
+        }
+    }
+
+    Process { // Cover art downloader
+        id: coverArtDownloader
+        property string targetFile: dockMediaPlayer.artUrl
+        command: [ "bash", "-c", `[ -f ${artFilePath} ] || curl -sSL '${targetFile}' -o '${artFilePath}'` ]
+        onExited: (exitCode, exitStatus) => {
+            dockMediaPlayer.downloaded = true
+        }
+    }
+
+    ColorQuantizer {
+        id: colorQuantizer
+        source:  Qt.resolvedUrl(artFilePath) 
+        depth: 0 // 2^0 = 1 color
+        rescaleSize: 1 // Rescale to 1x1 pixel for faster processing
+    }
+
+    property bool backgroundIsDark: artDominantColor.hslLightness < 0.5
+    property QtObject blendedColors: QtObject {
+        // Use default colors when blur/color generation is disabled
+        property color colLayer0: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colLayer0, artDominantColor, (backgroundIsDark && Appearance.m3colors.darkmode) ? 0.6 : 0.5) :
+            Appearance.colors.colLayer0
+        property color colLayer1: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colLayer1, artDominantColor, 0.5) :
+            Appearance.colors.colLayer1
+        property color colOnLayer0: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colOnLayer0, artDominantColor, 0.5) :
+            Appearance.colors.colOnLayer0
+        property color colOnLayer1: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colOnLayer1, artDominantColor, 0.5) :
+            Appearance.colors.colOnLayer1
+        property color colSubtext: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colOnLayer1, artDominantColor, 0.5) :
+            Appearance.colors.colOnLayer1
+        property color colPrimary: blurArtEnabled ? 
+            ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimary, artDominantColor), artDominantColor, 0.5) :
+            Appearance.colors.colPrimary
+        property color colPrimaryHover: blurArtEnabled ? 
+            ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimaryHover, artDominantColor), artDominantColor, 0.3) :
+            Appearance.colors.colPrimaryHover
+        property color colPrimaryActive: blurArtEnabled ? 
+            ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimaryActive, artDominantColor), artDominantColor, 0.3) :
+            Appearance.colors.colPrimaryActive
+        property color colSecondaryContainer: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.m3colors.m3secondaryContainer, artDominantColor, 0.15) :
+            Appearance.m3colors.m3secondaryContainer
+        property color colSecondaryContainerHover: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colSecondaryContainerHover, artDominantColor, 0.3) :
+            Appearance.colors.colSecondaryContainerHover
+        property color colSecondaryContainerActive: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.colors.colSecondaryContainerActive, artDominantColor, 0.5) :
+            Appearance.colors.colSecondaryContainerActive
+        property color colOnPrimary: blurArtEnabled ? 
+            ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.m3colors.m3onPrimary, artDominantColor), artDominantColor, 0.5) :
+            Appearance.m3colors.m3onPrimary
+        property color colOnSecondaryContainer: blurArtEnabled ? 
+            ColorUtils.mix(Appearance.m3colors.m3onSecondaryContainer, artDominantColor, 0.5) :
+            Appearance.m3colors.m3onSecondaryContainer
     }
 
     // ─────── Player Filtering Functions ───────
@@ -119,7 +208,7 @@ Item {
     Image {
         id: blurredArt
         anchors.fill: parent
-        anchors.margins: 3
+        anchors.margins: 15
         source: player && player.trackArtUrl && blurArtEnabled ? player.trackArtUrl : ""
         sourceSize.width: width
         sourceSize.height: height
@@ -135,29 +224,9 @@ Item {
             source: blurredArt
             saturation: 0.05
             blurEnabled: true
-            blurMax: 30
+            blurMax: 50
             blur: 1
         }
-
-        Rectangle {
-            anchors.fill: parent
-            color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.25)
-            radius: Appearance.rounding.screenRounding
-        }
-
-        Behavior on opacity {
-            NumberAnimation { duration: 300; easing.type: Easing.OutQuart }
-        }
-    }
-
-    // ─────── Default Background (when blur is disabled) ───────
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: 3
-        color: "transparent"
-        radius: Appearance.rounding.screenRounding
-        visible: !blurArtEnabled
-        
         Behavior on opacity {
             NumberAnimation { duration: 300; easing.type: Easing.OutQuart }
         }
@@ -173,7 +242,7 @@ Item {
         points: dockMediaPlayer.visualizerPoints
         maxVisualizerValue: dockMediaPlayer.maxVisualizerValue
         smoothing: dockMediaPlayer.visualizerSmoothing
-        color: ColorUtils.transparentize(Appearance.colors.colPrimary, 0.6)
+        color: ColorUtils.transparentize(blendedColors.colPrimary, 0.6)
         // radius: Appearance.rounding.screenRounding
     }
 
@@ -184,21 +253,21 @@ Item {
         property bool isToggled: false
         
         colBackground: isToggled ? 
-            ColorUtils.transparentize(Appearance.colors.colPrimary, 0.3) : 
-            ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.7)
+            ColorUtils.transparentize(blendedColors.colPrimary, 0.3) : 
+            ColorUtils.transparentize(blendedColors.colSecondaryContainer, 0.7)
         colBackgroundHover: isToggled ? 
-            Appearance.colors.colPrimaryHover : 
-            Appearance.colors.colSecondaryContainerHover
+            blendedColors.colPrimaryHover : 
+            blendedColors.colSecondaryContainerHover
         colRipple: isToggled ? 
-            Appearance.m3colors.m3secondaryContainer : 
-            Appearance.colors.colSecondaryContainerActive
+            blendedColors.colSecondaryContainer : 
+            blendedColors.colSecondaryContainerActive
 
         contentItem: MaterialSymbol {
             iconSize: Appearance.font.pixelSize.normal
             horizontalAlignment: Text.AlignHCenter
             color: !parent.isToggled ? 
-                Appearance.m3colors.m3secondary : 
-                Appearance.m3colors.m3onSecondaryContainer
+                blendedColors.colOnSecondaryContainer : 
+                blendedColors.colOnSecondaryContainer
             text: iconName
         }
     }
@@ -229,7 +298,7 @@ Item {
             if (meaningfulPlayers.length <= 4) return 44; // 2 rows for 3-4 players  
             return 66; // 3 rows for 5+ players
         }
-        color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.8)
+        color: ColorUtils.transparentize(blendedColors.colSecondaryContainer, 0.8)
         radius: Appearance.rounding.small
 
         Grid {
@@ -282,9 +351,9 @@ Item {
                     
                     property bool isSelected: modelData.index === selectedPlayerIndex
                     
-                    colBackground: isSelected ? Appearance.colors.colPrimary : ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.6)
-                    colBackgroundHover: isSelected ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
-                    colRipple: isSelected ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
+                    colBackground: isSelected ? blendedColors.colPrimary : ColorUtils.transparentize(blendedColors.colSecondaryContainer, 0.6)
+                    colBackgroundHover: isSelected ? blendedColors.colPrimaryHover : blendedColors.colSecondaryContainerHover
+                    colRipple: isSelected ? blendedColors.colPrimaryActive : blendedColors.colSecondaryContainerActive
 
                     onClicked: selectedPlayerIndex = modelData.index
 
@@ -297,7 +366,7 @@ Item {
                         text: modelData.icon
                         iconSize: Appearance.font.pixelSize.smaller
                         horizontalAlignment: Text.AlignHCenter
-                        color: parent.isSelected ? Appearance.m3colors.m3onPrimary : Appearance.m3colors.m3onSecondaryContainer
+                        color: parent.isSelected ? blendedColors.colOnPrimary : blendedColors.colOnSecondaryContainer
                     }
                 }
             }
@@ -316,7 +385,7 @@ Item {
             bottomMargin: -4
         }
         height: 3
-        color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.3)
+        color: ColorUtils.transparentize(blendedColors.colSecondaryContainer, 0.3)
         radius: Appearance.rounding.small
 
         Rectangle {
@@ -325,7 +394,7 @@ Item {
             anchors.bottom: parent.bottom
             width: parent.width * progressRatio
             height: parent.height
-            color: Appearance.colors.colPrimary
+            color: blendedColors.colPrimary
             radius: parent.radius
             Behavior on width { 
                 NumberAnimation { 
@@ -343,7 +412,7 @@ Item {
             width: seekArea.pressed ?  3 : 5
             height: parent.height
             radius: 2
-            color: Appearance.colors.colLayer1
+            color: blendedColors.colLayer1
             opacity: seekArea.containsMouse || seekArea.pressed ? 1 : 0
             Behavior on width { NumberAnimation { duration: 150; easing.type: Easing.OutQuart } }
             Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuart } }
@@ -391,14 +460,6 @@ Item {
         Behavior on height {
             NumberAnimation { duration: 150; easing.type: Easing.OutQuart }
         }
-
-        // states: [
-        //     State {
-        //         name: "hovered"
-        //         when: seekArea.containsMouse
-        //         PropertyChanges { target: seekbarBackground; height: 7 }
-        //     }
-        // ]
     }
     Loader {
         active: PersistentStates.dock.lyrics
@@ -425,15 +486,13 @@ RowLayout {
 
     spacing: 8
 
-   
-
     Rectangle {
         id: coverArtContainer
         Layout.preferredWidth: 40
         Layout.preferredHeight: 40
         antialiasing: true
         radius: Appearance.rounding.normal
-        color: Appearance.m3colors.m3secondaryContainer
+        color: blendedColors.colSecondaryContainer
         clip: true
 
         StyledText {
@@ -446,7 +505,7 @@ RowLayout {
                 let remaining = totalSeconds - currentSeconds
                 return remaining > 0 ? "-" + formatTimeSeconds(remaining) : "0:00"
             }
-            color: Appearance.m3colors.m3onSecondaryContainer
+            color: blendedColors.colOnSecondaryContainer
             font.pixelSize: Appearance.font.pixelSize.smallest + 1
             font.weight: Font.Medium
             horizontalAlignment: Text.AlignHCenter
@@ -466,13 +525,20 @@ RowLayout {
         }
         MouseArea {
         id: coverHovered
+        acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
         anchors.fill: parent
         hoverEnabled: true
-            onPressed: {
+            onPressed: (event) => {
+               if (event.button === Qt.MiddleButton) {
+                   blurArtEnabled = !blurArtEnabled ;
+                   PersistentStateManager.setState("dock.useBlur", blurArtEnabled)
+               } else if (event.button === Qt.RightButton) {
+                   activePlayer.next();
+               } else if (event.button === Qt.LeftButton) {
                 useVinylFallback = !useVinylFallback ;
                 PersistentStateManager.setState("dock.useVinyl", useVinylFallback);
             }
-    }
+    }}
     }
 
     Component {
@@ -528,7 +594,7 @@ Component {
             anchors.centerIn: parent
             text: "graphic_eq"
             iconSize: Appearance.font.pixelSize.huge
-            color: Appearance.m3colors.m3secondary
+            color: blendedColors.colOnSecondaryContainer
         }
     }
 }
@@ -545,7 +611,7 @@ Component {
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.Medium
                 elide: Text.ElideRight
-                color: Appearance.colors.colOnLayer0
+                color: blendedColors.colOnLayer0
                 text: player && player.trackTitle
                       ? StringUtils.cleanMusicTitle(player.trackTitle)
                       : "No Media Playing"
@@ -556,7 +622,7 @@ Component {
                 Layout.minimumWidth: 1
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 elide: Text.ElideRight
-                color: Appearance.colors.colSubtext
+                color: blendedColors.colSubtext
                 Behavior on color { ColorAnimation { duration: 250; easing.type: Easing.OutQuad } }
                 text: player && player.trackArtist
                       ? player.trackArtist
@@ -617,14 +683,14 @@ Component {
                 opacity: player && player.canPause ? 1 : 0.5
 
                 colBackground: player && player.playbackState === MprisPlaybackState.Playing
-                            ? Appearance.colors.colPrimary
-                            : Appearance.colors.colSecondaryContainer
+                            ? blendedColors.colPrimary
+                            : blendedColors.colSecondaryContainer
                 colBackgroundHover: player && player.playbackState === MprisPlaybackState.Playing
-                                   ? Appearance.colors.colPrimaryHover
-                                   : Appearance.colors.colSecondaryContainerHover
+                                   ? blendedColors.colPrimaryHover
+                                   : blendedColors.colSecondaryContainerHover
                 colRipple: player && player.playbackState === MprisPlaybackState.Playing
-                           ? Appearance.colors.colPrimaryActive
-                           : Appearance.colors.colSecondaryContainerActive
+                           ? blendedColors.colPrimaryActive
+                           : blendedColors.colSecondaryContainerActive
 
                 onClicked: {
                     if (player && player.canPause) {
@@ -641,13 +707,12 @@ Component {
                     fill: 1
                     horizontalAlignment: Text.AlignHCenter
                     color: player && player.playbackState === MprisPlaybackState.Playing
-                           ? Appearance.m3colors.m3onSecondary
-                           : Appearance.m3colors.m3onSecondaryContainer
+                           ? blendedColors.colOnPrimary
+                           : blendedColors.colOnSecondaryContainer
                     text: player && player.playbackState === MprisPlaybackState.Playing
                           ? "pause" : "play_arrow"
                 }
             }
-
             DockMediaButton {
                 iconName: "skip_next"
                 enabled: !!player && player.canGoNext
@@ -658,7 +723,6 @@ Component {
                     }
                 }
             }
-
              DockMediaButton {
                 id:lyrics
                 enabled: !!player && player.canControl

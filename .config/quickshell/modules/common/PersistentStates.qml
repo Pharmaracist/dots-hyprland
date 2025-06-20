@@ -12,6 +12,7 @@ Singleton {
         property bool pinned:false
         property bool lyrics:true
         property bool useVinyl:true
+        property bool useBlur:true
         property int currentContent: -1
 
     }

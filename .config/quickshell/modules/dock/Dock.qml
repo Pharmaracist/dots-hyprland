@@ -235,7 +235,7 @@ Scope {
                                         Layout.fillHeight: true
                                         asynchronous: true
                                         opacity: active ? 1 : 0.5
-                                        active: !root.isSpecialContent && root.contentComponents[root.currentContent]
+                                        // active: !root.isSpecialContent && root.contentComponents[root.currentContent]
                                         sourceComponent: active ? root.contentComponents[root.currentContent] : null
                                          Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad} }
 
