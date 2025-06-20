@@ -14,6 +14,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import Quickshell.Widgets
+import Quickshell.Hyprland
 
 Item {
     id: dockMediaPlayer
@@ -611,7 +612,7 @@ Item {
                 buttonRadius: hovered ? 15 : 10
                 Layout.rightMargin: 6
                 Layout.leftMargin: 6
-                enabled: !!player && player.canPause
+                enabled: true
                 opacity: player && player.canPause ? 1 : 0.5
 
                 colBackground: player && player.playbackState === MprisPlaybackState.Playing
@@ -627,6 +628,8 @@ Item {
                 onClicked: {
                     if (player && player.canPause) {
                         player.togglePlaying();
+                    } else  {
+                        Hyprland.dispatch(`exec elisa`)
                     }
                 }
                 Behavior on buttonRadius { animation: Appearance.animation.elementMove.numberAnimation.createObject(this) }
