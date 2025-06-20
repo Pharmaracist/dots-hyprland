@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell.Hyprland
+import QtQuick.Layouts
 import "root:/"
 import "root:/modules/common/"
 import "root:/modules/common/widgets"
@@ -21,11 +22,11 @@ Item {
     property string currentMode: PersistentStates.temp.currentScheme
     signal modeChanged(string mode)
     
-    implicitWidth: parent.width - 45
+    implicitWidth: parent.width
     implicitHeight: 45
-    
     ListView {
         anchors.fill: parent
+        anchors.horizontalCenter: parent.horizontalCenter
         model: modes
         orientation: ListView.Horizontal
         spacing: 5
@@ -33,21 +34,34 @@ Item {
         
         delegate: Button {
             required property string modelData
-            width: 45
+            width:  modelData === currentMode ? 150 : 45
             height: 45
-            
+            Behavior on width {
+                NumberAnimation {
+                   easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline
+                   easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]      
+                }
+            }
             background: Rectangle {
                 id: bg
-                radius: width / 2
+                radius: modelData === currentMode ? 25 : width / 4
                 color: modelData === currentMode ?
                     Appearance.m3colors.m3primary :
                     Appearance.m3colors.m3surfaceContainer
-            }
             
+            Behavior on radius {
+                NumberAnimation {
+                   easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline
+                   easing.bezierCurve: Appearance?.animation.elementMoveFast.bezierCurve ?? [0.34, 0.80, 0.34, 1.00, 1, 1]      
+                }
+            }
+            }
             contentItem: Item {
                 width: parent.width
                 height: parent.height
-                
+                RowLayout {
+                    id:content
+                    anchors.fill: parent
                 MaterialSymbol {
                     text: getIcon(modelData)
                     font.pixelSize: Appearance.font.pixelSize.huge
@@ -55,15 +69,22 @@ Item {
                         Appearance.m3colors.m3onPrimary :
                         Appearance.m3colors.m3onSurfaceVariant
                     
-                    // Multiple centering approaches
-                    anchors.centerIn: parent
+                    anchors.centerIn: modelData !== currentMode ? parent : null
                     width: parent.width
                     height: parent.height
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
                 }
+                StyledText {
+                    id: titleText
+                    visible:modelData === currentMode
+                    color: modelData === currentMode ?
+                        Appearance.m3colors.m3onPrimary :
+                        Appearance.m3colors.m3onSurfaceVariant
+                    text: getTooltipText(modelData)
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    font.family: Appearance.font.family.title
             }
-            
+            }
+            }
             StyledToolTip {
             ToolTip.visible: hovered
                 content:  getTooltipText(modelData)
@@ -74,7 +95,7 @@ Item {
                 currentMode = modelData;
                 modeChanged(modelData);
                 PersistentStateManager.setState("temp.currentScheme", currentMode)
-                Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --type '${currentMode}'`);
+                Hyprland.dispatch(`exec ${Directories.wallpaperSwitchScriptPath} --lastused --type '${currentMode}'&`);
             }
             
             function getIcon(mode) {
