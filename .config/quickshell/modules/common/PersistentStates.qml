@@ -43,6 +43,8 @@ Singleton {
         }
         property QtObject temp: QtObject {
             property bool enableTransparency: false
+            property string currentScheme: ""
+
         }
 
     property QtObject bar: QtObject {

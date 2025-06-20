@@ -22,7 +22,7 @@ Rectangle {
     property int rowHeight: 50 // Height of one toggle row including spacing
     property int maxVisibleToggles: collapsed ? 2 : 10 // Show 2 toggles when collapsed, all when expanded
     readonly property int collapsedHeight: rowHeight + 80 // Single row + padding + drag bar
-    readonly property int expandedHeight: Math.ceil(togglesList.length / buttonGrid.columns) * rowHeight + 230
+    readonly property int expandedHeight: Math.ceil(togglesList.length / buttonGrid.columns) * rowHeight + 268
     // List of all toggles for counting
     readonly property var togglesList: ["NetworkToggle", "BluetoothToggle", "NightLight", "GameMode", "IdleInhibitor", "SyncAudio", "Transparency"]
 
@@ -427,6 +427,14 @@ Rectangle {
                 }
 
             }
+ ModeSelector {
+        Layout.alignment: Qt.AlignHCenter
+        onModeChanged: function(newMode) {
+            console.log("Theme mode changed to:", newMode);
+            // Here you would call your matugen service
+            // For example: MatugenService.setMode(newMode);
+        }
+    }
 
         }
 

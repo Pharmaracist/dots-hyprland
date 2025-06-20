@@ -84,7 +84,7 @@ Item {
             const path = fileUrl.toString().replace("file://", "")
 
             try {
-                const command = `exec bash -c "${root.wallpaperSelector} ${path} &"`
+                const command = `exec bash -c "${root.wallpaperSelector} ${path} --type ${PersistentStates.temp.currentScheme} &"`
                 Hyprland.dispatch(command)
                 Hyprland.dispatch('global quickshell:wallpaperSelectorClose')
                 wallpaperChanged(path)
