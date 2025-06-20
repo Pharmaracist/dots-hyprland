@@ -69,7 +69,7 @@ Item {
                         Appearance.m3colors.m3onPrimary :
                         Appearance.m3colors.m3onSurfaceVariant
                     
-                    anchors.centerIn: modelData !== currentMode ? parent : null
+                        Layout.alignment: modelData !== currentMode ? Qt.AlignHCenter : Qt.AlignLeft
                     width: parent.width
                     height: parent.height
                 }
@@ -86,11 +86,9 @@ Item {
             }
             }
             StyledToolTip {
-            ToolTip.visible: hovered
                 content:  getTooltipText(modelData)
-                ToolTip.delay: 500
             }
-
+            
             onClicked: {
                 currentMode = modelData;
                 modeChanged(modelData);

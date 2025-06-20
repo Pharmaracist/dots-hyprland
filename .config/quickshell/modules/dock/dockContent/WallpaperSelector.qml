@@ -124,7 +124,7 @@ Item {
             Text {
                 anchors.centerIn: parent
                 text: "Wallpaper Selector"
-                color: Appearance.colors.textPrimary
+                color: Appearance.m3colors.m3primary
                 font.pixelSize: 18
                 font.weight: Font.Medium
             }

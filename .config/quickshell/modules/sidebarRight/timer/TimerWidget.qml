@@ -157,7 +157,7 @@ Item {
                    text: "timer_off"
                    font.pixelSize: 48
                    color: Appearance.m3colors.m3onSurfaceVariant
-                   anchors.horizontalCenter: parent.horizontalCenter
+                   Layout.alignment:Qt.AlignHCenter
                }
 
                StyledText {
@@ -165,7 +165,7 @@ Item {
                    font.pixelSize: Appearance.font.pixelSize.large
                    color: Appearance.m3colors.m3onSurfaceVariant
                    horizontalAlignment: Text.AlignHCenter
-                   anchors.horizontalCenter: parent.horizontalCenter
+                   Layout.alignment:Qt.AlignHCenter
                }
 
                StyledText {
@@ -173,7 +173,8 @@ Item {
                    font.pixelSize: Appearance.font.pixelSize.normal
                    color: Appearance.m3colors.m3onSurfaceVariant
                    horizontalAlignment: Text.AlignHCenter
-                   anchors.horizontalCenter: parent.horizontalCenter
+                   Layout.alignment:Qt.AlignHCenter
+
                }
             }       
             }

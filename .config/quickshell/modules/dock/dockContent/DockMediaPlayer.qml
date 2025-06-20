@@ -425,15 +425,7 @@ RowLayout {
 
     spacing: 8
 
-    MouseArea {
-        id: coverHovered
-        anchors.fill: coverArtContainer
-        hoverEnabled: true
-            onPressed: {
-                useVinylFallback = !useVinylFallback ;
-                PersistentStateManager.setState("dock.useVinyl", useVinylFallback);
-            }
-    }
+   
 
     Rectangle {
         id: coverArtContainer
@@ -472,6 +464,15 @@ RowLayout {
             active: true
             sourceComponent: useVinylFallback ? vinylComponent : artComponent
         }
+        MouseArea {
+        id: coverHovered
+        anchors.fill: parent
+        hoverEnabled: true
+            onPressed: {
+                useVinylFallback = !useVinylFallback ;
+                PersistentStateManager.setState("dock.useVinyl", useVinylFallback);
+            }
+    }
     }
 
     Component {

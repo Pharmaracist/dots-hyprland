@@ -14,7 +14,7 @@ Item {
     }
 
     Component.onDestruction: {
-        readLyrics.kill()
+        readLyrics.running = false
     }
 
     // Run lrcsnc and read real-time output

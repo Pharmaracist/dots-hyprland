@@ -16,27 +16,35 @@ import Quickshell.Hyprland
 Item {
     id: root
     required property var panelWindow
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
+    readonly property HyprlandMonitor monitor: panelWindow ? Hyprland.monitorFor(panelWindow.screen) : null
     readonly property var toplevels: ToplevelManager.toplevels
     readonly property int workspacesShown: ConfigOptions.overview.numOfRows * ConfigOptions.overview.numOfCols
-    readonly property int workspaceGroup: Math.floor((monitor.activeWorkspace?.id - 1) / workspacesShown)
-    property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor.id)
+    readonly property int workspaceGroup: Math.floor(((monitor?.activeWorkspace?.id ?? 1) - 1) / workspacesShown)
+    property bool monitorIsFocused: (Hyprland.focusedMonitor?.id === monitor?.id)
     property var windows: HyprlandData.windowList
     property var windowByAddress: HyprlandData.windowByAddress
     property var windowAddresses: HyprlandData.addresses
-    property var monitorData: HyprlandData.monitors.find(m => m.id === root.monitor.id)
+    property var monitorData: HyprlandData.monitors.find(m => m.id === root.monitor?.id) ?? null
     property real scale: 0.18
     property color activeBorderColor: Appearance.colors.colSecondary
 
-    property real workspaceImplicitWidth: (monitorData?.transform % 2 === 1) ? 
-        ((monitor.height - monitorData?.reserved[0] - monitorData?.reserved[2]) * root.scale / monitor.scale) / 1.265 :
-        ((monitor.width - monitorData?.reserved[0] - monitorData?.reserved[2]) * root.scale / monitor.scale) / 1.265
-    property real workspaceImplicitHeight: (monitorData?.transform % 2 === 1) ? 
-        ((monitor.width - monitorData?.reserved[1] - monitorData?.reserved[3]) * root.scale / monitor.scale) / 1.27:
-        ((monitor.height - monitorData?.reserved[1] - monitorData?.reserved[3]) * root.scale / monitor.scale)/ 1.27
+    // Add null safety checks for monitor and monitorData properties
+    property real workspaceImplicitWidth: {
+        if (!monitorData || !monitor) return 200; // fallback width
+        return (monitorData.transform % 2 === 1) ? 
+            ((monitor.height - (monitorData.reserved?.[0] ?? 0) - (monitorData.reserved?.[2] ?? 0)) * root.scale / monitor.scale) / 1.265 :
+            ((monitor.width - (monitorData.reserved?.[0] ?? 0) - (monitorData.reserved?.[2] ?? 0)) * root.scale / monitor.scale) / 1.265
+    }
+    
+    property real workspaceImplicitHeight: {
+        if (!monitorData || !monitor) return 150; // fallback height
+        return (monitorData.transform % 2 === 1) ? 
+            ((monitor.width - (monitorData.reserved?.[1] ?? 0) - (monitorData.reserved?.[3] ?? 0)) * root.scale / monitor.scale) / 1.27:
+            ((monitor.height - (monitorData.reserved?.[1] ?? 0) - (monitorData.reserved?.[3] ?? 0)) * root.scale / monitor.scale)/ 1.27
+    }
 
     property real workspaceNumberMargin: 80
-    property real workspaceNumberSize: Math.min(workspaceImplicitHeight, workspaceImplicitWidth) * monitor.scale
+    property real workspaceNumberSize: Math.min(workspaceImplicitHeight, workspaceImplicitWidth) * (monitor?.scale ?? 1)
     property int workspaceZ: 0
     property int windowZ: 1
     property int windowDraggingZ: 99999
@@ -154,8 +162,12 @@ Item {
                 property bool atInitPosition: (initX == x && initY == y)
                 restrictToWorkspace: Drag.active || atInitPosition
 
-                property int workspaceColIndex: windowData && windowData.workspace ? (windowData.workspace.id - 1) % ConfigOptions.overview.numOfCols : 0
-                property int workspaceRowIndex: windowData && windowData.workspace ? Math.floor((windowData.workspace.id - 1) % root.workspacesShown / ConfigOptions.overview.numOfCols) : 0
+                // Add null safety for workspace calculations
+                property int workspaceColIndex: (windowData?.workspace?.id !== undefined) ? 
+                    (windowData.workspace.id - 1) % ConfigOptions.overview.numOfCols : 0
+                property int workspaceRowIndex: (windowData?.workspace?.id !== undefined) ? 
+                    Math.floor((windowData.workspace.id - 1) % root.workspacesShown / ConfigOptions.overview.numOfCols) : 0
+                    
                 xOffset: (root.workspaceImplicitWidth + workspaceSpacing) * workspaceColIndex
                 yOffset: (root.workspaceImplicitHeight + workspaceSpacing) * workspaceRowIndex
 
@@ -165,7 +177,8 @@ Item {
                     repeat: false
                     running: false
                     onTriggered: {
-                        if (windowData && windowData.at && monitorData && monitorData.reserved) {
+                        // Add comprehensive null checks
+                        if (windowData?.at && monitorData?.reserved && windowData.at.length >= 2 && monitorData.reserved.length >= 4) {
                             window.x = Math.round(Math.max((windowData.at[0] - monitorData.reserved[0]) * root.scale, 0) + xOffset)
                             window.y = Math.round(Math.max((windowData.at[1] - monitorData.reserved[1]) * root.scale, 0) + yOffset)
                         }
@@ -184,7 +197,7 @@ Item {
                     acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                     drag.target: parent
                     onPressed: {
-                        if (windowData && windowData.workspace) {
+                        if (windowData?.workspace?.id !== undefined) {
                             root.draggingFromWorkspace = windowData.workspace.id
                         }
                         window.pressed = true
@@ -196,7 +209,7 @@ Item {
                         window.pressed = false
                         window.Drag.active = false
                         root.draggingFromWorkspace = -1
-                        if (targetWorkspace !== -1 && windowData && windowData.workspace && targetWorkspace !== windowData.workspace.id) {
+                        if (targetWorkspace !== -1 && windowData?.workspace?.id !== undefined && targetWorkspace !== windowData.workspace.id) {
                             Hyprland.dispatch(`movetoworkspacesilent ${targetWorkspace}, address:${window.windowData.address}`)
                             updateWindowPosition.restart()
                         }
@@ -221,7 +234,7 @@ Item {
                     StyledToolTip {
                         extraVisibleCondition: false
                         alternativeVisibleCondition: dragArea.containsMouse && !window.Drag.active
-                        content: windowData ? `${windowData.title}\n[${windowData.class}] ${windowData.xwayland ? "[XWayland] " : ""}\n` : ""
+                        content: windowData ? `${windowData.title ?? ""}\n[${windowData.class ?? ""}] ${windowData.xwayland ? "[XWayland] " : ""}\n` : ""
                     }
                 }
             }
@@ -229,7 +242,9 @@ Item {
 
         Rectangle { // Focused workspace indicator
             id: focusedWorkspaceIndicator
-            property int activeWorkspaceInGroup: monitor && monitor.activeWorkspace ? monitor.activeWorkspace.id - (root.workspaceGroup * root.workspacesShown) : 1
+            // Add null safety for active workspace calculations
+            property int activeWorkspaceInGroup: (monitor?.activeWorkspace?.id !== undefined) ? 
+                monitor.activeWorkspace.id - (root.workspaceGroup * root.workspacesShown) : 1
             property int activeWorkspaceRowIndex: Math.floor((activeWorkspaceInGroup - 1) / ConfigOptions.overview.numOfCols)
             property int activeWorkspaceColIndex: (activeWorkspaceInGroup - 1) % ConfigOptions.overview.numOfCols
             x: (root.workspaceImplicitWidth + workspaceSpacing) * activeWorkspaceColIndex

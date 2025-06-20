@@ -211,7 +211,7 @@ Scope {
                             }
 
                             color: Appearance.colors.colLayer0
-                            radius: !root.cornered ? Appearance.rounding.screenRounding : undefined
+                            radius: !root.cornered ? Appearance.rounding.screenRounding : 0
                             topRightRadius: Appearance.rounding.screenRounding
                             topLeftRadius: Appearance.rounding.screenRounding
 
@@ -248,7 +248,7 @@ Scope {
                                         Layout.fillWidth: true
                                         Layout.fillHeight: true
                                         asynchronous: true
-                                        active: !root.isSpecialContent && root.contentComponents[root.currentContent]
+                                        // active: !root.isSpecialContent && root.contentComponents[root.currentContent]
                                         sourceComponent: active ? root.contentComponents[root.currentContent] : null
                                     }
                                     DockSeparator {
@@ -327,7 +327,7 @@ Scope {
                                             id: shuffleButton
                                             visible: root.currentContent == 4
                                             color: hovered ? Appearance.colors.colLayer3Hover : Appearance.colors.colLayer3
-                                            anchors.right: parent.right
+                                            Layout.alignment:Qt.AlignRight
                                             radius: 99
                                             implicitWidth: 28
                                             implicitHeight: 28
@@ -396,7 +396,7 @@ Scope {
 
     Component { id: normalDock; DockApps {} }
     Component { id: powerMenu; DockPowerMenu {} }
-    Component { id: overview; OverviewWidget { panelWindow: dock ; property bool requestDockShow: true} }
+    Component { id: overview; OverviewWidget { panelWindow: root.dock ; property bool requestDockShow: true} }
     Component { id: mediaPlayer; DockMediaPlayer {} }
     Component { id: wallpaperSelector; WallpaperSelector {property bool requestDockShow: true} }
 }
