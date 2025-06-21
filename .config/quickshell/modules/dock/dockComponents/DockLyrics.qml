@@ -38,7 +38,7 @@ Text {
     anchors.centerIn: parent
     text: root.lyrics || ""
     font.pixelSize: Appearance.font.pixelSize.small - 1
-    font.family: Appearance.font.family.title
+    font.family: Appearance.font.family.main
     color: Appearance.colors.colOnLayer1
     horizontalAlignment: Text.AlignHCenter
     opacity: 0.5

@@ -68,6 +68,24 @@ Singleton {
                 },
             ]
         },
+        "gemini-2.5-flash": {
+            "name": "Gemini 2.5 Flashe",
+            "icon": "google-gemini-symbolic",
+            "description": qsTr("'s model\nGives up-to-date information with fast responses."),
+            "homepage": "https://aistudio.google.com",
+            "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent",
+            "model": "gemini-2.5-flash",
+            "requires_key": true,
+            "key_id": "gemini",
+            "key_get_link": "https://aistudio.google.com/app/apikey",
+            "key_get_description": qsTr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
+            "api_format": "gemini",
+            "tools": [
+                {
+                    "google_search": {}
+                },
+            ]
+        },
         "gemini-2.0-flash-tools": {
             "name": "Gemini 2.0 Flash (Tools)",
             "icon": "google-gemini-symbolic",

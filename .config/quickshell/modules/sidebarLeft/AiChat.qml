@@ -231,8 +231,8 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                     StyledText {
                         id: widgetNameText
                         Layout.alignment: Qt.AlignHCenter
-                        font.pixelSize: Appearance.font.pixelSize.larger
-                        font.family: Appearance.font.family.title
+                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.family: Appearance.font.family.main
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
                         text: qsTr("Large language models")
@@ -457,7 +457,7 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                     contentItem: MaterialSymbol {
                         anchors.centerIn: parent
                         horizontalAlignment: Text.AlignHCenter
-                        iconSize: Appearance.font.pixelSize.larger
+                        iconSize: Appearance.font.pixelSize.large
                         // fill: sendButton.enabled ? 1 : 0
                         color: sendButton.enabled ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer2Disabled
                         text: "send"
