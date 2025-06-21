@@ -29,6 +29,29 @@ Item {
     property real workspaceIconMarginShrinked: -6 // how far will the icon goes
     property int workspaceIndexInGroup: (monitor.activeWorkspace?.id - 1) % ConfigOptions.bar.workspaces.shown
 
+    // Japanese number mappings
+    property var japaneseNumbers: ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    property var kanjiNumbers: ["壱", "弐", "参", "四", "五", "六", "七", "八", "九", "拾"]
+    property var hiraganaNumbers: ["いち", "に", "さん", "よん", "ご", "ろく", "なな", "はち", "きゅう", "じゅう"]
+    
+    // Configuration for Japanese display
+    readonly property bool useJapanese: true // Set to false to use regular numbers
+    property string japaneseStyle: "kanji" // Options: "kanji", "hiragana", "formal"
+    
+    function getJapaneseNumber(num) {
+        if (!useJapanese || num < 1 || num > 10) return num.toString()
+        
+        switch(japaneseStyle) {
+            case "hiragana":
+                return hiraganaNumbers[num - 1] || num.toString()
+            case "formal":
+                return kanjiNumbers[num - 1] || num.toString()
+            case "kanji":
+            default:
+                return japaneseNumbers[num - 1] || num.toString()
+        }
+    }
+
     function updateWorkspaceOccupied() {
         workspaceOccupied = Array.from({ length: ConfigOptions.bar.workspaces.shown }, (_, i) => {
             return Hyprland.workspaces.values.some(ws => ws.id === workspaceGroup * ConfigOptions.bar.workspaces.shown + i + 1);
@@ -159,7 +182,6 @@ Item {
 
                 background: Item {
                     id: workspaceButtonBackground
-                    // ❌ Removed `implicitWidth: parent.width` to fix binding loop
                     implicitHeight: workspaceButtonHeight
 
                     property var biggestWindow: {
@@ -174,12 +196,15 @@ Item {
                     property var mainAppIconSource: Quickshell.iconPath(AppSearch.guessIcon(biggestWindow?.class), "image-missing")
 
                     StyledText {
-                        opacity: (ConfigOptions.bar.workspaces.alwaysShowNumbers || GlobalStates.workspaceShowNumbers || !workspaceButtonBackground.biggestWindow) ? 1 : 0
+                        opacity: (ConfigOptions.bar.workspaces.alwaysShowNumbers || GlobalStates.workspaceShowNumbers || !workspaceButtonBackground.biggestWindow) ? 0.8 : 0
                         anchors.centerIn: parent
-                        font.family: "Rubik"
-                        font.weight: 400
-                        font.pixelSize: Appearance.font.pixelSize.small - ((text.length - 1) * (text !== "10") * 2)
-                        text: `${button.workspaceValue}`
+                        font.family: useJapanese ? "Noto Sans CJK JP" : "Rubik" // Japanese font support
+                        font.weight: 300
+                        // Adjust font size for Japanese characters
+                        font.pixelSize: {
+                            let baseSize = Appearance.font.pixelSize.small
+                        }
+                        text: getJapaneseNumber(button.workspaceValue)
                         color: (monitor.activeWorkspace?.id == button.workspaceValue) ? 
                             Appearance.m3colors.m3onPrimary : 
                             (workspaceOccupied[index] ? Appearance.m3colors.m3onSecondaryContainer : Appearance.colors.colOnLayer1Inactive)
