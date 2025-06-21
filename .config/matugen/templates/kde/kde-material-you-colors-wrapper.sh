@@ -11,4 +11,4 @@ else
     mode_flag="-l"
 fi
 
-kde-material-you-colors "$mode_flag" --color "$color"
+kde-material-you-colors "$mode_flag" --color "$color" --chroma-multiplier 1 &

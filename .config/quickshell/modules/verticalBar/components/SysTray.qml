@@ -13,13 +13,12 @@ Item {
 
     required property var bar
 
-    width: parent.width
-    implicitHeight: 90
+    width: columnLayout.implicitWidth
+    implicitHeight: columnLayout.implicitHeight
 
     ColumnLayout {
         id: columnLayout
-
-        anchors.fill: parent
+        anchors.centerIn: parent
         spacing: 4
 
         Repeater {
@@ -40,7 +39,7 @@ Item {
             font.pixelSize: Appearance.font.pixelSize.larger
             color: Appearance.colors.colSubtext
             text: "•"
-            visible: SystemTray.items.values.length > 0
+            visible:SystemTray.items.values.length > 0
         }
 
     }

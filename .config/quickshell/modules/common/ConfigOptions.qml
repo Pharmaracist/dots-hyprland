@@ -90,7 +90,8 @@ Singleton {
 
         property list<string> pinnedApps: [ // IDs of pinned entries
             "org.kde.dolphin",
-            "heroic",
+	    "heroic",
+	    "osu-lazer",
             "steam",
             "github-desktop",
             "obsidian",

@@ -58,11 +58,13 @@ Item {
         CombinedTitle {
             bar: barRoot
             visible: !media.visible
+            Layout.alignment: Qt.AlignVCenter
+
         }
         
         Media {
             id: media
-            visible: MprisController.activePlayer?.trackTitle?.length > 0
+            visible: ((!PersistentStates.dock.currentContent === 0 ) && MprisController.activePlayer?.trackTitle?.length > 0) // Dodge redunduncy
         }
         
         transform: Rotation {
@@ -104,7 +106,11 @@ Item {
             spacing: 0.8 * 10
             Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
             Layout.fillWidth: true
+            SysTray {
+                bar:barRoot
+                Layout.alignment:  Qt.AlignHCenter
 
+            }
             StatusIcons {}
 
             ClockWidget {}

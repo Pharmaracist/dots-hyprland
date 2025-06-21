@@ -52,5 +52,7 @@ Singleton {
     property QtObject bar: QtObject {
         property int currentLayout: -1  // -1 means use first layout until user changes it
         property bool verticalMode: false
+        property bool visible: false
+
     }
 }
